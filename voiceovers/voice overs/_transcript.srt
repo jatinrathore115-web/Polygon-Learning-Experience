@@ -1,0 +1,300 @@
+1
+00:00:00,060 --> 00:00:01,896
+Look! A point.
+
+2
+00:00:02,180 --> 00:00:05,306
+Woah! It drew a shape.
+
+3
+00:00:05,341 --> 00:00:07,908
+Let's look at this shape closely.
+
+4
+00:00:07,963 --> 00:00:10,614
+There are no gaps in its boundary.
+
+5
+00:00:10,691 --> 00:00:13,171
+Is it open or closed?
+
+6
+00:00:13,411 --> 00:00:16,289
+Is this shape open or closed?
+
+7
+00:00:16,524 --> 00:00:18,121
+What about this one?
+
+8
+00:00:18,320 --> 00:00:19,588
+And this?
+
+9
+00:00:19,703 --> 00:00:21,519
+How about this one?
+
+10
+00:00:21,713 --> 00:00:24,438
+These two shapes are open...
+
+11
+00:00:24,823 --> 00:00:27,715
+...and these two shapes are closed.
+
+12
+00:00:27,935 --> 00:00:32,140
+Look! The boundaries of the shapes are different too.
+
+13
+00:00:32,343 --> 00:00:35,405
+Some are straight and some are curved.
+
+14
+00:00:35,577 --> 00:00:39,020
+Which boundaries are straight and which are curved?
+
+15
+00:00:39,681 --> 00:00:45,588
+You got it! These boundaries are straight, while these are curved.
+
+16
+00:00:45,906 --> 00:00:50,636
+Tap the figure that is both closed and made of straight lines.
+
+17
+00:00:50,681 --> 00:00:53,260
+We call this a polygon.
+
+18
+00:00:53,327 --> 00:00:59,407
+A closed figure made of only straight line segments is called a polygon.
+
+19
+00:00:59,563 --> 00:01:02,370
+Which of these figures are polygons?
+
+20
+00:01:02,740 --> 00:01:06,396
+These line segments are the sides of the polygon.
+
+21
+00:01:06,384 --> 00:01:10,839
+The point where two sides meet is called a vertex.
+
+22
+00:01:10,833 --> 00:01:14,839
+When two sides meet, they also form an angle.
+
+23
+00:01:15,044 --> 00:01:17,430
+Label the parts of the polygon.
+
+24
+00:01:17,624 --> 00:01:20,885
+How many sides does this polygon have?
+
+25
+00:01:21,041 --> 00:01:24,149
+This polygon has five sides.
+
+26
+00:01:24,173 --> 00:01:26,710
+Now let's change how it looks.
+
+27
+00:01:26,771 --> 00:01:33,360
+Drag any vertex. Stretch it, squash it, or resize it.
+
+28
+00:01:33,705 --> 00:01:37,163
+Whoa! It looks quite different now.
+
+29
+00:01:37,217 --> 00:01:40,340
+Its appearance has completely changed.
+
+30
+00:01:40,455 --> 00:01:42,927
+But not everything has changed.
+
+31
+00:01:42,947 --> 00:01:45,177
+Let's count the sides again.
+
+32
+00:01:45,178 --> 00:01:48,787
+Both polygons still have five sides.
+
+33
+00:01:48,844 --> 00:01:53,386
+So the number of sides gives us a good way to name polygons.
+
+34
+00:01:53,411 --> 00:01:57,646
+A polygon with three sides is called a triangle.
+
+35
+00:01:57,747 --> 00:02:02,273
+A polygon with four sides is called a quadrilateral.
+
+36
+00:02:02,303 --> 00:02:05,168
+Select all the quadrilaterals.
+
+37
+00:02:05,290 --> 00:02:09,620
+A polygon with five sides is called a pentagon.
+
+38
+00:02:09,705 --> 00:02:14,026
+A polygon with six sides is called a hexagon.
+
+39
+00:02:14,097 --> 00:02:18,539
+A polygon with seven sides is called a heptagon.
+
+40
+00:02:18,600 --> 00:02:23,171
+A polygon with eight sides is called an octagon.
+
+41
+00:02:23,334 --> 00:02:27,337
+Let's recall the different types of polygons we learnt about.
+
+42
+00:02:27,375 --> 00:02:29,861
+Which of these is a polygon?
+
+43
+00:02:29,914 --> 00:02:34,783
+Classify the figures as a polygon or not a polygon.
+
+44
+00:02:34,823 --> 00:02:39,825
+Find the odd one out. Which figure is NOT a polygon?
+
+45
+00:02:40,157 --> 00:02:42,604
+Which of these is a pentagon?
+
+46
+00:02:42,703 --> 00:02:47,271
+Classify each figure as a hexagon or a heptagon.
+
+47
+00:02:47,465 --> 00:02:52,314
+You did it! Now you know what makes a figure a polygon.
+
+48
+00:02:52,362 --> 00:02:56,949
+No gaps in its boundary. This shape is closed.
+
+49
+00:02:56,969 --> 00:03:00,432
+There is a gap in its boundary. It is open.
+
+50
+00:03:00,649 --> 00:03:05,802
+Not quite. Look for a figure with no gaps and no curves.
+
+51
+00:03:05,784 --> 00:03:09,334
+Count each side carefully and try again.
+
+52
+00:03:09,565 --> 00:03:13,891
+Yes! Closed, with only straight sides.
+
+53
+00:03:14,041 --> 00:03:18,444
+Is it closed? Does it have only straight sides?
+
+54
+00:03:18,496 --> 00:03:24,401
+A polygon is closed, with only straight sides. Try again.
+
+55
+00:03:24,698 --> 00:03:28,629
+Great job! You sorted the figures correctly.
+
+56
+00:03:28,843 --> 00:03:33,103
+Wrong group. Check for gaps or curved sides.
+
+57
+00:03:33,092 --> 00:03:38,779
+Polygons are closed, with only straight sides. Try again.
+
+58
+00:03:38,999 --> 00:03:42,820
+You found it! That is not a polygon.
+
+59
+00:03:42,910 --> 00:03:46,124
+Which figure breaks the rule for a polygon?
+
+60
+00:03:46,302 --> 00:03:51,405
+Exactly! A pentagon always has five sides.
+
+61
+00:03:51,424 --> 00:03:54,512
+Count the sides of each figure carefully.
+
+62
+00:03:54,479 --> 00:03:58,526
+Look for every figure with exactly five sides.
+
+63
+00:03:58,684 --> 00:04:05,097
+Well done! Hexagons have six sides and heptagons have seven sides.
+
+64
+00:04:05,112 --> 00:04:08,273
+Count the sides of the ones you placed wrong.
+
+65
+00:04:08,278 --> 00:04:12,940
+Six sides make a hexagon, seven make a heptagon.
+
+66
+00:04:13,120 --> 00:04:15,584
+Yes! It is closed.
+
+67
+00:04:15,800 --> 00:04:18,002
+Yes! It is open.
+
+68
+00:04:18,185 --> 00:04:23,954
+Look! This boundary isn't curved. It is made of straight lines.
+
+69
+00:04:24,154 --> 00:04:30,191
+Look closely. This boundary bends smoothly. It is curved.
+
+70
+00:04:30,508 --> 00:04:34,622
+Yes! It is closed and made of straight lines.
+
+71
+00:04:34,801 --> 00:04:37,922
+That is right! These are the ones.
+
+72
+00:04:37,931 --> 00:04:42,353
+A polygon is closed, with only straight sides.
+
+73
+00:04:42,521 --> 00:04:48,259
+Perfect! Side, vertex and angle — all labelled.
+
+74
+00:04:48,462 --> 00:04:53,866
+Not that one. A side is straight, a vertex is a corner.
+
+75
+00:04:54,131 --> 00:04:56,477
+Not quite. Try again.
+

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="990" height="430" viewBox="0 0 990 430">
+  <defs>
+    <linearGradient id="face" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#8ce9fc"/><stop offset=".24" stop-color="#54bdf5"/><stop offset="1" stop-color="#178ef5"/></linearGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#058ff5"/><stop offset=".36" stop-color="#2bafff"/><stop offset="1" stop-color="#006bea"/></linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#e6ffff" stop-opacity=".95"/><stop offset="1" stop-color="#b5f2ff" stop-opacity="0"/></linearGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="4"/></filter>
+  </defs>
+  <rect x="5" y="5" width="980" height="420" rx="210" fill="url(#rim)" stroke="#0086fc" stroke-width="8"/>
+  <rect x="22" y="21" width="946" height="387" rx="193" fill="url(#face)" stroke="#39bcff" stroke-width="5"/>
+  <path d="M65 159 Q95 39 219 36 H776 Q907 37 939 173 Q908 58 774 57 H224 Q113 56 65 159Z" fill="url(#shine)"/>
+  <path d="M765 49 Q941 37 930 203 Q914 79 765 49Z" fill="url(#shine)"/>
+  <path d="M45 273 Q78 402 223 402 H765 Q906 402 948 273" fill="none" stroke="#0478f5" stroke-opacity=".55" stroke-width="12" filter="url(#soft)"/>
+</svg>

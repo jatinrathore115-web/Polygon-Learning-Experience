@@ -1,0 +1,190 @@
+[
+  {
+    "step": 1,
+    "narration": "Look! A point."
+  },
+  {
+    "step": 2,
+    "narration": "Woah! It drew a shape."
+  },
+  {
+    "step": 3,
+    "narration": "Let's look at this shape closely."
+  },
+  {
+    "step": 4,
+    "narration": "There are no gaps in its boundary."
+  },
+  {
+    "step": 5,
+    "narration": "Is it open or closed?"
+  },
+  {
+    "step": 6,
+    "narration": "Is this shape open or closed?"
+  },
+  {
+    "step": 7,
+    "narration": "What about this one?"
+  },
+  {
+    "step": 8,
+    "narration": "And this?"
+  },
+  {
+    "step": 9,
+    "narration": "How about this one?"
+  },
+  {
+    "step": 10,
+    "narration": "These two shapes are open..."
+  },
+  {
+    "step": 11,
+    "narration": "...and these two shapes are closed."
+  },
+  {
+    "step": 12,
+    "narration": "Look! The boundaries of the shapes are different too."
+  },
+  {
+    "step": 13,
+    "narration": "Some are straight and some are curved."
+  },
+  {
+    "step": 14,
+    "narration": "Which boundaries are straight and which are curved?"
+  },
+  {
+    "step": 15,
+    "narration": "You got it! These boundaries are straight, while these are curved."
+  },
+  {
+    "step": 16,
+    "narration": "Tap the figure that is both closed and made of straight lines."
+  },
+  {
+    "step": 17,
+    "narration": "We call this a polygon."
+  },
+  {
+    "step": 18,
+    "narration": "A closed figure made of only straight line segments is called a polygon."
+  },
+  {
+    "step": 19,
+    "narration": "Which of these figures are polygons?"
+  },
+  {
+    "step": 20,
+    "narration": "These line segments are the sides of the polygon."
+  },
+  {
+    "step": 21,
+    "narration": "The point where two sides meet is called a vertex."
+  },
+  {
+    "step": 22,
+    "narration": "When two sides meet, they also form an angle."
+  },
+  {
+    "step": 23,
+    "narration": "Label the parts of the polygon."
+  },
+  {
+    "step": 24,
+    "narration": "How many sides does this polygon have?"
+  },
+  {
+    "step": 25,
+    "narration": "This polygon has 5 sides."
+  },
+  {
+    "step": 26,
+    "narration": "Now let's change how it looks."
+  },
+  {
+    "step": 27,
+    "narration": "Drag any vertex. Stretch it, squash it, or resize it."
+  },
+  {
+    "step": 28,
+    "narration": "Whoa! It looks quite different now."
+  },
+  {
+    "step": 29,
+    "narration": "Its appearance has completely changed."
+  },
+  {
+    "step": 30,
+    "narration": "But not everything has changed."
+  },
+  {
+    "step": 31,
+    "narration": "Let's count the sides again."
+  },
+  {
+    "step": 32,
+    "narration": "Both polygons still have 5 sides."
+  },
+  {
+    "step": 33,
+    "narration": "So the number of sides gives us a good way to name polygons."
+  },
+  {
+    "step": 34,
+    "narration": "A polygon with 3 sides is called a triangle."
+  },
+  {
+    "step": 35,
+    "narration": "A polygon with 4 sides is called a quadrilateral."
+  },
+  {
+    "step": 36,
+    "narration": "Select all the quadrilaterals."
+  },
+  {
+    "step": 37,
+    "narration": "A polygon with 5 sides is called a pentagon."
+  },
+  {
+    "step": 38,
+    "narration": "A polygon with 6 sides is called a hexagon."
+  },
+  {
+    "step": 39,
+    "narration": "A polygon with 7 sides is called a heptagon."
+  },
+  {
+    "step": 40,
+    "narration": "A polygon with 8 sides is called an octagon."
+  },
+  {
+    "step": 41,
+    "narration": "Let's recall the different types of polygons we learnt about."
+  },
+  {
+    "step": 42,
+    "narration": "Which of these is a polygon?"
+  },
+  {
+    "step": 43,
+    "narration": "Classify the figures as a polygon or not a polygon."
+  },
+  {
+    "step": 44,
+    "narration": "Find the odd one out. Which figure is NOT a polygon?"
+  },
+  {
+    "step": 45,
+    "narration": "Which of these is a pentagon?"
+  },
+  {
+    "step": 46,
+    "narration": "Classify each figure as a hexagon or a heptagon."
+  },
+  {
+    "step": 47,
+    "narration": "You did it! Now you know what makes a figure a polygon."
+  }
+]

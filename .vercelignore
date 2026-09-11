@@ -1,0 +1,17 @@
+# Kept in git, but no reason to ship them to the CDN.
+figs/
+uploads/
+verification/
+.thumbnail
+
+# The lesson loads recordings.js, recorded-player.js and the 75 mp3s at
+# runtime, so voiceovers/ must ship — excluding the folder wholesale left the
+# live site with no recorded voice at all. Only the working files stay behind.
+voiceovers/*.cjs
+voiceovers/*.txt
+voiceovers/*.md
+voiceovers/narrator-lines.json
+
+# Character pack: not wired into the lesson, and 12 MB of someone else's art
+# has no business on a public URL until it is.
+swiftee-assets/

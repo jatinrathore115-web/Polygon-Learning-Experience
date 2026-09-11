@@ -1,0 +1,76 @@
+#,filename,text,start_s,end_s,duration_s
+1,01_Look_A_point.mp3,Look! A point.,0.060,1.896,1.836
+2,02_Woah_It_drew_a_shape.mp3,Woah! It drew a shape.,2.180,5.306,3.126
+3,03_Lets_look_at_this_shape_closely.mp3,Let's look at this shape closely.,5.341,7.908,2.567
+4,04_There_are_no_gaps_in_its_boundary.mp3,There are no gaps in its boundary.,7.963,10.614,2.651
+5,05_Is_it_open_or_closed.mp3,Is it open or closed?,10.691,13.171,2.480
+6,06_Is_this_shape_open_or_closed.mp3,Is this shape open or closed?,13.411,16.289,2.878
+7,07_What_about_this_one.mp3,What about this one?,16.524,18.121,1.596
+8,08_And_this.mp3,And this?,18.320,19.588,1.267
+9,09_How_about_this_one.mp3,How about this one?,19.703,21.519,1.817
+10,10_These_two_shapes_are_open.mp3,These two shapes are open...,21.713,24.438,2.725
+11,11_and_these_two_shapes_are_closed.mp3,...and these two shapes are closed.,24.823,27.715,2.892
+12,12_Look_The_boundaries_of_the_shapes_are_different_too.mp3,Look! The boundaries of the shapes are different too.,27.935,32.140,4.205
+13,13_Some_are_straight_and_some_are_curved.mp3,Some are straight and some are curved.,32.343,35.405,3.062
+14,14_Which_boundaries_are_straight_and_which_are_curved.mp3,Which boundaries are straight and which are curved?,35.577,39.020,3.443
+15,15_You_got_it_These_boundaries_are_straight_while_these_are_curve.mp3,"You got it! These boundaries are straight, while these are curved.",39.681,45.588,5.907
+16,16_Tap_the_figure_that_is_both_closed_and_made_of_straight_lines.mp3,Tap the figure that is both closed and made of straight lines.,45.906,50.636,4.730
+17,17_We_call_this_a_polygon.mp3,We call this a polygon.,50.681,53.260,2.579
+18,18_A_closed_figure_made_of_only_straight_line_segments_is_called.mp3,A closed figure made of only straight line segments is called a polygon.,53.327,59.407,6.080
+19,19_Which_of_these_figures_are_polygons.mp3,Which of these figures are polygons?,59.563,62.370,2.808
+20,20_These_line_segments_are_the_sides_of_the_polygon.mp3,These line segments are the sides of the polygon.,62.740,66.396,3.656
+21,21_The_point_where_two_sides_meet_is_called_a_vertex.mp3,The point where two sides meet is called a vertex.,66.384,70.839,4.455
+22,22_When_two_sides_meet_they_also_form_an_angle.mp3,"When two sides meet, they also form an angle.",70.833,74.839,4.006
+23,23_Label_the_parts_of_the_polygon.mp3,Label the parts of the polygon.,75.044,77.430,2.386
+24,24_How_many_sides_does_this_polygon_have.mp3,How many sides does this polygon have?,77.624,80.885,3.261
+25,25_This_polygon_has_five_sides.mp3,This polygon has five sides.,81.041,84.149,3.108
+26,26_Now_lets_change_how_it_looks.mp3,Now let's change how it looks.,84.173,86.710,2.536
+27,27_Drag_any_vertex_Stretch_it_squash_it_or_resize_it.mp3,"Drag any vertex. Stretch it, squash it, or resize it.",86.771,93.360,6.589
+28,28_Whoa_It_looks_quite_different_now.mp3,Whoa! It looks quite different now.,93.705,97.163,3.458
+29,29_Its_appearance_has_completely_changed.mp3,Its appearance has completely changed.,97.217,100.340,3.123
+30,30_But_not_everything_has_changed.mp3,But not everything has changed.,100.455,102.927,2.472
+31,31_Lets_count_the_sides_again.mp3,Let's count the sides again.,102.947,105.177,2.230
+32,32_Both_polygons_still_have_five_sides.mp3,Both polygons still have five sides.,105.178,108.787,3.609
+33,33_So_the_number_of_sides_gives_us_a_good_way_to_name_polygons.mp3,So the number of sides gives us a good way to name polygons.,108.844,113.386,4.542
+34,34_A_polygon_with_three_sides_is_called_a_triangle.mp3,A polygon with three sides is called a triangle.,113.411,117.646,4.235
+35,35_A_polygon_with_four_sides_is_called_a_quadrilateral.mp3,A polygon with four sides is called a quadrilateral.,117.747,122.273,4.526
+36,36_Select_all_the_quadrilaterals.mp3,Select all the quadrilaterals.,122.303,125.168,2.865
+37,37_A_polygon_with_five_sides_is_called_a_pentagon.mp3,A polygon with five sides is called a pentagon.,125.290,129.620,4.330
+38,38_A_polygon_with_six_sides_is_called_a_hexagon.mp3,A polygon with six sides is called a hexagon.,129.705,134.026,4.321
+39,39_A_polygon_with_seven_sides_is_called_a_heptagon.mp3,A polygon with seven sides is called a heptagon.,134.097,138.539,4.442
+40,40_A_polygon_with_eight_sides_is_called_an_octagon.mp3,A polygon with eight sides is called an octagon.,138.600,143.171,4.571
+41,41_Lets_recall_the_different_types_of_polygons_we_learnt_about.mp3,Let's recall the different types of polygons we learnt about.,143.334,147.337,4.003
+42,42_Which_of_these_is_a_polygon.mp3,Which of these is a polygon?,147.375,149.861,2.486
+43,43_Classify_the_figures_as_a_polygon_or_not_a_polygon.mp3,Classify the figures as a polygon or not a polygon.,149.914,154.783,4.869
+44,44_Find_the_odd_one_out_Which_figure_is_NOT_a_polygon.mp3,Find the odd one out. Which figure is NOT a polygon?,154.823,159.825,5.002
+45,45_Which_of_these_is_a_pentagon.mp3,Which of these is a pentagon?,160.157,162.604,2.447
+46,46_Classify_each_figure_as_a_hexagon_or_a_heptagon.mp3,Classify each figure as a hexagon or a heptagon.,162.703,167.271,4.568
+47,47_You_did_it_Now_you_know_what_makes_a_figure_a_polygon.mp3,You did it! Now you know what makes a figure a polygon.,167.465,172.314,4.849
+48,48_No_gaps_in_its_boundary_This_shape_is_closed.mp3,No gaps in its boundary. This shape is closed.,172.362,176.949,4.587
+49,49_There_is_a_gap_in_its_boundary_It_is_open.mp3,There is a gap in its boundary. It is open.,176.969,180.432,3.463
+50,50_Not_quite_Look_for_a_figure_with_no_gaps_and_no_curves.mp3,Not quite. Look for a figure with no gaps and no curves.,180.649,185.802,5.153
+51,51_Count_each_side_carefully_and_try_again.mp3,Count each side carefully and try again.,185.784,189.334,3.550
+52,52_Yes_Closed_with_only_straight_sides.mp3,"Yes! Closed, with only straight sides.",189.565,193.891,4.326
+53,53_Is_it_closed_Does_it_have_only_straight_sides.mp3,Is it closed? Does it have only straight sides?,194.041,198.444,4.403
+54,54_A_polygon_is_closed_with_only_straight_sides_Try_again.mp3,"A polygon is closed, with only straight sides. Try again.",198.496,204.401,5.905
+55,55_Great_job_You_sorted_the_figures_correctly.mp3,Great job! You sorted the figures correctly.,204.698,208.629,3.931
+56,56_Wrong_group_Check_for_gaps_or_curved_sides.mp3,Wrong group. Check for gaps or curved sides.,208.843,213.103,4.260
+57,57_Polygons_are_closed_with_only_straight_sides_Try_again.mp3,"Polygons are closed, with only straight sides. Try again.",213.092,218.779,5.687
+58,58_You_found_it_That_is_not_a_polygon.mp3,You found it! That is not a polygon.,218.999,222.820,3.821
+59,59_Which_figure_breaks_the_rule_for_a_polygon.mp3,Which figure breaks the rule for a polygon?,222.910,226.124,3.214
+60,60_Exactly_A_pentagon_always_has_five_sides.mp3,Exactly! A pentagon always has five sides.,226.302,231.405,5.103
+61,61_Count_the_sides_of_each_figure_carefully.mp3,Count the sides of each figure carefully.,231.424,234.512,3.088
+62,62_Look_for_every_figure_with_exactly_five_sides.mp3,Look for every figure with exactly five sides.,234.479,238.526,4.047
+63,63_Well_done_Hexagons_have_six_sides_and_heptagons_have_seven_sid.mp3,Well done! Hexagons have six sides and heptagons have seven sides.,238.684,245.097,6.413
+64,64_Count_the_sides_of_the_ones_you_placed_wrong.mp3,Count the sides of the ones you placed wrong.,245.112,248.273,3.161
+65,65_Six_sides_make_a_hexagon_seven_make_a_heptagon.mp3,"Six sides make a hexagon, seven make a heptagon.",248.278,252.940,4.662
+66,66_Yes_It_is_closed.mp3,Yes! It is closed.,253.120,255.584,2.464
+67,67_Yes_It_is_open.mp3,Yes! It is open.,255.800,258.002,2.202
+68,68_Look_This_boundary_isnt_curved_It_is_made_of_straight_lines.mp3,Look! This boundary isn't curved. It is made of straight lines.,258.185,263.954,5.769
+69,69_Look_closely_This_boundary_bends_smoothly_It_is_curved.mp3,Look closely. This boundary bends smoothly. It is curved.,264.154,270.191,6.037
+70,70_Yes_It_is_closed_and_made_of_straight_lines.mp3,Yes! It is closed and made of straight lines.,270.508,274.622,4.114
+71,71_That_is_right_These_are_the_ones.mp3,That is right! These are the ones.,274.801,277.922,3.121
+72,72_A_polygon_is_closed_with_only_straight_sides.mp3,"A polygon is closed, with only straight sides.",277.931,282.353,4.422
+73,73_Perfect_Side_vertex_and_angle_all_labelled.mp3,"Perfect! Side, vertex and angle — all labelled.",282.521,288.259,5.738
+74,74_Not_that_one_A_side_is_straight_a_vertex_is_a_corner.mp3,"Not that one. A side is straight, a vertex is a corner.",288.462,293.866,5.404
+75,75_Not_quite_Try_again.mp3,Not quite. Try again.,294.131,296.477,2.346

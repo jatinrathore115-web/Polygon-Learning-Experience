@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# vercel
+.vercel/
+
+# logs
+*.log
+npm-debug.log*
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+
+# design-tool scratch state
+.thumbnail
+
+# scratch files from local verification runs
+__*.html
+__*.png
+
+.vercel
+.env*
+
+# scratch verification screenshots from the build process
+figs/

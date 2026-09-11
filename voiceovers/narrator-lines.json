@@ -1,0 +1,682 @@
+[
+  {
+    "id": "N001",
+    "type": "Main narration",
+    "text": "Look! A point.",
+    "uses": [
+      "Step 1 - 01 · Point / point"
+    ],
+    "audioFilename": "N001.wav"
+  },
+  {
+    "id": "N002",
+    "type": "Main narration",
+    "text": "Woah! It drew a shape.",
+    "uses": [
+      "Step 2 - 01 · Shape / draw"
+    ],
+    "audioFilename": "N002.wav"
+  },
+  {
+    "id": "N003",
+    "type": "Main narration",
+    "text": "Let's look at this shape closely.",
+    "uses": [
+      "Step 3 - 01 · Closer / closer"
+    ],
+    "audioFilename": "N003.wav"
+  },
+  {
+    "id": "N004",
+    "type": "Main narration",
+    "text": "There are no gaps in its boundary.",
+    "uses": [
+      "Step 4 - 01 · Boundary / trace"
+    ],
+    "audioFilename": "N004.wav"
+  },
+  {
+    "id": "N005",
+    "type": "Main narration",
+    "text": "Is it open or closed?",
+    "uses": [
+      "Step 5 - 01 · Open or closed / ask"
+    ],
+    "audioFilename": "N005.wav"
+  },
+  {
+    "id": "N006",
+    "type": "Main narration",
+    "text": "Is this shape open or closed?",
+    "uses": [
+      "Step 6 - 02 · Open or closed"
+    ],
+    "audioFilename": "N006.wav"
+  },
+  {
+    "id": "N007",
+    "type": "Main narration",
+    "text": "What about this one?",
+    "uses": [
+      "Step 7 - 03 · Open or closed"
+    ],
+    "audioFilename": "N007.wav"
+  },
+  {
+    "id": "N008",
+    "type": "Main narration",
+    "text": "And this?",
+    "uses": [
+      "Step 8 - 04 · Open or closed"
+    ],
+    "audioFilename": "N008.wav"
+  },
+  {
+    "id": "N009",
+    "type": "Main narration",
+    "text": "How about this one?",
+    "uses": [
+      "Step 9 - 05 · Open or closed"
+    ],
+    "audioFilename": "N009.wav"
+  },
+  {
+    "id": "N010",
+    "type": "Main narration",
+    "text": "These two shapes are open...",
+    "uses": [
+      "Step 10 - 06 · Open figures / open"
+    ],
+    "audioFilename": "N010.wav"
+  },
+  {
+    "id": "N011",
+    "type": "Main narration",
+    "text": "...and these two shapes are closed.",
+    "uses": [
+      "Step 11 - 06 · Closed figures / closed"
+    ],
+    "audioFilename": "N011.wav"
+  },
+  {
+    "id": "N012",
+    "type": "Main narration",
+    "text": "Look! The boundaries of the shapes are different too.",
+    "uses": [
+      "Step 12 - 06 · Boundaries / bound"
+    ],
+    "audioFilename": "N012.wav"
+  },
+  {
+    "id": "N013",
+    "type": "Main narration",
+    "text": "Some are straight and some are curved.",
+    "uses": [
+      "Step 13 - 06 · Straight or curved / sc"
+    ],
+    "audioFilename": "N013.wav"
+  },
+  {
+    "id": "N014",
+    "type": "Main narration",
+    "text": "Which boundaries are straight and which are curved?",
+    "uses": [
+      "Step 14 - 06 · Classify / classify"
+    ],
+    "audioFilename": "N014.wav"
+  },
+  {
+    "id": "N015",
+    "type": "Main narration",
+    "text": "You got it! These boundaries are straight, while these are curved.",
+    "uses": [
+      "Step 15 - 06 · Well done / done"
+    ],
+    "audioFilename": "N015.wav"
+  },
+  {
+    "id": "N016",
+    "type": "Main narration",
+    "text": "Select all the shapes made using only straight lines.",
+    "uses": [
+      "Step 16 - 07 ? Find straight-line shapes"
+    ],
+    "audioFilename": "N016.wav"
+  },
+  {
+    "id": "N017",
+    "type": "Main narration",
+    "text": "We call this a polygon.",
+    "uses": [
+      "Step 17 - 08 · Polygon"
+    ],
+    "audioFilename": "N017.wav"
+  },
+  {
+    "id": "N018",
+    "type": "Main narration",
+    "text": "A closed figure made of only straight line segments is called a polygon.",
+    "uses": [
+      "Step 18 - 09 · Definition"
+    ],
+    "audioFilename": "N018.wav"
+  },
+  {
+    "id": "N019",
+    "type": "Main narration",
+    "text": "Which of these figures are polygons?",
+    "uses": [
+      "Step 19 - 10 · Which are polygons"
+    ],
+    "audioFilename": "N019.wav"
+  },
+  {
+    "id": "N020",
+    "type": "Main narration",
+    "text": "These line segments are the sides of the polygon.",
+    "uses": [
+      "Step 20 - 11 · Sides / sides"
+    ],
+    "audioFilename": "N020.wav"
+  },
+  {
+    "id": "N021",
+    "type": "Main narration",
+    "text": "The point where two sides meet is called a vertex.",
+    "uses": [
+      "Step 21 - 11 · Vertex / vertex"
+    ],
+    "audioFilename": "N021.wav"
+  },
+  {
+    "id": "N022",
+    "type": "Main narration",
+    "text": "When two sides meet, they also form an angle.",
+    "uses": [
+      "Step 22 - 11 · Angle / angle"
+    ],
+    "audioFilename": "N022.wav"
+  },
+  {
+    "id": "N023",
+    "type": "Main narration",
+    "text": "Label the parts of the polygon.",
+    "uses": [
+      "Step 23 - 12 · Label the parts"
+    ],
+    "audioFilename": "N023.wav"
+  },
+  {
+    "id": "N024",
+    "type": "Main narration",
+    "text": "How many sides does this polygon have?",
+    "uses": [
+      "Step 24 - 13 · How many sides"
+    ],
+    "audioFilename": "N024.wav"
+  },
+  {
+    "id": "N025",
+    "type": "Main narration",
+    "text": "This polygon has 5 sides.",
+    "uses": [
+      "Step 25 - 13 · Five sides / five"
+    ],
+    "audioFilename": "N025.wav"
+  },
+  {
+    "id": "N026",
+    "type": "Main narration",
+    "text": "Now let's change how it looks.",
+    "uses": [
+      "Step 26 - 14 · Change it / intro"
+    ],
+    "audioFilename": "N026.wav"
+  },
+  {
+    "id": "N027",
+    "type": "Main narration",
+    "text": "Drag any vertex. Stretch it, squash it, or resize it.",
+    "uses": [
+      "Step 27 - 14 · Drag a vertex / drag"
+    ],
+    "audioFilename": "N027.wav"
+  },
+  {
+    "id": "N028",
+    "type": "Main narration",
+    "text": "Whoa! It looks quite different now.",
+    "uses": [
+      "Step 28 - 14 · Changed / wow"
+    ],
+    "audioFilename": "N028.wav"
+  },
+  {
+    "id": "N029",
+    "type": "Main narration",
+    "text": "Its appearance has completely changed.",
+    "uses": [
+      "Step 29 - 15 · Before and after / a"
+    ],
+    "audioFilename": "N029.wav"
+  },
+  {
+    "id": "N030",
+    "type": "Main narration",
+    "text": "But not everything has changed.",
+    "uses": [
+      "Step 30 - 15 · Not everything / b"
+    ],
+    "audioFilename": "N030.wav"
+  },
+  {
+    "id": "N031",
+    "type": "Main narration",
+    "text": "Let's count the sides again.",
+    "uses": [
+      "Step 31 - 16 · Count again / ask"
+    ],
+    "audioFilename": "N031.wav"
+  },
+  {
+    "id": "N032",
+    "type": "Main narration",
+    "text": "Both polygons still have 5 sides.",
+    "uses": [
+      "Step 32 - 16 · Still five / both"
+    ],
+    "audioFilename": "N032.wav"
+  },
+  {
+    "id": "N033",
+    "type": "Main narration",
+    "text": "So the number of sides gives us a good way to name polygons.",
+    "uses": [
+      "Step 33 - 16 · Naming / name"
+    ],
+    "audioFilename": "N033.wav"
+  },
+  {
+    "id": "N034",
+    "type": "Main narration",
+    "text": "A polygon with 3 sides is called a triangle.",
+    "uses": [
+      "Step 34 - 17 · Triangle / tri"
+    ],
+    "audioFilename": "N034.wav"
+  },
+  {
+    "id": "N035",
+    "type": "Main narration",
+    "text": "A polygon with 4 sides is called a quadrilateral.",
+    "uses": [
+      "Step 35 - 17 · Quadrilateral / quad"
+    ],
+    "audioFilename": "N035.wav"
+  },
+  {
+    "id": "N036",
+    "type": "Main narration",
+    "text": "Select all the quadrilaterals.",
+    "uses": [
+      "Step 36 - 18 · Quadrilaterals"
+    ],
+    "audioFilename": "N036.wav"
+  },
+  {
+    "id": "N037",
+    "type": "Main narration",
+    "text": "A polygon with 5 sides is called a pentagon.",
+    "uses": [
+      "Step 37 - 19 · Pentagon"
+    ],
+    "audioFilename": "N037.wav"
+  },
+  {
+    "id": "N038",
+    "type": "Main narration",
+    "text": "A polygon with 6 sides is called a hexagon.",
+    "uses": [
+      "Step 38 - 20 · Hexagon"
+    ],
+    "audioFilename": "N038.wav"
+  },
+  {
+    "id": "N039",
+    "type": "Main narration",
+    "text": "A polygon with 7 sides is called a heptagon.",
+    "uses": [
+      "Step 39 - 21 · Heptagon"
+    ],
+    "audioFilename": "N039.wav"
+  },
+  {
+    "id": "N040",
+    "type": "Main narration",
+    "text": "A polygon with 8 sides is called an octagon.",
+    "uses": [
+      "Step 40 - 22 · Octagon"
+    ],
+    "audioFilename": "N040.wav"
+  },
+  {
+    "id": "N041",
+    "type": "Main narration",
+    "text": "Let's recall the different types of polygons we learnt about.",
+    "uses": [
+      "Step 41 - 23 · Recall"
+    ],
+    "audioFilename": "N041.wav"
+  },
+  {
+    "id": "N042",
+    "type": "Main narration",
+    "text": "Which of these is a polygon?",
+    "uses": [
+      "Step 42 - CFU 1"
+    ],
+    "audioFilename": "N042.wav"
+  },
+  {
+    "id": "N043",
+    "type": "Main narration",
+    "text": "Classify the figures as a polygon or not a polygon.",
+    "uses": [
+      "Step 43 - CFU 2"
+    ],
+    "audioFilename": "N043.wav"
+  },
+  {
+    "id": "N044",
+    "type": "Main narration",
+    "text": "Find the odd one out. Which figure is NOT a polygon?",
+    "uses": [
+      "Step 44 - CFU 3"
+    ],
+    "audioFilename": "N044.wav"
+  },
+  {
+    "id": "N045",
+    "type": "Main narration",
+    "text": "Which of these is a pentagon?",
+    "uses": [
+      "Step 45 - CFU 4"
+    ],
+    "audioFilename": "N045.wav"
+  },
+  {
+    "id": "N046",
+    "type": "Main narration",
+    "text": "Classify each figure as a hexagon or a heptagon.",
+    "uses": [
+      "Step 46 - CFU 5"
+    ],
+    "audioFilename": "N046.wav"
+  },
+  {
+    "id": "N047",
+    "type": "Main narration",
+    "text": "You did it! Now you know what makes a figure a polygon.",
+    "uses": [
+      "Step 47 - Finished"
+    ],
+    "audioFilename": "N047.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "No gaps in its boundary. This shape is closed.",
+    "uses": [
+      "Step 5 - 01 · Open or closed: incorrect answer",
+      "Step 7 - 03 · Open or closed: incorrect answer",
+      "Step 9 - 05 · Open or closed: incorrect answer"
+    ],
+    "id": "F001",
+    "audioFilename": "F001.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "There is a gap in its boundary. It is open.",
+    "uses": [
+      "Step 6 - 02 · Open or closed: incorrect answer",
+      "Step 8 - 04 · Open or closed: incorrect answer"
+    ],
+    "id": "F002",
+    "audioFilename": "F002.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "Look for shapes with only straight lines and no curves.",
+    "uses": [
+      "Step 16 - incorrect curved shape selected"
+    ],
+    "id": "F003",
+    "audioFilename": "F003.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "Count each side carefully and try again.",
+    "uses": [
+      "Step 24 - 13 · How many sides: incorrect answer",
+      "Step 31 - 16 · Count again: incorrect answer"
+    ],
+    "id": "F004",
+    "audioFilename": "F004.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "Yes! Closed, with only straight sides.",
+    "uses": [
+      "Step 42 - CFU 1: correct answer"
+    ],
+    "id": "F005",
+    "audioFilename": "F005.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "Is it closed? Does it have only straight sides?",
+    "uses": [
+      "Step 42 - CFU 1: incorrect answer",
+      "Step 44 - CFU 3: second/subsequent incorrect answer"
+    ],
+    "id": "F006",
+    "audioFilename": "F006.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "A polygon is closed, with only straight sides. Try again.",
+    "uses": [
+      "Step 42 - CFU 1: second/subsequent incorrect answer"
+    ],
+    "id": "F007",
+    "audioFilename": "F007.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "Great job! You sorted the figures correctly.",
+    "uses": [
+      "Step 43 - CFU 2: correct answer"
+    ],
+    "id": "F008",
+    "audioFilename": "F008.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "Wrong group. Check for gaps or curved sides.",
+    "uses": [
+      "Step 43 - CFU 2: incorrect answer"
+    ],
+    "id": "F009",
+    "audioFilename": "F009.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "Polygons are closed, with only straight sides. Try again.",
+    "uses": [
+      "Step 43 - CFU 2: second/subsequent incorrect answer"
+    ],
+    "id": "F010",
+    "audioFilename": "F010.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "You found it! That is not a polygon.",
+    "uses": [
+      "Step 44 - CFU 3: correct answer"
+    ],
+    "id": "F011",
+    "audioFilename": "F011.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "Which figure breaks the rule for a polygon?",
+    "uses": [
+      "Step 44 - CFU 3: incorrect answer"
+    ],
+    "id": "F012",
+    "audioFilename": "F012.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "Exactly! A pentagon always has 5 sides.",
+    "uses": [
+      "Step 45 - CFU 4: correct answer"
+    ],
+    "id": "F013",
+    "audioFilename": "F013.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "Count the sides of each figure carefully.",
+    "uses": [
+      "Step 45 - CFU 4: incorrect answer"
+    ],
+    "id": "F014",
+    "audioFilename": "F014.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "Look for every figure with exactly 5 sides.",
+    "uses": [
+      "Step 45 - CFU 4: second/subsequent incorrect answer"
+    ],
+    "id": "F015",
+    "audioFilename": "F015.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "Well done! Hexagons have 6 sides and heptagons have 7 sides.",
+    "uses": [
+      "Step 46 - CFU 5: correct answer"
+    ],
+    "id": "F016",
+    "audioFilename": "F016.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "Count the sides of the ones you placed wrong.",
+    "uses": [
+      "Step 46 - CFU 5: incorrect answer"
+    ],
+    "id": "F017",
+    "audioFilename": "F017.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "6 sides make a hexagon, 7 make a heptagon.",
+    "uses": [
+      "Step 46 - CFU 5: second/subsequent incorrect answer"
+    ],
+    "id": "F018",
+    "audioFilename": "F018.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "Yes! It is closed.",
+    "uses": [
+      "Steps 5, 7, 9: correct Closed answer"
+    ],
+    "id": "F019",
+    "audioFilename": "F019.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "Yes! It is open.",
+    "uses": [
+      "Steps 6, 8: correct Open answer"
+    ],
+    "id": "F020",
+    "audioFilename": "F020.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "Look! This boundary isn't curved. It is made of straight lines.",
+    "uses": [
+      "Steps 14: Curved selected for a straight boundary"
+    ],
+    "id": "F021",
+    "audioFilename": "F021.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "Look closely. This boundary bends smoothly. It is curved.",
+    "uses": [
+      "Steps 14: Straight selected for a curved boundary"
+    ],
+    "id": "F022",
+    "audioFilename": "F022.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "Yes! Both shapes are made of straight lines.",
+    "uses": [
+      "Step 16 - both straight-line shapes selected"
+    ],
+    "id": "F023",
+    "audioFilename": "F023.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "That is right! These are the ones.",
+    "uses": [
+      "Steps 19, 36: all correct figures selected"
+    ],
+    "id": "F024",
+    "audioFilename": "F024.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "A polygon is closed, with only straight sides.",
+    "uses": [
+      "Steps 19, 36: incorrect figure selected"
+    ],
+    "id": "F025",
+    "audioFilename": "F025.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "Perfect! Side, vertex and angle — all labelled.",
+    "uses": [
+      "Steps 23: all three labels correctly placed"
+    ],
+    "id": "F026",
+    "audioFilename": "F026.wav"
+  },
+  {
+    "type": "Feedback",
+    "text": "Not that one. A side is straight, a vertex is a corner.",
+    "uses": [
+      "Steps 23: incorrect label placement"
+    ],
+    "id": "F027",
+    "audioFilename": "F027.wav"
+  },
+  {
+    "type": "Fallback",
+    "text": "Not quite. Try again.",
+    "uses": [
+      "Generic tap-one fallback; current configured questions provide specific retry lines"
+    ],
+    "id": "F028",
+    "audioFilename": "F028.wav"
+  }
+]

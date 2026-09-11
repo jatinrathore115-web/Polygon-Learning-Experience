@@ -1,0 +1,244 @@
+Polygon lesson - complete voiceover recording script
+
+75 recording entries: 47 main narration, 27 feedback, and 1 generic fallback.
+
+Only text displayed inside the brown narrator panel receives a voiceover.
+Board labels (including Shape), options, buttons, numbers and secondary prompts are not spoken.
+Record one file per ID; existing N/F IDs are unchanged. Reused feedback needs one recording.
+Read numerals naturally as words. Read NOT with emphasis.
+Current playback uses the supplied MP3 recordings where transcript wording matches.
+N016, F003 and F023 use speech synthesis because their supplied recordings contain older instructions.
+Recorded text reveal follows the audio clock using locally generated word-level alignment timestamps.
+Long instructions display in natural single-line phrases while the complete recording plays continuously; record each complete N/F line as listed.
+Tap, drag and keyboard actions remain locked until the entire instruction finishes.
+Errors do not count as completion: the Play voiceover control retries the blocked line.
+
+MAIN NARRATION - IN LESSON ORDER
+
+N001 | Main narration | Step 1 - 01 · Point / point
+Look! A point.
+
+N002 | Main narration | Step 2 - 01 · Shape / draw
+Woah! It drew a shape.
+
+N003 | Main narration | Step 3 - 01 · Closer / closer
+Let's look at this shape closely.
+
+N004 | Main narration | Step 4 - 01 · Boundary / trace
+There are no gaps in its boundary.
+
+N005 | Main narration | Step 5 - 01 · Open or closed / ask
+Is it open or closed?
+
+N006 | Main narration | Step 6 - 02 · Open or closed
+Is this shape open or closed?
+
+N007 | Main narration | Step 7 - 03 · Open or closed
+What about this one?
+
+N008 | Main narration | Step 8 - 04 · Open or closed
+And this?
+
+N009 | Main narration | Step 9 - 05 · Open or closed
+How about this one?
+
+N010 | Main narration | Step 10 - 06 · Open figures / open
+These two shapes are open...
+
+N011 | Main narration | Step 11 - 06 · Closed figures / closed
+...and these two shapes are closed.
+
+N012 | Main narration | Step 12 - 06 · Boundaries / bound
+Look! The boundaries of the shapes are different too.
+
+N013 | Main narration | Step 13 - 06 · Straight or curved / sc
+Some are straight and some are curved.
+
+N014 | Main narration | Step 14 - 06 · Classify / classify
+Which boundaries are straight and which are curved?
+
+N015 | Main narration | Step 15 - 06 · Well done / done
+You got it! These boundaries are straight, while these are curved.
+
+N016 | Main narration | Step 16 - 07 ? Find straight-line shapes
+Select all the shapes made using only straight lines.
+
+N017 | Main narration | Step 17 - 08 · Polygon
+We call this a polygon.
+
+N018 | Main narration | Step 18 - 09 · Definition
+A closed figure made of only straight line segments is called a polygon.
+
+N019 | Main narration | Step 19 - 10 · Which are polygons
+Which of these figures are polygons?
+
+N020 | Main narration | Step 20 - 11 · Sides / sides
+These line segments are the sides of the polygon.
+
+N021 | Main narration | Step 21 - 11 · Vertex / vertex
+The point where two sides meet is called a vertex.
+
+N022 | Main narration | Step 22 - 11 · Angle / angle
+When two sides meet, they also form an angle.
+
+N023 | Main narration | Step 23 - 12 · Label the parts
+Label the parts of the polygon.
+
+N024 | Main narration | Step 24 - 13 · How many sides
+How many sides does this polygon have?
+
+N025 | Main narration | Step 25 - 13 · Five sides / five
+This polygon has 5 sides.
+
+N026 | Main narration | Step 26 - 14 · Change it / intro
+Now let's change how it looks.
+
+N027 | Main narration | Step 27 - 14 · Drag a vertex / drag
+Drag any vertex. Stretch it, squash it, or resize it.
+
+N028 | Main narration | Step 28 - 14 · Changed / wow
+Whoa! It looks quite different now.
+
+N029 | Main narration | Step 29 - 15 · Before and after / a
+Its appearance has completely changed.
+
+N030 | Main narration | Step 30 - 15 · Not everything / b
+But not everything has changed.
+
+N031 | Main narration | Step 31 - 16 · Count again / ask
+Let's count the sides again.
+
+N032 | Main narration | Step 32 - 16 · Still five / both
+Both polygons still have 5 sides.
+
+N033 | Main narration | Step 33 - 16 · Naming / name
+So the number of sides gives us a good way to name polygons.
+
+N034 | Main narration | Step 34 - 17 · Triangle / tri
+A polygon with 3 sides is called a triangle.
+
+N035 | Main narration | Step 35 - 17 · Quadrilateral / quad
+A polygon with 4 sides is called a quadrilateral.
+
+N036 | Main narration | Step 36 - 18 · Quadrilaterals
+Select all the quadrilaterals.
+
+N037 | Main narration | Step 37 - 19 · Pentagon
+A polygon with 5 sides is called a pentagon.
+
+N038 | Main narration | Step 38 - 20 · Hexagon
+A polygon with 6 sides is called a hexagon.
+
+N039 | Main narration | Step 39 - 21 · Heptagon
+A polygon with 7 sides is called a heptagon.
+
+N040 | Main narration | Step 40 - 22 · Octagon
+A polygon with 8 sides is called an octagon.
+
+N041 | Main narration | Step 41 - 23 · Recall
+Let's recall the different types of polygons we learnt about.
+
+N042 | Main narration | Step 42 - CFU 1
+Which of these is a polygon?
+
+N043 | Main narration | Step 43 - CFU 2
+Classify the figures as a polygon or not a polygon.
+
+N044 | Main narration | Step 44 - CFU 3
+Find the odd one out. Which figure is NOT a polygon?
+
+N045 | Main narration | Step 45 - CFU 4
+Which of these is a pentagon?
+
+N046 | Main narration | Step 46 - CFU 5
+Classify each figure as a hexagon or a heptagon.
+
+N047 | Main narration | Step 47 - Finished
+You did it! Now you know what makes a figure a polygon.
+
+FEEDBACK AND RETRY LINES
+
+F001 | Feedback | Step 5 - 01 · Open or closed: incorrect answer; Step 7 - 03 · Open or closed: incorrect answer; Step 9 - 05 · Open or closed: incorrect answer
+No gaps in its boundary. This shape is closed.
+
+F002 | Feedback | Step 6 - 02 · Open or closed: incorrect answer; Step 8 - 04 · Open or closed: incorrect answer
+There is a gap in its boundary. It is open.
+
+F003 | Feedback | Step 16 - incorrect curved shape selected
+Look for shapes with only straight lines and no curves.
+
+F004 | Feedback | Step 24 - 13 · How many sides: incorrect answer; Step 31 - 16 · Count again: incorrect answer
+Count each side carefully and try again.
+
+F005 | Feedback | Step 42 - CFU 1: correct answer
+Yes! Closed, with only straight sides.
+
+F006 | Feedback | Step 42 - CFU 1: incorrect answer; Step 44 - CFU 3: second/subsequent incorrect answer
+Is it closed? Does it have only straight sides?
+
+F007 | Feedback | Step 42 - CFU 1: second/subsequent incorrect answer
+A polygon is closed, with only straight sides. Try again.
+
+F008 | Feedback | Step 43 - CFU 2: correct answer
+Great job! You sorted the figures correctly.
+
+F009 | Feedback | Step 43 - CFU 2: incorrect answer
+Wrong group. Check for gaps or curved sides.
+
+F010 | Feedback | Step 43 - CFU 2: second/subsequent incorrect answer
+Polygons are closed, with only straight sides. Try again.
+
+F011 | Feedback | Step 44 - CFU 3: correct answer
+You found it! That is not a polygon.
+
+F012 | Feedback | Step 44 - CFU 3: incorrect answer
+Which figure breaks the rule for a polygon?
+
+F013 | Feedback | Step 45 - CFU 4: correct answer
+Exactly! A pentagon always has 5 sides.
+
+F014 | Feedback | Step 45 - CFU 4: incorrect answer
+Count the sides of each figure carefully.
+
+F015 | Feedback | Step 45 - CFU 4: second/subsequent incorrect answer
+Look for every figure with exactly 5 sides.
+
+F016 | Feedback | Step 46 - CFU 5: correct answer
+Well done! Hexagons have 6 sides and heptagons have 7 sides.
+
+F017 | Feedback | Step 46 - CFU 5: incorrect answer
+Count the sides of the ones you placed wrong.
+
+F018 | Feedback | Step 46 - CFU 5: second/subsequent incorrect answer
+6 sides make a hexagon, 7 make a heptagon.
+
+F019 | Feedback | Steps 5, 7, 9: correct Closed answer
+Yes! It is closed.
+
+F020 | Feedback | Steps 6, 8: correct Open answer
+Yes! It is open.
+
+F021 | Feedback | Steps 14: Curved selected for a straight boundary
+Look! This boundary isn't curved. It is made of straight lines.
+
+F022 | Feedback | Steps 14: Straight selected for a curved boundary
+Look closely. This boundary bends smoothly. It is curved.
+
+F023 | Feedback | Step 16 - both straight-line shapes selected
+Yes! Both shapes are made of straight lines.
+
+F024 | Feedback | Steps 19, 36: all correct figures selected
+That is right! These are the ones.
+
+F025 | Feedback | Steps 19, 36: incorrect figure selected
+A polygon is closed, with only straight sides.
+
+F026 | Feedback | Steps 23: all three labels correctly placed
+Perfect! Side, vertex and angle — all labelled.
+
+F027 | Feedback | Steps 23: incorrect label placement
+Not that one. A side is straight, a vertex is a corner.
+
+F028 | Fallback | Generic tap-one fallback; current configured questions provide specific retry lines
+Not quite. Try again.
+

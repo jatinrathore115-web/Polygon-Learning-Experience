@@ -1,0 +1,2764 @@
+<!DOCTYPE html>
+<html>
+<head><base href="../"><script>window.__spoken=[];Object.defineProperty(window,'speechSynthesis',{value:{cancel(){},speak(u){window.__spoken.push(u)},getVoices(){return []}}});window.SpeechSynthesisUtterance=class{constructor(t){this.text=t}};</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; background: #8ecff2; overflow: hidden; }
+  a { color: #2f6fd0; } a:hover { color: #1546a0; }
+  /* The lesson has no text-entry fields: suppress selection and browsing carets. */
+  * { -webkit-tap-highlight-color: transparent; caret-color: transparent; -webkit-user-select: none; user-select: none; }
+  body { cursor: default; }
+  @keyframes magicReveal {
+    0% { opacity:0; transform:scale(.86) translateY(12px); filter:blur(7px) drop-shadow(0 0 18px #ffc65a); }
+    58% { opacity:1; transform:scale(1.025) translateY(-2px); filter:blur(0) drop-shadow(0 0 9px rgba(255,180,55,.6)); }
+    100% { opacity:1; transform:scale(1); filter:none; }
+  }
+  @keyframes magicSpark {
+    0% { opacity:0; transform:translate(0,0) scale(.1) rotate(0deg); }
+    30% { opacity:.9; }
+    100% { opacity:0; transform:translate(var(--mx),var(--my)) scale(.25) rotate(100deg); }
+  }
+  @media (prefers-reduced-motion:reduce) { .magic-spark { display:none; } }
+  @keyframes confettiFall {
+    0% { transform:translate3d(0,0,0) rotate(0deg) rotateY(0deg); opacity:0; }
+    10% { opacity:1; }
+    75% { opacity:1; }
+    100% { transform:translate3d(var(--drift),806px,0) rotate(var(--spin)) rotateY(540deg); opacity:0; }
+  }
+  @media (prefers-reduced-motion:reduce) { .celebration-piece { animation:none !important; display:none; } }
+  @keyframes shapeFinish {
+    0% { stroke:#74e8ff; fill:rgba(75,210,245,.02); filter:drop-shadow(0 0 16px rgba(34,184,230,.65)); }
+    45% { stroke:#2cbce7; fill:rgba(75,210,245,.12); filter:drop-shadow(0 0 12px rgba(34,184,230,.45)); }
+    100% { stroke:#1aa7d5; fill:rgba(75,210,245,.045); filter:drop-shadow(0 0 7px rgba(34,184,230,.28)); }
+  }
+  @media (prefers-reduced-motion:reduce) { .created-shape { animation:none !important; } }
+  @keyframes dr { to { stroke-dashoffset: 0; } }
+  @keyframes breathe { 0%,100% { transform: scale(1) translateY(0); } 50% { transform: scale(1.014) translateY(-3px); } }
+  @keyframes sway { 0%,100% { transform: rotate(-1.1deg) translateY(0); } 50% { transform: rotate(1.4deg) translateY(-4px); } }
+  @keyframes nod { 0% { transform: translateY(0) scale(1); } 35% { transform: translateY(-16px) scale(1.04); } 60% { transform: translateY(2px) scale(0.99); } 100% { transform: translateY(0); } }
+  @keyframes tilt { 0%,100% { transform: rotate(0); } 30% { transform: rotate(-7deg); } 70% { transform: rotate(4deg); } }
+  @keyframes wig { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-11px); } 45% { transform: translateX(9px); } 70% { transform: translateX(-6px); } }
+  @keyframes pop { 0% { transform: scale(1); } 45% { transform: scale(1.09); } 100% { transform: scale(1); } }
+  @keyframes ptPulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.18); opacity: 0.86; } }
+  @keyframes halo { 0% { transform: scale(0.7); opacity: 0.55; } 100% { transform: scale(2.1); opacity: 0; } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes handHint { 0%,100% { transform: translate(0,0); opacity: 0.9; } 50% { transform: translate(64px,-52px); opacity: 1; } }
+  @keyframes nudgeTap { 0% { transform: translate(14px,30px) scale(1.1); opacity: 0; } 16% { transform: translate(0,0) scale(1.06); opacity: 1; } 38% { transform: translate(0,0) scale(0.84); } 56% { transform: translate(0,0) scale(1.04); } 82% { transform: translate(0,0) scale(1); opacity: 1; } 100% { transform: translate(0,6px) scale(1); opacity: 0; } }
+  @keyframes nudgeRing { 0% { transform: scale(0.3); opacity: 0; } 34% { transform: scale(0.4); opacity: 0.85; } 100% { transform: scale(1.7); opacity: 0; } }
+  @keyframes glowPulse { 0%,100% { opacity: 0.25; } 50% { opacity: 0.75; } }
+  /* --- MammothGuide poses. Every keyframe animates transform only, inside a
+         fixed-size viewport, so the character's anchor and scale never move. --- */
+  @keyframes mamRise { 0% { transform: translateY(232px); } 72% { transform: translateY(-6px); } 100% { transform: translateY(0); } }
+  @keyframes mamBreathe { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-2px) scale(1.006); } }
+  @keyframes mamTalk { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+  @keyframes mamWatch { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-2px) scale(1.004); } }
+  @keyframes mamCurious { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+  @keyframes mamThink { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-2px) scale(1.005); } }
+  @keyframes mamNod { 0% { transform: translateY(0); } 50% { transform: translateY(-8px); } 100% { transform: translateY(0); } }
+  @keyframes mamSuccessA { 0% { transform: translateY(0) scale(1); } 40% { transform: translateY(-16px) scale(1.02); } 100% { transform: translateY(0); } }
+  @keyframes mamSuccessB { 0% { transform: translateY(0) scale(1); } 40% { transform: translateY(-16px) scale(1.02); } 100% { transform: translateY(0); } }
+  @keyframes mamCelebrate { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-14px) scale(1.015); } }
+  @keyframes mamSurpriseA { 0% { transform: scale(1); } 35% { transform: translateY(-8px) scale(1.035); } 100% { transform: translateY(0); } }
+  @keyframes mamSurpriseB { 0% { transform: scale(1); } 35% { transform: translateY(-8px) scale(1.035); } 100% { transform: translateY(0); } }
+  @keyframes mamOopsA { 0% { transform: translateY(0) scale(1); } 100% { transform: translateY(6px) scale(0.99); } }
+  @keyframes mamOopsB { 0% { transform: translateY(0) scale(1); } 100% { transform: translateY(6px) scale(0.99); } }
+  /* --- ambient + interaction juice --- */
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  @keyframes snowFall { 0% { transform: translateY(-70px); } 100% { transform: translateY(1180px); } }
+  @keyframes flakeSway { 0%,100% { transform: translateX(-24px); } 50% { transform: translateX(24px); } }
+  @keyframes ripple { 0% { transform: scale(0.18); opacity: 0.9; } 100% { transform: scale(2.5); opacity: 0; } }
+  @keyframes textIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes textInB { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Interactive affordances live on separate layers so feedback animations keep their transforms. */
+  @keyframes actionGlow { 0%,100% { opacity:.35; } 50% { opacity:.85; } }
+  @keyframes actionShine { 0%,65% { background-position:180% 0; } 100% { background-position:-80% 0; } }
+  .game-action { position:relative; isolation:isolate; touch-action:manipulation; transition:scale 140ms ease; }
+  .game-action::before { content:''; position:absolute; inset:-4px; border-radius:inherit; pointer-events:none; opacity:0; box-shadow:0 0 0 2px rgba(80,205,255,.4),0 0 22px rgba(35,181,255,.4); transition:opacity 180ms; }
+  [data-interactive="true"] .game-action::before { animation:actionGlow 3.2s ease-in-out infinite; }
+  [data-interactive="true"] .game-action:hover::before,
+  [data-interactive="true"] .game-action:focus-visible::before { animation:none; opacity:1; box-shadow:0 0 0 3px #a3edff,0 0 32px rgba(20,172,255,.65); }
+  [data-interactive="true"] .game-action:active { scale:.96; }
+  .game-action:focus-visible { outline:4px solid #f5c33f; outline-offset:7px; }
+  .game-primary::after { content:''; position:absolute; inset:7px; border-radius:inherit; pointer-events:none; background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.35) 49%,transparent 63%) 180% 0 / 250% 100% no-repeat; opacity:0; }
+  [data-interactive="true"] .game-primary::after { opacity:1; animation:actionShine 4.5s ease-in-out infinite; }
+  [data-interactive="true"] .game-handle { filter:drop-shadow(0 0 9px #22b8e6); }
+  @media (prefers-reduced-motion:reduce) {
+    .narrator-text span { animation:none !important; opacity:1 !important; transform:none !important; }
+    .game-action,.game-action::before,.game-action::after,.game-action *,.game-handle { animation:none !important; transition:none !important; }
+    [data-interactive="true"] .game-action::before { opacity:.55; }
+    .game-primary::after { display:none; }
+  }
+</style>
+<script src="polygon-data.js"></script>
+<script src="screen-navigator.js"></script>
+</helmet>
+<div ref="{{ stageRef }}" style="position:fixed;inset:0;width:100%;height:100%;background:#8ecff2 url(assets/background..png) center center / cover no-repeat;overflow:hidden">
+  <div style="{{ scalerStyle }}">
+
+    <!-- ============ frozen background ============ z 0 -->
+    <img src="assets/background..png" alt="" style="{{ bgStyle }}" />
+
+    <sc-for list="{{ snow }}" as="w" hint-placeholder-count="0">
+      <div style="{{ w.wrap }}"><div style="{{ w.dot }}"></div></div>
+    </sc-for>
+
+    <!-- ============ ice board ============ z 30 -->
+    <img src="assets/ice%20board.png" alt="" style="{{ boardStyle }}" />
+
+    <!-- ============ learning content ============ z 32, inside the board's safe area -->
+    <div ref="{{ safeRef }}" data-screen-label="{{ screenLabel }}" data-interactive="{{ effectsEnabled }}" onPointerDown="{{ stageDown }}" style="{{ safeStyle }}">
+
+      <sc-if value="{{ showZones }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;left:0;top:376px;width:100%;display:flex;gap:52px">
+          <div ref="{{ zoneARef }}" style="{{ zoneAStyle }}">
+            <div style="font:900 30px Nunito,sans-serif;color:#1f6d4a;letter-spacing:0.06em">{{ zoneAName }}</div>
+            <div style="font:700 21px Nunito,sans-serif;color:#57907a;margin-top:2px">{{ zoneASub }}</div>
+          </div>
+          <div ref="{{ zoneBRef }}" style="{{ zoneBStyle }}">
+            <div style="font:900 30px Nunito,sans-serif;color:#a8395f;letter-spacing:0.06em">{{ zoneBName }}</div>
+            <div style="font:700 21px Nunito,sans-serif;color:#bd7a92;margin-top:2px">{{ zoneBSub }}</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-for list="{{ cards }}" as="c" hint-placeholder-count="0">
+        <div class="{{ c.click ? 'game-action' : '' }}" role="{{ c.click ? 'button' : undefined }}" tabIndex="{{ c.click && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ c.nudge }}" style="{{ c.wrap }}" onPointerDown="{{ c.down }}" onPointerEnter="{{ c.enter }}" onPointerLeave="{{ c.leave }}" onClick="{{ c.click }}">
+          <div style="{{ c.glow }}"></div>
+          <svg viewBox="{{ c.vb }}" style="{{ c.svgStyle }}" ref="{{ c.svgRef }}">
+            <g style="{{ c.gStyle }}">
+              <path class="{{ c.pathClass }}" style="{{ c.pathStyle }}" d="{{ c.d }}" fill="{{ c.fill }}" stroke="{{ c.stroke }}" stroke-width="{{ c.sw }}" stroke-linejoin="round" stroke-linecap="round"></path>
+              <path style="{{ c.outlineStyle }}" d="{{ c.extra }}" fill="none" stroke="{{ c.stroke }}" stroke-width="{{ c.sw }}" stroke-linecap="round"></path>
+              <sc-for list="{{ c.hl }}" as="s" hint-placeholder-count="0">
+                <path d="{{ s.d }}" fill="none" stroke="{{ s.color }}" stroke-width="{{ s.w }}" stroke-linecap="round" stroke-linejoin="round" style="{{ s.style }}"></path>
+              </sc-for>
+              <path data-trace="1" d="{{ c.traceD }}" fill="none" stroke="#22b8e6" stroke-width="{{ c.traceW }}" stroke-linecap="round" stroke-linejoin="round" pathLength="100" style="{{ c.traceStyle }}"></path>
+              <sc-for list="{{ c.arcs }}" as="a" hint-placeholder-count="0">
+                <path d="{{ a.d }}" fill="none" stroke="{{ a.color }}" stroke-width="{{ a.w }}" stroke-linecap="round"></path>
+              </sc-for>
+              <sc-for list="{{ c.dots }}" as="p" hint-placeholder-count="0">
+                <circle data-dot="{{ p.dot }}" cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.fill }}" stroke="{{ p.stroke }}" stroke-width="{{ p.sw }}" style="{{ p.style }}"></circle>
+              </sc-for>
+              <sc-for list="{{ c.handles }}" as="h" hint-placeholder-count="0">
+                <g>
+                  <circle cx="{{ h.x }}" cy="{{ h.y }}" r="{{ h.hit }}" fill="rgba(0,0,0,0)" style="cursor:grab" onPointerDown="{{ h.down }}"></circle>
+                  <circle cx="{{ h.x }}" cy="{{ h.y }}" r="{{ h.r }}" class="game-handle" fill="#ffffff" stroke="#22b8e6" stroke-width="{{ h.sw }}" style="pointer-events:none"></circle>
+                </g>
+              </sc-for>
+            </g>
+          </svg>
+          <sc-for list="{{ c.pins }}" as="p" hint-placeholder-count="0">
+            <div style="{{ p.style }}">{{ p.n }}</div>
+          </sc-for>
+          <div style="{{ c.badgeStyle }}">{{ c.badge }}</div>
+          <div style="{{ c.chipStyle }}">{{ c.chip }}</div>
+          <div style="{{ c.markStyle }}">{{ c.mark }}</div>
+        </div>
+      </sc-for>
+
+      <sc-for list="{{ targets }}" as="t" hint-placeholder-count="0">
+        <div class="{{ t.click ? 'game-action' : '' }}" role="{{ t.click ? 'button' : undefined }}" tabIndex="{{ t.click && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-label-target="{{ t.labelKey }}" data-nudge="{{ t.nudge }}" style="{{ t.style }}" onPointerEnter="{{ t.enter }}" onPointerLeave="{{ t.leave }}" onClick="{{ t.click }}">{{ t.text }}</div>
+      </sc-for>
+
+      <sc-for list="{{ callouts }}" as="o" hint-placeholder-count="0">
+        <div style="{{ o.style }}">{{ o.text }}</div>
+      </sc-for>
+
+      <sc-for list="{{ leaders }}" as="l" hint-placeholder-count="0">
+        <div style="{{ l.style }}"></div>
+      </sc-for>
+
+      <sc-for list="{{ drops }}" as="d" hint-placeholder-count="0">
+        <div style="{{ d.style }}">
+
+          <div class="{{ d.click ? 'game-action game-primary' : '' }}" role="{{ d.click ? 'button' : undefined }}" tabIndex="{{ d.click && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ d.nudge }}" onClick="{{ d.click }}" onPointerEnter="{{ d.enter }}" onPointerLeave="{{ d.leave }}" style="{{ d.btn }}">
+            <span>{{ d.label }}</span>
+            <span aria-hidden="true" style="{{ d.arrowStyle }}">{{ d.arrow }}</span>
+          </div>
+          <sc-for list="{{ d.menu }}" as="m" hint-placeholder-count="0">
+            <div class="{{ m.click ? 'game-action' : '' }}" role="{{ m.click ? 'button' : undefined }}" tabIndex="{{ m.click && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" onClick="{{ m.click }}" onPointerEnter="{{ m.enter }}" onPointerLeave="{{ m.leave }}" style="{{ m.style }}">{{ m.text }}</div>
+          </sc-for>
+        </div>
+      </sc-for>
+
+      <sc-if value="{{ showChoice }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;left:0;bottom:6px;width:100%;display:flex;justify-content:center;gap:74px">
+          <div class="{{ chooseOpen ? 'game-action game-primary' : '' }}" role="{{ chooseOpen ? 'button' : undefined }}" tabIndex="{{ chooseOpen && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeOC }}" onClick="{{ chooseOpen }}" onPointerEnter="{{ hovOpen }}" onPointerLeave="{{ hovOut }}" style="{{ btnOpen }}">Open</div>
+          <div class="{{ chooseClosed ? 'game-action game-primary' : '' }}" role="{{ chooseClosed ? 'button' : undefined }}" tabIndex="{{ chooseClosed && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeClosed }}" onClick="{{ chooseClosed }}" onPointerEnter="{{ hovClosed }}" onPointerLeave="{{ hovOut }}" style="{{ btnClosed }}">Closed</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showChips }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;left:0;bottom:10px;width:100%;display:flex;justify-content:center;gap:44px">
+          <sc-for list="{{ chips }}" as="p" hint-placeholder-count="3">
+            <div class="{{ p.click ? 'game-action' : '' }}" role="{{ p.click ? 'button' : undefined }}" tabIndex="{{ p.click && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ p.nudge }}" onPointerDown="{{ p.down }}" onPointerEnter="{{ p.enter }}" onPointerLeave="{{ p.leave }}" onClick="{{ p.click }}" style="{{ p.style }}">{{ p.text }}</div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showCounter }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;left:0;bottom:8px;width:100%;display:flex;justify-content:center;align-items:center;gap:34px">
+          <sc-for list="{{ counters }}" as="n" hint-placeholder-count="1">
+            <div style="{{ n.wrap }}">
+              <div style="{{ n.captionStyle || {font: '800 22px Nunito,sans-serif',color: '#3c7bbd',textAlign: 'center',lineHeight: 1.1,width: '104px'} }}">{{ n.caption }}</div>
+              <div class="{{ n.minus ? 'game-action' : '' }}" role="{{ n.minus ? 'button' : undefined }}" tabIndex="{{ n.minus && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" onClick="{{ n.minus }}" onPointerEnter="{{ n.mIn }}" onPointerLeave="{{ n.out }}" style="{{ n.btnM }}">–</div>
+              <div style="{{ n.box }}">{{ n.value }}</div>
+              <div class="{{ n.plus ? 'game-action' : '' }}" role="{{ n.plus ? 'button' : undefined }}" tabIndex="{{ n.plus && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ n.nudge }}" onClick="{{ n.plus }}" onPointerEnter="{{ n.pIn }}" onPointerLeave="{{ n.out }}" style="{{ n.btnP }}">+</div>
+            </div>
+          </sc-for>
+          <div class="{{ check ? 'game-action game-primary' : '' }}" role="{{ check ? 'button' : undefined }}" tabIndex="{{ check && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeCheck }}" onClick="{{ check }}" onPointerEnter="{{ hovCheck }}" onPointerLeave="{{ hovOut }}" style="{{ checkStyle }}">{{ checkLabel }}</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showCheck }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;left:0;bottom:6px;width:100%;display:flex;justify-content:center">
+          <div class="{{ check ? 'game-action game-primary' : '' }}" role="{{ check ? 'button' : undefined }}" tabIndex="{{ check && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeCheck }}" onClick="{{ check }}" onPointerEnter="{{ hovCheck }}" onPointerLeave="{{ hovOut }}" style="{{ checkStyle }}">{{ checkLabel }}</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showHand }}" hint-placeholder-val="{{ false }}">
+        <img src="assets/handNudge.webp" alt="" style="{{ handStyle }}" />
+      </sc-if>
+
+      <sc-for list="{{ fx }}" as="f" hint-placeholder-count="0">
+        <div class="{{ f.className }}" style="{{ f.style }}">{{ f.t }}</div>
+      </sc-for>
+
+      <sc-if value="{{ showNudge }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ nudgeWrap }}">
+          <div style="{{ nudgeRing }}"></div>
+          <img src="assets/handNudge.webp" alt="" style="{{ nudgeHand }}" />
+        </div>
+      </sc-if>
+    </div>
+
+    <!-- ============ wooden instruction sign ============ z 40 -->
+    <img src="assets/ui_sign.png" alt="" style="{{ signStyle }}" />
+    <div style="{{ signTextBox }}">
+      <div class="narrator-text" ref="{{ narrRef }}" style="{{ narrStyle }}"><sc-for list="{{ narratorParts }}" as="part" hint-placeholder-count="0"><span key="{{ part.key }}" style="{{ part.style }}">{{ part.text }}</span></sc-for></div>
+    </div>
+
+    <sc-if value="{{ voiceError }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ retryVoice }}" style="position:absolute;left:50%;bottom:24px;translate:-50% 0;z-index:90;padding:14px 32px;border:3px solid white;border-radius:30px;background:#167bb7;color:white;font:800 26px Nunito,sans-serif;cursor:pointer">{{ voiceError }}</button>
+    </sc-if>
+    <div ref="{{ ghostRef }}" style="position:absolute;left:0;top:0;pointer-events:none;opacity:0;z-index:60"></div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1320,&quot;height&quot;:720}}">
+const IK = '#f58420', ICE = '#22b8e6', GRN = '#2f9e5e', RED = '#e8553f', GOLD = '#e9a733';
+
+/* ============================================================================
+   MASTER GAME STAGE
+   Every layer is placed as a percentage of this 1980x1080 reference stage and
+   the whole stage is scaled by one transform, so the composition can never
+   drift apart between 1920x1080 and 1024x576 — there is only ever one number
+   driving layout. Boxes below were measured off the reference art itself.
+   ========================================================================= */
+const STAGE = { w: 1980, h: 1080 };
+const LAYER = {
+  board:   { x: 68,  y: 158, w: 1844, h: 871 },   /* 3.43% / 14.63% / 93.13% / 80.65% */
+  sign:    { x: 443, y: 6,   w: 1095, h: 155 },   /* 22.37% / 0.56% / 55.30% / 14.35% */
+  mammoth: { x: 164, y: 24,  w: 269,  h: 181 }    /* 8.28% / 2.22% / 13.59% / 16.76%  */
+};
+/* Learning content lives here: inset from the ice border on all four sides so
+   nothing ever touches the frozen frame. */
+const SAFE = { x: 197, y: 245, w: 1585, h: 716 };
+/* The sign's usable inner text box — clear of the rope bolts and both
+   snowflake decorations, and only as tall as the plank's wood band. */
+const NARR = { x: 573, y: 44, w: 835, h: 94 };
+const NARR_TYPE = { size: 38, color: '#633c19', accent: '#2c63b9', outline: 3 };
+// Reserve animation headroom and a gap before the sign, keeping the paw baseline.
+const MAM_SAFE = { top: STAGE.h * 0.02, right: (LAYER.sign.x - LAYER.mammoth.x) * 0.05, motion: 20 };
+const MAM_BASELINE = LAYER.mammoth.y + LAYER.mammoth.h;
+const MAM_AREA = { x: LAYER.mammoth.x, y: MAM_SAFE.top,
+  w: LAYER.sign.x - LAYER.mammoth.x, h: MAM_BASELINE - MAM_SAFE.top };
+const MAM_HEIGHT = Math.min(LAYER.mammoth.h, MAM_AREA.h - MAM_SAFE.motion,
+  (MAM_AREA.w - MAM_SAFE.right) * 510 / 760);
+const MAM_WIDTH = MAM_HEIGHT * 760 / 510;
+
+function pc(v, total) { return (100 * v / total).toFixed(4) + '%'; }
+/* Turns a stage-pixel box into a percentage-positioned absolute style. */
+function stageBox(L, z) {
+  return {
+    position: 'absolute', left: pc(L.x, STAGE.w), top: pc(L.y, STAGE.h),
+    width: pc(L.w, STAGE.w), height: pc(L.h, STAGE.h), zIndex: z
+  };
+}
+
+/* ============================================================================
+   MAMMOTH GUIDE — reusable character state machine
+   Screens never pick animations themselves; they raise semantic events and the
+   guide decides the pose. Both sprites share one 760x510 canvas and every pose
+   animates transform only inside a fixed viewport, so swapping expression can
+   never change the character's anchor, scale or baseline.
+   ========================================================================= */
+const MAMMOTH_STATES = {
+  ENTER: 'ENTER', IDLE: 'IDLE', TALKING: 'TALKING', ENCOURAGING: 'ENCOURAGING',
+  CURIOUS: 'CURIOUS', THINKING: 'THINKING', WATCHING: 'WATCHING',
+  SUCCESS: 'SUCCESS', WRONG: 'WRONG', SURPRISED: 'SURPRISED', CELEBRATE: 'CELEBRATE'
+};
+/* sad: true selects the mam_sad sprite. hold: ms means the pose is temporary
+   and the guide returns to its resting pose afterwards. */
+const MAMMOTH_POSE = {
+  ENTER:       { anim: 'mamRise 820ms cubic-bezier(.24,.9,.26,1) both' },
+  IDLE:        { anim: 'mamBreathe 4.6s ease-in-out infinite' },
+  TALKING:     { anim: 'mamTalk 2.1s ease-in-out infinite' },
+  WATCHING:    { anim: 'mamWatch 4.2s ease-in-out infinite' },
+  CURIOUS:     { anim: 'mamCurious 3.2s ease-in-out infinite' },
+  THINKING:    { anim: 'mamThink 3.6s ease-in-out infinite' },
+  ENCOURAGING: { anim: 'mamNod 1000ms ease-in-out both', hold: 1100 },
+  SUCCESS:     { anim: 'mamSuccess# 900ms ease-in-out both', hold: 1000, once: true },
+  CELEBRATE:   { anim: 'mamCelebrate 2.2s ease-in-out infinite' },
+  SURPRISED:   { anim: 'mamSurprise# 760ms ease-out both', hold: 900, once: true },
+  WRONG:       { anim: 'mamOops# 700ms ease-out both', hold: 1200, once: true, sad: true }
+};
+
+class MammothGuide {
+  constructor(host) {
+    this.host = host;
+    this.current = MAMMOTH_STATES.IDLE;
+    this.resting = MAMMOTH_STATES.IDLE;
+    this._hold = null;
+    this._queued = null;
+  }
+  /* The single entry point. opts.then overrides where a temporary pose lands.
+     A reaction (a pose with a hold) outranks the ambient poses, so the oops
+     or the cheer plays out in full and the talking pose queues behind it —
+     otherwise the corrective line would wipe the reaction the moment it starts. */
+  setState(name, opts) {
+    const pose = MAMMOTH_POSE[name];
+    if (!pose) return;
+    const o = opts || {};
+    const ambient = !pose.hold;
+    /* queue the ambient pose; it lands the moment the reaction finishes */
+    if (this._hold && ambient && !o.force) { this.resting = name; this._queued = name; return; }
+    if (this._hold) { clearTimeout(this._hold); this._hold = null; }
+    this._queued = null;
+    this.current = name;
+    if (ambient) this.resting = name;
+    const back = o.then || this.resting;
+    this.host.setState((st) => ({ mamState: name, mamTick: (st.mamTick || 0) + 1 }));
+    if (pose.hold) {
+      this._hold = this.host.later(() => {
+        this._hold = null;
+        const next = this._queued || back;
+        this._queued = null;
+        if (this.current === name) this.setState(next, { force: true });
+      }, o.hold || pose.hold);
+    }
+  }
+  /* runStep clears every component timer, so any pending reaction dies with
+     them — drop the handle too or it would block ambient poses forever. */
+  reset() { this._hold = null; this._queued = null; this.resting = MAMMOTH_STATES.IDLE; }
+  /* Resolves the pose into a sprite + animation for the current render. */
+  pose() {
+    const p = MAMMOTH_POSE[this.current] || MAMMOTH_POSE.IDLE;
+    const tick = this.host.state.mamTick || 0;
+    return {
+      sad: !!p.sad,
+      anim: p.once ? p.anim.replace('#', tick % 2 ? 'A' : 'B') : p.anim
+    };
+  }
+  /* ---- semantic events: the only thing screens should call ---- */
+  onScreenEnter() { this.setState(MAMMOTH_STATES.ENTER, { then: MAMMOTH_STATES.IDLE, force: true }); }
+  onInstructionStart() { this.setState(MAMMOTH_STATES.TALKING); }
+  onInstructionComplete() { this.setState(MAMMOTH_STATES.WATCHING); }
+  onInteractionStart() { this.setState(MAMMOTH_STATES.WATCHING); }
+  onCorrectProgress() { this.setState(MAMMOTH_STATES.ENCOURAGING, { then: MAMMOTH_STATES.WATCHING }); }
+  onWrongAttempt() { this.setState(MAMMOTH_STATES.WRONG, { then: MAMMOTH_STATES.WATCHING }); }
+  onCorrectAnswer() { this.setState(MAMMOTH_STATES.SUCCESS, { then: MAMMOTH_STATES.WATCHING }); }
+  onSurprise() { this.setState(MAMMOTH_STATES.SURPRISED, { then: MAMMOTH_STATES.WATCHING }); }
+  onScreenComplete() { this.setState(MAMMOTH_STATES.CELEBRATE); }
+}
+
+class Component extends DCLogic {
+  state = {
+    ready: false, k: 0, narr: '', speaking: false, voiceError: '', muted: false, scale: 1,
+    sel: [], dd: [null, null, null, null], ddOpen: -1, ddWrong: [false, false, false, false],
+    cnt: [4, 4], attempts: 0, wrong: null, ok: null, nudge: null,
+    mamState: 'IDLE', mamTick: 0, mamHidden: true, interactive: false,
+    narrTone: 'teach', narrTick: 0,
+    hoverK: null, pressK: null, fx: [],
+    userPts: null, dragged: false, reveal: false, nums: 0, hlKind: null,
+    chip: null, placed: {}, badPlace: null, sortAt: {}, pickedFig: null,
+    n: 4, morph: null, traceKey: 0, tracing: false, drawing: false, drawn: false,
+    zoomed: false, showHand: false, checked: false, gapPulse: false, phase: ''
+  };
+
+  /* One guide instance for the whole lesson; screens only raise events at it. */
+  guide = new MammothGuide(this);
+
+  /* ---------- lifecycle ---------- */
+  componentDidMount() {
+    this.stageRef = React.createRef();
+    this.zoneARef = React.createRef(); this.zoneBRef = React.createRef();
+    this.narrRef = React.createRef();
+    this.safeRef = React.createRef();
+    this.ghostRef = React.createRef(); this.svgRefs = {};
+    this.timers = [];
+    this.snow = this.makeSnow();
+    window.addEventListener('pointerdown', this.unlockAudio, true);
+    window.addEventListener('keydown', this.unlockAudio, true);
+    window.addEventListener('pointerup', this.unlockAudio, true);
+    window.addEventListener('touchend', this.unlockAudio, true);
+    window.addEventListener('pointerup', this.pressOff);
+    window.addEventListener('pointercancel', this.pressOff);
+    const boot = () => {
+      if (!window.POLY) { this.timers.push(setTimeout(boot, 60)); return; }
+      this.P = window.POLY;
+      /* The lesson always opens on screen 1 so the guide's entrance plays every
+         time. Clear any progress an earlier build persisted. */
+      try { localStorage.removeItem('polyLessonV1'); } catch (e) {}
+      this.setState({ ready: true, k: 0, userPts: null }, () => this.runStep(0, true));
+    };
+    boot();
+    window.__poly = this;
+    if (window.PolygonScreenNavigator) this._disposeNavigator = window.PolygonScreenNavigator.mount(this);
+    this.fit = () => {
+      const el = this.stageRef && this.stageRef.current;
+      const w = (el && el.clientWidth) || document.documentElement.clientWidth || window.innerWidth;
+      const h = (el && el.clientHeight) || document.documentElement.clientHeight || window.innerHeight;
+      if (!w || !h) return;
+      const sc = Math.min(w / 1980, h / 1080);
+      if (Math.abs(sc - this.state.scale) > 0.0005) this.setState({ scale: sc });
+    };
+    this.fit();
+    requestAnimationFrame(this.fit);
+    setTimeout(this.fit, 150);
+    window.addEventListener('resize', this.fit);
+    if (window.ResizeObserver) {
+      this._ro = new ResizeObserver(() => this.fit());
+      this._ro.observe(document.documentElement);
+      const el = this.stageRef.current;
+      if (el) this._ro.observe(el);
+    }
+    this._fitTimer = setInterval(() => this.fit(), 120);
+  }
+  componentWillUnmount() {
+    if (this._disposeNavigator) this._disposeNavigator();
+    if (this._labelDragCleanup) this._labelDragCleanup();
+    if (this._sortDragCleanup) this._sortDragCleanup();
+    this.stopDrawingSound();
+    this.gen = (this.gen || 0) + 1;
+    if (this._ro) this._ro.disconnect();
+    if (this._fitTimer) clearInterval(this._fitTimer);
+    window.removeEventListener('pointerdown', this.unlockAudio, true);
+    window.removeEventListener('keydown', this.unlockAudio, true);
+    window.removeEventListener('pointerup', this.unlockAudio, true);
+    window.removeEventListener('touchend', this.unlockAudio, true);
+    window.removeEventListener('pointerup', this.pressOff);
+    window.removeEventListener('pointercancel', this.pressOff);
+    this.timers.forEach(clearTimeout);
+    window.removeEventListener('resize', this.fit);
+    try { window.speechSynthesis.cancel(); } catch (e) {}
+  }
+  later(fn, ms) { const t = setTimeout(fn, ms); this.timers.push(t); return t; }
+  mapPt(box, vb, pt, pad) {
+    const p = pad === undefined ? 20 : pad;
+    const ix = box.x + p, iy = box.y + p, iw = box.w - 2 * p, ih = box.h - 2 * p;
+    const v = String(vb).split(' ').map(Number);
+    const sc = Math.min(iw / v[2], ih / v[3]);
+    return [ix + (iw - v[2] * sc) / 2 + (pt[0] - v[0]) * sc, iy + (ih - v[3] * sc) / 2 + (pt[1] - v[1]) * sc];
+  }
+  leader(a, b, color) {
+    const dx = b[0] - a[0], dy = b[1] - a[1];
+    const len = Math.max(0, Math.hypot(dx, dy) - 62);
+    const ang = Math.atan2(dy, dx) * 180 / Math.PI;
+    return { style: {
+      position: 'absolute', left: a[0] + 'px', top: a[1] + 'px', width: len + 'px', height: '6px',
+      marginTop: '-3px', borderRadius: '3px', background: color, zIndex: 1,
+      transform: 'rotate(' + ang.toFixed(2) + 'deg)', transformOrigin: '0 50%', transition: 'background 260ms'
+    } };
+  }
+  /* Progress is deliberately not persisted — every run starts at screen 1. */
+  save() {}
+
+  /* ---------- audio ---------- */
+  ac() {
+    if (!this._ac || this._ac.state === 'closed') {
+      const A = window.AudioContext || window.webkitAudioContext;
+      if (A) {
+        this._ac = new A();
+        this._sfxOutput = this._ac.createGain();
+        this._sfxOutput.gain.value = 2;
+        const limiter = this._ac.createDynamicsCompressor();
+        limiter.threshold.value = -12; limiter.knee.value = 12;
+        limiter.ratio.value = 8; limiter.attack.value = 0.003; limiter.release.value = 0.15;
+        this._sfxOutput.connect(limiter); limiter.connect(this._ac.destination);
+      }
+    }
+    return this._ac;
+  }
+  // Schedule from the resumed audio clock, never from a suspended clock.
+  unlockAudio = () => {
+    try {
+      const ac = this.ac();
+      if (ac && ac.state !== 'running') return ac.resume().catch(() => {});
+    } catch (error) {}
+    return Promise.resolve();
+  };
+  withAudio(play, lifetime = 500) {
+    if (this.state.muted) return;
+    const generation = this.gen || 0, requested = Date.now();
+    const ready = () => {
+      if (this.state.muted || generation !== (this.gen || 0) || Date.now() - requested > lifetime) return;
+      try { const ac = this.ac(); if (ac && ac.state === 'running') play(ac); } catch (error) {}
+    };
+    try {
+      const ac = this.ac(); if (!ac) return;
+      if (ac.state === 'running') ready();
+      else this.unlockAudio().then(ready);
+    } catch (error) {}
+  }
+  tone(f, dur, type, vol, delay) {
+    this.withAudio(ac => {
+      const t0 = ac.currentTime + (delay || 0);
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = type || 'sine'; o.frequency.setValueAtTime(f, t0);
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(vol || 0.06, t0 + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      o.connect(g); g.connect(this._sfxOutput);
+      o.onended = () => { o.disconnect(); g.disconnect(); };
+      o.start(t0); o.stop(t0 + dur + 0.05);
+    });
+  }
+  startDrawingSound(ms) {
+    this.stopDrawingSound();
+    const token = this._drawingToken, requested = Date.now();
+    this.withAudio(ac => {
+      if (token !== this._drawingToken) return;
+      const remaining = ms - (Date.now() - requested);
+      if (remaining <= 0) return;
+      // Soft, filtered pencil friction with small variations in the grain.
+      const buffer = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate);
+      const samples = buffer.getChannelData(0);
+      let smooth = 0;
+      for (let i = 0; i < samples.length; i++) {
+        smooth = smooth * 0.65 + (Math.random() * 2 - 1) * 0.35;
+        samples[i] = smooth * (0.75 + 0.25 * Math.sin(i / ac.sampleRate * 83));
+      }
+      const source = ac.createBufferSource(), filter = ac.createBiquadFilter(), gain = ac.createGain();
+      source.buffer = buffer; source.loop = true;
+      filter.type = 'bandpass'; filter.frequency.value = 1800; filter.Q.value = 0.65;
+      gain.gain.setValueAtTime(0.045, ac.currentTime);
+      source.connect(filter); filter.connect(gain); gain.connect(this._sfxOutput);
+      source.onended = () => { source.disconnect(); filter.disconnect(); gain.disconnect(); };
+      this._drawingSound = { source, filter, gain, ac };
+      source.start(); source.stop(ac.currentTime + remaining / 1000 + 0.04);
+      this.updateDrawingSound(this.drawProgress || 0);
+    }, ms);
+  }
+  updateDrawingSound(t) {
+    const sound = this._drawingSound; if (!sound) return;
+    const speed = 4 * t * (1 - t);
+    sound.gain.gain.setTargetAtTime(0.045 + 0.24 * speed, sound.ac.currentTime, 0.025);
+    sound.filter.frequency.setTargetAtTime(1200 + 900 * speed, sound.ac.currentTime, 0.04);
+  }
+  stopDrawingSound() {
+    this._drawingToken = (this._drawingToken || 0) + 1;
+    const sound = this._drawingSound; this._drawingSound = null;
+    if (!sound) return;
+    try {
+      const now = sound.ac.currentTime;
+      sound.gain.gain.cancelScheduledValues(now);
+      sound.gain.gain.setTargetAtTime(0, now, 0.008);
+      sound.source.stop(now + 0.04);
+    } catch (error) {}
+  }
+  sfx(kind) {
+    this.unlockAudio();
+    if (kind === 'tap') this.tone(520, 0.08, 'triangle', 0.05);
+    else if (kind === 'ok') { this.tone(660, 0.12, 'sine', 0.06); this.tone(880, 0.16, 'sine', 0.05, 0.1); this.tone(1180, 0.2, 'sine', 0.04, 0.2); }
+    else if (kind === 'no') { this.tone(300, 0.12, 'triangle', 0.05); this.tone(232, 0.18, 'triangle', 0.045, 0.1); }
+    else if (kind === 'trace') this.tone(1320, 0.5, 'sine', 0.022);
+    else if (kind === 'done') { this.tone(784, 0.1, 'sine', 0.05); this.tone(1046, 0.22, 'sine', 0.045, 0.09); }
+    else if (kind === 'tick') this.tone(880, 0.05, 'square', 0.03);
+    else if (kind === 'snap') { this.tone(600, 0.07, 'sine', 0.05); this.tone(920, 0.1, 'sine', 0.04, 0.06); }
+    else if (kind === 'pick') this.tone(440, 0.06, 'sine', 0.04);
+    else if (kind === 'swap') this.tone(380, 0.14, 'sine', 0.03);
+    else if (kind === 'pop') { this.tone(280, 0.10, 'sine', 0.055); this.tone(520, 0.13, 'triangle', 0.04, 0.05); this.tone(790, 0.18, 'sine', 0.032, 0.12); }
+    else if (kind === 'hover') this.tone(1180, 0.035, 'sine', 0.018);
+    else if (kind === 'party') { [523, 659, 784, 1046, 1318].forEach((f, i) => this.tone(f, 0.24, 'sine', 0.045, i * 0.085)); }
+  }
+
+  /* ---------- narration + voice over ---------- */
+  // Speech completion, never an estimated duration, controls the input gate.
+  speak(text, cb, durationMs) {
+    this.prepareNarratorReveal(text, durationMs);
+    const generation = this.gen || 0, id = this.spkId = (this.spkId || 0) + 1;
+    const current = () => id === this.spkId && generation === (this.gen || 0);
+    let finished = false, started = false, failed = false;
+    const fail = () => {
+      if (!current() || finished) return;
+      failed = true;
+      this._voiceRetry = () => this.speak(text, cb, durationMs);
+      this.setState({ wordReveal: 'complete' });
+      this.setState({ voiceError: 'Play voiceover', interactive: false });
+    };
+    if (!window.speechSynthesis || typeof SpeechSynthesisUtterance === 'undefined') { fail(); return; }
+    try {
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 0.92; u.pitch = 1.2; u.volume = 1;
+      u.onstart = () => { if (current()) { started = true; failed = false; this.setState({ voiceError: '', wordReveal: 'playing' }); } };
+      u.onend = (event) => {
+        if (!current() || finished || failed) return;
+        finished = true; this._voiceRetry = null;
+        if (event && Number.isFinite(event.elapsedTime) && event.elapsedTime > 0) {
+          this._voiceDurations = this._voiceDurations || {};
+          this._voiceDurations[text] = event.elapsedTime * 1000;
+        }
+        this.setState({ wordReveal: 'complete' }, cb);
+      };
+      u.onerror = fail;
+      u.onboundary = (event) => {
+        if (!current()) return;
+        const word = text.slice(0, event.charIndex + 1).toLowerCase().match(/[a-z]+$/);
+        if (word) this.keyword(word[0]);
+      };
+      this._utter = u;
+      window.speechSynthesis.speak(u);
+      // A blocked autoplay request needs a gesture; this timer never unlocks input.
+      this.later(() => { if (!started && !finished) fail(); }, 6000);
+    } catch (error) { fail(); }
+  }
+  retryVoice = () => {
+    this.unlockAudio();
+    const retry = this._voiceRetry;
+    if (!retry) return;
+    this.spkId = (this.spkId || 0) + 1;
+    try { window.speechSynthesis.cancel(); } catch (error) {}
+    this.setState({ voiceError: '', muted: false });
+    retry();
+  };
+  narratorWidth(text) {
+    const display = String(text).replace(/\b(?:triangles?|quadrilaterals?|pentagons?|hexagons?|heptagons?|octagons?|polygons?)\b/gi, word => word.toUpperCase());
+    try {
+      const canvas = document.createElement('canvas'), context = canvas.getContext('2d');
+      context.font = '800 ' + NARR_TYPE.size + 'px "Baloo 2", Nunito, sans-serif';
+      return context.measureText(display).width + display.length * NARR_TYPE.size * 0.005 + 12;
+    } catch (error) { return display.length * NARR_TYPE.size * 0.62 + 12; }
+  }
+  instructionPages(text) {
+    const clean = String(text || '').replace(/\s+/g, ' ').trim();
+    if (!clean || this.narratorWidth(clean) <= NARR.w - 24) return [clean];
+    const words = clean.split(' ');
+    if (words.length === 1) return [clean];
+    let best = 1, score = -Infinity;
+    for (let i = 1; i < words.length; i++) {
+      const left = words.slice(0, i).join(' '), right = words.slice(i).join(' ');
+      // Prefer complete sentences, then clauses, before a balanced word boundary.
+      const boundary = /[.!?]$/.test(left) ? 120 : /[,;:]$/.test(left) ? 75 : /^(?:and|while|but|which|with|is called|made of)\b/i.test(right) ? 55 : 0;
+      const balance = Math.abs(this.narratorWidth(left) - this.narratorWidth(right)) / 20;
+      const candidate = boundary - balance - (i < 2 || words.length - i < 2 ? 80 : 0);
+      if (candidate > score) { score = candidate; best = i; }
+    }
+    return this.instructionPages(words.slice(0, best).join(' ')).concat(this.instructionPages(words.slice(best).join(' ')));
+  }
+  pumpVoice() {
+    if (this._voiceReading || !this._voiceStarted) return;
+    const item = (this._voiceQueue || [])[0];
+    if (!item) return;
+    this._voiceReading = true;
+    this.speak(item.text, () => {
+      this._voiceQueue.shift();
+      this._voiceReading = false;
+      if (this._voiceQueue.length) { this.pumpVoice(); return; }
+      const after = this._voiceAfter;
+      this._voiceAfter = null;
+      this._voiceLocked = false;
+      this.setState({ speaking: false, interactive: true, voiceError: '' });
+      this.guide.onInstructionComplete();
+      if (this._advanceAfterVoice) { this._advanceAfterVoice = false; this.advance(); }
+      else if (after) after();
+      else if (!this.step().auto) this.armNudge();
+    });
+  }
+  keyword(w) {
+    const map = { straight: 'straight', curved: 'curved', open: 'open', closed: 'closed', sides: 'sides', side: 'sides', vertex: 'vertex', angle: 'angle', polygon: 'polygon', triangle: 'name', quadrilateral: 'name', pentagon: 'name', hexagon: 'name', heptagon: 'name', octagon: 'name' };
+    const key = map[w]; if (!key) return;
+    if (this.state.hlKind !== key) this.setState({ hlKind: key });
+    if (key === 'name' && !this.state.reveal) this.setState({ reveal: true });
+  }
+  /* Instruction text, guide pose and narration all start on the same tick, and
+     the guide only drops out of TALKING when the audio actually ends. */
+  narrate(text, opts) {
+    const o = opts || {};
+    this.spkId = (this.spkId || 0) + 1;
+    try { window.speechSynthesis.cancel(); } catch (error) {}
+    this._voiceLocked = true; this._voiceReading = false; this._voiceStarted = true;
+    this._voiceQueue = this.instructionPages(text).map(part => ({ text: part })); this._voiceRetry = null;
+    this._voiceAfter = () => {
+      if (this.step().sc === 'END') this.guide.onScreenComplete();
+      if (o.then) o.then();
+      else if (o.auto) this.later(() => this.advance(), 420);
+    };
+    this.setState((st) => ({ narr: text, speaking: true, interactive: false,
+      voiceError: '', nudge: null, muted: false,
+      hlKind: o.hl !== undefined ? o.hl : st.hlKind
+    }), () => { this.pumpVoice(); });
+    this.guide.onInstructionStart();
+  }
+  replay = () => { const t = this.state.narr; if (t) this.narrate(t, {}); };
+  toggleMute = () => {}; // Mandatory narration cannot be skipped by muting.
+
+  /* ---------- geometry ---------- */
+  dPath(pts, closed) { return 'M' + pts.map((p) => p[0] + ' ' + p[1]).join(' L') + (closed ? ' Z' : ''); }
+  fig(name) { return this.P.FIG[name]; }
+  k(name) { const F = this.fig(name); const w = parseFloat(String(F.vb).split(' ')[2]) || 1000; return w / 1000; }
+  figD(name, ptsOverride) {
+    const F = this.fig(name);
+    if (F.d) return F.d;
+    return this.dPath(ptsOverride || F.pts, F.closed);
+  }
+  segs(name, ptsOverride) {
+    const F = this.fig(name), pts = ptsOverride || F.pts || [];
+    const out = [], n = pts.length, lim = F.closed ? n : n - 1;
+    for (let i = 0; i < lim; i++) {
+      const a = pts[i], b = pts[(i + 1) % n];
+      out.push({ d: 'M' + a[0] + ' ' + a[1] + ' L' + b[0] + ' ' + b[1], mid: [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], a: a, b: b });
+    }
+    return out;
+  }
+  centroid(pts) {
+    let x = 0, y = 0; pts.forEach((p) => { x += p[0]; y += p[1]; });
+    return [x / pts.length, y / pts.length];
+  }
+  arcAt(pts, i, r) {
+    const n = pts.length, v = pts[i], p = pts[(i - 1 + n) % n], q = pts[(i + 1) % n];
+    const u1 = this.unit(v, p), u2 = this.unit(v, q);
+    const a = [v[0] + u1[0] * r, v[1] + u1[1] * r], b = [v[0] + u2[0] * r, v[1] + u2[1] * r];
+    return 'M' + a[0].toFixed(1) + ' ' + a[1].toFixed(1) + ' Q' + v[0] + ' ' + v[1] + ' ' + b[0].toFixed(1) + ' ' + b[1].toFixed(1);
+  }
+  unit(from, to) { const dx = to[0] - from[0], dy = to[1] - from[1], l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; }
+  resample(pts, n, closed) {
+    const P = closed ? pts.concat([pts[0]]) : pts.slice();
+    const seg = [], L = [];
+    let total = 0;
+    for (let i = 0; i < P.length - 1; i++) { const d = Math.hypot(P[i + 1][0] - P[i][0], P[i + 1][1] - P[i][1]); seg.push(d); total += d; L.push(total); }
+    const out = [];
+    for (let k = 0; k < n; k++) {
+      const t = (k / n) * total;
+      let i = 0; while (i < L.length - 1 && L[i] < t) i++;
+      const prev = i === 0 ? 0 : L[i - 1], f = seg[i] ? (t - prev) / seg[i] : 0;
+      out.push([P[i][0] + (P[i + 1][0] - P[i][0]) * f, P[i][1] + (P[i + 1][1] - P[i][1]) * f]);
+    }
+    return out;
+  }
+  morphTo(fromPts, toPts, ms, done) {
+    const N = 96, g = this.gen || 0;
+    const A = this.resample(fromPts, N, true), B = this.resample(toPts, N, true);
+    const t0 = performance.now();
+    let closed = false;
+    const finish = () => {
+      if (closed) return;
+      closed = true;
+      this.stopDrawingSound();
+      if (g !== (this.gen || 0)) return;
+      this.setState({ morph: null });
+      done && done();
+    };
+    const tick = () => {
+      if (closed || g !== (this.gen || 0)) return;
+      const t = Math.max(0, Math.min(1, (performance.now() - t0) / ms));
+      const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      this.setState({ morph: A.map((p, i) => [p[0] + (B[i][0] - p[0]) * e, p[1] + (B[i][1] - p[1]) * e]) });
+      if (t < 1) requestAnimationFrame(tick); else finish();
+    };
+    requestAnimationFrame(tick);
+    this.later(finish, ms + 160);
+  }
+
+  /* ---------- the lesson script ---------- */
+  sets() {
+    const C = this.P.C;
+    return {
+      cmp: [['starClosed', C.blue], ['zig', C.green], ['pot', C.orange], ['crescent', C.purple]],
+      p19: [['p19a', C.blue], ['p19b', C.green], ['p19c', C.blue], ['p19d', C.blue], ['p19e', C.purple]],
+      q36: [['q36a', C.pink, '#fbd9e4'], ['q36b', IK, '#ffffff'], ['q36c', C.orange, '#fbc98f'], ['q36d', C.gold, '#f9d47c']],
+      cfu1: [['c1a', C.purple], ['c1b', C.green], ['c1c', C.orange], ['c1d', C.blue], ['c1e', C.pink]],
+      cfu2: [['c2a', C.purple], ['c2b', C.green], ['c2c', C.orange], ['c2d', C.blue], ['c2e', C.pink]],
+      cfu3: [['c3a', C.green], ['c3b', C.blue], ['c3c', C.purple], ['c3d', C.orange]],
+      cfu4: [['c4a', C.green], ['c4b', C.purple], ['c4c', C.blue], ['c4d', C.pink], ['c4e', C.orange], ['c4f', C.green]],
+      cfu5: [['c5a', C.purple], ['c5b', C.green], ['c5c', C.orange], ['c5d', C.blue]]
+    };
+  }
+  steps() {
+    if (this._steps) return this._steps;
+    const S = this.sets();
+    const ocFb = {
+      closed: 'No gaps in its boundary. This shape is closed.',
+      open: 'There is a gap in its boundary. It is open.'
+    };
+    this._steps = [
+      { sc: 'S1', ph: 'point', label: '01 · Point', narr: 'Look! A point.', auto: true },
+      { sc: 'S1', ph: 'draw', label: '01 · Shape', narr: 'Woah! It drew a shape.', auto: true },
+      { sc: 'S1', ph: 'closer', label: '01 · Closer', narr: "Let's look at this shape closely.", auto: true },
+      { sc: 'S1', ph: 'trace', label: '01 · Boundary', narr: 'There are no gaps in its boundary.', auto: true },
+      { sc: 'S1', ph: 'ask', label: '01 · Open or closed', narr: 'Is it open or closed?', q: 'oc', fig: 'leaf', ans: 'closed', fb: ocFb },
+      { sc: 'S2', label: '02 · Open or closed', narr: 'Is this shape open or closed?', q: 'oc', fig: 'pot', ans: 'open', fb: ocFb },
+      { sc: 'S3', label: '03 · Open or closed', narr: 'What about this one?', q: 'oc', fig: 'starClosed', ans: 'closed', fb: ocFb },
+      { sc: 'S4', label: '04 · Open or closed', narr: 'And this?', q: 'oc', fig: 'zig', ans: 'open', fb: ocFb },
+      { sc: 'S5', label: '05 · Open or closed', narr: 'How about this one?', q: 'oc', fig: 'crescent', ans: 'closed', fb: ocFb },
+      { sc: 'S6', ph: 'open', label: '06 · Open figures', narr: 'These two shapes are open...', set: 'cmp', auto: true, hl: 'open' },
+      { sc: 'S6', ph: 'closed', label: '06 · Closed figures', narr: '...and these two shapes are closed.', set: 'cmp', auto: true, hl: 'closed' },
+      { sc: 'S6', ph: 'bound', label: '06 · Boundaries', narr: 'Look! The boundaries of the shapes are different too.', set: 'cmp', auto: true },
+      { sc: 'S6', ph: 'sc', label: '06 · Straight or curved', narr: 'Some are straight and some are curved.', set: 'cmp', auto: true },
+      { sc: 'S6', ph: 'classify', label: '06 · Classify', narr: 'Which boundaries are straight and which are curved?', set: 'cmp', q: 'dd' },
+      { sc: 'S6', ph: 'done', label: '06 · Well done', narr: 'You got it! These boundaries are straight, while these are curved.', set: 'cmp', auto: true },
+      { sc: 'S7', label: '07 - Find straight-line shapes', narr: 'Select all the shapes made using only straight lines.', set: 'cmp', q: 'straight', correct: [0, 1] },
+      { sc: 'S8', label: '08 · Polygon', narr: 'We call this a polygon.', fig: 'starClosed', reveal: 'POLYGON', auto: true },
+      { sc: 'S9', label: '09 · Definition', narr: 'A closed figure made of only straight line segments is called a polygon.', fig: 'pentagon', build: true, reveal: 'Polygon', auto: true },
+      { sc: 'S10', label: '10 · Which are polygons', narr: 'Which of these figures are polygons?', set: 'p19', q: 'multi', correct: [2, 4] },
+      { sc: 'S11', ph: 'sides', label: '11 · Sides', narr: 'These line segments are the sides of the polygon.', fig: 'pentagon', auto: true },
+      { sc: 'S11', ph: 'vertex', label: '11 · Vertex', narr: 'The point where two sides meet is called a vertex.', fig: 'pentagon', auto: true },
+      { sc: 'S11', ph: 'angle', label: '11 · Angle', narr: 'When two sides meet, they also form an angle.', fig: 'pentagon', auto: true },
+      { sc: 'S12', label: '12 · Label the parts', narr: 'Label the parts of the polygon.', fig: 'cross', q: 'labels' },
+      { sc: 'S13', label: '13 · How many sides', narr: 'How many sides does this polygon have?', fig: 'pentagon', q: 'count', ans: 5, fb: { one: 'Count each side carefully and try again.' } },
+      { sc: 'S13', ph: 'five', label: '13 · Five sides', narr: 'This polygon has 5 sides.', fig: 'pentagon', auto: true },
+      { sc: 'S14', ph: 'intro', label: '14 · Change it', narr: "Now let's change how it looks.", fig: 'pentagon', auto: true },
+      { sc: 'S14', ph: 'drag', label: '14 · Drag a vertex', narr: 'Drag any vertex. Stretch it, squash it, or resize it.', fig: 'pentagon', q: 'deform' },
+      { sc: 'S14', ph: 'wow', label: '14 · Changed', narr: 'Whoa! It looks quite different now.', fig: 'pentagon', auto: true },
+      { sc: 'S15', ph: 'a', label: '15 · Before and after', narr: 'Its appearance has completely changed.', ba: true, auto: true },
+      { sc: 'S15', ph: 'b', label: '15 · Not everything', narr: 'But not everything has changed.', ba: true, auto: true },
+      { sc: 'S16', ph: 'ask', label: '16 · Count again', narr: "Let's count the sides again.", ba: true, q: 'count2', fb: { one: 'Count each side carefully and try again.' } },
+      { sc: 'S16', ph: 'both', label: '16 · Still five', narr: 'Both polygons still have 5 sides.', ba: true, auto: true },
+      { sc: 'S16', ph: 'name', label: '16 · Naming', narr: 'So the number of sides gives us a good way to name polygons.', ba: true, auto: true },
+      { sc: 'S17', ph: 'tri', label: '17 · Triangle', narr: 'A polygon with 3 sides is called a triangle.', fig: 'triangle', count: 3, reveal: 'Triangle', auto: true },
+      { sc: 'S17', ph: 'quad', label: '17 · Quadrilateral', narr: 'A polygon with 4 sides is called a quadrilateral.', fig: 'quad', count: 4, reveal: 'Quadrilateral', morphFrom: 'triangle', auto: true },
+      { sc: 'S18', label: '18 · Quadrilaterals', narr: 'Select all the quadrilaterals.', set: 'q36', q: 'multi', correct: [0, 2, 3] },
+      { sc: 'S19', label: '19 · Pentagon', narr: 'A polygon with 5 sides is called a pentagon.', fig: 'pentagon', count: 5, reveal: 'Pentagon', auto: true },
+      { sc: 'S20', label: '20 · Hexagon', narr: 'A polygon with 6 sides is called a hexagon.', fig: 'hexagon', count: 6, reveal: 'Hexagon', auto: true },
+      { sc: 'S21', label: '21 · Heptagon', narr: 'A polygon with 7 sides is called a heptagon.', fig: 'heptagon', count: 7, reveal: 'Heptagon', auto: true },
+      { sc: 'S22', label: '22 · Octagon', narr: 'A polygon with 8 sides is called an octagon.', fig: 'octagon', count: 8, reveal: 'Octagon', auto: true },
+      { sc: 'S23', label: '23 · Recall', narr: "Let's recall the different types of polygons we learnt about.", q: 'recall' },
+      {
+        sc: 'C1', label: 'CFU 1', narr: 'Which of these is a polygon?', sub: 'Select all that are polygons.',
+        set: 'cfu1', q: 'multi', check: true, correct: [0, 2],
+        fb: { ok: 'Yes! Closed, with only straight sides.', one: 'Is it closed? Does it have only straight sides?', two: 'A polygon is closed, with only straight sides. Try again.' }
+      },
+      {
+        sc: 'C2', label: 'CFU 2', narr: 'Classify the figures as a polygon or not a polygon.', set: 'cfu2', q: 'sort',
+        zones: ['POLYGONS', 'NOT POLYGONS'],
+        answer: [0, 1, 0, 0, 1],
+        fb: { ok: 'Great job! You sorted the figures correctly.', one: 'Wrong group. Check for gaps or curved sides.', two: 'Polygons are closed, with only straight sides. Try again.' }
+      },
+      {
+        sc: 'C3', label: 'CFU 3', narr: 'Find the odd one out. Which figure is NOT a polygon?', set: 'cfu3', q: 'tap1', correct: 3,
+        fb: { ok: 'You found it! That is not a polygon.', one: 'Which figure breaks the rule for a polygon?', two: 'Is it closed? Does it have only straight sides?' }
+      },
+      {
+        sc: 'C4', label: 'CFU 4', narr: 'Which of these is a pentagon?', sub: 'Select all that are pentagons.',
+        set: 'cfu4', q: 'multi', check: true, correct: [0, 1, 2, 4],
+        fb: { ok: 'Exactly! A pentagon always has 5 sides.', one: 'Count the sides of each figure carefully.', two: 'Look for every figure with exactly 5 sides.' }
+      },
+      {
+        sc: 'C5', label: 'CFU 5', narr: 'Classify each figure as a hexagon or a heptagon.', set: 'cfu5', q: 'sort',
+        zones: ['HEXAGON', 'HEPTAGON', '6 sides', '7 sides'], answer: [0, 1, 0, 1],
+        fb: { ok: 'Well done! Hexagons have 6 sides and heptagons have 7 sides.', one: 'Count the sides of the ones you placed wrong.', two: '6 sides make a hexagon, 7 make a heptagon.' }
+      },
+      { sc: 'END', label: 'Finished', narr: 'You did it! Now you know what makes a figure a polygon.' }
+    ];
+    return this._steps;
+  }
+  step() { return this.steps()[this.state.k] || this.steps()[0]; }
+
+  /* ---------- flow ---------- */
+  advance = (event) => {
+    if (event && this.locked()) return;
+    if (this._voiceLocked) { this._advanceAfterVoice = true; return; }
+    const k = Math.min(this.state.k + 1, this.steps().length - 1);
+    if (k === this.state.k) return;
+    this.sfx('swap');
+    this.setState({ k: k }, () => { this.save(); this.runStep(k, false); });
+  };
+  runStep(k, restoring) {
+    if (this._labelDragCleanup) this._labelDragCleanup();
+    if (this._sortDragCleanup) this._sortDragCleanup();
+    this.stopDrawingSound();
+    const s = this.steps()[k];
+    this._voiceStarted = false; this._voiceLocked = true; this._voiceReading = false;
+    this._voiceQueue = []; this._voiceAfter = null;
+    this._advanceAfterVoice = false; this._voiceRetry = null;
+    this._stage2Shown = false;
+    this.gen = (this.gen || 0) + 1;
+    this.timers.forEach(clearTimeout); this.timers = [];
+    this.guide.reset();
+    try { window.speechSynthesis.cancel(); } catch (e) {}
+    const reset = {
+      magicReveal: s.q === 'oc' && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches),
+      narrPage: '', draggingLabel:null, labelHover:null, draggingFigure:null, sortHover:null,
+      sel: [], ddOpen: -1, wrong: null, ok: null, attempts: 0, nudge: null,
+      reveal: false, nums: 0, hlKind: null, tracing: false, drawing: false,
+      zoomed: false, showHand: false, checked: false, gapPulse: false, phase: s.ph || '',
+      chip: null, badPlace: null, pickedFig: null, morph: null
+    };
+    if (s.ph === 'draw') reset.drawn = false;
+    if (s.sc !== 'S6') { reset.dd = [null, null, null, null]; reset.ddWrong = [false, false, false, false]; }
+    if (s.sc !== 'S12') reset.placed = {};
+    if (s.sc !== 'C2' && s.sc !== 'C5') reset.sortAt = {};
+    if (s.q === 'count') reset.cnt = [4, 4];
+    if (s.q === 'count2') reset.cnt = [4, 4];
+    if (s.q === 'recall') reset.n = 4;
+    /* A new screen = a new entrance. Sub-phases of one screen keep him on stage. */
+    const fresh = this._lastSc !== s.sc;
+    this._lastSc = s.sc;
+    reset.narrTone = 'teach'; reset.fx = [];
+    reset.hoverK = null; reset.pressK = null;
+    /* Nothing is tappable until the instruction has actually started. */
+    reset.interactive = false; reset.speaking = false; reset.voiceError = '';
+    if (fresh) reset.narr = '';
+
+    this.setState(reset, () => {
+      const popMs = this.enterScreen(fresh);
+      if (this.state.magicReveal) this.revealQuestionShape();
+      const go = () => {
+        this.narrate(s.narr, { auto: !!s.auto && !s.q, hl: s.hl, then: s.q ? () => this.armNudge() : undefined });
+        if (s.reveal && !s.count) this.later(() => this.setState({ reveal: true }), 1100);
+      };
+      const goCounted = (n, both) => {
+        this.countUntil = performance.now() + this.countDur(n);
+        this.narrate(s.narr, { hl: s.hl, then: () => this.advanceAfterCount() });
+        this.countSides(n, 0);
+        if (both) this.countSides(n, 1);
+      };
+      const start = () => {
+        if (s.sc === 'END') this.later(() => this.confetti(), 260);
+        if (s.ph === 'point') { this.later(go, 500); return; }
+        if (s.ph === 'draw') { this.setState({ drawing: true }); this.runDraw(2000, () => { this.setState({ drawn: true }); this.sfx('done'); go(); }); return; }
+        if (s.ph === 'closer') { this.setState({ zoomed: true }); this.later(go, 300); return; }
+        if (s.ph === 'trace') { this.runTrace(1700); this.later(go, 500); return; }
+        if (s.ph === 'five' || s.count) { goCounted(s.count || 5, false); return; }
+        if (s.ph === 'both') { goCounted(5, true); return; }
+        if (s.ph === 'bound') { this.runTrace(1500); this.later(go, 250); return; }
+        if (s.ph === 'quad' && s.morphFrom) {
+          const from = this.fig(s.morphFrom).pts, to = this.fig(s.fig).pts;
+          this.setState({ nums: 0 });
+          this.morphTo(from, to, 1500, () => {
+            this.countUntil = performance.now() + this.countDur(4);
+            this.narrate(s.narr, { then: () => this.advanceAfterCount() });
+            this.countSides(4, 0);
+          });
+          return;
+        }
+        if (s.q === 'deform') {
+          this.narrate(s.narr, { then: () => { if (!this.state.dragged) this.setState({ showHand: true }); } });
+          return;
+        }
+        go();
+      };
+      this.later(start, popMs);
+    });
+  }
+
+  /* ---------- screen entrance ----------
+     He starts low, behind the ice board, and rises into place. The board is a
+     later sibling in the DOM with a higher z-index, so it genuinely occludes
+     his lower body — no clip or mask is doing the work.
+     Returns how long the caller must hold the instruction back for. */
+  enterScreen(fresh) {
+    if (!fresh) {
+      if (this.state.mamHidden) this.setState({ mamHidden: false });
+      return 0;
+    }
+    this.setState({ mamHidden: true });
+    this.later(() => {
+      this.setState({ mamHidden: false });
+      this.guide.onScreenEnter();
+      this.sfx('pop');
+      this.snowPuff();
+    }, 80);
+    return 760;
+  }
+  /* Snow kicks up off the board's rim where he surfaces. */
+  snowPuff() {
+    const items = [];
+    const originX = LAYER.mammoth.x + LAYER.mammoth.w * 0.46 - SAFE.x;
+    for (let i = 0; i < 9; i++) {
+      const a = -Math.PI / 2 + (i - 4) * 0.29;
+      const d = 70 + Math.random() * 70;
+      items.push({ kind: 'spark', x: originX + (Math.random() * 40 - 20), y: -22,
+        dx: Math.cos(a) * d * 1.5, dy: Math.sin(a) * d * 0.7 + 40,
+        c: 'rgba(255,255,255,0.95)', s: 11 + Math.random() * 13, rot: Math.random() * 360, z: 3 });
+    }
+    this.fxAdd(items, 950);
+  }
+
+  /* ---------- animations ---------- */
+  countDur(n) { return 520 + n * 620 + 260 + 1000; }
+  advanceAfterCount() {
+    const wait = Math.max(300, (this.countUntil || 0) - performance.now());
+    this.later(() => this.advance(), wait);
+  }
+  revealQuestionShape() {
+    const generation = this.gen;
+    const size = this.step().sc === 'S1' ? 470 : 430;
+    const cx = SAFE.w / 2, cy = (this.step().sc === 'S1' ? 44 : 40) + size / 2;
+    const items = Array.from({length:16},(_,i) => {
+      const angle = i * Math.PI / 8, radius = size * .43;
+      return {kind:'magic',x:cx+Math.cos(angle)*radius,y:cy+Math.sin(angle)*radius,
+        dx:Math.cos(angle)*42,dy:Math.sin(angle)*42,delay:i%4*55,s:10+(i%3)*4};
+    });
+    this.fxAdd(items,1200); this.sfx('pop');
+    this.later(() => { if (generation === this.gen) this.setState({magicReveal:false}); },1000);
+  }
+  magicCard(card) {
+    if (this.state.magicReveal) card.svgStyle = Object.assign({},card.svgStyle,{
+      animation:'magicReveal 950ms cubic-bezier(.22,.8,.25,1) both',transformOrigin:'center center'
+    });
+    return card;
+  }
+  runTrace(ms) {
+    this.setState({ tracing: false, traceKey: this.state.traceKey + 1 }, () => {
+      this.later(() => { this.setState({ tracing: true, traceMs: ms }); this.sfx('trace'); }, 40);
+      this.later(() => this.setState({ tracing: false }), ms + 700);
+    });
+  }
+  runDraw(ms, done) {
+    this.stopDrawingSound();
+    const generation = this.gen || 0;
+    const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let closed = false, started = null, length = 0, measuredPath = null;
+    this.drawProgress = 0;
+    const finish = () => {
+      if (closed || generation !== (this.gen || 0)) return;
+      closed = true;
+      this.stopDrawingSound();
+      this.drawProgress = 1;
+      this.setState({ drawing: false, tracing: false, drawn: true }, () => { if (done) done(); });
+    };
+    this.setState({ tracing: true, traceMs: ms, traceKey: this.state.traceKey + 1 }, () => {
+      if (reduced) { finish(); return; }
+      const tick = (now) => {
+        if (closed || generation !== (this.gen || 0)) return;
+        const svg = this.svgRefs[0] && this.svgRefs[0].current;
+        const path = svg && svg.querySelector('[data-trace]');
+        const dot = svg && svg.querySelector('[data-dot]');
+        if (path && dot) {
+          if (started === null) { started = now; this.startDrawingSound(ms); }
+          const t = Math.max(0, Math.min(1, (now - started) / ms));
+          this.updateDrawingSound(t);
+          // One eased timeline drives both the growing stroke and its leading light.
+          const progress = t * t * (3 - 2 * t);
+          this.drawProgress = progress;
+          path.style.strokeDashoffset = String(100 * (1 - progress));
+          if (measuredPath !== path) { length = path.getTotalLength(); measuredPath = path; }
+          const point = path.getPointAtLength(length * progress);
+          dot.setAttribute('cx', point.x); dot.setAttribute('cy', point.y);
+          if (t >= 1) { finish(); return; }
+        }
+        requestAnimationFrame(tick);
+      };
+      const begin = () => {
+        if (closed || generation !== (this.gen || 0)) return;
+        requestAnimationFrame(tick);
+        this.later(finish, ms + 800);
+      };
+      // Keep the leaf at its starting point until the sound clock is ready.
+      // Browser autoplay permission may require the learner's first tap.
+      try {
+        const ac = this.state.muted ? null : this.ac();
+        if (ac && ac.state !== 'running') this.unlockAudio().then(begin);
+        else begin();
+      } catch (error) { begin(); }
+    });
+  }
+  countSides(n, which) {
+    for (let i = 1; i <= n; i++) {
+      this.later(() => {
+        this.setState((st) => ({ nums: which ? st.nums : i, numsB: which ? i : st.numsB }));
+        this.sfx('tick');
+        if (i === n) this.later(() => this.setState({ reveal: true }), 260);
+      }, 520 + i * 620);
+    }
+  }
+  /* Kept as the single call site the screens already use; it now just raises
+     the matching guide event so no screen picks an animation itself. */
+  react(kind) {
+    const bad = kind === 'wrong';
+    this.setState({ narrTone: bad ? 'no' : 'ok' });
+    if (bad) {
+      this.guide.onWrongAttempt();
+    } else {
+      /* success plays out uninterrupted */
+      this.setState({ interactive: false });
+      this.guide.onCorrectAnswer();
+      this.burstHere();
+    }
+  }
+
+  /* ---------- particle FX ---------- */
+  fxAdd(items, ms) {
+    const gid = (this._fxG = (this._fxG || 0) + 1);
+    const list = items.map((o, j) => Object.assign({ gid: gid, id: gid + '_' + j, on: false }, o));
+    this.setState((st) => ({ fx: st.fx.concat(list).slice(-120) }));
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      this.setState((st) => ({ fx: st.fx.map((f) => (f.gid === gid ? Object.assign({}, f, { on: true }) : f)) }));
+    }));
+    this.later(() => this.setState((st) => ({ fx: st.fx.filter((f) => f.gid !== gid) })), ms);
+  }
+  /* Safe-area coordinates of the last thing the learner touched. */
+  ptFromEvent(e) {
+    const box = this.safeRef && this.safeRef.current;
+    if (!box || !e || e.clientX === undefined) return null;
+    const b = box.getBoundingClientRect(), sc = this.state.scale || 1;
+    if (!b.width) return null;
+    return { x: (e.clientX - b.left) / sc, y: (e.clientY - b.top) / sc };
+  }
+  stageDown = (e) => {
+    const p = this.ptFromEvent(e);
+    if (!p) return;
+    this._lastPt = p;
+    this.ripple(p.x, p.y);
+  };
+  ripple(x, y, color) {
+    this.fxAdd([{ kind: 'ripple', x: x, y: y, c: color || 'rgba(34,184,230,0.8)', r: 44 }], 680);
+  }
+  burst(x, y, opt) {
+    const o = opt || {};
+    const count = o.n || 15;
+    const cols = o.cols || ['#ffd85e', '#7fe0a6', '#7fd3f7', '#ffffff', '#ffa8d3', '#c2a0f0'];
+    const items = [];
+    for (let i = 0; i < count; i++) {
+      const a = (Math.PI * 2 * i) / count + Math.random() * 0.5;
+      const d = (o.d || 120) + Math.random() * 90;
+      items.push({ kind: 'spark', x: x, y: y, dx: Math.cos(a) * d, dy: Math.sin(a) * d - 34,
+        c: cols[i % cols.length], s: 10 + Math.random() * 13, rot: Math.random() * 360 });
+    }
+    this.fxAdd(items, 1000);
+  }
+  burstHere(opt) {
+    const p = this._lastPt || { x: SAFE.w / 2, y: 300 };
+    this.burst(p.x, p.y, opt);
+  }
+  confetti() {
+    const cols = ['#ffd85e', '#7fe0a6', '#7fd3f7', '#ffa8d3', '#c2a0f0', '#ff9d5c'];
+    const items = [];
+    for (let i = 0; i < 46; i++) {
+      items.push({ kind: 'conf', x: Math.random() * SAFE.w, w: 10 + Math.random() * 12,
+        h: 16 + Math.random() * 16, c: cols[i % cols.length],
+        rot: (Math.random() * 900 - 450), ms: 1500 + Math.random() * 1400,
+        dx: Math.random() * 160 - 80 });
+    }
+    this.fxAdd(items, 3100);
+    this.sfx('party');
+  }
+
+  // Keyboard activation uses the same click handlers and answer guards as pointer input.
+  activateKey = (event) => {
+    if (event.target !== event.currentTarget || this.locked() || event.repeat) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault(); event.currentTarget.click();
+    }
+  };
+
+  /* ---------- hover / press bookkeeping ---------- */
+  hovOn(key) {
+    this._hov = this._hov || {};
+    if (!this._hov[key]) this._hov[key] = () => { if (this.state.hoverK !== key) this.setState({ hoverK: key }); };
+    return this._hov[key];
+  }
+  hovOff = () => { if (this.state.hoverK !== null) this.setState({ hoverK: null }); };
+  pressOn(key) {
+    this._prs = this._prs || {};
+    if (!this._prs[key]) this._prs[key] = () => this.setState({ pressK: key });
+    return this._prs[key];
+  }
+  pressOff = () => { if (this.state.pressK !== null) this.setState({ pressK: null }); };
+  /* Adds lift-on-hover / squash-on-press to any button-ish style object. */
+  liftable(style, key, opt) {
+    const o = opt || {};
+    const hov = this.state.hoverK === key, pr = this.state.pressK === key;
+    const out = Object.assign({}, style);
+    const base = out.transform ? out.transform + ' ' : '';
+    out.transition = (out.transition ? out.transition + ', ' : '') +
+      'transform 140ms cubic-bezier(.3,1.3,.4,1), box-shadow 140ms ease-out, filter 140ms ease-out';
+    out.willChange = 'transform';
+    if (pr) {
+      out.transform = base + 'translateY(' + (o.press || 5) + 'px) scale(0.975)';
+      if (out.boxShadow) out.boxShadow = out.boxShadow.replace(/0 (\d+)px 0/, '0 2px 0');
+    } else if (hov) {
+      out.transform = base + 'translateY(-' + (o.lift || 5) + 'px) scale(' + (o.scale || 1.035) + ')';
+      out.filter = (out.filter ? out.filter + ' ' : '') + 'brightness(1.05)';
+      out.boxShadow = (out.boxShadow ? out.boxShadow + ', ' : '') + '0 12px 26px rgba(31,109,180,0.25)';
+    }
+    return out;
+  }
+
+  /* ---------- ambient snowfall ---------- */
+  makeSnow() {
+    const out = [];
+    for (let i = 0; i < 26; i++) {
+      const x = (i * 311 + 47) % 1940;
+      const r = 6 + ((i * 7) % 10);
+      const dur = 11 + ((i * 13) % 13);
+      const del = -((i * 17) % 24);
+      out.push({
+        wrap: {
+          position: 'absolute', left: x + 'px', top: '-70px', width: r + 'px', height: r + 'px',
+          pointerEvents: 'none', zIndex: 1,
+          animation: 'snowFall ' + dur + 's linear ' + del + 's infinite'
+        },
+        dot: {
+          width: '100%', height: '100%', borderRadius: '50%',
+          background: 'radial-gradient(circle at 42% 38%, #ffffff 0%, rgba(226,244,255,0.9) 55%, rgba(186,224,250,0) 100%)',
+          opacity: 0.3 + ((i % 5) * 0.09), filter: 'blur(0.6px)',
+          animation: 'flakeSway ' + (4 + (i % 5)) + 's ease-in-out ' + (-(i % 8)) + 's infinite'
+        }
+      });
+    }
+    return out;
+  }
+
+  /* ---------- hand nudge demo ---------- */
+  clearNudge() {
+    this._nudgeToken = (this._nudgeToken || 0) + 1;
+    this._nudgeDone = true;
+    if (this.state.nudge) this.setState({ nudge: null });
+  }
+  /* Figure-selection hints stay neutral; button hints use the actual button bounds. */
+  neutralPt() {
+    const q = this.step().q;
+    if (q === 'tap1' || q === 'multi' || q === 'straight') return { x: SAFE.w / 2, y: 480 };
+    return null;
+  }
+  armNudge(delay) {
+    const token = this._nudgeToken = (this._nudgeToken || 0) + 1;
+    const generation = this.gen || 0;
+    const wait = delay === undefined ? 8000 : delay;
+    this._nudgeDone = false;
+    this.later(() => {
+      if (token !== this._nudgeToken || generation !== (this.gen || 0) || this._nudgeDone || this.locked() || (this.step().q === 'oc' && this.state.ok)) return;
+      const box = this.safeRef && this.safeRef.current;
+      if (!box) return;
+      let pt = this.neutralPt();
+      if (!pt) {
+        const el = box.querySelector('[data-nudge="1"]');
+        if (!el) return;
+        const b = el.getBoundingClientRect(), p = box.getBoundingClientRect();
+        if (!b.width) return;
+        const sc = p.width / SAFE.w || this.state.scale || 1;
+        pt = { x: (b.left + b.width / 2 - p.left) / sc, y: (b.top + b.height / 2 - p.top) / sc };
+      }
+      this.setState({ nudge: pt });
+      this.later(() => { if (token === this._nudgeToken && generation === (this.gen || 0) && !this._nudgeDone) this.setState({ nudge: null }); }, 2900);
+    }, wait);
+  }
+  /* second half of a two-part action (pick, then place) — demonstrated once */
+  armStage2() {
+    if (this._stage2Shown) return;
+    this._stage2Shown = true;
+    this.armNudge(420);
+  }
+
+  /* ---------- interaction gate ----------
+     Taps are ignored while an instruction is being given and while a success
+     animation plays, so a stray double-tap cannot skip a transition. */
+  locked() { return !!this._voiceLocked || this.state.speaking || this.state.magicReveal || !this.state.interactive; }
+
+  /* ---------- feedback ---------- */
+  feedback(text, then) {
+    this.setState({ speaking: true, interactive: false });
+    this.narrate(text, { then: then || (() => {}) });
+  }
+  restoreQuestion() {
+    const s = this.step();
+    this.setState({ narrTone: 'teach' });
+    this.narrate(s.narr, { then: () => this.armNudge() });
+  }
+
+  /* ---------- open / closed ---------- */
+  choose = (val) => {
+    const s = this.step(); if (this.state.ok || this.locked()) return;
+    this.clearNudge(); this.sfx('tap');
+    if (val === s.ans) {
+      this.setState({ ok: val, wrong: null }); this.react('happy'); this.confetti();
+      this.runTrace(1100);
+      this.feedback(val === 'closed' ? 'Yes! It is closed.' : 'Yes! It is open.', () => this.later(this.advance, 250));
+    } else {
+      this.setState({ wrong: val, attempts: this.state.attempts + 1 }); this.sfx('no'); this.react('wrong');
+      const F = this.fig(s.fig);
+      if (s.ans === 'open' && F.gap) { this.setState({ gapPulse: true }); this.later(() => this.setState({ gapPulse: false }), 2600); }
+      else this.runTrace(1800);
+      this.feedback(s.fb[s.ans], () => { this.setState({ wrong: null }); this.restoreQuestion(); });
+    }
+  };
+  chooseOpen = () => this.choose('open');
+  chooseClosed = () => this.choose('closed');
+
+  /* ---------- dropdown classify (screen 6) ---------- */
+  ddToggle(i) { return () => { if (this.locked()) return; this.clearNudge(); this.sfx('tap'); this.setState({ ddOpen: this.state.ddOpen === i ? -1 : i }); }; }
+  ddPick(i, val) {
+    return (ev) => {
+      if (ev && ev.stopPropagation) ev.stopPropagation();
+      if (this.locked()) return;
+      this.sfx('tap');
+      const s = this.step(), truth = ['Straight', 'Straight', 'Curved', 'Curved'];
+      const dd = this.state.dd.slice(), bad = this.state.ddWrong.slice();
+      this.setState({ ddOpen: -1 });
+      if (val === truth[i]) {
+        dd[i] = val; bad[i] = false;
+        this.setState({ dd: dd, ddWrong: bad }); this.react('happy'); this.confetti();
+        const generation = this.gen;
+        this.later(() => {
+          if (generation !== this.gen) return;
+          if (dd.every((v, j) => v === truth[j])) this.advance();
+          else this.setState({ interactive: true });
+        }, 1600);
+      } else {
+        dd[i] = val; bad[i] = true;
+        this.setState({ dd: dd, ddWrong: bad, wrong: i }); this.sfx('no'); this.react('wrong');
+        this.setState({ hlKind: val === 'Curved' ? 'segsOf' + i : 'curveOf' + i });
+        this.feedback(val === 'Curved'
+          ? "Look! This boundary isn't curved. It is made of straight lines."
+          : 'Look closely. This boundary bends smoothly. It is curved.',
+          () => { const b = this.state.ddWrong.slice(), values = this.state.dd.slice(); b[i] = false; values[i] = null; this.setState({ dd: values, ddWrong: b, wrong: null, hlKind: null }); this.restoreQuestion(); });
+      }
+    };
+  }
+
+  /* ---------- tap one ---------- */
+  tapCard(i) {
+    return () => {
+      if (this.locked()) return;
+      this.clearNudge();
+      const s = this.step();
+      if (s.q === 'straight') {
+        if (this.state.checked || this.state.sel.includes(i)) return;
+        this.sfx('tap');
+        if (s.correct.includes(i)) {
+          const sel = this.state.sel.concat(i), finished = s.correct.every(index => sel.includes(index));
+          this.setState({ sel, wrong: null, checked: finished });
+          if (finished) {
+            this.react('happy'); this.confetti();
+            this.feedback('Yes! Both shapes are made of straight lines.', () => this.later(this.advance, 400));
+          } else { this.sfx('ok'); this.burstHere(); this.guide.onCorrectProgress(); this.armNudge(); }
+        } else {
+          this.setState({ wrong: i }); this.sfx('no'); this.react('wrong');
+          this.feedback('Look for shapes with only straight lines and no curves.', () => { this.setState({ wrong: null }); this.restoreQuestion(); });
+        }
+        return;
+      }
+      if (s.q === 'tap1') {
+        if (this.state.ok !== null) return;
+        this.sfx('tap');
+        if (i === s.correct) {
+          this.setState({ ok: i, wrong: null }); this.react('happy'); this.confetti();
+          this.feedback((s.fb && s.fb.ok) || 'Yes! It is closed and made of straight lines.', () => this.later(this.advance, 300));
+        } else {
+          const a = this.state.attempts + 1;
+          this.setState({ wrong: i, attempts: a }); this.sfx('no'); this.react('wrong');
+          const msg = a >= 2 && s.fb && s.fb.two ? s.fb.two : (s.fb && s.fb.one) || 'Not quite. Try again.';
+          this.feedback(msg, () => { this.setState({ wrong: null }); this.restoreQuestion(); });
+        }
+        return;
+      }
+      if (s.q === 'multi') {
+        if (this.state.checked) return;
+        this.sfx('tap');
+        const sel = this.state.sel.slice();
+        const at = sel.indexOf(i);
+        if (s.check) {
+          if (at >= 0) sel.splice(at, 1); else sel.push(i);
+          this.setState({ sel: sel, wrong: null });
+        } else {
+          if (s.correct.indexOf(i) >= 0) {
+            if (at < 0) sel.push(i);
+            const finished = s.correct.every((c) => sel.indexOf(c) >= 0);
+            this.setState({ sel: sel, wrong: null }); this.sfx('ok');
+            if (finished) this.react('happy'); else { this.burstHere(); this.guide.onCorrectProgress(); }
+            if (finished) {
+              this.setState({ checked: true });
+              this.feedback('That is right! These are the ones.', () => {});
+            }
+          } else {
+            this.setState({ wrong: i, attempts: this.state.attempts + 1 }); this.sfx('no'); this.react('wrong');
+            this.feedback('A polygon is closed, with only straight sides.',
+              () => { this.setState({ wrong: null }); this.restoreQuestion(); });
+          }
+        }
+        return;
+      }
+      if (s.q === 'sort') {
+        if (Date.now() < (this._sortClickUntil || 0)) return;
+        if (this.state.sortAt[i] !== undefined) return;
+        this.sfx('pick');
+        const pick = this.state.pickedFig === i ? null : i;
+        this.setState({ pickedFig: pick }, () => { if (pick !== null) this.armStage2(); });
+      }
+    };
+  }
+
+  /* ---------- multi select check ---------- */
+  check = () => {
+    if (this.locked()) return;
+    this.clearNudge();
+    const s = this.step();
+    if (s.q === 'count' || s.q === 'count2') return this.checkCount();
+    if (s.q === 'multi' && s.check) {
+      const sel = this.state.sel.slice().sort().join(','), truth = s.correct.slice().sort().join(',');
+      this.sfx('tap');
+      if (sel === truth) {
+        this.setState({ checked: true, ok: 1 }); this.sfx('ok'); this.react('happy'); this.confetti();
+        this.feedback(s.fb.ok, () => this.later(this.advance, 500));
+      } else {
+        const a = this.state.attempts + 1;
+        this.setState({ attempts: a, wrong: 'set' }); this.sfx('no'); this.react('wrong');
+        if (a >= 2) this.coach();
+        this.feedback(a >= 2 ? s.fb.two : s.fb.one, () => { this.setState({ wrong: null }); this.restoreQuestion(); });
+      }
+      return;
+    }
+    if (this.state.checked) this.advance();
+  };
+  coach() {
+    this.setState({ hlKind: 'coach' });
+    this.later(() => this.setState({ hlKind: null }), 4200);
+  }
+  checkCount() {
+    const s = this.step();
+    this.sfx('tap');
+    if (s.q === 'count') {
+      if (this.state.cnt[0] === 5) {
+        this.setState({ ok: 1 }); this.sfx('ok'); this.react('happy');
+        this.later(this.advance, 700);
+      } else {
+        this.setState({ wrong: 0, attempts: this.state.attempts + 1 }); this.sfx('no'); this.react('wrong');
+        this.feedback(s.fb.one, () => { this.setState({ wrong: null }); this.restoreQuestion(); });
+      }
+    } else {
+      const a = this.state.cnt[0] === 5, b = this.state.cnt[1] === 5;
+      if (a && b) {
+        this.setState({ ok: 1 }); this.sfx('ok'); this.react('happy');
+        this.later(this.advance, 800);
+      } else {
+        this.setState({ wrong: a ? 1 : (b ? 0 : 2), attempts: this.state.attempts + 1 });
+        this.sfx('no'); this.react('wrong');
+        this.feedback(s.fb.one, () => { this.setState({ wrong: null }); this.restoreQuestion(); });
+      }
+    }
+  }
+  bump(i, d) {
+    return () => {
+      if (this.locked() || this.state.ok) return;
+      this.clearNudge();
+      const c = this.state.cnt.slice();
+      const v = Math.max(1, Math.min(10, c[i] + d));
+      if (v === c[i]) return;
+      c[i] = v; this.sfx('tick');
+      this.setState({ cnt: c, wrong: null });
+    };
+  }
+
+  /* ---------- recall stepper ---------- */
+  bumpN(d) {
+    return () => {
+      if (this.locked()) return;
+      this.clearNudge();
+      const cur = this.state.n, v = Math.max(3, Math.min(8, cur + d));
+      if (v === cur) return; // Reaching the stepper limit is not an incorrect answer.
+      this.sfx('tick');
+      const from = this.P.reg(cur, 500, 500, 300, cur === 4 ? 45 : 0);
+      const to = this.P.reg(v, 500, 500, 300, v === 4 ? 45 : 0);
+      this.setState({ n: v });
+      this.morphTo(from, to, 520);
+      if (v === 8 || v === 3) this.later(() => {}, 0);
+    };
+  }
+
+  /* ---------- vertex dragging (screen 14) ---------- */
+  handleDown(i) {
+    return (ev) => {
+      ev.preventDefault(); ev.stopPropagation();
+      if (this.locked()) return;
+      const svg = this.svgRefs[0] && this.svgRefs[0].current; if (!svg) return;
+      const base = this.state.userPts || this.fig('pentagon').pts.map((p) => p.slice());
+      const pts = base.map((p) => p.slice());
+      const start = this.state.userPts ? null : pts.map((p) => p.slice());
+      if (start) this.origPts = start;
+      const toSvg = (e) => {
+        const m = svg.getScreenCTM(); if (!m) return null;
+        const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+        return pt.matrixTransform(m.inverse());
+      };
+      const vb = this.fig('pentagon').vb.split(' ').map(Number);
+      const move = (e) => {
+        if (this.locked()) return;
+        const p = toSvg(e); if (!p) return;
+        const x = Math.max(vb[0] + 8, Math.min(vb[0] + vb[2] - 8, p.x));
+        const y = Math.max(vb[1] + 8, Math.min(vb[1] + vb[3] - 8, p.y));
+        pts[i] = [+x.toFixed(1), +y.toFixed(1)];
+        this.setState({ userPts: pts.map((q) => q.slice()) });
+      };
+      const up = () => {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+        if (this.locked()) return;
+        this.setState({ showHand: false });
+        this.save();
+        const o = this.fig('pentagon').pts;
+        const moved = pts.some((p, j) => Math.hypot(p[0] - o[j][0], p[1] - o[j][1]) > 26);
+        if (moved && !this.state.dragged) {
+          this.setState({ dragged: true }); this.sfx('done'); this.react('happy');
+          this.later(this.advance, 700);
+        }
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+      this.clearNudge();
+      this.setState({ showHand: false });
+    };
+  }
+
+  /* ---------- label chips (screen 12) ---------- */
+  dragLabel(name) {
+    return (event) => {
+      if (this.locked() || event.button !== 0 || Object.values(this.state.placed).includes(name)) return;
+      if (this._labelDragCleanup) this._labelDragCleanup();
+    if (this._sortDragCleanup) this._sortDragCleanup();
+      const id = event.pointerId, generation = this.gen, origin = { x:event.clientX, y:event.clientY };
+      const ghost = this.ghostRef.current;
+      let active = false, frame = null, latest = event, hovered = null;
+      const findTarget = e => {
+        const node = document.elementFromPoint(e.clientX,e.clientY);
+        return node && node.closest('[data-label-target]');
+      };
+      const paint = () => {
+        frame = null;
+        if (!active || !ghost) return;
+        const rect = ghost.parentElement.getBoundingClientRect(), scale = rect.width / STAGE.w;
+        const x = Math.max(100,Math.min(STAGE.w-100,(latest.clientX-rect.left)/scale));
+        const y = Math.max(44,Math.min(STAGE.h-44,(latest.clientY-rect.top)/scale));
+        ghost.style.transform = 'translate3d('+x+'px,'+y+'px,0) translate(-50%,-65%) scale(1.06)';
+        const target = findTarget(latest), key = target && target.getAttribute('data-label-target');
+        const next = key && !this.state.placed[key] ? key : null;
+        if (hovered !== next) { hovered = next; this.setState({ labelHover:next }); }
+      };
+      const cleanup = () => {
+        window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',up); window.removeEventListener('pointercancel',cancel);
+        if (frame !== null) cancelAnimationFrame(frame);
+        if (ghost) { ghost.style.opacity='0'; ghost.textContent=''; }
+        this._labelDragCleanup = null;
+      };
+      const move = e => {
+        if (e.pointerId !== id) return;
+        if (this.locked() || generation !== this.gen) { cancel(); return; }
+        if (!active && Math.hypot(e.clientX-origin.x,e.clientY-origin.y)<6) return;
+        e.preventDefault(); latest=e;
+        if (!active) {
+          active=true; this.clearNudge(); this.sfx('pick');
+          this.setState({ chip:name, draggingLabel:name });
+          if (ghost) { ghost.textContent=name; Object.assign(ghost.style,{opacity:'1',padding:'12px 28px',borderRadius:'28px',background:'linear-gradient(#72d5ff,#168bd7)',border:'3px solid white',color:'white',font:'800 34px "Baloo 2",sans-serif',boxShadow:'0 12px 24px rgba(15,100,170,.28),0 0 24px rgba(34,184,230,.55)',whiteSpace:'nowrap'}); }
+        }
+        if (frame === null) frame=requestAnimationFrame(paint);
+      };
+      const up = e => {
+        if (e.pointerId !== id) return;
+        const target = active && findTarget(e), key = target && target.getAttribute('data-label-target');
+        cleanup();
+        if (!active) return;
+        this._labelClickUntil=Date.now()+400;
+        this.setState({ draggingLabel:null,labelHover:null }, () => {
+          if (generation !== this.gen || this.locked()) return;
+          if (key && !this.state.placed[key]) this.hitTarget(key)();
+          else this.setState({ chip:null });
+        });
+      };
+      const cancel = () => { cleanup(); this.setState({ draggingLabel:null,labelHover:null,chip:null }); };
+      this._labelDragCleanup=cleanup;
+      window.addEventListener('pointermove',move,{passive:false}); window.addEventListener('pointerup',up); window.addEventListener('pointercancel',cancel);
+    };
+  }
+  dragFigure(index) {
+    return (event) => {
+      if (this.locked() || event.button !== 0 || this.state.sortAt[index] !== undefined) return;
+      if (this._sortDragCleanup) this._sortDragCleanup();
+      const id = event.pointerId, generation = this.gen, origin = { x:event.clientX, y:event.clientY };
+      const ghost = this.ghostRef.current;
+      const artwork = event.currentTarget.querySelector('svg').cloneNode(true);
+      Object.assign(artwork.style,{width:'100%',height:'100%',transform:'none'});
+      let active = false, frame = null, latest = event, hovered = null;
+      const findTarget = e => {
+        const refs=[this.zoneARef,this.zoneBRef];
+        return refs.findIndex(ref => { if(!ref.current) return false; const r=ref.current.getBoundingClientRect(); return e.clientX>=r.left && e.clientX<=r.right && e.clientY>=r.top && e.clientY<=r.bottom; });
+      };
+      const paint = () => {
+        frame = null;
+        if (!active || !ghost) return;
+        const rect = ghost.parentElement.getBoundingClientRect(), scale = rect.width / STAGE.w;
+        const x = Math.max(100,Math.min(STAGE.w-100,(latest.clientX-rect.left)/scale));
+        const y = Math.max(44,Math.min(STAGE.h-44,(latest.clientY-rect.top)/scale));
+        ghost.style.transform = 'translate3d('+x+'px,'+y+'px,0) translate(-50%,-65%) scale(1.06)';
+        const next = findTarget(latest);
+        if (hovered !== next) { hovered = next; this.setState({ sortHover:next }); }
+      };
+      const cleanup = () => {
+        window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',up); window.removeEventListener('pointercancel',cancel);
+        if (frame !== null) cancelAnimationFrame(frame);
+        if (ghost) { ghost.style.opacity='0'; ghost.textContent=''; }
+        this._sortDragCleanup = null;
+      };
+      const move = e => {
+        if (e.pointerId !== id) return;
+        if (this.locked() || generation !== this.gen) { cancel(); return; }
+        if (!active && Math.hypot(e.clientX-origin.x,e.clientY-origin.y)<6) return;
+        e.preventDefault(); latest=e;
+        if (!active) {
+          active=true; this.clearNudge(); this.sfx('pick');
+          this.setState({ pickedFig:index, draggingFigure:index });
+          if (ghost) {
+            ghost.replaceChildren(artwork);
+            Object.assign(ghost.style,{opacity:'1',width:'170px',height:'170px',padding:'14px',boxSizing:'border-box',borderRadius:'26px',background:'#fff',border:'4px solid #6bcfff',boxShadow:'0 16px 30px rgba(15,90,150,.25),0 0 24px rgba(34,184,230,.5)'});
+          }
+        }
+        if (frame === null) frame=requestAnimationFrame(paint);
+      };
+      const up = e => {
+        if (e.pointerId !== id) return;
+        const zone = active ? findTarget(e) : -1;
+        cleanup();
+        if (!active) return;
+        this._sortClickUntil=Date.now()+400;
+        this.setState({ draggingFigure:null,sortHover:null }, () => {
+          if (generation !== this.gen || this.locked()) return;
+          if (zone >= 0) this.dropInto(zone)();
+          else this.setState({ pickedFig:null });
+        });
+      };
+      const cancel = () => { cleanup(); this.setState({ draggingFigure:null,sortHover:null,pickedFig:null }); };
+      this._sortDragCleanup=cleanup;
+      window.addEventListener('pointermove',move,{passive:false}); window.addEventListener('pointerup',up); window.addEventListener('pointercancel',cancel);
+    };
+  }
+  pickChip(name) {
+    return () => {
+      if (this.locked()) return;
+      this.clearNudge(); this.sfx('pick');
+      if (Date.now() < (this._labelClickUntil || 0) || Object.values(this.state.placed).includes(name)) return;
+      const pick = this.state.chip === name ? null : name;
+      this.setState({ chip: pick }, () => { if (pick) this.armStage2(); });
+    };
+  }
+  hitTarget(key) {
+    return () => {
+      if (this.locked()) return;
+      this.clearNudge();
+      const want = { side: 'Side', vertex: 'Vertex', angle: 'Angle' }[key];
+      const chip = this.state.chip;
+      if (!chip) return;
+      if (this.state.placed[key]) return;
+      if (chip === want) {
+        const placed = Object.assign({}, this.state.placed); placed[key] = chip;
+        const done = Object.keys(placed).length === 3;
+        this.setState({ placed: placed, chip: null }); this.sfx('snap');
+        if (done) this.react('happy'); else { this.burstHere(); this.guide.onCorrectProgress(); }
+        if (done) {
+          this.sfx('done'); this.confetti();
+          this.feedback('Perfect! Side, vertex and angle — all labelled.', () => this.later(this.advance, 400));
+        }
+      } else {
+        this.setState({ badPlace: key, chip: null }); this.sfx('no'); this.react('wrong');
+        this.later(() => this.setState({ badPlace: null }), 700);
+        this.feedback('Not that one. A side is straight, a vertex is a corner.',
+          () => this.restoreQuestion());
+      }
+    };
+  }
+
+  /* ---------- sort zones (CFU 2 / 5) ---------- */
+  dropInto(zone) {
+    return () => {
+      if (this.locked()) return;
+      this.clearNudge();
+      const i = this.state.pickedFig;
+      if (i === null || i === undefined) return;
+      const s = this.step();
+      const at = Object.assign({}, this.state.sortAt);
+      if (s.answer[i] === zone) {
+        at[i] = zone;
+        const done = Object.keys(at).length === s.answer.length;
+        this.setState({ sortAt: at, pickedFig: null }); this.sfx('snap');
+        if (done) this.react('happy'); else { this.burstHere(); this.guide.onCorrectProgress(); }
+        if (Object.keys(at).length === s.answer.length) {
+          this.setState({ checked: true }); this.sfx('done'); this.confetti();
+          this.feedback(s.fb.ok, () => this.later(this.advance, 500));
+        }
+      } else {
+        const a = this.state.attempts + 1;
+        this.setState({ pickedFig: null, wrong: i, attempts: a }); this.sfx('no'); this.react('wrong');
+        this.later(() => this.setState({ wrong: null }), 700);
+        this.feedback(a >= 2 ? s.fb.two : s.fb.one, () => this.restoreQuestion());
+      }
+    };
+  }
+
+  /* ---------- card building (number badges are HTML overlays) ---------- */
+  cardStyleFor(state) {
+    if (state === 'ok') return { border: '5px solid ' + GRN, background: '#f2fbf5', boxShadow: '0 0 0 6px rgba(47,158,94,0.16), 0 10px 0 rgba(47,158,94,0.22), 0 0 24px rgba(47,158,94,.28)' };
+    if (state === 'bad') return { border: '5px solid ' + RED, background: '#fff4f2', boxShadow: '0 0 0 6px rgba(232,85,63,0.14), 0 10px 0 rgba(232,85,63,0.22), 0 0 24px rgba(232,85,63,.24)' };
+    if (state === 'sel') return { border: '5px solid ' + ICE, background: '#e2f7ff', boxShadow: '0 0 0 6px rgba(34,184,230,0.18), 0 10px 0 rgba(34,184,230,0.26)' };
+    return { border: '5px solid #d5ecfa', background: '#ffffff', boxShadow: '0 8px 0 rgba(146,196,228,0.35)' };
+  }
+  buildCard(o) {
+    const st = o.state;
+    const base = this.cardStyleFor(st);
+    const stroke = !o.stroke || o.stroke === '#123a6b' ? IK : o.stroke;
+    const kk = (parseFloat(String(o.vb || '0 0 1000 1000').split(' ')[2]) || 1000) / 1000;
+    const pad = o.pad === undefined ? 20 : o.pad;
+    const v = String(o.vb || '0 0 1000 1000').split(' ').map(Number);
+    const iw = o.w - 2 * pad, ih = o.h - 2 * pad;
+    const fsc = Math.min(iw / v[2], ih / v[3]);
+    const ox = pad + (iw - v[2] * fsc) / 2, oy = pad + (ih - v[3] * fsc) / 2;
+    const toPx = (p) => [ox + (p[0] - v[0]) * fsc, oy + (p[1] - v[1]) * fsc];
+    const wrap = Object.assign({
+      position: 'absolute', left: o.x + 'px', top: o.y + 'px', width: o.w + 'px', height: o.h + 'px',
+      borderRadius: '30px', boxSizing: 'border-box', padding: (o.pad || 20) + 'px',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      transition: 'left 420ms cubic-bezier(.22,.9,.24,1), top 420ms cubic-bezier(.22,.9,.24,1), width 420ms, height 420ms, opacity 380ms, transform 260ms, border-color 200ms, background 200ms',
+      touchAction: o.down ? 'none' : 'manipulation', cursor: o.down ? 'grab' : (o.click ? 'pointer' : 'default'), opacity: o.opacity === undefined ? 1 : o.opacity,
+      animation: o.anim || 'none', zIndex: o.z || 2
+    }, base);
+    if (o.plain) { wrap.border = 'none'; wrap.background = 'transparent'; wrap.boxShadow = 'none'; }
+    /* --- live feel: hover lifts the card, press squashes it, idle breathes --- */
+    const hk = 'card:' + o.key;
+    const clickable = !!o.click;
+    const hov = clickable && this.state.hoverK === hk;
+    const prs = clickable && this.state.pressK === hk;
+    const still = !o.anim || o.anim === 'none';
+    if (hov && !o.plain) {
+      wrap.borderColor = ICE;
+      wrap.boxShadow = (wrap.boxShadow || '') + ', 0 16px 30px rgba(31,109,180,0.26)';
+    }
+    if (still) {
+      if (prs) wrap.transform = 'translateY(4px) scale(0.978)';
+      else if (hov) wrap.transform = 'translateY(-9px) scale(1.025)';
+    }
+    const idx = this._cardN = (this._cardN || 0) + 1;
+    const gStyle = { animation: 'none' }; // Keep teaching geometry steady; animate the interactive card instead.
+    const svgTf = prs ? 'scale(0.955)' : (hov ? 'scale(1.07)' : 'scale(1)');
+    return {
+      key: o.key, vb: o.vb, d: o.d, extra: o.extra || '', fill: o.fill || 'none',
+      stroke: stroke,
+      pathStyle: stroke === IK ? { filter: 'drop-shadow(0 0 ' + (7 * kk) + 'px rgba(255,145,30,.48))' } : {},
+      outlineStyle: stroke === IK ? { filter: 'drop-shadow(0 0 ' + (7 * kk) + 'px rgba(255,145,30,.48))' } : {},
+      sw: +((o.sw || 16) * kk).toFixed(2), wrap: wrap,
+      svgStyle: {
+        width: '100%', height: '100%', overflow: 'visible', display: 'block',
+        transform: svgTf, transformOrigin: 'center center',
+        transition: 'transform 170ms cubic-bezier(.3,1.3,.4,1)'
+      },
+      gStyle: gStyle,
+      glow: hov ? {
+        position: 'absolute', left: '-6px', top: '-6px', right: '-6px', bottom: '-6px',
+        borderRadius: '34px', pointerEvents: 'none',
+        background: 'radial-gradient(circle at 50% 45%, rgba(34,184,230,0.16), rgba(34,184,230,0) 68%)'
+      } : { display: 'none' },
+      enter: clickable ? this.hovOn(hk) : null,
+      leave: clickable ? this.hovOff : null,
+      svgRef: o.svgRef, hl: o.hl || [], arcs: o.arcs || [], dots: o.dots || [], nums: o.nums || [],
+      handles: o.handles || [], traceD: o.traceD || '', traceW: +(((o.sw || 16) + 7) * kk).toFixed(2),
+      pins: (o.nums || []).map((n) => {
+        const p = toPx([n.x, n.y]);
+        return { n: n.t, style: {
+          position: 'absolute', left: p[0].toFixed(1) + 'px', top: p[1].toFixed(1) + 'px',
+          translate: '-50% -50%', width: '58px', height: '58px', borderRadius: '50%',
+          boxSizing: 'border-box', background: '#ffffff', border: '6px solid ' + ICE,
+          font: '900 32px Nunito, sans-serif', color: '#1546a0',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 3px 0 rgba(31,109,180,0.2)', zIndex: 5,
+          animation: 'pop 300ms ease-out both', pointerEvents: 'none'
+        } };
+      }),
+      traceStyle: o.traceStyle || { opacity: 0 },
+      badge: o.badge || '', badgeStyle: o.badge ? {
+        position: 'absolute', left: '50%', translate: '-50% 0', bottom: '-46px',
+        font: '900 26px Nunito, sans-serif', color: '#2c6ba8', letterSpacing: '0.04em'
+      } : { display: 'none' },
+      chip: o.chip || '', chipStyle: o.chip ? {
+        position: 'absolute', left: '50%', translate: '-50% 0', top: '-30px',
+        padding: '7px 22px', borderRadius: '18px', background: o.chipBg || '#e8f6ff',
+        border: '3px solid ' + (o.chipBorder || '#9fd8f4'), font: '900 24px Nunito, sans-serif',
+        color: o.chipColor || '#2c6ba8', whiteSpace: 'nowrap', animation: 'fadeUp 320ms ease-out both'
+      } : { display: 'none' },
+      mark: st === 'ok' ? '✓' : (st === 'bad' ? '✕' : ''),
+      markStyle: (st === 'ok' || st === 'bad') ? {
+        position: 'absolute', right: '-14px', top: '-14px', width: '52px', height: '52px',
+        borderRadius: '50%', background: st === 'ok' ? GRN : RED, color: '#fff',
+        font: '900 30px Nunito, sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        boxShadow: '0 4px 0 rgba(0,0,0,0.18)', animation: 'pop 320ms ease-out both'
+      } : { display: 'none' },
+      down: o.down || (clickable ? this.pressOn(hk) : null), click: o.click, nudge: o.nudge ? '1' : ''
+    };
+  }
+  traceStyleFor(on, ms) {
+    if (!on) return { opacity: 0 };
+    return {
+      opacity: 1, strokeDasharray: 100, strokeDashoffset: 100,
+      animation: 'dr ' + (ms || 1600) + 'ms linear forwards',
+      filter: 'drop-shadow(0 0 10px rgba(34,184,230,0.85))'
+    };
+  }
+  segHl(name, idxs, pts, color, w) {
+    const segs = this.segs(name, pts);
+    const kk = this.k(name);
+    return idxs.filter((i) => segs[i]).map((i) => ({
+      d: segs[i].d, color: color || ICE, w: +((w || 26) * kk).toFixed(2),
+      style: { filter: 'drop-shadow(0 0 8px rgba(34,184,230,0.7))' }
+    }));
+  }
+
+  /* ---------- main view model ---------- */
+  renderVals() {
+    const st = this.state;
+    this._cardN = 0;
+    // Fit from the first paint, before resize observers or mount timers run.
+    const viewport = document.documentElement;
+    const viewportScale = Math.min(
+      (viewport.clientWidth || window.innerWidth) / STAGE.w,
+      (viewport.clientHeight || window.innerHeight) / STAGE.h
+    );
+    const scale = Math.min(st.scale, viewportScale || st.scale);
+    const scaler = {
+      position: 'absolute', left: '50%', top: '50%', width: '1980px', height: '1080px',
+      transform: 'translate(-50%, -50%) scale(' + scale + ')', transformOrigin: 'center center'
+    };
+    const shellOnly = {
+      voiceError: st.voiceError, retryVoice: this.retryVoice,
+      effectsEnabled: !this.locked(), activateKey: this.activateKey,
+      scalerStyle: scaler, narration: st.narr || '', narratorParts: this.narratorParts(), progress: '', screenLabel: 'loading',
+      cards: [], targets: [], callouts: [], leaders: [], drops: [], chips: [], counters: [],
+      showChoice: false, showChips: false, showCounter: false, showCheck: false, showZones: false, showHand: false,
+      muteIcon: st.muted ? '✕' : '♪', replay: this.replay, toggleMute: this.toggleMute,
+      narrStyle: this.narrStyle(), mammothStyle: this.mamStyle(), narrRef: this.narrRef,
+      bgStyle: this.bgStyle(), boardStyle: this.boardStyle(), signStyle: this.signStyle(),
+      signTextBox: this.signTextBox(), safeStyle: this.safeStyle(),
+      mamViewport: this.mamViewportStyle(), hudStyle: this.hudStyle(),
+      progressStyle: this.progressStyle(),
+      snow: this.snow || [], fx: this.fxStyles(),
+      stageDown: this.stageDown, hovOut: this.hovOff,
+      hovReplay: this.hovOn('ui:replay'), hovMute: this.hovOn('ui:mute'),
+      hovOpen: this.hovOn('oc:open'), hovClosed: this.hovOn('oc:closed'), hovCheck: this.hovOn('ui:check'),
+      btnReplay: this.roundBtn('ui:replay', 24), btnMute: this.roundBtn('ui:mute', 22),
+      happyStyle: {
+        position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block',
+        objectFit: 'contain', objectPosition: 'center bottom',
+        opacity: this.guide.pose().sad ? 0 : 1, transition: 'opacity 220ms ease-out',
+        userSelect: 'none', pointerEvents: 'none'
+      },
+      sadStyle: {
+        position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block',
+        objectFit: 'contain', objectPosition: 'center bottom',
+        opacity: this.guide.pose().sad ? 1 : 0, transition: 'opacity 220ms ease-out',
+        userSelect: 'none', pointerEvents: 'none'
+      },
+      ghostRef: this.ghostRef, zoneARef: this.zoneARef, zoneBRef: this.zoneBRef, stageRef: this.stageRef,
+      safeRef: this.safeRef, nudgeOC: this.step().ans === 'open' ? '1' : '',
+      nudgeClosed: this.step().ans === 'closed' ? '1' : '', nudgeCheck: '',
+      showNudge: !!st.nudge,
+      nudgeWrap: st.nudge ? {
+        position: 'absolute', left: st.nudge.x + 'px', top: st.nudge.y + 'px',
+        width: '0px', height: '0px', zIndex: 30, pointerEvents: 'none'
+      } : { display: 'none' },
+      nudgeRing: st.nudge ? {
+        position: 'absolute', left: '-54px', top: '-54px', width: '108px', height: '108px',
+        borderRadius: '50%', border: '7px solid #f5c33f', boxSizing: 'border-box',
+        animation: 'nudgeRing 1400ms ease-out 2 both'
+      } : { display: 'none' },
+      nudgeHand: st.nudge ? {
+        // Align the asset's visible fingertip, allowing for its transparent padding.
+        position: 'absolute', left: '-36px', top: '-30px', width: '92px', height: 'auto',
+        transformOrigin: '36px 30px',
+        display: 'block', filter: 'drop-shadow(0 6px 10px rgba(60,40,10,0.35))',
+        animation: 'nudgeTap 1400ms ease-in-out 2 both'
+      } : { display: 'none' }
+    };
+    if (!st.ready || !this.P) return shellOnly;
+
+    const s = this.step();
+    const V = Object.assign({}, shellOnly, {
+      progress: 'Step ' + (st.k + 1) + ' / ' + this.steps().length,
+      screenLabel: s.label,
+      check: this.check, checkLabel: st.checked && !s.check ? 'Next' : 'Check',
+      checkStyle: this.bigBtn(st.checked && !s.check ? GRN : '#2f8fd0', 260),
+      chooseOpen: this.chooseOpen, chooseClosed: this.chooseClosed,
+      btnOpen: this.ocBtn('open'), btnClosed: this.ocBtn('closed')
+    });
+
+    if (s.sc === 'S1') this.viewS1(V, s);
+    else if (s.q === 'oc') this.viewOC(V, s);
+    else if (s.sc === 'S6') this.viewCompare(V, s);
+    else if (s.sc === 'S7') this.viewTapOne(V, s, true);
+    else if (s.sc === 'S8') this.viewReveal(V, s);
+    else if (s.sc === 'S9') this.viewBuild(V, s);
+    else if (s.sc === 'S11') this.viewParts(V, s);
+    else if (s.sc === 'S12') this.viewLabels(V, s);
+    else if (s.sc === 'S13') this.viewCount(V, s);
+    else if (s.sc === 'S14') this.viewDeform(V, s);
+    else if (s.sc === 'S15' || s.sc === 'S16') this.viewBA(V, s);
+    else if (s.q === 'recall') this.viewRecall(V, s);
+    else if (s.q === 'multi') this.viewMulti(V, s);
+    else if (s.q === 'sort') this.viewSort(V, s);
+    else if (s.q === 'tap1') this.viewTapOne(V, s, false);
+    else if (s.count) this.viewName(V, s);
+    else if (s.sc === 'END') this.viewEnd(V, s);
+    this.decorate(V);
+    return V;
+  }
+
+  /* Every tappable thing gets the same hover-lift / press-squash treatment,
+     wired centrally so each screen builder stays about layout. */
+  decorate(V) {
+    (V.targets || []).forEach((t, i) => {
+      const k = 'tg' + i;
+      t.enter = this.hovOn(k); t.leave = this.hovOff;
+      if (t.click && t.style) t.style = this.liftable(t.style, k, { lift: 4, scale: 1.03 });
+    });
+    (V.chips || []).forEach((p, i) => {
+      const k = 'chip' + i;
+      p.enter = this.hovOn(k); p.leave = this.hovOff; p.down = p.down || this.pressOn(k);
+      if (p.click && p.style) p.style = this.liftable(p.style, k, { lift: 6 });
+    });
+    (V.drops || []).forEach((d, i) => {
+      const k = 'dd' + i;
+      d.enter = this.hovOn(k); d.leave = this.hovOff;
+      if (d.click && d.btn) d.btn = this.liftable(d.btn, k, { lift: 4, scale: 1.02 });
+      (d.menu || []).forEach((m, j) => {
+        const mk = 'dm' + i + '_' + j;
+        m.enter = this.hovOn(mk); m.leave = this.hovOff;
+        if (m.style) m.style = this.liftable(m.style, mk, { lift: 3, scale: 1.04 });
+      });
+    });
+    (V.counters || []).forEach((c, i) => {
+      const mk = 'cm' + i, pk = 'cp' + i;
+      c.mIn = this.hovOn(mk); c.pIn = this.hovOn(pk); c.out = this.hovOff;
+      c.btnM = this.liftable(c.btn || {}, mk, { lift: 4, scale: 1.09 });
+      c.btnP = this.liftable(c.btn || {}, pk, { lift: 4, scale: 1.09 });
+    });
+    if (V.btnOpen) V.btnOpen = this.liftable(V.btnOpen, 'oc:open', { lift: 5 });
+    if (V.btnClosed) V.btnClosed = this.liftable(V.btnClosed, 'oc:closed', { lift: 5 });
+    if (V.checkStyle && V.checkStyle.display !== 'none') V.checkStyle = this.liftable(V.checkStyle, 'ui:check', V.roundCounterCheck ? { lift: 4, scale: 1.09 } : { lift: 5 });
+  }
+  roundBtn(key, fs) {
+    return this.liftable({
+      width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(255,255,255,0.92)',
+      border: '3px solid #7fd3f7', boxShadow: '0 4px 0 rgba(31,109,180,0.28)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+      font: '800 ' + fs + 'px Nunito, sans-serif', color: '#1f6db4', userSelect: 'none'
+    }, key, { lift: 3, scale: 1.08 });
+  }
+
+  /* ---------- particle rendering ---------- */
+  fxStyles() {
+    return (this.state.fx || []).map((f) => {
+      if (f.kind === 'magic') return { t:'', className:'magic-spark', style:{
+        position:'absolute',left:f.x+'px',top:f.y+'px',width:f.s+'px',height:f.s+'px',
+        background:'linear-gradient(135deg,#fff7c1,#ffbc42)',
+        clipPath:'polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%)',
+        '--mx':f.dx+'px','--my':f.dy+'px',pointerEvents:'none',zIndex:25,
+        animation:'magicSpark 900ms ease-out '+f.delay+'ms both'
+      }};
+      if (f.kind === 'ripple') {
+        return { t: '', style: {
+          position: 'absolute', left: (f.x - f.r) + 'px', top: (f.y - f.r) + 'px',
+          width: (f.r * 2) + 'px', height: (f.r * 2) + 'px', borderRadius: '50%',
+          border: '6px solid ' + f.c, boxSizing: 'border-box', pointerEvents: 'none', zIndex: 28,
+          animation: 'ripple 620ms cubic-bezier(.2,.8,.3,1) both'
+        } };
+      }
+      if (f.kind === 'conf') {
+        return { t: '', className: 'celebration-piece', style: {
+          position:'absolute', left:f.x+'px', top:'-50px', width:f.w+'px', height:f.h+'px',
+          background:'linear-gradient(135deg, #ffffff 0%, '+f.c+' 35%, '+f.c+' 100%)',
+          borderRadius:f.w > 16 ? '50%' : '2px', pointerEvents:'none', zIndex:27,
+          '--drift':f.dx+'px', '--spin':f.rot+'deg',
+          animation:'confettiFall '+f.ms+'ms cubic-bezier(.25,.3,.55,1) both',
+          boxShadow:'0 2px 3px rgba(20,60,90,.12)'
+        } };
+      }
+      return { t: '', style: {
+        position: 'absolute', left: f.x + 'px', top: f.y + 'px', width: f.s + 'px', height: f.s + 'px',
+        borderRadius: '50%', background: f.c, pointerEvents: 'none', zIndex: f.z || 29,
+        boxShadow: '0 0 10px ' + f.c,
+        transform: 'translate(-50%,-50%) translate(' + (f.on ? f.dx : 0) + 'px,' + (f.on ? f.dy : 0) + 'px) ' +
+          'scale(' + (f.on ? 0.25 : 1) + ') rotate(' + (f.on ? f.rot + 220 : f.rot) + 'deg)',
+        opacity: f.on ? 0 : 1,
+        transition: 'transform 880ms cubic-bezier(.15,.75,.3,1), opacity 880ms ease-out'
+      } };
+    });
+  }
+
+  // Shared by every instruction, correction, success message and replay.
+  prepareNarratorReveal(text, durationMs) {
+    const known = durationMs || (this._voiceDurations && this._voiceDurations[text]);
+    const count = (text.match(/\S+/g) || []).length;
+    const interval = Number.isFinite(known) && known > 0 && count > 1
+      ? Math.max(0, (known - 220) / (count - 1)) : 110;
+    this.setState(st => ({ narrPage: text, narrTick: st.narrTick + 1,
+      wordReveal: 'waiting', wordInterval: interval }));
+  }
+  narratorParts() {
+    const text = this.state.narrPage === undefined ? this.state.narr || '' : this.state.narrPage;
+    const tokens = text.split(/(\s+)/).filter(Boolean);
+    let word = 0;
+    return tokens.map((token, index) => {
+      const key = this.state.narrTick + '-' + index;
+      if (!/\S/.test(token)) return { key, text: token, style: { whiteSpace: 'pre' } };
+      const shape = /\b(?:triangles?|quadrilaterals?|pentagons?|hexagons?|heptagons?|octagons?|polygons?)\b/gi;
+      const highlighted = shape.test(token);
+      shape.lastIndex = 0;
+      const delay = Math.round(word++ * (this.state.wordInterval === undefined ? 110 : this.state.wordInterval));
+      return {
+        key, text: token.replace(shape, name => name.toUpperCase()),
+        style: {
+          display: 'inline-block', color: highlighted ? NARR_TYPE.accent : NARR_TYPE.color,
+          transformOrigin: '50% 70%',
+          animation: this.state.wordReveal === 'complete' ? 'none' : (this.state.narrTick % 2 ? 'textIn' : 'textInB') + ' 220ms ease-in ' + delay + 'ms both',
+          animationPlayState: this.state.wordReveal === 'waiting' ? 'paused' : 'running'
+        }
+      };
+    });
+  }
+  narrStyle() {
+    return {
+      width: NARR.w + 'px',
+      fontFamily: '"Baloo 2", Nunito, sans-serif', fontWeight: 800,
+      fontSize: Math.min(NARR_TYPE.size, NARR_TYPE.size * (NARR.w - 24) / Math.max(1, this.narratorWidth(this.state.narrPage || this.state.narr || ''))) + 'px', lineHeight: 1.18, letterSpacing: '0.005em',
+      color: NARR_TYPE.color, textAlign: 'center', whiteSpace: 'nowrap',
+      overflowWrap: 'normal',
+      WebkitTextStrokeWidth: NARR_TYPE.outline + 'px',
+      WebkitTextStrokeColor: '#ffffff', paintOrder: 'stroke fill',
+      textShadow: '0 2px 1px rgba(120,74,25,0.16)',
+      animation: 'none'
+    };
+  }
+  /* ---------- scene layers, all derived from the same stage box ---------- */
+  bgStyle() {
+    return Object.assign(stageBox({ x: 0, y: 0, w: STAGE.w, h: STAGE.h }, 0),
+      { display: 'block', objectFit: 'cover', userSelect: 'none', pointerEvents: 'none' });
+  }
+  boardStyle() {
+    // The transparent source is a full scene canvas, including margin around every corner.
+    return Object.assign(stageBox({ x: 0, y: 0, w: STAGE.w, h: STAGE.h }, 30),
+      { display: 'block', objectFit: 'contain', objectPosition: 'center', userSelect: 'none', pointerEvents: 'none' });
+  }
+  signStyle() {
+    return Object.assign(stageBox(LAYER.sign, 40),
+      { display: 'block', userSelect: 'none', pointerEvents: 'none' });
+  }
+  /* Stable text box on the plank. It never resizes with the text, so the
+     instruction cannot jump vertically between screens. */
+  signTextBox() {
+    return Object.assign(stageBox(NARR, 41), {
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      boxSizing: 'border-box', pointerEvents: 'none'
+    });
+  }
+  safeStyle() { return Object.assign(stageBox(SAFE, 32), { pointerEvents: this.locked() ? 'none' : 'auto' }); }
+  hudStyle() {
+    return {
+      position: 'absolute', right: pc(40, STAGE.w), top: pc(44, STAGE.h),
+      display: 'flex', gap: pc(14, STAGE.w), alignItems: 'center', zIndex: 42
+    };
+  }
+  progressStyle() {
+    return {
+      height: '44px', padding: '0 20px', borderRadius: '22px',
+      background: 'rgba(255,255,255,0.86)', border: '3px solid #cfeafb',
+      display: 'flex', alignItems: 'center', font: '800 22px Nunito, sans-serif',
+      color: '#3c7bbd', letterSpacing: '0.02em', whiteSpace: 'nowrap'
+    };
+  }
+  /* Scene-relative safe area; only the inner character carries animation transforms. */
+  mamViewportStyle() {
+    return Object.assign(stageBox(MAM_AREA, 20), { pointerEvents: 'none', overflow: 'visible' });
+  }
+  mamStyle() {
+    const st = this.state;
+    const box = {
+      position: 'absolute', left: 0, bottom: 0,
+      width: pc(MAM_WIDTH, MAM_AREA.w), height: pc(MAM_HEIGHT, MAM_AREA.h),
+      transformOrigin: '50% 100%'
+    };
+    if (st.mamHidden) return Object.assign(box, { transform: 'translateY(232px)' });
+    return Object.assign(box, { animation: this.guide.pose().anim });
+  }
+  bigBtn(color, w) {
+    return {
+      minWidth: w + 'px', padding: '0 44px', height: '86px', borderRadius: '43px',
+      background: 'linear-gradient(rgba(255,255,255,.26),rgba(255,255,255,0) 55%), ' + color, border:'3px solid rgba(255,255,255,.75)', boxSizing:'border-box', textShadow:'0 2px 2px rgba(0,55,100,.22)', color: '#fff', font: '800 38px "Baloo 2", Nunito, sans-serif',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+      boxShadow: 'inset 0 2px 0 rgba(255,255,255,.35), 0 6px 0 rgba(10,75,115,.3), 0 10px 20px rgba(20,110,165,.18)', userSelect: 'none',
+      transition: 'transform 130ms ease-out, box-shadow 130ms'
+    };
+  }
+  ocBtn(kind) {
+    const st = this.state;
+    const feedback = st.ok === kind ? GRN : (st.wrong === kind ? RED : null);
+    return {
+      width: '270px', minWidth: '270px', height: '118px', borderRadius: '59px',
+      background: 'url("assets/option-button.svg") center / contain no-repeat',
+      color: '#ffffff', border: 'none', font: '800 42px "Baloo 2", Nunito, sans-serif',
+      textShadow: '0 2px 3px rgba(0,72,151,0.35)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+      boxShadow: feedback ? '0 0 0 5px ' + feedback + ', 0 0 26px ' + feedback : 'none',
+      userSelect: 'none', boxSizing: 'border-box',
+      animation: st.wrong === kind ? 'wig 420ms ease-in-out both' : (st.ok === kind ? 'pop 380ms ease-out both' : 'none'),
+      transition: 'box-shadow 180ms, transform 180ms'
+    };
+  }
+
+  /* ----- screen 1 ----- */
+  viewS1(V, s) {
+    const st = this.state, ph = st.phase;
+    const F = this.fig('leaf');
+    // One centered layout for the point, drawing, trace and question screens.
+    const size = 470;
+    const x = (SAFE.w - size) / 2, y = 44;
+    const origin = this.mapPt({ x: x, y: y, w: size, h: size }, F.vb, F.pts[0]);
+    this.svgRefs[0] = this.svgRefs[0] || React.createRef();
+    if (ph === 'point') {
+      V.cards = [];
+      V.callouts = [{
+        text: 'Point', style: {
+          position: 'absolute', left: '50%', top: (origin[1] + 85) + 'px', translate: '-50% 0',
+          font: '900 40px Nunito, sans-serif', color: '#2c6ba8', animation: 'fadeUp 400ms ease-out both'
+        }
+      }];
+      V.leaders = [
+        { style: { position: 'absolute', left: origin[0] + 'px', top: origin[1] + 'px', width: '150px', height: '150px', marginLeft: '-75px', marginTop: '-75px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(34,184,230,0.5), rgba(34,184,230,0))', animation: 'halo 1.6s ease-out infinite' } },
+        { style: { position: 'absolute', left: origin[0] + 'px', top: origin[1] + 'px', width: '34px', height: '34px', marginLeft: '-17px', marginTop: '-17px', borderRadius: '50%', background: '#1d5c96', boxShadow: '0 0 0 6px rgba(255,255,255,0.9), 0 6px 14px rgba(20,70,120,0.4)', animation: 'ptPulse 900ms ease-in-out 3' } }
+      ];
+      return;
+    }
+    const drawnD = this.figD('leaf');
+    const card = this.buildCard({
+      key: 'leaf', x: x, y: y, w: size, h: size, plain: true,
+      vb: F.vb, d: ph === 'draw' && !st.drawn ? '' : drawnD, stroke: IK, sw: 20,
+      svgRef: this.svgRefs[0],
+      traceD: drawnD,
+      traceStyle: st.tracing ? this.traceStyleFor(true, st.traceMs) : { opacity: 0 },
+      dots: st.drawing ? [{ dot: '1', x: F.pts[0][0], y: F.pts[0][1], r: 23, fill: '#fff', stroke: ICE, sw: 10, style: { filter: 'drop-shadow(0 0 12px rgba(34,184,230,0.9))' } }] : [],
+      hl: st.ok === 'closed' ? [{ d: drawnD, color: GRN, w: 20 * this.k('leaf'), style: {} }] : []
+    });
+    if (st.ok === 'closed') card.traceStyle = { opacity: 0 };
+    // The creation stays anchored to the point; ambient floating would move its first vertex.
+    card.gStyle = { animation: 'none' };
+    if (ph === 'draw') {
+      card.traceW = 20;
+      card.traceStyle = {
+        opacity: st.drawing ? 1 : 0, strokeDasharray: 100,
+        strokeDashoffset: 100 * (1 - (this.drawProgress || 0)),
+        filter: 'drop-shadow(0 0 9px rgba(34,184,230,.42))',
+        transition: 'opacity 420ms ease-out'
+      };
+      card.stroke = '#1aa7d5';
+      card.fill = st.drawn ? 'rgba(75,210,245,.045)' : 'none';
+      card.pathClass = st.drawn ? 'created-shape' : '';
+      card.pathStyle = st.drawn ? {
+        animation: 'shapeFinish 1100ms ease-out both',
+        filter: 'drop-shadow(0 0 7px rgba(34,184,230,.28))'
+      } : {};
+    }
+    V.cards = [ph === 'ask' ? this.magicCard(card) : card];
+    if (ph !== 'point' && (st.drawn || ph !== 'draw')) {
+      V.callouts = [{
+        text: 'Shape', style: {
+          position: 'absolute', left: '50%', top: (y + size + 6) + 'px', translate: '-50% 0',
+          font: '900 38px Nunito, sans-serif', color: '#2c6ba8', animation: 'fadeUp 400ms ease-out both'
+        }
+      }];
+    }
+    if (ph === 'ask') { V.showChoice = true; V.callouts = []; }
+  }
+
+  /* ----- screens 2-5 ----- */
+  viewOC(V, s) {
+    const st = this.state, F = this.fig(s.fig);
+    const size = 430, x = (SAFE.w - size) / 2, y = 40;
+    this.svgRefs[0] = this.svgRefs[0] || React.createRef();
+    const d = this.figD(s.fig);
+    const dots = [];
+    if (st.gapPulse && F.gap) {
+      dots.push({ x: F.gap.x, y: F.gap.y, r: F.gap.w / 2, fill: 'rgba(232,85,63,0.16)', stroke: RED, sw: 8 * this.k(s.fig), style: { animation: 'glowPulse 900ms ease-in-out infinite' } });
+    }
+    V.cards = [this.buildCard({
+      key: s.fig, x: x, y: y, w: size, h: size, plain: true, vb: F.vb,
+      d: d, extra: F.extra || '', stroke: st.ok ? GRN : IK, sw: 18, svgRef: this.svgRefs[0],
+      traceD: d, traceStyle: st.tracing && !st.ok ? this.traceStyleFor(true, st.traceMs) : { opacity: 0 },
+      dots: dots,
+      anim: st.wrong ? 'wig 420ms ease-in-out both' : 'none'
+    })];
+    V.cards[0] = this.magicCard(V.cards[0]);
+    V.showChoice = true;
+  }
+
+  /* ----- screen 6 + 7 ----- */
+  cmpCards(V, s, tappable) {
+    const st = this.state, S = this.sets()[s.set];
+    const w = 330, h = 330, gap = 42, total = S.length * w + (S.length - 1) * gap;
+    const x0 = (SAFE.w - total) / 2, y = 130;
+    const openIdx = [1, 2], closedIdx = [0, 3], straightIdx = [0, 1], curvedIdx = [2, 3];
+    const ph = st.phase;
+    return S.map((it, i) => {
+      const name = it[0], F = this.fig(name), d = this.figD(name);
+      let pulse = false, hl = [];
+      if (ph === 'open' && openIdx.indexOf(i) >= 0) pulse = true;
+      if (ph === 'closed' && closedIdx.indexOf(i) >= 0) pulse = true;
+      if (st.hlKind === 'straight' && straightIdx.indexOf(i) >= 0) pulse = true;
+      if (st.hlKind === 'curved' && curvedIdx.indexOf(i) >= 0) pulse = true;
+      if (st.hlKind === 'segsOf' + i || st.hlKind === 'curveOf' + i) {
+        hl = F.pts ? this.segHl(name, F.pts.map((p, j) => j), null, ICE, 22) : [{ d: d, color: ICE, w: 22, style: {} }];
+      }
+      const trace = st.tracing && (ph === 'bound' || ph === 'sc');
+      let state = null;
+      if (tappable) {
+        if (st.ok === i || (s.q === 'straight' && st.sel.includes(i))) state = 'ok'; else if (st.wrong === i) state = 'bad';
+      }
+      let chip = '', chipBg, chipBorder, chipColor;
+      const showChip = ph !== 'open' || openIdx.indexOf(i) >= 0;
+      if ((ph === 'open' && openIdx.indexOf(i) >= 0) || ph === 'closed' || ph === 'bound' || ph === 'sc' || ph === 'classify' || ph === 'done' || tappable) {
+        const isOpen = openIdx.indexOf(i) >= 0;
+        if (ph === 'open' && !isOpen) chip = '';
+        else { chip = isOpen ? 'Open' : 'Closed'; chipBg = isOpen ? '#fff3e3' : '#e9f7ee'; chipBorder = isOpen ? '#f0c58a' : '#a6dcbb'; chipColor = isOpen ? '#a1642a' : '#26714b'; }
+      }
+      return this.buildCard({
+        key: name + i, x: x0 + i * (w + gap), y: y, w: w, h: h, vb: F.vb, d: d, extra: F.extra || '',
+        stroke: it[1], sw: 18, state: state, hl: hl,
+        traceD: d, traceStyle: trace ? this.traceStyleFor(true, 1400) : { opacity: 0 },
+        anim: st.wrong === i ? 'wig 420ms ease-in-out both' : (pulse ? 'pop 900ms ease-in-out infinite' : 'none'),
+        chip: chip, chipBg: chipBg, chipBorder: chipBorder, chipColor: chipColor,
+        click: tappable ? this.tapCard(i) : null,
+        opacity: tappable && s.q !== 'straight' && st.ok !== null && st.ok !== i ? 0 : 1
+      });
+    });
+  }
+  viewCompare(V, s) {
+    const st = this.state, ph = st.phase;
+    V.cards = this.cmpCards(V, s, false);
+    if (ph === 'classify' || ph === 'done') {
+      const truth = ['Straight', 'Straight', 'Curved', 'Curved'];
+      V.drops = st.dd.map((val, i) => {
+        const card = V.cards[i];
+        const left = parseFloat(card.wrap.left), w = parseFloat(card.wrap.width);
+        const done = ph === 'done' || val === truth[i];
+        const bad = st.ddWrong[i];
+        const open = st.ddOpen === i;
+        return {
+          style: { position: 'absolute', left: (left + w / 2 - 108) + 'px', top: '484px', width: '216px', zIndex: open ? 20 : 5 },
+          btn: {
+            height: '72px', borderRadius: '22px', boxSizing: 'border-box',
+            background: done ? 'linear-gradient(#56d995,#20995b)' : (bad ? 'linear-gradient(#ff8c7d,#d94e43)' : 'linear-gradient(#fff2ad 0%,#ffd45b 42%,#ffbb32 100%)'),
+            border: '4px solid ' + (done ? '#b7f5ce' : (bad ? '#ffc6bd' : '#fff2b9')),
+            color: done || bad ? '#ffffff' : '#674015',
+            font: '800 30px Nunito, sans-serif', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', gap: '12px', padding: '0 12px', cursor: done ? 'default' : 'pointer',
+            boxShadow: done ? '0 0 0 3px rgba(47,158,94,.22), 0 0 26px rgba(47,158,94,.65), 0 6px 0 rgba(47,158,94,.25)' : (bad ? '0 0 0 3px rgba(232,85,63,.22), 0 0 26px rgba(232,85,63,.65), 0 6px 0 rgba(232,85,63,.25)' : 'inset 0 2px 0 rgba(255,255,255,.8), 0 6px 0 #cb8b20, 0 9px 18px rgba(223,156,32,.22)'),
+            animation: bad ? 'wig 420ms ease-in-out both' : 'none'
+          },
+          nudge: !done && st.dd.slice(0, i).every((v, j) => v === truth[j]) ? '1' : '',
+          arrow: done ? '\u2713' : '\u25be',
+          arrowStyle: { display:'flex', alignItems:'center', justifyContent:'center', width:'28px', height:'28px', flexShrink:0, borderRadius:'50%', background:'rgba(255,255,255,.35)', fontSize:'22px', transform:open ? 'rotate(180deg)' : 'none', transition:'transform 180ms ease' },
+          label: done ? truth[i] : (val || 'Select'),
+          click: done ? null : this.ddToggle(i),
+          menu: open ? ['Straight', 'Curved'].map((opt) => ({
+            text: opt, click: this.ddPick(i, opt),
+            style: {
+              height: '60px', boxSizing: 'border-box', borderRadius: '16px', background: 'linear-gradient(#46bcf5,#1684d0)', border: '3px solid #cfeafb',
+              color: '#ffffff', font: '800 28px Nunito, sans-serif', display: 'flex',
+              alignItems: 'center', justifyContent: 'center', cursor: 'pointer', marginTop: '8px',
+              boxShadow: 'inset 0 2px 0 rgba(255,255,255,.4), 0 4px 0 #1268a2', animation:'fadeUp 180ms ease-out both'
+            }
+          })) : []
+        };
+      });
+    }
+
+  }
+  viewTapOne(V, s, isCmp) {
+    const st = this.state;
+    if (isCmp) { V.cards = this.cmpCards(V, s, true); return; }
+    const S = this.sets()[s.set];
+    const w = 320, gap = 46, total = S.length * w + (S.length - 1) * gap;
+    const x0 = (SAFE.w - total) / 2, y = 150;
+    V.cards = S.map((it, i) => {
+      const F = this.fig(it[0]);
+      let state = null;
+      if (st.ok === i) state = 'ok'; else if (st.wrong === i) state = 'bad';
+      return this.buildCard({
+        key: it[0], x: x0 + i * (w + gap), y: y, w: w, h: w, vb: F.vb, d: this.figD(it[0]),
+        extra: F.extra || '', stroke: it[1], sw: 20, state: state,
+        badge: String.fromCharCode(65 + i), click: this.tapCard(i),
+        anim: st.wrong === i ? 'wig 420ms ease-in-out both' : 'none'
+      });
+    });
+  }
+
+  /* ----- screens 8 / 9 ----- */
+  viewReveal(V, s) {
+    const st = this.state, F = this.fig(s.fig), size = 420;
+    V.cards = [this.buildCard({
+      key: s.fig, x: (SAFE.w - size) / 2, y: 60, w: size, h: size, plain: true,
+      vb: F.vb, d: this.figD(s.fig), stroke: this.P.C.blue, sw: 20,
+      anim: st.reveal ? 'pop 700ms ease-out both' : 'none'
+    })];
+    if (st.reveal) V.callouts = [this.labelPill(s.reveal, 540)];
+  }
+  labelPill(text, top) {
+    return {
+      text: text, style: {
+        position: 'absolute', left: '50%', top: top + 'px', translate: '-50% 0',
+        padding: '12px 44px', borderRadius: '30px', background: '#fff8e2',
+        border: '5px solid ' + GOLD, font: '800 46px "Baloo 2", Nunito, sans-serif',
+        color: '#8a5a12', letterSpacing: '0.06em', whiteSpace: 'nowrap',
+        boxShadow: '0 8px 0 rgba(198,146,44,0.35)', animation: 'pop 520ms ease-out both'
+      }
+    };
+  }
+  viewBuild(V, s) {
+    const st = this.state, F = this.fig('pentagon'), size = 430, K = this.k('pentagon');
+    const d = this.figD('pentagon');
+    V.cards = [this.buildCard({
+      key: 'pent', x: (SAFE.w - size) / 2, y: 50, w: size, h: size, plain: true,
+      vb: F.vb, d: '', stroke: this.P.C.blue, sw: 20,
+      traceD: d, traceStyle: this.traceStyleFor(true, 2400),
+      dots: F.pts.map((p) => ({ x: p[0], y: p[1], r: 16 * K, fill: '#fff', stroke: ICE, sw: 6 * K, style: { opacity: 1 } }))
+    })];
+    if (st.reveal) V.callouts = [this.labelPill(s.reveal, 530)];
+  }
+
+  /* ----- screen 11 parts ----- */
+  viewParts(V, s) {
+    const st = this.state, ph = st.phase, F = this.fig('pentagon'), K = this.k('pentagon');
+    const size = 500, x = 330, y = 116, box = { x: x, y: y, w: size, h: size };
+    const pts = F.pts, segs = this.segs('pentagon');
+    const hl = [];
+    if (ph === 'sides') hl.push.apply(hl, this.segHl('pentagon', [0, 1, 2, 3, 4], null, ICE, 26));
+    if (ph === 'vertex') hl.push.apply(hl, this.segHl('pentagon', [1, 2], null, 'rgba(34,184,230,0.45)', 20));
+    if (ph === 'angle') hl.push.apply(hl, this.segHl('pentagon', [1, 2], null, ICE, 24));
+    const dots = [];
+    if (ph === 'vertex' || ph === 'angle') dots.push({ x: pts[2][0], y: pts[2][1], r: 20 * K, fill: '#fff', stroke: ph === 'angle' ? '#c2a0f0' : ICE, sw: 9 * K, style: { transformBox: 'fill-box', transformOrigin: 'center', animation: 'ptPulse 1s ease-in-out infinite', filter: 'drop-shadow(0 0 10px rgba(34,184,230,0.8))' } });
+    const arcs = ph === 'angle' ? [{ d: this.arcAt(pts, 2, 190 * K), color: GOLD, w: 13 * K }] : [];
+    V.cards = [this.buildCard({
+      key: 'pent', x: x, y: y, w: size, h: size, plain: true, vb: F.vb,
+      d: this.figD('pentagon'), stroke: this.P.C.blue, sw: 18,
+      hl: hl, dots: dots, arcs: arcs
+    })];
+    const items = [
+      { key: 'sides', text: 'Side', anchor: this.mapPt(box, F.vb, segs[0].mid), off: [-40, -150] },
+      { key: 'vertex', text: 'Vertex', anchor: this.mapPt(box, F.vb, pts[2]), off: [200, -110] },
+      { key: 'angle', text: 'Angle', anchor: this.mapPt(box, F.vb, pts[2]), off: [210, 120] }
+    ];
+    const order = ['sides', 'vertex', 'angle'];
+    const cur = order.indexOf(ph);
+    const shown = items.filter((it) => order.indexOf(it.key) <= cur);
+    V.callouts = shown.map((it) => {
+      const on = it.key === ph, p = [it.anchor[0] + it.off[0], it.anchor[1] + it.off[1]];
+      return { text: it.text, style: {
+        position: 'absolute', left: p[0] + 'px', top: p[1] + 'px', translate: '-50% -50%',
+        padding: '10px 36px', borderRadius: '26px', background: on ? '#e9f7ff' : '#f6f9fb',
+        border: '5px solid ' + (on ? ICE : '#dfe9f0'), whiteSpace: 'nowrap', zIndex: 4,
+        font: '800 38px "Baloo 2", Nunito, sans-serif', color: on ? '#17618f' : '#8ea6b8',
+        opacity: on ? 1 : 0.55, boxShadow: on ? '0 7px 0 rgba(34,184,230,0.28)' : 'none',
+        transition: 'all 260ms ease-out', animation: 'fadeUp 320ms ease-out both'
+      } };
+    });
+    V.leaders = shown.map((it) => this.leader(it.anchor,
+      [it.anchor[0] + it.off[0], it.anchor[1] + it.off[1]], it.key === ph ? ICE : '#dfe9f0'));
+  }
+
+  /* ----- screen 12 label the parts ----- */
+  viewLabels(V, s) {
+    const st = this.state, F = this.fig('cross'), size = 470, K = this.k('cross');
+    const x = STAGE.w / 2 - SAFE.x - size / 2, y = 96, box = { x: x, y: y, w: size, h: size };
+    const pts = F.pts;
+    const hl = [], dots = [], arcs = [];
+    const p = st.placed;
+    if (p.side) hl.push.apply(hl, this.segHl('cross', [6], null, GRN, 24));
+    if (p.vertex) dots.push({ x: pts[5][0], y: pts[5][1], r: 22 * K, fill: '#fff', stroke: GRN, sw: 9 * K, style: {} });
+    if (p.angle) arcs.push({ d: this.arcAt(pts, 1, 130 * K), color: GRN, w: 11 * K });
+    V.cards = [this.buildCard({
+      key: 'cross', x: x, y: y, w: size, h: size, plain: true, vb: F.vb,
+      d: this.figD('cross'), stroke: this.P.C.blue, sw: 12, hl: hl, dots: dots, arcs: arcs,
+      fill: 'rgba(207,226,243,0.55)'
+    })];
+    const segsC = this.segs('cross');
+    const anchors = {
+      side: this.mapPt(box, F.vb, segsC[6].mid),
+      vertex: this.mapPt(box, F.vb, pts[5]),
+      angle: this.mapPt(box, F.vb, pts[1])
+    };
+    const offs = { side: [-210, 95], vertex: [250, 60], angle: [270, -80] };
+    const spots = ['side', 'vertex', 'angle'].map((key) => ({
+      key: key, label: key.charAt(0).toUpperCase() + key.slice(1),
+      p: [anchors[key][0] + offs[key][0], anchors[key][1] + offs[key][1]]
+    }));
+    V.targets = spots.map((sp) => {
+      const done = !!p[sp.key], bad = st.badPlace === sp.key;
+      return {
+        nudge: st.chip && st.chip.toLowerCase() === sp.key ? '1' : '',
+        labelKey: sp.key, text: done ? sp.label : '?', click: this.hitTarget(sp.key),
+        style: {
+          position: 'absolute', left: (sp.p[0] - 106) + 'px', top: (sp.p[1] - 38) + 'px',
+          width: '212px', height: '76px', borderRadius: '22px', boxSizing: 'border-box',
+          border: (done ? '5px solid ' + GRN : (bad ? '5px solid ' + RED : '5px dashed #299bd5')),
+          background: done ? '#eefaf2' : (bad ? '#fff2ef' : (st.chip ? '#fff4c8' : '#eaf7ff')),
+          color: done ? '#1f6d4a' : '#2470a1', font: '800 34px "Baloo 2", Nunito, sans-serif',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: done ? 'default' : 'pointer', transform:st.labelHover === sp.key ? 'scale(1.05)' : 'none', transition:'transform 150ms,box-shadow 150ms', boxShadow: st.labelHover === sp.key ? '0 0 0 4px #ffd45b,0 0 26px rgba(255,196,50,.65)' : '0 6px 0 rgba(146,196,228,0.32)',
+          animation: bad ? 'wig 420ms ease-in-out both' : 'none', zIndex: 6
+        }
+      };
+    });
+    V.leaders = spots.map((sp) => this.leader(anchors[sp.key], sp.p, p[sp.key] ? GRN : '#9fd0ec'));
+    V.showChips = true;
+    const chipNames = ['Side', 'Vertex', 'Angle'];
+    const firstFree = chipNames.findIndex((t) => !Object.keys(p).some((k) => p[k] === t));
+    V.chips = chipNames.map((t, ci) => {
+      const used = Object.keys(p).some((k) => p[k] === t);
+      const active = st.chip === t;
+      return {
+        nudge: !st.chip && ci === firstFree ? '1' : '', text: t, click: this.pickChip(t), down: this.dragLabel(t),
+        style: {
+          padding: '0 40px', height: '78px', borderRadius: '39px', boxSizing: 'border-box',
+          background: used ? '#eef4f8' : (active ? 'linear-gradient(#ffe98b,#ffc43b)' : 'linear-gradient(#48baf3,#1583cc)'),
+          border: '5px solid ' + (used ? '#dbe6ee' : (active ? '#0f8fba' : '#a9dcf6')),
+          color: used ? '#b3c4d0' : (active ? '#674015' : '#ffffff'),
+          font: '800 36px "Baloo 2", Nunito, sans-serif', display: 'flex', alignItems: 'center',
+          touchAction:'none', cursor: used ? 'default' : 'grab', opacity: st.draggingLabel === t ? 0.35 : (used ? 0.55 : 1),
+          boxShadow: '0 7px 0 rgba(146,196,228,0.42)', transform: active ? 'translateY(-4px)' : 'none',
+          transition: 'all 160ms ease-out', userSelect: 'none'
+        }
+      };
+    });
+  }
+
+  /* ----- screen 13 count ----- */
+  viewCount(V, s) {
+    const st = this.state, F = this.fig('pentagon'), size = 400, K = this.k('pentagon');
+    const segs = this.segs('pentagon'), c = this.centroid(F.pts);
+    const nums = [];
+    for (let i = 0; i < st.nums; i++) {
+      const m = segs[i].mid, u = this.unit(c, m), o = 58 * K;
+      nums.push({ x: +(m[0] + u[0] * o).toFixed(1), y: +(m[1] + u[1] * o).toFixed(1), ty: +(m[1] + u[1] * o + 15 * K).toFixed(1), r: 38 * K, sw: 8 * K, fs: 46 * K, t: String(i + 1) });
+    }
+    const hl = st.nums > 0 ? this.segHl('pentagon', [st.nums - 1], null, ICE, 24) : [];
+    V.cards = [this.buildCard({
+      key: 'pent', x: (SAFE.w - size) / 2, y: 40, w: size, h: size, plain: true, vb: F.vb,
+      d: this.figD('pentagon'), stroke: st.ok ? GRN : this.P.C.blue, sw: 18, hl: hl, nums: nums
+    })];
+    if (s.q === 'count') {
+      V.showCounter = true;
+      V.counters = [this.counter(0, '')];
+      V.checkStyle = Object.assign({}, V.counters[0].btn, { font: '900 22px Nunito,sans-serif' });
+      V.roundCounterCheck = true;
+    }
+  }
+  counter(i, caption) {
+    const st = this.state;
+    const bad = st.wrong === i || st.wrong === 2;
+    const good = !!st.ok;
+    const rim = good ? GRN : (bad ? RED : '#08b9f4');
+    return {
+      caption: caption,
+      captionStyle: { display: caption ? 'block' : 'none', width: '112px', flexShrink: 0, font: '900 26px Nunito,sans-serif', color: '#073d7c', lineHeight: 1.08, textAlign: 'left' },
+      wrap: {
+        display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', borderRadius: '64px',
+        background: good ? 'linear-gradient(#eafff1,#b4efd1)' : (bad ? 'linear-gradient(#fff2ed,#ffd3c6)' : 'linear-gradient(165deg,#e4fbff 0%,#b8edfc 48%,#8adaf8 100%)'),
+        border: '4px solid ' + rim,
+        boxShadow: 'inset 0 5px 0 rgba(255,255,255,.95), inset 0 -6px 0 rgba(0,152,225,.18), 0 6px 0 #159bce, 0 9px 20px ' + (good ? 'rgba(44,164,102,.3)' : bad ? 'rgba(225,72,65,.3)' : 'rgba(23,154,216,.22)'),
+        animation: bad ? 'wig 420ms ease-in-out both' : 'none'
+      },
+      btn: {
+        width: '80px', height: '80px', flexShrink: 0, borderRadius: '50%',
+        background: 'radial-gradient(ellipse at 32% 14%,rgba(255,255,255,.85) 0%,rgba(255,255,255,.85) 5%,transparent 7%), linear-gradient(150deg,#3cc9ff 0%,#009cfa 48%,#0079e4 100%)',
+        border: '4px solid #0476c9', color: '#fff', font: '900 54px Nunito,sans-serif',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', lineHeight: 1,
+        textShadow: '0 2px 3px rgba(0,54,137,.45)',
+        boxShadow: 'inset 0 4px 0 rgba(174,238,255,.75), inset 0 -5px 0 rgba(0,77,178,.24), 0 4px 0 #0464b6, 0 7px 12px rgba(0,120,213,.22)', userSelect: 'none'
+      },
+      box: {
+        width: '100px', height: '86px', flexShrink: 0, borderRadius: '22px', background: 'linear-gradient(#fff,#fafdff)',
+        border: '3px solid #79dbfa', color: '#093c7a', font: '900 58px Nunito, sans-serif',
+        boxShadow: '0 0 0 5px rgba(87,209,250,.18), 0 3px 12px rgba(0,153,227,.2)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center'
+      },
+      value: String(st.cnt[i]), minus: this.bump(i, -1), plus: this.bump(i, 1), nudge: i === 0 ? '1' : ''
+    };
+  }
+
+  /* ----- screen 14 deform ----- */
+  viewDeform(V, s) {
+    const st = this.state, F = this.fig('pentagon'), size = 470, K = this.k('pentagon');
+    const pts = st.userPts || F.pts;
+    this.svgRefs[0] = this.svgRefs[0] || React.createRef();
+    const showHandles = st.phase === 'drag' || st.phase === 'wow';
+    V.cards = [this.buildCard({
+      key: 'pent', x: (SAFE.w - size) / 2, y: 60, w: size, h: size, plain: true, vb: F.vb,
+      d: this.dPath(pts, true), stroke: this.P.C.blue, sw: 18, svgRef: this.svgRefs[0],
+      fill: 'rgba(207,226,243,0.5)',
+      handles: showHandles ? pts.map((p, i) => ({ x: p[0], y: p[1], r: 34 * K, hit: 130 * K, sw: 11 * K, down: this.handleDown(i) })) : []
+    })];
+    V.showHand = st.showHand;
+    const grab = this.mapPt({ x: (SAFE.w - size) / 2, y: 60, w: size, h: size }, F.vb, pts[0]);
+    V.handStyle = {
+      position: 'absolute', left: (grab[0] - 12) + 'px', top: (grab[1] - 4) + 'px',
+      width: '92px', height: 'auto', display: 'block', pointerEvents: 'none', zIndex: 9,
+      filter: 'drop-shadow(0 6px 10px rgba(60,40,10,0.35))',
+      animation: 'handHint 1.7s ease-in-out infinite'
+    };
+  }
+
+  /* ----- screens 15 / 16 ----- */
+  viewBA(V, s) {
+    const st = this.state, F = this.fig('pentagon'), K = this.k('pentagon');
+    const orig = F.pts, user = st.userPts || F.pts;
+    const size = 380, gapX = 200;
+    const y = 60;
+    const leftX = SAFE.w / 2 - gapX - size, rightX = SAFE.w / 2 + gapX - 0;
+    const segsO = this.segs('pentagon'), segsU = this.segs('pentagon', user);
+    const cO = this.centroid(orig), cU = this.centroid(user);
+    const mk = (which) => {
+      const pts = which ? user : orig, segs = which ? segsU : segsO, cc = which ? cU : cO;
+      const n = which ? (st.numsB || 0) : (st.nums || 0);
+      const nums = [];
+      for (let i = 0; i < n; i++) {
+        const m = segs[i].mid, u = this.unit(cc, m), o = 56 * K;
+        nums.push({ x: +(m[0] + u[0] * o).toFixed(1), y: +(m[1] + u[1] * o).toFixed(1), ty: +(m[1] + u[1] * o + 14 * K).toFixed(1), r: 36 * K, sw: 8 * K, fs: 44 * K, t: String(i + 1) });
+      }
+      const glow = st.phase === 'b' ? [{ d: this.dPath(pts, true), color: 'rgba(34,184,230,0.55)', w: 34 * K, style: { animation: 'glowPulse 1.4s ease-in-out infinite' } }] : [];
+      return this.buildCard({
+        key: which ? 'after' : 'before', x: which ? rightX : leftX, y: y, w: size, h: size,
+        vb: F.vb, d: this.dPath(pts, true), stroke: which ? this.P.C.orange : this.P.C.blue, sw: 18,
+        fill: 'rgba(207,226,243,0.45)', hl: glow, nums: nums,
+        badge: which ? 'After' : 'Before',
+        anim: st.phase === 'a' ? 'pop 1200ms ease-in-out 2' : 'none'
+      });
+    };
+    V.cards = [mk(false), mk(true)];
+    if (s.q === 'count2') {
+      V.showCounter = true;
+      V.counters = [this.counter(0, 'Sides · Before'), this.counter(1, 'Sides · After')];
+    }
+  }
+
+  /* ----- naming screens ----- */
+  viewName(V, s) {
+    const st = this.state, F = this.fig(s.fig), size = 440, K = this.k(s.fig);
+    const pts = st.morph || F.pts;
+    const segs = this.segs(s.fig, st.morph ? null : F.pts), c = this.centroid(F.pts);
+    const nums = [];
+    if (!st.morph) {
+      for (let i = 0; i < st.nums; i++) {
+        const m = segs[i].mid, u = this.unit(c, m), o = 60 * K;
+        nums.push({ x: +(m[0] + u[0] * o).toFixed(1), y: +(m[1] + u[1] * o).toFixed(1), ty: +(m[1] + u[1] * o + 15 * K).toFixed(1), r: 38 * K, sw: 8 * K, fs: 46 * K, t: String(i + 1) });
+      }
+    }
+    const hl = !st.morph && st.nums > 0 ? this.segHl(s.fig, [st.nums - 1], null, ICE, 26) : [];
+    V.cards = [this.buildCard({
+      key: s.fig, x: (SAFE.w - size) / 2, y: 40, w: size, h: size, plain: true,
+      vb: F.vb, d: this.dPath(pts, true), stroke: this.P.C.blue, sw: 18,
+      fill: 'rgba(207,226,243,0.45)', hl: hl, nums: nums
+    })];
+    if (st.reveal || st.nums >= (s.count || 99)) V.callouts = [this.labelPill(s.reveal, 540)];
+  }
+
+  /* ----- recall ----- */
+  viewRecall(V, s) {
+    const st = this.state, size = 420;
+    const names = { 3: 'Triangle', 4: 'Quadrilateral', 5: 'Pentagon', 6: 'Hexagon', 7: 'Heptagon', 8: 'Octagon' };
+    const pts = st.morph || this.P.reg(st.n, 500, 500, 300, st.n === 4 ? 45 : 0);
+    V.cards = [this.buildCard({
+      key: 'recall', x: (SAFE.w - size) / 2, y: 20, w: size, h: size, plain: true,
+      vb: '150 150 700 700', d: this.dPath(pts, true), stroke: this.P.C.blue, sw: 18,
+      fill: 'rgba(207,226,243,0.45)'
+    })];
+    V.callouts = [{
+      text: names[st.n], style: {
+        position: 'absolute', left: '50%', top: '452px', translate: '-50% 0',
+        padding: '10px 46px', borderRadius: '30px', background: '#fff8e2', border: '5px solid ' + GOLD,
+        font: '800 46px "Baloo 2", Nunito, sans-serif', color: '#8a5a12', whiteSpace: 'nowrap',
+        boxShadow: '0 8px 0 rgba(198,146,44,0.35)', animation: 'pop 380ms ease-out both'
+      }
+    }];
+    V.showCounter = true;
+    V.counters = [{
+      caption: 'Sides',
+      wrap: { display: 'flex', alignItems: 'center', gap: '14px', padding: '10px 18px', borderRadius: '30px', background: 'rgba(255,255,255,0.9)', border: '4px solid #cfeafb', boxShadow: '0 6px 0 rgba(146,196,228,0.35)' },
+      btn: { width: '68px', height: '68px', borderRadius: '50%', background: '#fff', border: '4px solid #a9dcf6', color: '#1d5c96', font: '800 40px Nunito, sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 5px 0 rgba(146,196,228,0.4)', userSelect: 'none' },
+      box: { minWidth: '92px', height: '72px', borderRadius: '18px', background: '#f4fbff', border: '4px solid #cfeafb', color: '#123a6b', font: '900 44px Nunito, sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+      value: String(st.n), minus: this.bumpN(-1), plus: this.bumpN(1), nudge: '1'
+    }];
+    V.showCounter = true;
+    V.checkStyle = { display: 'none' };
+    V.checkLabel = '';
+    V.targets = [{
+      text: 'Next', click: this.advance, nudge: '',
+      style: Object.assign({ position: 'absolute', right: '10px', bottom: '14px', zIndex: 8 }, this.bigBtn(GRN, 200))
+    }];
+  }
+
+  /* ----- multi select ----- */
+  viewMulti(V, s) {
+    const st = this.state, S = this.sets()[s.set];
+    const n = S.length;
+    const w = n >= 6 ? 236 : (n === 5 ? 272 : 300), gap = n >= 6 ? 26 : 38;
+    const total = n * w + (n - 1) * gap;
+    const x0 = (SAFE.w - total) / 2, y = s.sub ? 150 : 130;
+    const done = s.correct.every((c) => st.sel.indexOf(c) >= 0) && st.sel.length === s.correct.length;
+    V.cards = S.map((it, i) => {
+      const F = this.fig(it[0]);
+      const sel = st.sel.indexOf(i) >= 0;
+      let state = null;
+      if (st.wrong === i) state = 'bad';
+      else if (sel && !s.check) state = 'ok';
+      else if (sel && s.check) state = st.checked ? 'ok' : 'sel';
+      const coach = st.hlKind === 'coach' && sel && s.correct.indexOf(i) < 0;
+      return this.buildCard({
+        key: it[0], x: x0 + i * (w + gap), y: y, w: w, h: w, vb: F.vb, d: this.figD(it[0]),
+        extra: F.extra || '', stroke: it[1], sw: 20, fill: it[2] || 'none', state: state,
+        badge: String.fromCharCode(65 + i), click: this.tapCard(i),
+        traceD: this.figD(it[0]), traceStyle: coach ? this.traceStyleFor(true, 1500) : { opacity: 0 },
+        anim: st.wrong === i ? 'wig 420ms ease-in-out both' : (coach ? 'pop 900ms ease-in-out infinite' : 'none')
+      });
+    });
+    if (s.sub) {
+      V.callouts = [{
+        text: s.sub, style: {
+          position: 'absolute', left: '50%', top: '46px', translate: '-50% 0',
+          font: '800 32px Nunito, sans-serif', color: '#4c86bd', whiteSpace: 'nowrap'
+        }
+      }];
+    }
+    if (s.check) {
+      V.showCheck = true;
+      V.nudgeCheck = st.sel.length && !st.checked ? '1' : '';
+      V.checkLabel = st.checked ? 'Next' : 'Check';
+      V.checkStyle = this.bigBtn(st.checked ? GRN : (st.sel.length ? '#2f8fd0' : '#a9c7dd'), 250);
+    } else if (done) {
+      V.showCheck = true;
+      V.checkLabel = 'Next';
+      V.checkStyle = this.bigBtn(GRN, 230);
+      V.check = this.advance;
+    }
+  }
+
+  /* ----- sort ----- */
+  viewSort(V, s) {
+    const st = this.state, S = this.sets()[s.set];
+    const n = S.length;
+    const w = 190, gap = 26, total = n * w + (n - 1) * gap;
+    const x0 = (SAFE.w - total) / 2;
+    const zoneW = (SAFE.w - 52) / 2;
+    V.showZones = true;
+    V.zoneAName = s.zones[0]; V.zoneBName = s.zones[1];
+    V.zoneASub = s.zones[2] || ''; V.zoneBSub = s.zones[3] || '';
+    const holding = st.pickedFig !== null && st.pickedFig !== undefined;
+    const zoneStyle = (which) => {
+      const hot = holding && (st.sortHover === which || st.hoverK === 'tg' + which);
+      return {
+        width: zoneW + 'px', height: '338px', borderRadius: '30px', boxSizing: 'border-box',
+        padding: '16px 18px',
+        border: '5px ' + (hot ? 'solid ' : 'dashed ') + (which ? '#a995e4' : '#68b7df'),
+        background: which
+          ? (hot ? '#e9ddff' : '#f2edff')
+          : (hot ? '#d4f1ff' : '#eaf8ff'),
+        cursor: holding ? 'pointer' : 'default',
+        transform: hot ? 'scale(1.015)' : 'scale(1)',
+        boxShadow: hot ? '0 12px 26px rgba(31,109,180,0.18)' : 'none',
+        animation: holding && !hot ? 'glowPulse 1.6s ease-in-out infinite' : 'none',
+        transition: 'all 200ms ease-out', textAlign: 'center'
+      };
+    };
+    V.zoneAStyle = zoneStyle(0); V.zoneBStyle = zoneStyle(1);
+    const counts = [0, 0];
+    V.cards = S.map((it, i) => {
+      const F = this.fig(it[0]);
+      const at = st.sortAt[i];
+      const picked = st.pickedFig === i;
+      let x, y, size;
+      if (at === undefined) { x = x0 + i * (w + gap); y = 30; size = w; }
+      else {
+        const col = counts[at]++;
+        size = 150;
+        x = (at ? zoneW + 52 : 0) + 30 + col * (size + 18);
+        y = 376 + 92;
+      }
+      return this.buildCard({
+        key: it[0], x: x, y: y, w: size, h: size, vb: F.vb, d: this.figD(it[0]),
+        extra: F.extra || '', stroke: it[1], sw: 22, pad: 14,
+        state: at !== undefined ? 'ok' : (st.wrong === i ? 'bad' : (picked ? 'sel' : null)),
+        click: at === undefined ? this.tapCard(i) : null, down: at === undefined ? this.dragFigure(i) : null,
+        opacity:st.draggingFigure === i ? 0.3 : 1,
+        nudge: at === undefined && st.pickedFig === null && !Object.keys(st.sortAt).length && i === 0,
+        z: at === undefined ? 8 : 9,
+        anim: st.wrong === i ? 'wig 420ms ease-in-out both' : (picked ? 'pop 900ms ease-in-out infinite' : 'none')
+      });
+    });
+    V.targets = [
+      { text: '', click: this.dropInto(0), nudge: st.pickedFig !== null && s.answer[st.pickedFig] === 0 && !Object.keys(st.sortAt).length ? '1' : '', style: { position: 'absolute', left: '0px', top: '376px', width: zoneW + 'px', height: '338px', zIndex: 3, cursor: st.pickedFig !== null ? 'pointer' : 'default' } },
+      { text: '', click: this.dropInto(1), nudge: st.pickedFig !== null && s.answer[st.pickedFig] === 1 && !Object.keys(st.sortAt).length ? '1' : '', style: { position: 'absolute', left: (zoneW + 52) + 'px', top: '376px', width: zoneW + 'px', height: '338px', zIndex: 3, cursor: st.pickedFig !== null ? 'pointer' : 'default' } }
+    ];
+    V.callouts = [{
+      text: st.pickedFig === null || st.pickedFig === undefined ? 'Drag each figure into its matching column' : 'Drag into a column and release',
+      style: {
+        position: 'absolute', left: '50%', top: '250px', translate: '-50% 0',
+        font: '800 28px Nunito, sans-serif', color: '#4c86bd', whiteSpace: 'nowrap'
+      }
+    }];
+  }
+
+  restart = () => {
+    if (this.locked()) return;
+    this.sfx('tap');
+    this.setState({ k: 0, userPts: null, dragged: false, drawn: false }, () => {
+      this.save();
+      this.runStep(0, false);
+    });
+  };
+  viewEnd(V, s) {
+    const row = [['triangle', this.P.C.purple], ['quad', this.P.C.orange], ['pentagon', this.P.C.blue],
+      ['hexagon', this.P.C.green], ['heptagon', this.P.C.pink], ['octagon', this.P.C.teal]];
+    const w = 226, gap = 24, total = row.length * w + (row.length - 1) * gap;
+    const x0 = (SAFE.w - total) / 2;
+    V.cards = row.map((it, i) => {
+      const F = this.fig(it[0]);
+      return this.buildCard({
+        key: 'end' + it[0], x: x0 + i * (w + gap), y: 120, w: w, h: w, vb: F.vb,
+        d: this.figD(it[0]), stroke: it[1], sw: 22, fill: 'rgba(207,226,243,0.4)',
+        badge: String(i + 3) + ' sides',
+        anim: 'pop 2600ms ease-in-out ' + (i * 160) + 'ms infinite'
+      });
+    });
+    V.callouts = [{
+      text: 'Polygon: closed + only straight line segments',
+      style: {
+        position: 'absolute', left: '50%', top: '470px', translate: '-50% 0',
+        padding: '16px 54px', borderRadius: '34px', background: '#fff8e2', border: '5px solid ' + GOLD,
+        font: '800 42px "Baloo 2", Nunito, sans-serif', color: '#8a5a12', whiteSpace: 'nowrap',
+        boxShadow: '0 8px 0 rgba(198,146,44,0.35)', animation: 'pop 620ms ease-out both'
+      }
+    }];
+    V.targets = [{
+      text: 'Play again', click: this.restart, nudge: '',
+      style: Object.assign({
+        position: 'absolute', left: '50%', top: '620px', translate: '-50% 0', zIndex: 8
+      }, this.bigBtn(GRN, 300))
+    }];
+  }
+}
+
+</script>
+</body>
+</html>
+<script>let attempts=0;const check=setInterval(()=>{if(!window.__poly?.state.ready){if(++attempts>100){clearInterval(check);document.body.setAttribute('data-test','not-loaded')}return}clearInterval(check);const g=window.__poly;g.timers.forEach(clearTimeout);g.narrate('One two three four five.',{});const sample=()=>Array.from(document.querySelectorAll('.narrator-text > span')).filter(s=>s.textContent.trim()).map(s=>({text:s.textContent,opacity:getComputedStyle(s).opacity,animation:getComputedStyle(s).animation}));setTimeout(()=>{const waiting=sample();window.__spoken.at(-1).onstart();setTimeout(()=>{const early=sample();setTimeout(()=>{const result=document.createElement('pre');result.id='word-result';result.textContent=JSON.stringify({waiting,early,end:sample()});document.body.append(result)},1400)},160)},100)},100);</script>
