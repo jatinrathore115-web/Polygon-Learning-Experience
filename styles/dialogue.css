@@ -1,0 +1,124 @@
+/* Reusable HTML/CSS speech bubble. Leave .dialogue-text empty until content is supplied. */
+.comic-dialogue {
+  --dialogue-width: 520px;
+  --dialogue-height: 230px;
+  --dialogue-radius: 55px;
+  --dialogue-frame: #31b9b4;
+  --dialogue-edge: #16777c;
+  --dialogue-paper: #eafff3;
+  position: relative;
+  isolation: isolate;
+  width: min(100%, var(--dialogue-width));
+  min-height: var(--dialogue-height);
+  padding: 8px;
+  box-sizing: border-box;
+  border: 5px solid var(--dialogue-edge);
+  border-radius: var(--dialogue-radius);
+  background: linear-gradient(180deg, #42c5ba, var(--dialogue-frame));
+  box-shadow: 0 8px 0 rgba(21,103,103,.12), 0 12px 20px rgba(15,77,83,.16);
+}
+.dialogue-inner {
+  position: relative;
+  width: 100%;
+  min-height: max(0px, calc(var(--dialogue-height) - 26px));
+  box-sizing: border-box;
+  border: 3px solid #b5ead4;
+  border-radius: calc(var(--dialogue-radius) - 13px);
+  background: linear-gradient(180deg, #f8fff7, var(--dialogue-paper));
+  box-shadow: inset 0 3px 0 rgba(255,255,255,.9);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+}
+.dialogue-inner::before {
+  content: '';
+  position: absolute;
+  top: 13px;
+  left: 20px;
+  width: 36px;
+  height: 13px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.8);
+  transform: rotate(-30deg);
+  pointer-events: none;
+}
+.dialogue-text {
+  position: relative;
+  min-width: 0;
+  z-index: 3;
+  padding: 14px;
+  box-sizing: border-box;
+  text-align: center;
+  color: #174b52;
+  font: 800 28px/1.25 'Baloo 2', Nunito, sans-serif;
+}
+/* Overlapping outer and inner layers join the short tail to the panel. */
+.comic-dialogue::before {
+  content: '';
+  position: absolute;
+  right: 42px;
+  bottom: -28px;
+  width: 54px;
+  height: 54px;
+  border-right: 5px solid var(--dialogue-edge);
+  border-bottom: 5px solid var(--dialogue-edge);
+  border-radius: 0 0 16px 0;
+  background: var(--dialogue-frame);
+  transform: skewX(12deg) rotate(45deg);
+  z-index: -1;
+}
+.comic-dialogue::after {
+  content: '';
+  position: absolute;
+  right: 54px;
+  bottom: -13px;
+  width: 32px;
+  height: 32px;
+  border-radius: 0 0 10px 0;
+  background: var(--dialogue-paper);
+  transform: skewX(12deg) rotate(45deg);
+  pointer-events: none;
+  z-index: 2;
+}
+.comic-accent {
+  position: absolute;
+  top: -39px;
+  right: 9px;
+  width: 72px;
+  height: 52px;
+  pointer-events: none;
+}
+.comic-accent span {
+  position: absolute;
+  display: block;
+  width: 14px;
+  height: 32px;
+  border: 4px solid var(--dialogue-edge);
+  border-radius: 10px;
+  background: #a5ebc6;
+}
+.comic-accent span:first-child { left: 8px; top: 0; transform: rotate(12deg); }
+.comic-accent span:last-child { left: 40px; top: 11px; height: 25px; background: #ffd06a; transform: rotate(42deg); }
+/* Game dialogue follows passage length without reserving an empty center. */
+.comic-dialogue.dialogue-box { --dialogue-height: 0px; --dialogue-radius: 44px; }
+/* The game tail has a fixed head anchor, independent of passage width/height. */
+.dialogue-box::before,
+.dialogue-box::after {
+  right: auto;
+  bottom: auto;
+  left: var(--dialogue-tail-x);
+  top: calc(100% - 16px);
+  width: 82px;
+  height: 78px;
+  border: 0;
+  border-radius: 0;
+  transform: none;
+  clip-path: polygon(15% 0, 100% 0, 0 100%);
+  pointer-events: none;
+}
+.dialogue-box::before { z-index: 1; background: var(--dialogue-edge); }
+.dialogue-box::after {
+  z-index: 2;
+  background: var(--dialogue-paper);
+  clip-path: polygon(23% 0, 90% 0, 7% 86%);
+}

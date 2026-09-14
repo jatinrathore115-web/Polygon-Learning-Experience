@@ -21,9 +21,10 @@ desktop.ini
 # scratch files from local verification runs
 __*.html
 __*.png
+verification/runtime/
+verification/output/
 
-.vercel
 .env*
 
 # scratch verification screenshots from the build process
-figs/
+reference/figs/

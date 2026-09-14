@@ -109,7 +109,7 @@ const ask = view('ask', { drawn: true });
 const askCard = ask.cards[0];
 const askBox = { x: px(askCard.wrap.left), y: px(askCard.wrap.top), w: px(askCard.wrap.width), h: px(askCard.wrap.height) };
 const askBottom = g.mapPt(askBox, F.vb, [bb.x0, bb.y1])[1];
-const buttonsTop = SAFE.h - 6 - 86;   /* the Open / Closed row sits 6px off the floor */
+const buttonsTop = px(ask.choiceRowStyle.top); // Answer row follows the fitted card.
 check(ask.showChoice === true, 'the question shows its Open and Closed controls');
 check(buttonsTop - askBottom > 60,
   'and the shape clears them by ' + (buttonsTop - askBottom).toFixed(0) + 'px');

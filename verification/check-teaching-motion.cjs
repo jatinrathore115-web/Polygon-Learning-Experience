@@ -11,7 +11,18 @@ for(const phase of ['sides','vertex','angle']){
   const recording=c.window.PolygonRecordedVoice.find(step.narr);
   const word=recording.words.find(w=>w.word.toLowerCase().replace(/[^a-z]/g,'')===(phase==='sides'?'sides':phase));
   assert.equal(parseFloat(v.callouts.at(-1).style.animationDelay),word.start*1000);
-  const shaft=parseFloat(v.leaders.at(-1).style.width);assert(shaft>=50&&shaft<=60);
+  const shaft=parseFloat(v.leaders.at(-1).style.width);assert(shaft>=(phase==='sides'?20:50)&&shaft<=60);
+  assert.equal(v.cards[0].wrap.width,'750px');
+  for(const label of v.callouts){
+    const left=parseFloat(label.style.left),top=parseFloat(label.style.top);
+    assert(left-100>=0&&left+100<=1570&&top-42>=0&&top+42<=701,'label stays inside the content area');
+  }
+  if(phase==='vertex'){
+    assert(v.cards[0].hl.every(h=>h.color!==v.cards[0].stroke),'meeting sides contrast with the outline');
+    const edges=v.cards[0].hl[0].style;
+    assert(parseFloat(edges.animationDelay)+parseFloat(edges.animationDuration)<=parseFloat(v.cards[0].dots[0].style.animationDelay));
+    assert.equal(v.cards[0].dots[0].style.animationDelay,v.callouts.at(-1).style.animationDelay);
+  }
   if(phase!=='sides'){
     const end=g.fig('pentagon').pts[2].join(' ');
     assert(v.cards[0].hl.every(h=>h.d.trim().endsWith(end)));

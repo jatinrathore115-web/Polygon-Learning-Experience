@@ -15,6 +15,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles/buttons.css" />
+<link rel="stylesheet" href="styles/dialogue.css" />
 <style>
   html, body { margin: 0; padding: 0; height: 100%; background: #8b7edc; overflow: hidden; }
   a { color: #2f6fd0; } a:hover { color: #1546a0; }
@@ -63,15 +65,16 @@
      other starts. Only the glow animates once they are drawn. */
   @keyframes boundDraw { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
   @keyframes boundLit { 0%,100% { filter: drop-shadow(0 0 7px rgba(34,184,230,0.55)); } 50% { filter: drop-shadow(0 0 20px rgba(34,184,230,1)); } }
-  @keyframes breathe { 0%,100% { transform: scale(1) translateY(0); } 50% { transform: scale(1.014) translateY(-3px); } }
-  @keyframes sway { 0%,100% { transform: rotate(-1.1deg) translateY(0); } 50% { transform: rotate(1.4deg) translateY(-4px); } }
-  @keyframes nod { 0% { transform: translateY(0) scale(1); } 35% { transform: translateY(-16px) scale(1.04); } 60% { transform: translateY(2px) scale(0.99); } 100% { transform: translateY(0); } }
-  @keyframes tilt { 0%,100% { transform: rotate(0); } 30% { transform: rotate(-7deg); } 70% { transform: rotate(4deg); } }
+  @keyframes polygonRevealGlow { 0%,100% { opacity: 0; filter: drop-shadow(0 0 0 rgba(34,184,230,0)); } 40% { opacity: 1; filter: drop-shadow(0 0 18px rgba(34,184,230,.85)); } }
+  @keyframes storyArrive { from { opacity:0; } to { opacity:1; } }
+  @keyframes rockArrival { 0% { transform:translate(-440px,-400px) rotate(-12deg) scale(.78); opacity:0; } 18% { opacity:1; } 62% { transform:translate(42px,-160px) rotate(8deg) scale(1); } 84% { transform:translate(0,-22px) rotate(-3deg); } 93% { transform:translate(0,5px) scale(1.035,.965); } 100% { transform:translate(0,0) rotate(0); opacity:1; } }
+  .story-surface .story-controls { transition:opacity 260ms ease-out; }
+  .story-surface[data-controls="waiting"] .story-controls { opacity:0; visibility:hidden; pointer-events:none; }
+  @media(prefers-reduced-motion:reduce) { .story-board,.story-surface,.dialogue-box,.story-controls { transition:none!important; } }
   @keyframes wig { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-11px); } 45% { transform: translateX(9px); } 70% { transform: translateX(-6px); } }
   @keyframes wrongTapA { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 45% { transform: translateX(5px); } 70% { transform: translateX(-3px); } }
   @keyframes wrongTapB { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 45% { transform: translateX(5px); } 70% { transform: translateX(-3px); } }
   @keyframes pop { 0% { transform: scale(1); } 45% { transform: scale(1.09); } 100% { transform: scale(1); } }
-  @keyframes ptPulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.18); opacity: 0.86; } }
   @keyframes halo { 0% { transform: scale(0.7); opacity: 0.55; } 100% { transform: scale(2.1); opacity: 0; } }
   /* --- screen 1: the point arrives, then keeps a slow breath so it holds the
          eye on a large white board. Appear and breathe are on two nested
@@ -92,42 +95,17 @@
          while she speaks — and it is transform only. --- */
   .swiftee-wrap { transform-origin: 50% 88%; transition: transform 760ms cubic-bezier(.2,.8,.25,1.04), opacity 280ms ease-out; will-change: transform; }
   .swiftee-wrap[data-hidden="true"] { transition: none; }
-  @keyframes swifteeDot { 0%,100% { opacity:.2; transform:scale(.6); } 50% { opacity:1; transform:scale(1); } }
-  .swiftee-dot { position:absolute; border-radius:50%; background:#fff; border:2px solid #9fdcff; box-shadow:0 2px 6px rgba(20,90,150,.25); animation:swifteeDot 1.05s ease-in-out infinite; }
   /* --- ambient + interaction juice --- */
-  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-  @keyframes snowFall { 0% { transform: translateY(-70px); } 100% { transform: translateY(1180px); } }
-  @keyframes flakeSway { 0%,100% { transform: translateX(-14px); } 50% { transform: translateX(14px); } }
   @keyframes ripple { 0% { transform: scale(0.18); opacity: 0.9; } 100% { transform: scale(2.5); opacity: 0; } }
   @keyframes instructionPanelIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
   .instruction-panel { position:absolute; inset:0; z-index:40; pointer-events:none; animation:instructionPanelIn 420ms ease-in both; }
   @keyframes textIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes textInB { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* Interactive affordances live on separate layers so feedback animations keep their transforms. */
-  @keyframes actionGlow { 0%,100% { opacity:.35; } 50% { opacity:.85; } }
-  @keyframes actionShine { 0%,65% { background-position:180% 0; } 100% { background-position:-80% 0; } }
-  .game-action { position:relative; isolation:isolate; touch-action:manipulation; transition:scale 140ms ease; }
-  .game-action::before { content:''; position:absolute; inset:-4px; border-radius:inherit; pointer-events:none; opacity:0; box-shadow:0 0 0 2px rgba(80,205,255,.4),0 0 22px rgba(35,181,255,.4); transition:opacity 180ms; }
-  [data-interactive="true"] .game-action::before { animation:actionGlow 3.2s ease-in-out infinite; }
-  [data-interactive="true"] .game-action:hover::before,
-  [data-interactive="true"] .game-action:focus-visible::before { animation:none; opacity:1; box-shadow:0 0 0 3px #a3edff,0 0 32px rgba(20,172,255,.65); }
-  [data-interactive="true"] .game-action:active { scale:.96; }
-  .game-action:focus-visible { outline:4px solid #f5c33f; outline-offset:7px; }
-  .game-primary::after { content:''; position:absolute; inset:7px; border-radius:inherit; pointer-events:none; background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.35) 49%,transparent 63%) 180% 0 / 250% 100% no-repeat; opacity:0; }
-  [data-interactive="true"] .game-primary::after { opacity:1; animation:actionShine 4.5s ease-in-out infinite; }
-  [data-interactive="true"] .game-handle { filter:drop-shadow(0 0 9px #22b8e6); }
-  /* Quiet controls: no pulsing halo, no shine sweep — a crisp lift on hover, so
-     they still answer the pointer without glowing like a primary button. */
-  .game-quiet { transition:translate 140ms ease, border-color 140ms ease, box-shadow 140ms ease; }
-  .game-quiet::before, .game-quiet::after { display:none !important; }
-  [data-interactive="true"] .game-quiet:hover { translate:0 -2px; border-color:#7cc9f2; }
-  [data-interactive="true"] .game-quiet:active { translate:0 1px; }
   @media (prefers-reduced-motion:reduce) {
     .idle-hand,.idle-ring { animation:none !important; transform:none !important; opacity:1 !important; }
     .instruction-panel { animation:none !important; }
     .swiftee-wrap { transition:none !important; }
-    .swiftee-dot { animation:none !important; opacity:1 !important; transform:none !important; }
     .drop-zone { animation:none !important; }
     .ice-board { transition:none !important; }
     .narrator-text span { animation:none !important; opacity:1 !important; transform:none !important; }
@@ -145,31 +123,22 @@
   <div style="{{ scalerStyle }}">
 
     <!-- ============ frozen background ============ z 0 -->
-    <img src="assets/background.png" alt="" style="{{ bgStyle }}" />
+    <img src="assets/image.png" alt="" style="{{ bgStyle }}" />
 
-    <sc-for list="{{ snow }}" as="w" hint-placeholder-count="0">
-      <div style="{{ w.wrap }}"><div style="{{ w.dot }}"></div></div>
-    </sc-for>
-
-    <!-- ============ Swiftee guide ============ z 20 — sits BEFORE the board
-         in the DOM and below it in z, so the board's snowy rim covers her feet
-         and she reads as perched behind the ice, beside the sign she speaks from. -->
+    <!-- ============ Swiftee guide ============ z 20, perched on the left rock -->
     <sc-if value="{{ showGuide }}" hint-placeholder-val="{{ false }}">
       <div style="{{ guideViewport }}">
         <div class="swiftee-wrap" data-hidden="{{ guideHidden }}" style="{{ guideStyle }}">
           <canvas ref="{{ guideRef }}" width="{{ guideCell }}" height="{{ guideCell }}" role="img" aria-label="Swiftee, your guide" style="{{ guideCanvasStyle }}"></canvas>
         </div>
-        <sc-if value="{{ showSpeechDots }}" hint-placeholder-val="{{ false }}">
-          <sc-for list="{{ speechDots }}" as="dot" hint-placeholder-count="0"><div class="swiftee-dot" style="{{ dot.style }}"></div></sc-for>
-        </sc-if>
       </div>
     </sc-if>
 
     <!-- ============ ice board ============ z 30 -->
-    <img class="ice-board" src="assets/ice%20board.png" alt="" style="{{ boardStyle }}" />
+    <div class="story-board" aria-hidden="true" style="{{ boardStyle }}"></div>
 
     <!-- ============ learning content ============ z 32, inside the board's safe area -->
-    <div ref="{{ safeRef }}" data-screen-label="{{ screenLabel }}" data-interactive="{{ effectsEnabled }}" onPointerDown="{{ stageDown }}" style="{{ safeStyle }}">
+    <div class="story-surface" ref="{{ safeRef }}" data-controls="{{ storyControls ? 'ready' : 'waiting' }}" data-screen-label="{{ screenLabel }}" data-interactive="{{ effectsEnabled }}" onPointerDown="{{ stageDown }}" style="{{ safeStyle }}">
 
       <sc-if value="{{ showZones }}" hint-placeholder-val="{{ false }}">
         <div style="{{ zoneRowStyle }}">
@@ -238,20 +207,20 @@
             <span aria-hidden="true" style="{{ d.arrowStyle }}">{{ d.arrow }}</span>
           </div>
           <sc-for list="{{ d.menu }}" as="m" hint-placeholder-count="0">
-            <div class="{{ m.click ? 'game-action game-quiet' : '' }}" role="{{ m.click ? 'button' : undefined }}" tabIndex="{{ m.click && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ m.nudge }}" onClick="{{ m.click }}" onPointerEnter="{{ m.enter }}" onPointerLeave="{{ m.leave }}" style="{{ m.style }}">{{ m.text }}</div>
+            <div class="{{ m.click ? 'game-action game-quiet game-dropdown-option' : 'game-dropdown-option' }}" role="{{ m.click ? 'button' : undefined }}" tabIndex="{{ m.click && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ m.nudge }}" onClick="{{ m.click }}" onPointerEnter="{{ m.enter }}" onPointerLeave="{{ m.leave }}" style="{{ m.style }}">{{ m.text }}</div>
           </sc-for>
         </div>
       </sc-for>
 
       <sc-if value="{{ showChoice }}" hint-placeholder-val="{{ false }}">
-        <div style="position:absolute;left:0;bottom:6px;width:100%;display:flex;justify-content:center;gap:74px">
+        <div class="story-controls" style="{{ choiceRowStyle }}">
           <div class="{{ chooseOpen ? 'game-action game-primary' : '' }}" role="{{ chooseOpen ? 'button' : undefined }}" tabIndex="{{ chooseOpen && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeOC }}" onClick="{{ chooseOpen }}" onPointerEnter="{{ hovOpen }}" onPointerLeave="{{ hovOut }}" style="{{ btnOpen }}">Open</div>
           <div class="{{ chooseClosed ? 'game-action game-primary' : '' }}" role="{{ chooseClosed ? 'button' : undefined }}" tabIndex="{{ chooseClosed && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeClosed }}" onClick="{{ chooseClosed }}" onPointerEnter="{{ hovClosed }}" onPointerLeave="{{ hovOut }}" style="{{ btnClosed }}">Closed</div>
         </div>
       </sc-if>
 
       <sc-if value="{{ showChips }}" hint-placeholder-val="{{ false }}">
-        <div style="position:absolute;left:0;bottom:10px;width:100%;display:flex;justify-content:center;gap:44px">
+        <div class="story-controls" style="position:absolute;left:0;bottom:10px;width:100%;display:flex;justify-content:center;gap:44px">
           <sc-for list="{{ chips }}" as="p" hint-placeholder-count="3">
             <div class="{{ p.click ? 'game-action' : '' }}" role="{{ p.click ? 'button' : undefined }}" tabIndex="{{ p.click && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ p.nudge }}" onPointerDown="{{ p.down }}" onPointerEnter="{{ p.enter }}" onPointerLeave="{{ p.leave }}" onClick="{{ p.click }}" style="{{ p.style }}">{{ p.text }}</div>
           </sc-for>
@@ -259,7 +228,7 @@
       </sc-if>
 
       <sc-if value="{{ showCounter }}" hint-placeholder-val="{{ false }}">
-        <div style="{{ counterRowStyle }}">
+        <div class="{{ storyCounting ? '' : 'story-controls' }}" style="{{ counterRowStyle }}">
           <sc-for list="{{ counters }}" as="n" hint-placeholder-count="1">
             <div role="group" aria-label="{{ n.accessibleLabel }}" style="{{ n.wrap }}">
               <div style="{{ n.captionStyle }}">{{ n.caption }}</div>
@@ -273,7 +242,7 @@
       </sc-if>
 
       <sc-if value="{{ showCheck }}" hint-placeholder-val="{{ false }}">
-        <div style="position:absolute;left:0;bottom:6px;width:100%;display:flex;justify-content:center">
+        <div class="story-controls" style="position:absolute;left:0;bottom:6px;width:100%;display:flex;justify-content:center">
           <div class="{{ check ? 'game-action game-primary' : '' }}" role="{{ check ? 'button' : undefined }}" tabIndex="{{ check && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeCheck }}" onClick="{{ check }}" onPointerEnter="{{ hovCheck }}" onPointerLeave="{{ hovOut }}" aria-disabled="{{ checkDisabled }}" style="{{ checkStyle }}">{{ checkLabel }}</div>
         </div>
       </sc-if>
@@ -294,26 +263,18 @@
       </sc-if>
     </div>
 
-    <!-- ============ wooden instruction sign ============ z 40 -->
+    <!-- ============ dialogue sized to its current passage ============ z 40 -->
     <div class="instruction-panel">
-    <img src="assets/intruction%20panel.png" alt="" style="{{ signStyle }}" />
-    <div style="{{ signTextBox }}">
+    <div class="comic-dialogue dialogue-box" style="{{ signStyle }}">
+      <div class="dialogue-inner"><div class="dialogue-text">
       <div class="narrator-text" ref="{{ narrRef }}" style="{{ narrStyle }}"><sc-for list="{{ narratorParts }}" as="part" hint-placeholder-count="0"><span key="{{ part.key }}" style="{{ part.style }}">{{ part.text }}</span></sc-for></div>
+      </div></div>
+      <div class="comic-accent" aria-hidden="true"><span></span><span></span></div>
     </div>
 
     </div>
 
-    <!-- ============ learner controls ============ z 42 -->
-    <div style="{{ hudStyle }}">
-      <div class="game-action" role="button" tabIndex="0" onKeyDown="{{ activateKey }}" aria-label="Say the instruction again" onClick="{{ replay }}" onPointerEnter="{{ hovReplay }}" onPointerLeave="{{ hovOut }}" style="{{ btnReplay }}">↻</div>
-      <div class="game-action" role="button" tabIndex="0" onKeyDown="{{ activateKey }}" aria-label="{{ muteLabel }}" onClick="{{ toggleMute }}" onPointerEnter="{{ hovMute }}" onPointerLeave="{{ hovOut }}" style="{{ btnMute }}">{{ muteIcon }}</div>
-      <div aria-live="polite" style="{{ progressStyle }}">{{ progress }}</div>
-      <div aria-live="polite" style="position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0">{{ liveMsg }}</div>
-    </div>
 
-    <sc-if value="{{ voiceError }}" hint-placeholder-val="{{ false }}">
-      <button onClick="{{ retryVoice }}" style="position:absolute;left:50%;bottom:24px;translate:-50% 0;z-index:90;padding:14px 32px;border:3px solid white;border-radius:30px;background:#167bb7;color:white;font:800 26px Nunito,sans-serif;cursor:pointer">{{ voiceError }}</button>
-    </sc-if>
     <div ref="{{ ghostRef }}" style="position:absolute;left:0;top:0;pointer-events:none;opacity:0;z-index:60"></div>
   </div>
 </div>
@@ -332,29 +293,18 @@ const IK = '#f58420', ICE = '#22b8e6', GRN = '#2f9e5e', RED = '#e8553f', GOLD = 
    drift apart between 1920x1080 and 1024x576 — there is only ever one number
    driving layout. Boxes below were measured off the reference art itself.
    ========================================================================= */
+/* Warm CSS button surfaces, shared by answers, steppers and primary actions. */
+const BUTTON = { face: 'linear-gradient(#ffe795 0%, #ffca52 55%, #ffad32 100%)', ink: '#673408', edge: '#fff0b5', shadow: 'inset 0 2px 0 rgba(255,255,255,.65), 0 6px 0 #bd6818, 0 10px 18px rgba(135,73,13,.18)' };
 const STAGE = { w: 1980, h: 1080 };
-/* "ice board.png" is a full-stage canvas with the board painted inside it at
-   this rectangle — measured off the asset's alpha bounds. */
-const BOARD_ART = { x: 68, y: 157, w: 1844, h: 872 };
-/* Where that painted board should actually sit. Moved down and in a touch so
-   there is a real gap under the sign, keeping a comfortable bottom margin. */
-const BOARD = { x: 87, y: 196, w: 1806, h: 854 };
-/* The plank, sized to the room left above the board. Its aspect (6.855) is
-   fixed by the artwork, so width follows height. */
-const SIGN_TOP = 10, SIGN_GAP = 12;
-const SIGN_H = BOARD.y - SIGN_GAP - SIGN_TOP;
-const SIGN_W = Math.round(SIGN_H * 1844 / 269);
+/* Reserve the left rock for the guide; all activity layouts share the right surface. */
+const BOARD = { x: 378, y: 122, w: 1594, h: 846 };
 const LAYER = {
   board:   BOARD,
-  sign:    { x: Math.round((STAGE.w - SIGN_W) / 2), y: SIGN_TOP, w: SIGN_W, h: SIGN_H }
+  sign:    { x: 22, y: 236, w: 344, h: 272 }
 };
-/* Learning content: inset from the ice border on all four sides so nothing
-   ever touches the frozen frame. Derived from the board so the two move together. */
+/* Preserve the existing logical content size so geometry and drop coordinates stay stable. */
 const SAFE = {
-  x: Math.round(BOARD.x + BOARD.w * 0.0654),
-  y: Math.round(BOARD.y + BOARD.h * 0.1009),
-  w: Math.round(BOARD.w * 0.8693),
-  h: Math.round(BOARD.h * 0.8211)
+  x: 390, y: 172, w: 1570, h: 701
 };
 /* Sort screens (CFU 2 / 5): a tray row of figures above two drop columns.
    Every number is stage px inside SAFE, and the view, the hover preview and
@@ -370,16 +320,6 @@ const SORT = {
      the pair glides inward and settles as one centred result on the board. */
   unite: 56, uniteGap: 24, uniteMs: 520
 };
-/* The plank's usable text band — clear of the rope bolts and both snowflakes,
-   and only as tall as the wood. Derived from the sign for the same reason.
-   Width comes from sampling the plank art (1844x269) for wood that is clear
-   across the rows a centred line actually occupies: the widest run there is
-   6.2%-89.6% of the sign, and the right snowflake is the tighter side, so the
-   widest centred band is 2x39.6% ~ 79%. 80% with the pad below puts the glyph
-   edges at 11.1%/88.9% — inside the wood on both sides.
-   A single line sits in those clear middle rows and gets the wide band; a
-   second line dips into the rows the snowflakes occupy, so two-line text gets
-   the narrower one (the widest centred run across those lower rows is ~77%). */
 /* Screen 1's point: the mark's diameter, and how long it takes to travel from
    the board's centre to the first vertex of the shape it is about to draw. */
 const S1_DOT = 62, S1_TRAVEL = 620;
@@ -387,38 +327,14 @@ const S1_DOT = 62, S1_TRAVEL = 620;
    them reaches the word "boundaries" at about 1.9s, so they are lit and holding
    well before it arrives, by whichever voice is reading. */
 const BOUND_DRAW = 1150;
-const NARR_ONE = 0.80, NARR_TWO = 0.7626;
-const NARR = {
-  x: Math.round(LAYER.sign.x + LAYER.sign.w * (1 - NARR_ONE) / 2),
-  y: Math.round(LAYER.sign.y + LAYER.sign.h * 0.2719),
-  w: Math.round(LAYER.sign.w * NARR_ONE),
-  w2: Math.round(LAYER.sign.w * NARR_TWO),
-  /* tall enough to hold two lines at the fixed size, centred where one line
-     sat before, so the instruction never shifts vertically between screens. */
-  h: Math.round(LAYER.sign.h * 0.60)
-};
-/* One size on every screen. The sign is the lesson's speaking voice, and type
-   that resizes per sentence reads as that voice changing volume — the longest
-   line would otherwise arrive a third smaller than the shortest. So the size
-   never scales to fit: a sentence too wide for the plank takes a second,
-   balanced line instead. pad is the optical breathing room inside the band. */
-const NARR_TYPE = { size: 38, lineHeight: 1.18, pad: 24, color: '#633c19', accent: '#2c63b9', outline: 3 };
-/* Swiftee's cell, in the sky to the left of the sign. Every frame of every
-   animation in the pack shares one square cell with the pivot at its centre, so
-   the guide is one fixed box: swapping expressions can never move her. The
-   standing baseline (from the manifest) is set a little below the board's top
-   edge so the snowy rim covers her feet and she reads as perched behind the ice. */
-const SWIFTEE_CELL = 310;
+const NARR = { w: 284, w2: 284 };
+/* Consistent readable type; longer narration pages inside the dialogue bubble. */
+const NARR_TYPE = { size: 46, lineHeight: 1.2, pad: 8, color: '#174b52', accent: '#975213', outline: 0 };
+/* Every expression shares one fixed cell, so changing poses cannot move the guide. */
+const SWIFTEE_CELL = 340;
 const SWIFTEE_BASELINE = (window.SWIFTEE && window.SWIFTEE.baseline) || 0.877;
-/* Where her feet stand, and the centre line she stands on. Feet land inside the
-   board rim so the snow covers them; the centre keeps a clear gap to the sign. */
-const SWIFTEE_FEET = BOARD.y + 46, SWIFTEE_CENTRE = 210;
-/* How far right she actually inks while a line is being spoken, as a fraction
-   of the cell. Taken from the manifest: puzzleing (473 of 512) is the widest
-   expression that can share the screen with narration — celebrating is wider
-   still, but it only starts once the voice has stopped. The speech trail is
-   placed against this edge, so it clears her in every pose it can appear with. */
-const SWIFTEE_INK = { right: 473 / 512 };
+/* Feet and centre line aligned to the left rock in assets/image.png. */
+const SWIFTEE_FEET = 824, SWIFTEE_CENTRE = 192;
 const GUIDE_BOX = {
   x: Math.round(SWIFTEE_CENTRE - SWIFTEE_CELL / 2),
   y: Math.round(SWIFTEE_FEET - SWIFTEE_CELL * SWIFTEE_BASELINE),
@@ -522,6 +438,7 @@ class SwifteeGuide {
     this.resting = GUIDE_REST.WATCH;
     this.reaction = null;   /* token of the reaction holding the stage, if any */
     this.misses = 0;        /* wrong attempts on the question now on screen */
+    this.progress = 0; this.voiceActive = false; this.wordCues = new Set();
     this.dozing = false; this.wakeTo = null; this._idle = null; this._preload = null;
   }
   get on() { return !!this.sprite; }
@@ -581,9 +498,11 @@ class SwifteeGuide {
     this.sprite.set(this.exit().concat(this.build(name, Infinity)));
   }
   /* A list of [state, cycles] played once, in order, then back to resting. */
-  react(list) {
+  react(list, priority = 2) {
     if (!this.on) return;
-    const token = this.reaction = {};
+    // Hints and drag events must not erase an answer reaction or restart themselves.
+    if (this.reaction && (priority < this.reaction.priority || (priority === 1 && this.reaction.priority === 1))) return;
+    const token = this.reaction = { priority };
     let segs = this.exit();
     list.forEach(([name, cycles]) => { segs = segs.concat(this.build(name, cycles || 1)); });
     if (!segs.length) { this.reaction = null; return; }
@@ -596,6 +515,7 @@ class SwifteeGuide {
     if (!this.on) return;
     this._idle = setTimeout(() => {
       this._idle = null;
+      if (this.voiceActive || (this.host.locked && this.host.locked())) return;
       if (this.reaction) { this.armIdle(); return; }
       this.dozing = true; this.wakeTo = this.resting;
       this.settle(GUIDE_REST.DOZE);
@@ -604,33 +524,69 @@ class SwifteeGuide {
   clearIdle() { if (this._idle) { clearTimeout(this._idle); this._idle = null; } }
   wake() { if (!this.dozing) return; this.dozing = false; this.resting = this.wakeTo || GUIDE_REST.WATCH; }
   /* runStep clears the lesson's timers; drop ours and land back on watching. */
-  reset() { this.clearIdle(); this.dozing = false; this.reaction = null; this.misses = 0; this.resting = GUIDE_REST.WATCH; }
+  reset() {
+    this.clearIdle(); this.dozing = false; this.reaction = null;
+    this.misses = 0; this.progress = 0; this.voiceActive = false; this.wordCues.clear();
+    this.resting = GUIDE_REST.WATCH;
+    if (this.on) this.sprite.set(this.build(GUIDE_REST.WATCH, Infinity));
+  }
 
-  /* ---- semantic events: the only thing screens should call ---- */
-  /* A new screen: she flies in beside the sign; on the very first one she
-     waves hello before the first instruction. */
+  /* Semantic events keep expressions tied to actual playback and learner actions. */
   onScreenEnter(first) {
     if (!this.on) return;
     this.clearIdle(); this.dozing = false; this.reaction = null; this.resting = GUIDE_REST.WATCH;
-    this.react(first ? [['flapping', 0.6], ['waving', 1]] : [['flapping', 0.6]]);
+    this.react(first ? [['flapping', 1]] : [['curious', .35]], 1);
   }
-  /* Instruction text, narration and her talking start on the same tick. */
-  onInstructionStart() { this.wake(); this.clearIdle(); this.settle(GUIDE_REST.TALK); }
-  /* …and she only stops talking when the audio actually ends. */
-  onInstructionComplete(awaiting) { this.settle(GUIDE_REST.WATCH); if (awaiting) this.armIdle(); else this.clearIdle(); }
-  onInteractionStart() { this.wake(); this.clearIdle(); this.react([['curious', 1]]); }
-  onCorrectProgress() { this.wake(); this.react([['happy', 1]]); this.armIdle(); }
-  /* The guide counts misses itself rather than reading the lesson's attempt
-     tally: the screens bump that inside the same setState that precedes the
-     call, so a first miss can already read as a second one. It clears with
-     every step, which is exactly when the lesson clears its own count. */
-  onWrongAttempt() { this.wake(); this.clearIdle(); this.misses += 1; this.react([[this.misses >= 2 ? 'puzzleing' : 'confused', 1]]); }
-  onCorrectAnswer() { this.wake(); this.clearIdle(); this.react([[this.misses > 0 ? 'relieved' : 'happy', 1]]); }
-  onSurprise() { this.wake(); this.react([['surprised', 1]]); }
-  /* The hand hint appears: she leans in with it. */
-  onHint() { this.wake(); this.react([['curious', 1]]); this.armIdle(); }
-  onActivity() { const woke = this.dozing; this.wake(); if (woke && !this.reaction) this.settle(this.resting); if (this._idle) this.armIdle(); }
-  onScreenComplete() { this.clearIdle(); this.dozing = false; this.resting = GUIDE_REST.CHEER; this.react([['proud', 1]]); }
+  onInstructionQueued() {
+    this.wordCues.clear(); this.onInstructionPause();
+  }
+  onInstructionStart() {
+    if (this.voiceActive) return;
+    this.voiceActive = true; this.wake(); this.clearIdle(); this.settle(GUIDE_REST.TALK);
+  }
+  onInstructionPause() {
+    this.voiceActive = false; this.clearIdle(); this.settle(GUIDE_REST.WATCH);
+  }
+  onInstructionComplete(awaiting) {
+    this.onInstructionPause(); if (awaiting) this.armIdle();
+  }
+  onInteractionStart() { this.wake(); this.clearIdle(); this.react([['curious', .35]], 1); }
+  onCorrectProgress() {
+    this.wake(); this.progress += 1;
+    this.react([[this.progress % 3 === 0 ? 'proud' : 'happy', .45]], 2); this.armIdle();
+  }
+  onWrongAttempt() {
+    this.wake(); this.clearIdle(); this.misses += 1;
+    this.react([[this.misses >= 2 ? 'puzzleing' : 'confused', .55]], 3);
+  }
+  onCorrectAnswer() {
+    this.wake(); this.clearIdle(); this.react([[this.misses > 0 ? 'relieved' : 'happy', .7]], 3);
+  }
+  onSurprise() { this.wake(); this.react([['surprised', .45]], 2); }
+  onWord(word, step) {
+    if (!this.voiceActive) return;
+    const w = String(word).toLowerCase().replace(/[^a-z]/g, '');
+    let cue = /^(whoa|woah|wow)$/.test(w) ? 'surprise' : null;
+    if (step.sc === 'S8' && w === 'polygon') cue = 'surprise';
+    if (!step.q && /^(triangle|quadrilateral|pentagon|hexagon|heptagon|octagon)$/.test(w)) cue = 'proud';
+    if (!cue || this.wordCues.has(cue)) return;
+    this.wordCues.add(cue);
+    if (cue === 'surprise') this.onSurprise();
+    else this.react([['proud', .45]], 2);
+  }
+  onHint() {
+    if (this.voiceActive) return;
+    this.wake(); this.react([['curious', .35]], 1); this.armIdle();
+  }
+  onActivity() {
+    const woke = this.dozing; this.wake();
+    if (woke && !this.reaction) this.settle(this.resting);
+    if (this._idle) this.armIdle();
+  }
+  onScreenComplete() {
+    this.clearIdle(); this.dozing = false; this.voiceActive = false;
+    this.resting = GUIDE_REST.CHEER; this.react([['proud', .7]], 4);
+  }
 }
 
 class Component extends DCLogic {
@@ -639,6 +595,7 @@ class Component extends DCLogic {
     sel: [], dd: [null, null, null, null], ddOpen: -1, ddWrong: [false, false, false, false],
     cnt: [4, 4], attempts: 0, wrong: null, ok: null, ocReveal: null, nudge: null,
     guideHidden: true, interactive: false,
+    storyDialogue: false, storyContent: false, storyControls: false, guideFlying: false,
     narrTone: 'teach', narrTick: 0,
     hoverK: null, pressK: null, fx: [],
     userPts: null, dragged: false, reveal: false, nums: 0, hlKind: null,
@@ -660,7 +617,6 @@ class Component extends DCLogic {
     this.safeRef = React.createRef();
     this.ghostRef = React.createRef(); this.svgRefs = {};
     this.timers = [];
-    this.snow = this.makeSnow();
     window.addEventListener('pointerdown', this.unlockAudio, true);
     window.addEventListener('pointerdown', this.noteActivity, true);
     window.addEventListener('keydown', this.noteActivity, true);
@@ -746,8 +702,6 @@ class Component extends DCLogic {
       transform: 'rotate(' + ang.toFixed(2) + 'deg)', transformOrigin: '0 50%', transition: 'background 260ms'
     } };
   }
-  /* Progress is deliberately not persisted — every run starts at screen 1. */
-  save() {}
 
   /* ---------- audio ---------- */
   ac() {
@@ -766,7 +720,14 @@ class Component extends DCLogic {
     return this._ac;
   }
   // Schedule from the resumed audio clock, never from a suspended clock.
-  unlockAudio = () => {
+  unlockAudio = (event) => {
+    // A normal game gesture can recover blocked narration without another button.
+    const gesture = event && event.isTrusted && (event.type === 'pointerup' || event.type === 'touchend'
+      || (event.type === 'keydown' && !event.repeat && (event.key === 'Enter' || event.key === ' ')));
+    if (gesture && this.state.voiceError && this._voiceRetry && Date.now() - (this._lastVoiceGesture || 0) > 350) {
+      this._lastVoiceGesture = Date.now();
+      this.retryVoice();
+    }
     try {
       const ac = this.ac();
       if (ac && ac.state !== 'running') return ac.resume().catch(() => {});
@@ -868,6 +829,7 @@ class Component extends DCLogic {
     const fail = () => {
       if (!current() || finished) return;
       failed = true;
+      this.guide.onInstructionPause();
       this._voiceRetry = () => this.speak(text, cb, durationMs);
       this.setState({ wordReveal: 'complete' });
       this.setState({ voiceError: 'Play voiceover', interactive: false });
@@ -878,7 +840,7 @@ class Component extends DCLogic {
     try {
       const u = new SpeechSynthesisUtterance(text);
       u.rate = 0.92; u.pitch = 1.2; u.volume = 1;
-      u.onstart = () => { if (current()) { started = true; failed = false; this.setState({ voiceError: '', wordReveal: 'playing' }); } };
+      u.onstart = () => { if (current()) { started = true; failed = false; this.storyVoiceStart(); this.setState({ voiceError: '', wordReveal: 'playing' }); } };
       u.onend = (event) => {
         if (!current() || finished || failed) return;
         finished = true; this._voiceRetry = null;
@@ -889,6 +851,8 @@ class Component extends DCLogic {
         this.setState({ wordReveal: 'complete' }, cb);
       };
       u.onerror = fail;
+      u.onpause = () => { if (current() && !finished) this.guide.onInstructionPause(); };
+      u.onresume = () => { if (current() && !finished && !failed) this.guide.onInstructionStart(); };
       u.onboundary = (event) => {
         if (!current() || finished || failed) return;
         if (event.name === 'word' && Number.isFinite(event.charIndex)) {
@@ -922,24 +886,22 @@ class Component extends DCLogic {
       return context.measureText(display).width + display.length * NARR_TYPE.size * 0.005 + 12;
     } catch (error) { return display.length * NARR_TYPE.size * 0.62 + 12; }
   }
-  /* How this sentence sits on the plank at the one fixed size: one line while
-     it clears the wide band, two balanced lines after that. narrStyle and
-     signFits both read this, so wrapping and paging can never disagree. */
+  /* Measure the passage against the dialogue's maximum text width for paging. */
   narrFit(text) {
     const measured = this.narratorWidth(text);
-    const wrapped = measured > NARR.w - NARR_TYPE.pad;
-    return { measured, wrapped, width: wrapped ? NARR.w2 : NARR.w };
+    const width = this.dialogueLayout().w - 60;
+    const wrapped = measured > width - NARR_TYPE.pad;
+    return { measured, wrapped, width };
   }
-  /* Can the sign hold this whole sentence? The budget is two lines, not one.
+  /* Can the dialogue hold this whole sentence? The budget is four short lines.
      Anything inside it must never be split: the pager swaps pages while the
      audio plays, and a swap mid-sentence reads as the instruction blinking out
      and rebuilding itself. */
   signFits(text) {
     const fit = this.narrFit(text);
     if (!fit.wrapped) return true;
-    /* 1.85 lines of room rather than 2: a balanced wrap never fills both lines
-       edge to edge, and text spilling off the plank is worse than a page swap. */
-    return fit.measured <= 1.85 * (NARR.w2 - NARR_TYPE.pad);
+    /* Leave wrapping headroom; longer instructions page with the recording. */
+    return fit.measured <= 3.6 * (fit.width - NARR_TYPE.pad);
   }
   instructionPages(text) {
     const clean = String(text || '').replace(/\s+/g, ' ').trim();
@@ -969,7 +931,7 @@ class Component extends DCLogic {
       const after = this._voiceAfter;
       this._voiceAfter = null;
       this._voiceLocked = false;
-      this.setState({ speaking: false, interactive: true, voiceError: '' });
+      this.setState({ speaking: false, interactive: true, voiceError: '', storyControls: true });
       this.guide.onInstructionComplete(!!this.step().q && !this._advanceAfterVoice);
       if (this._advanceAfterVoice) { this._advanceAfterVoice = false; this.advance(); }
       else if (after) after();
@@ -977,35 +939,37 @@ class Component extends DCLogic {
     });
   }
   keyword(w) {
+    this.guide.onWord(w, this.step());
     const map = { straight: 'straight', curved: 'curved', open: 'open', closed: 'closed', sides: 'sides', side: 'sides', vertex: 'vertex', angle: 'angle', polygon: 'polygon', triangle: 'name', quadrilateral: 'name', pentagon: 'name', hexagon: 'name', heptagon: 'name', octagon: 'name' };
-    const key = map[w]; if (!key) return;
+    const key = map[w.toLowerCase().replace(/[^a-z]/g, '')]; if (!key) return;
     if (this.state.hlKind !== key) this.setState({ hlKind: key });
     if (key === 'name' && !this.state.reveal) this.setState({ reveal: true });
+    if (key === 'polygon' && this.step().sc === 'S8' && !this.state.reveal) this.setState({ reveal: true });
   }
-  /* Instruction text, guide pose and narration all start on the same tick, and
-     the guide only drops out of TALKING when the audio actually ends. */
+  /* Queue the instruction; actual playback events start and stop the talking pose. */
   narrate(text, opts) {
     const o = opts || {};
     if (this._stopRecordedVoice) this._stopRecordedVoice();
     this.spkId = (this.spkId || 0) + 1;
     try { window.speechSynthesis.cancel(); } catch (error) {}
+    this.guide.onInstructionQueued();
     this._voiceLocked = true; this._voiceReading = false; this._voiceStarted = true;
     this._voiceQueue = (window.PolygonRecordedVoice && window.PolygonRecordedVoice.find(text) ? [text] : this.instructionPages(text)).map(part => ({ text: part })); this._voiceRetry = null;
     this._voiceAfter = () => {
       if (this.step().sc === 'END') this.guide.onScreenComplete();
       if (o.then) o.then();
-      else if (o.auto) this.later(() => this.advance(), 420);
+      else if (o.auto) {
+        const polygonReveal = this.step().sc === 'S8';
+        // Speech engines without word events still reveal before the reading pause.
+        if (polygonReveal && !this.state.reveal) this.setState({ reveal: true });
+        this.later(() => this.advance(), polygonReveal ? 1800 : 420);
+      }
     };
     this.setState((st) => ({ narr: text, speaking: true, interactive: false,
       voiceError: '', nudge: null, muted: false, voiceElapsedMs: null,
       motionRun: (st.motionRun || 0) + 1,
       hlKind: o.hl !== undefined ? o.hl : st.hlKind
     }), () => { this.pumpVoice(); });
-    /* Lines that open with a gasp or a cheer get the matching face first;
-       the talking pose queues behind it. */
-    if (/^(whoa|woah|wow)\b/i.test(text)) this.guide.onSurprise();
-    else if (/^(you got it|you did it)\b/i.test(text)) this.guide.onCorrectAnswer();
-    this.guide.onInstructionStart();
   }
   replay = () => { const t = this.state.narr; if (t) this.narrate(t, {}); };
   /* Narration stays mandatory: state.muted only gates withAudio() and the
@@ -1034,27 +998,7 @@ class Component extends DCLogic {
     let x = 0, y = 0; pts.forEach((p) => { x += p[0]; y += p[1]; });
     return [x / pts.length, y / pts.length];
   }
-  arcAt(pts, i, r) {
-    const n = pts.length, v = pts[i], p = pts[(i - 1 + n) % n], q = pts[(i + 1) % n];
-    const u1 = this.unit(v, p), u2 = this.unit(v, q);
-    const a = [v[0] + u1[0] * r, v[1] + u1[1] * r], b = [v[0] + u2[0] * r, v[1] + u2[1] * r];
-    return 'M' + a[0].toFixed(1) + ' ' + a[1].toFixed(1) + ' Q' + v[0] + ' ' + v[1] + ' ' + b[0].toFixed(1) + ' ' + b[1].toFixed(1);
-  }
   unit(from, to) { const dx = to[0] - from[0], dy = to[1] - from[1], l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; }
-  resample(pts, n, closed) {
-    const P = closed ? pts.concat([pts[0]]) : pts.slice();
-    const seg = [], L = [];
-    let total = 0;
-    for (let i = 0; i < P.length - 1; i++) { const d = Math.hypot(P[i + 1][0] - P[i][0], P[i + 1][1] - P[i][1]); seg.push(d); total += d; L.push(total); }
-    const out = [];
-    for (let k = 0; k < n; k++) {
-      const t = (k / n) * total;
-      let i = 0; while (i < L.length - 1 && L[i] < t) i++;
-      const prev = i === 0 ? 0 : L[i - 1], f = seg[i] ? (t - prev) / seg[i] : 0;
-      out.push([P[i][0] + (P[i + 1][0] - P[i][0]) * f, P[i][1] + (P[i + 1][1] - P[i][1]) * f]);
-    }
-    return out;
-  }
   cancelMorph() {
     if (this._morphFrame != null) cancelAnimationFrame(this._morphFrame);
     this._morphFrame = null;
@@ -1268,7 +1212,7 @@ class Component extends DCLogic {
     const k = Math.min(this.state.k + 1, this.steps().length - 1);
     if (k === this.state.k) return;
     this.sfx('swap');
-    this.setState({ k: k }, () => { this.save(); this.runStep(k, false); });
+    this.setState({ k: k }, () => { this.runStep(k, false); });
   };
   runStep(k, restoring) {
     this.cancelMorph();
@@ -1280,6 +1224,7 @@ class Component extends DCLogic {
     this.stopDrawingSound();
     const s = this.steps()[k];
     this._voiceStarted = false; this._voiceLocked = true; this._voiceReading = false;
+    this._storyCountStart = null; this._lastExplore = 0;
     this._voiceQueue = []; this._voiceAfter = null;
     this._advanceAfterVoice = false; this._voiceRetry = null;
     this._stage2Shown = false;
@@ -1299,11 +1244,13 @@ class Component extends DCLogic {
     if (s.sc !== 'S6') { reset.dd = [null, null, null, null]; reset.ddWrong = [false, false, false, false]; }
     if (s.sc !== 'S12') reset.placed = {};
     if (s.sc !== 'C2' && s.sc !== 'C5') reset.sortAt = {};
-    if (s.q === 'count') reset.cnt = [4, 4];
+    if (s.sc === 'S13') reset.cnt = [0, 4];
     if (s.q === 'count2') reset.cnt = [5, 4];
     if (s.q === 'recall') { reset.n = 4; reset.recallNameN = 4; }
     /* A new screen = a new entrance. Sub-phases of one screen keep him on stage. */
     const fresh = this._lastSc !== s.sc;
+    reset.storyControls = false;
+    if (fresh) { reset.storyContent = false; reset.storyDialogue = false; }
     this._lastSc = s.sc;
     reset.narrTone = 'teach'; reset.fx = [];
     reset.hoverK = null; reset.pressK = null;
@@ -1316,15 +1263,18 @@ class Component extends DCLogic {
       if (this.state.magicReveal) this.revealQuestionShape();
       const go = () => {
         this.narrate(s.narr, { auto: !!s.auto && !s.q, hl: s.hl, then: s.q ? () => this.armNudge() : undefined });
-        if (s.reveal && !s.count) this.later(() => this.setState({ reveal: true }), 1100);
+        if (s.reveal && !s.count && s.sc !== 'S8') this.later(() => this.setState({ reveal: true }), 1100);
       };
       const goCounted = (n, both) => {
-        this.countUntil = performance.now() + this.countDur(n);
+        this._storyCountStart = () => {
+          this.countUntil = performance.now() + this.countDur(n);
+          this.countSides(n, 0);
+          if (both) this.countSides(n, 1);
+        };
         this.narrate(s.narr, { hl: s.hl, then: () => this.advanceAfterCount() });
-        this.countSides(n, 0);
-        if (both) this.countSides(n, 1);
       };
       const start = () => {
+        if (s.ph === 'draw') this.setState({ storyContent: true });
         if (s.sc === 'END') this.later(() => this.confetti(), 260);
         if (s.ph === 'point') { this.later(go, 500); return; }
         if (s.ph === 'draw') {
@@ -1369,27 +1319,40 @@ class Component extends DCLogic {
     });
   }
 
-  /* ---------- screen entrance ----------
-     A new screen: Swiftee flies in from off stage and lands beside the sign;
-     the board is a later sibling with a higher z-index, so its snowy rim
-     genuinely covers her feet — no clip or mask is doing the work. On the very
-     first screen she waves hello before the lesson's first line.
-     Returns how long the caller must hold the instruction back for. */
+  /* Fly onto the left rock once, then reveal dialogue before the lesson starts.
+     Later screens keep the guide perched. Return the narration delay. */
   enterScreen(fresh) {
-    if (!fresh) {
-      if (this.state.guideHidden) this.setState({ guideHidden: false });
-      return 0;
-    }
     const first = !this._guideGreeted;
+    if (!first) {
+      this.setState({ guideHidden: false, guideFlying: false, storyDialogue: true });
+      return fresh ? 240 : 0;
+    }
     this._guideGreeted = true;
-    this.setState({ guideHidden: true });
+    if (this.reducedMotion()) {
+      this.setState({ guideHidden: false, guideFlying: false, storyDialogue: true });
+      this.guide.settle(GUIDE_REST.WATCH);
+      return 300;
+    }
+    this.setState({ guideHidden: true, guideFlying: false });
     this.later(() => {
-      this.setState({ guideHidden: false });
-      this.guide.onScreenEnter(first);
+      this.setState({ guideHidden: false, guideFlying: true });
+      this.guide.onScreenEnter(true);
     }, 80);
-    /* she touches down as the fly-in transition ends */
-    this.later(() => { this.sfx('pop'); this.snowPuff(); }, 820);
-    return first ? 3100 : 880;
+    this.later(() => {
+      this.setState({ guideFlying: false });
+      this.sfx('pop'); this.snowPuff();
+    }, 1480);
+    this.later(() => this.setState({ storyDialogue: true }), 1740);
+    return 2200;
+  }
+  storyVoiceStart() {
+    this.guide.onInstructionStart();
+    // Reveal the activity from real playback, never an autoplay timeout.
+    if (this._storyCountStart) {
+      const start = this._storyCountStart; this._storyCountStart = null; start();
+    }
+    if (this.state.storyContent) return;
+    this.setState({ storyDialogue: true, storyContent: true });
   }
   /* Snow kicks up off the board's rim where she lands. */
   snowPuff() {
@@ -1398,7 +1361,7 @@ class Component extends DCLogic {
     for (let i = 0; i < 9; i++) {
       const a = -Math.PI / 2 + (i - 4) * 0.29;
       const d = 70 + Math.random() * 70;
-      items.push({ kind: 'spark', x: originX + (Math.random() * 40 - 20), y: -22,
+      items.push({ kind: 'spark', x: originX + (Math.random() * 40 - 20), y: SWIFTEE_FEET - SAFE.y,
         dx: Math.cos(a) * d * 1.5, dy: Math.sin(a) * d * 0.7 + 40,
         c: 'rgba(255,255,255,0.95)', s: 11 + Math.random() * 13, rot: Math.random() * 360, z: 3 });
     }
@@ -1606,31 +1569,6 @@ class Component extends DCLogic {
     return out;
   }
 
-  /* ---------- ambient snowfall ---------- */
-  makeSnow() {
-    const out = [];
-    for (let i = 0; i < 26; i++) {
-      const x = (i * 311 + 47) % 1940;
-      const r = 6 + ((i * 7) % 10);
-      const dur = 26 + ((i * 13) % 17);
-      const del = -((i * 17) % 24);
-      out.push({
-        wrap: {
-          position: 'absolute', left: x + 'px', top: '-70px', width: r + 'px', height: r + 'px',
-          pointerEvents: 'none', zIndex: 1,
-          animation: 'snowFall ' + dur + 's linear ' + del + 's infinite'
-        },
-        dot: {
-          width: '100%', height: '100%', borderRadius: '50%',
-          background: 'radial-gradient(circle at 42% 38%, #ffffff 0%, rgba(226,244,255,0.9) 55%, rgba(186,224,250,0) 100%)',
-          opacity: 0.3 + ((i % 5) * 0.09), filter: 'blur(0.6px)',
-          animation: 'flakeSway ' + (10 + (i % 5) * 2) + 's ease-in-out ' + (-(i % 8) * 2) + 's infinite'
-        }
-      });
-    }
-    return out;
-  }
-
   /* ---------- hand nudge demo ---------- */
   noteActivity = (event) => {
     const stage = this.stageRef && this.stageRef.current;
@@ -1731,7 +1669,7 @@ class Component extends DCLogic {
   chooseClosed = () => this.choose('closed');
 
   /* ---------- dropdown classify (screen 6) ---------- */
-  ddToggle(i) { return () => { if (this.locked()) return; this.clearNudge(); this.sfx('tap'); this.setState({ ddOpen: this.state.ddOpen === i ? -1 : i }); }; }
+  ddToggle(i) { return () => { if (this.locked()) return; this.clearNudge(); this.sfx('tap'); this.guide.onInteractionStart(); this.setState({ ddOpen: this.state.ddOpen === i ? -1 : i }); }; }
   ddPick(i, val) {
     return (ev) => {
       if (ev && ev.stopPropagation) ev.stopPropagation();
@@ -1874,6 +1812,7 @@ class Component extends DCLogic {
     const s = this.step();
     this.sfx('tap');
     if (s.q === 'count') {
+      if (this.state.cnt[0] === 0) return;
       if (this.state.cnt[0] === 5) {
         this.setState({ ok: 1 }); this.sfx('ok'); this.react('happy');
         this.later(this.advance, 700);
@@ -1898,9 +1837,9 @@ class Component extends DCLogic {
       if (this.locked() || this.state.ok) return;
       this.clearNudge();
       const c = this.state.cnt.slice();
-      const v = Math.max(1, Math.min(10, c[i] + d));
+      const v = Math.max(this.step().q === 'count' ? 0 : 1, Math.min(10, c[i] + d));
       if (v === c[i]) return;
-      c[i] = v; this.sfx('tick');
+      c[i] = v; this.sfx('tick'); this.guide.onInteractionStart();
       this.setState({ cnt: c, wrong: null });
     };
   }
@@ -1914,6 +1853,7 @@ class Component extends DCLogic {
       const cur = this.state.n, v = Math.max(3, Math.min(8, cur + d));
       if (v === cur) return; // Reaching the stepper limit is not an incorrect answer.
       this.sfx('tick');
+      this.guide.onInteractionStart();
       const from = this.recallPoints(cur), to = this.recallPoints(v);
       this.morphTo(from, to, 520, () => this.setState({ recallNameN: v }), { n: v });
     };
@@ -1960,7 +1900,6 @@ class Component extends DCLogic {
         cleanup();
         if (generation !== this.gen || this.locked()) return;
         this.setState({ showHand: false });
-        this.save();
         const o = this.fig('pentagon').pts;
         const moved = pts.some((p, j) => Math.hypot(p[0] - o[j][0], p[1] - o[j][1]) > 26);
         if (moved && !this.state.dragged) {
@@ -2158,6 +2097,7 @@ class Component extends DCLogic {
       if (Date.now() < (this._labelClickUntil || 0) || Object.values(this.state.placed).includes(name)) return;
       this.clearNudge(); this.sfx('pick');
       const pick = this.state.chip === name ? null : name;
+      if (pick) this.guide.onInteractionStart();
       this.setState({ chip: pick }, () => { if (pick) this.armStage2(); });
     };
   }
@@ -2283,7 +2223,7 @@ class Component extends DCLogic {
        the pointer and the drop column it is sitting in. */
     if (o.through) wrap.pointerEvents = 'none';
     if (o.plain) { wrap.borderWidth = '0'; wrap.borderStyle = 'none'; wrap.background = 'transparent'; wrap.boxShadow = 'none'; }
-    /* --- live feel: hover lifts the card, press squashes it, idle breathes --- */
+    /* Hover lifts the card; pressing gives tactile feedback. */
     const hk = 'card:' + o.key;
     const clickable = !!o.click;
     const hov = clickable && this.state.hoverK === hk;
@@ -2298,6 +2238,10 @@ class Component extends DCLogic {
       else if (hov) wrap.transform = 'translateY(-9px) scale(1.025)';
     }
     const idx = this._cardN = (this._cardN || 0) + 1;
+    if (this.state.storyContent && !this.reducedMotion()) {
+      const entrance = 'storyArrive 320ms ease-out ' + (120 + Math.min(idx - 1, 5) * 80) + 'ms backwards';
+      wrap.animation = wrap.animation && wrap.animation !== 'none' ? wrap.animation + ', ' + entrance : entrance;
+    }
     const gStyle = { animation: 'none' }; // Keep teaching geometry steady; animate the interactive card instead.
     const svgTf = prs ? 'scale(0.955)' : (hov ? 'scale(1.07)' : 'scale(1)');
     return {
@@ -2344,7 +2288,7 @@ class Component extends DCLogic {
         position: 'absolute', left: '50%', translate: '-50% 0', bottom: 'calc(100% + 25px)',
         padding: '7px 22px', borderRadius: '18px', background: o.chipBg || '#e8f6ff',
         border: '3px solid ' + (o.chipBorder || '#9fd8f4'), font: '900 24px Nunito, sans-serif',
-        color: o.chipColor || '#2c6ba8', whiteSpace: 'nowrap', animation: 'fadeUp 320ms ease-out both'
+        color: o.chipColor || '#2c6ba8', whiteSpace: o.stackedChip ? 'pre-line' : 'nowrap', textAlign: 'center', lineHeight: o.stackedChip ? '1.45' : undefined, animation: 'fadeUp 320ms ease-out both'
       } : { display: 'none' },
       /* No cross on a wrong answer. A red badge stamped on the child's choice
          marks the child, not the thinking; the card already turns red, shakes,
@@ -2362,6 +2306,7 @@ class Component extends DCLogic {
   }
   traceStyleFor(on, ms) {
     if (!on) return { opacity: 0 };
+    if (this.reducedMotion()) return { opacity: 1, strokeDasharray: 'none', filter: 'drop-shadow(0 0 6px rgba(34,184,230,.5))' };
     return {
       opacity: 1, strokeDasharray: 100, strokeDashoffset: 100,
       animation: 'dr ' + (ms || 1600) + 'ms linear forwards',
@@ -2496,32 +2441,27 @@ class Component extends DCLogic {
       transform: 'translate(-50%, -50%) scale(' + scale + ')', transformOrigin: 'center center'
     };
     if (compact) Object.assign(scaler, {position:'relative',left:0,top:0,transform:'none',zoom:scale});
-    const viewportStyle = {position:'fixed',inset:0,width:'100%',height:'100%',background:'#8b7edc url(assets/background.png) center / cover no-repeat',overflow:compact?'auto':'hidden'};
+    const viewportStyle = {position:'fixed',inset:0,width:'100%',height:'100%',background:'#103574 url(assets/image.png) center / cover no-repeat',overflow:compact?'auto':'hidden'};
     const shellOnly = {
       voiceError: st.voiceError, retryVoice: this.retryVoice,
       effectsEnabled: !this.locked(), activateKey: this.activateKey,
-      layoutScroll: () => this.clearNudge(), viewportStyle, scalerStyle: scaler, narration: st.narr || '', narratorParts: this.narratorParts(), progress: '', screenLabel: 'loading',
+      storyControls: !!st.storyControls,
+      storyCounting: !!(st.ready && this.P && this.step().sc === 'S13' && this.step().ph === 'five'),
+      layoutScroll: () => this.clearNudge(), viewportStyle, scalerStyle: scaler, narration: st.narr || '', narratorParts: this.narratorParts(), screenLabel: 'loading',
+      choiceRowStyle: { position:'absolute',left:0,bottom:'6px',width:'100%',display:'flex',justifyContent:'center',gap:'74px' },
       cards: [], targets: [], callouts: [], leaders: [], drops: [], chips: [], counters: [],
       counterRowStyle: {position:'absolute',left:0,bottom:'8px',width:'100%',display:'flex',justifyContent:'center',alignItems:'center',gap:'24px'},
       showChoice: false, showChips: false, showCounter: false, showCheck: false, showZones: false, showHand: false,
       zoneRowStyle: {}, liveMsg: this.state.say || '',
-      muteIcon: st.muted ? '✕' : '♪',
-      muteLabel: st.muted ? 'Turn sound effects on' : 'Turn sound effects off',
-      replay: this.replay, toggleMute: this.toggleMute,
       narrStyle: this.narrStyle(), narrRef: this.narrRef,
       bgStyle: this.bgStyle(), boardStyle: this.boardStyle(), signStyle: this.signStyle(),
-      signTextBox: this.signTextBox(), safeStyle: this.safeStyle(),
+      safeStyle: this.safeStyle(),
       showGuide: GUIDE_VISIBLE, guideViewport: this.guideViewportStyle(), guideStyle: this.guideStyle(),
       guideRef: this.guideRef, guideHidden: st.guideHidden, guideCell: (window.SWIFTEE && window.SWIFTEE.cell) || 256,
       guideCanvasStyle: { position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block', pointerEvents: 'none' },
-      showSpeechDots: GUIDE_VISIBLE && st.speaking && !st.guideHidden, speechDots: this.speechDots(),
-      hudStyle: this.hudStyle(),
-      progressStyle: this.progressStyle(),
-      snow: this.snow || [], fx: this.fxStyles(false), confettiFx: this.fxStyles(true),
+      fx: this.fxStyles(false), confettiFx: this.fxStyles(true),
       stageDown: this.stageDown, hovOut: this.hovOff,
-      hovReplay: this.hovOn('ui:replay'), hovMute: this.hovOn('ui:mute'),
       hovOpen: this.hovOn('oc:open'), hovClosed: this.hovOn('oc:closed'), hovCheck: this.hovOn('ui:check'),
-      btnReplay: this.roundBtn('ui:replay', 24), btnMute: this.roundBtn('ui:mute', 22),
       ghostRef: this.ghostRef, zoneARef: this.zoneARef, zoneBRef: this.zoneBRef, stageRef: this.stageRef,
       safeRef: this.safeRef,
       /* These read lesson data, which does not exist until boot() assigns this.P.
@@ -2551,7 +2491,6 @@ class Component extends DCLogic {
 
     const s = this.step();
     const V = Object.assign({}, shellOnly, {
-      progress: 'Step ' + (st.k + 1) + ' / ' + this.steps().length,
       screenLabel: s.label,
       check: this.check, checkLabel: st.checked && !s.check ? 'Next' : 'Check',
       checkStyle: this.bigBtn(st.checked && !s.check ? GRN : '#2f8fd0', 260),
@@ -2576,9 +2515,37 @@ class Component extends DCLogic {
     else if (s.q === 'tap1') this.viewTapOne(V, s, false);
     else if (s.count) this.viewName(V, s);
     else if (s.sc === 'END') this.viewEnd(V, s);
+    this.fitActivityPanel(V, s);
     this.decorate(V);
     return V;
   }
+
+  /* Keep the logical stage stable while fitting the visible panel around its activity. */
+  fitActivityPanel(V, s) {
+    if (s.q !== 'oc' && s.sc !== 'S1') return;
+    const card = V.cards[0];
+    const box = card ? { x: parseFloat(card.wrap.left), y: parseFloat(card.wrap.top),
+      w: parseFloat(card.wrap.width), h: parseFloat(card.wrap.height) } : this.s1Box(s.ph);
+    const padding = 32, caption = V.showChoice ? 0 : 76;
+    const panel = { x: SAFE.x + box.x - padding, y: SAFE.y + box.y - padding,
+      w: box.w + padding * 2, h: box.h + caption + padding * 2 };
+    V.boardStyle = Object.assign(this.boardStyle(), stageBox(panel, 30));
+    if (V.showChoice) {
+      V.choiceRowStyle = { position:'absolute',left:(box.x + box.w / 2 - SAFE.w / 2)+'px',top:(panel.y + panel.h - SAFE.y + 28)+'px',
+        width:'100%',display:'flex',justifyContent:'center',gap:'32px' };
+      if (card) {
+        card.accessibleLabel = 'Trace the shape outline. Then choose Open or Closed.';
+        card.selected = undefined;
+      }
+    }
+  }
+
+  exploreOutline = () => {
+    if (this.locked() || this.state.ok || this.state.wrong || this.state.ocReveal || this.state.tracing) return;
+    if (Date.now() - (this._lastExplore || 0) < 1800) return;
+    this._lastExplore = Date.now(); this.clearNudge(); this.guide.onInteractionStart();
+    this.runTrace(1200);
+  };
 
   /* Every tappable thing gets the same hover-lift / press-squash treatment,
      wired centrally so each screen builder stays about layout. */
@@ -2619,7 +2586,7 @@ class Component extends DCLogic {
       if(c.plusDisabled){c.plus=null;c.pIn=null;c.nudge='';}
     });
     if(V.showCounter && V.checkStyle && V.checkStyle.display !== 'none') {
-      V.checkDisabled = this.locked() || !!this.state.ok;
+      V.checkDisabled = this.locked() || !!this.state.ok || (this.step().q === 'count' && this.state.cnt[0] === 0);
       V.checkHitStyle = this.counterHitStyle();
       V.checkStyle.position = V.checkStyle.position || 'relative';
       if(V.checkDisabled){V.check=null;Object.assign(V.checkStyle,{opacity:.48,cursor:'default',boxShadow:'none'});}
@@ -2645,14 +2612,6 @@ class Component extends DCLogic {
       if (!c.plusDisabled) c.nudge = '1';
       else if (!c.minusDisabled) c.minusNudge = '1';
     }
-  }
-  roundBtn(key, fs) {
-    return this.liftable({
-      width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(255,255,255,0.92)',
-      border: '3px solid #7fd3f7', boxShadow: '0 4px 0 rgba(31,109,180,0.28)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-      font: '800 ' + fs + 'px Nunito, sans-serif', color: '#1f6db4', userSelect: 'none'
-    }, key, { lift: 3, scale: 1.08 });
   }
 
   /* ---------- particle rendering ---------- */
@@ -2735,6 +2694,8 @@ class Component extends DCLogic {
         key, text: token.replace(shape, name => name.toUpperCase()),
         style: {
           display: 'inline-block', color: highlighted ? NARR_TYPE.accent : NARR_TYPE.color,
+          // Keep long words intact inside the narrow speech lane.
+          fontSize: Math.min(NARR_TYPE.size, Math.floor(NARR_TYPE.size * (this.dialogueLayout().w - 68) / this.narratorWidth(token))) + 'px',
           opacity: this.state.wordReveal === 'complete' ? 1 : 0,
           transformOrigin: '50% 70%',
           animation: this.state.wordReveal === 'complete' || !visible ? 'none' : (this.state.narrTick % 2 ? 'textIn' : 'textInB') + ' 220ms ease-in ' + delay + 'ms both',
@@ -2744,21 +2705,18 @@ class Component extends DCLogic {
     });
   }
   narrStyle() {
-    const fit = this.narrFit(this.state.narrPage || this.state.narr || '');
     return {
-      width: fit.width + 'px',
+      width: 'auto', maxWidth: '100%',
       fontFamily: '"Baloo 2", Nunito, sans-serif', fontWeight: 800,
       fontSize: NARR_TYPE.size + 'px', lineHeight: NARR_TYPE.lineHeight,
       letterSpacing: '0.005em',
       color: NARR_TYPE.color, textAlign: 'center',
-      whiteSpace: fit.wrapped ? 'normal' : 'nowrap',
-      /* balance splits a two-line instruction evenly instead of filling line
-         one and leaving an orphan below it. */
-      textWrap: fit.wrapped ? 'balance' : 'nowrap',
+      whiteSpace: 'normal',
+      textWrap: 'balance',
       overflowWrap: 'normal',
       WebkitTextStrokeWidth: NARR_TYPE.outline + 'px',
       WebkitTextStrokeColor: '#ffffff', paintOrder: 'stroke fill',
-      textShadow: '0 2px 1px rgba(120,74,25,0.16)',
+      textShadow: 'none',
       animation: 'none'
     };
   }
@@ -2768,44 +2726,39 @@ class Component extends DCLogic {
       { display: 'block', objectFit: 'cover', userSelect: 'none', pointerEvents: 'none' });
   }
   boardStyle() {
-    /* The source is a full-stage canvas with the board painted inside it, so to
-       land the painted board on BOARD we scale the whole canvas and offset by
-       where the art sits within it. */
-    const k = BOARD.h / BOARD_ART.h;
-    const box = {
-      x: BOARD.x - BOARD_ART.x * k, y: BOARD.y - BOARD_ART.y * k,
-      w: STAGE.w * k, h: STAGE.h * k
-    };
-    return Object.assign(stageBox(box, 30),
-      { display: 'block', objectFit: 'fill', userSelect: 'none', pointerEvents: 'none' });
-  }
-  signStyle() {
-    return Object.assign(stageBox(LAYER.sign, 40),
-      { display: 'block', userSelect: 'none', pointerEvents: 'none' });
-  }
-  /* Stable text box on the plank. It never resizes with the text, so the
-     instruction cannot jump vertically between screens. */
-  signTextBox() {
-    return Object.assign(stageBox(NARR, 41), {
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      boxSizing: 'border-box', pointerEvents: 'none'
+    return Object.assign(stageBox(BOARD, 30), {
+      background: 'rgba(248,253,255,.96)', border: '2px solid rgba(191,229,251,.9)',
+      borderRadius: '42px', boxSizing: 'border-box', boxShadow: '0 18px 50px rgba(8,38,92,.18)',
+      opacity: this.state.storyContent ? 1 : 0, transition: 'opacity 260ms ease-out',
+      pointerEvents: 'none'
     });
   }
-  safeStyle() { return Object.assign(stageBox(SAFE, 32), { pointerEvents: this.locked() ? 'none' : 'auto' }); }
-  hudStyle() {
+  dialogueLayout() {
+    const step = this.state.ready ? this.step() : null;
+    const roomy = step && (step.sc === 'S1' || step.q === 'oc');
+    // The bubble grows upward; its tail always meets the guide's head.
+    const bottom = GUIDE_BOX.y + 65 - 57;
+    return { x:22, y:bottom - 272, w:roomy ? 620 : NARR.w + 60, h:272 };
+  }
+  signStyle() {
+    const box = this.dialogueLayout();
+    const text = this.state.narrPage === undefined ? this.state.narr : this.state.narrPage;
     return {
-      position: 'absolute', right: pc(40, STAGE.w), top: pc(44, STAGE.h),
-      display: 'flex', gap: pc(14, STAGE.w), alignItems: 'center', zIndex: 42
+      position: 'absolute', left: pc(box.x, STAGE.w),
+      bottom: pc(STAGE.h - box.y - box.h, STAGE.h),
+      zIndex: 40,
+      '--dialogue-tail-x': (SWIFTEE_CENTRE - box.x - 5) + 'px',
+      width: 'max-content', minWidth: '280px', maxWidth: box.w + 'px', height: 'auto',
+      display: 'block', userSelect: 'none', pointerEvents: 'none',
+      opacity: this.state.storyDialogue && !!text ? 1 : 0,
+      transition: 'opacity 240ms ease-out'
     };
   }
-  progressStyle() {
-    return {
-      height: '44px', padding: '0 20px', borderRadius: '22px',
-      background: 'rgba(255,255,255,0.86)', border: '3px solid #cfeafb',
-      display: 'flex', alignItems: 'center', font: '800 22px Nunito, sans-serif',
-      color: '#3c7bbd', letterSpacing: '0.02em', whiteSpace: 'nowrap'
-    };
-  }
+  safeStyle() { return Object.assign(stageBox(SAFE, 32), {
+    pointerEvents: this.locked() || !this.state.storyContent ? 'none' : 'auto',
+    opacity: this.state.storyContent ? 1 : 0, visibility: this.state.storyContent ? 'visible' : 'hidden',
+    transition: 'opacity 240ms ease-out'
+  }); }
   /* Swiftee's cell, scene-relative; the wrapper inside carries the only motion. */
   guideViewportStyle() {
     return Object.assign(stageBox(GUIDE_BOX, 20), { pointerEvents: 'none', overflow: 'visible' });
@@ -2815,35 +2768,16 @@ class Component extends DCLogic {
   guideStyle() {
     const st = this.state;
     const box = { position: 'absolute', inset: 0 };
-    if (st.guideHidden) return Object.assign(box, { transform: 'translate(-340px, 180px) scale(.55) rotate(-14deg)', opacity: 0 });
-    return Object.assign(box, { transform: st.speaking ? 'translate(9px, 0) rotate(3deg)' : 'translate(0, 0) rotate(0deg)', opacity: 1 });
-  }
-  /* Three dots rising from her beak to the plank while a line is being said,
-     so the sign reads as what she is saying. Stage px inside her cell. */
-  speechDots() {
-    const st = this.state;
-    if (!GUIDE_VISIBLE || !st.speaking || st.guideHidden) return [];
-    /* The trail lives in the clear sky between her silhouette and the plank:
-       it starts past her ink box (the manifest's footprint for the pose set)
-       and ends just short of the wood, so it never collides with either. */
-    const fromX = SWIFTEE_CELL * SWIFTEE_INK.right + 8;
-    const toX = LAYER.sign.x - GUIDE_BOX.x - 8;
-    const fromY = SWIFTEE_CELL * 0.44, toY = SWIFTEE_CELL * 0.30;
-    return [8, 11, 14].map((size, i) => {
-      const t = i / 2;
-      return { style: {
-        left: (fromX + (toX - fromX) * t - size / 2) + 'px',
-        top: (fromY + (toY - fromY) * t - size / 2) + 'px',
-        width: size + 'px', height: size + 'px', animationDelay: (i * 0.18) + 's'
-      } };
-    });
+    if (st.guideHidden) return Object.assign(box, { opacity: 0, transition: 'none' });
+    if (st.guideFlying && !this.reducedMotion()) return Object.assign(box, { animation: 'rockArrival 1400ms cubic-bezier(.25,.6,.35,1) both', transition: 'none', opacity: 1 });
+    return Object.assign(box, { transform: 'none', opacity: 1, animation: 'none' });
   }
   bigBtn(color, w) {
     return {
       minWidth: w + 'px', padding: '0 44px', height: '86px', borderRadius: '43px',
-      background: 'linear-gradient(rgba(255,255,255,.26),rgba(255,255,255,0) 55%), ' + color, border:'3px solid rgba(255,255,255,.75)', boxSizing:'border-box', textShadow:'0 2px 2px rgba(0,55,100,.22)', color: '#fff', font: '800 38px "Baloo 2", Nunito, sans-serif',
+      background: color === '#a9c7dd' ? '#f1dfb8' : BUTTON.face, border:'3px solid ' + BUTTON.edge, boxSizing:'border-box', textShadow:'0 1px 0 rgba(255,255,255,.5)', color: BUTTON.ink, font: '800 38px "Baloo 2", Nunito, sans-serif',
       display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-      boxShadow: 'inset 0 2px 0 rgba(255,255,255,.35), 0 6px 0 rgba(10,75,115,.3), 0 10px 20px rgba(20,110,165,.18)', userSelect: 'none',
+      boxShadow: BUTTON.shadow, userSelect: 'none',
       transition: 'transform 130ms ease-out, box-shadow 130ms'
     };
   }
@@ -2854,13 +2788,13 @@ class Component extends DCLogic {
     const revealing = !!st.ocReveal;
     const feedback = isRight ? GRN : (isWrong ? RED : null);
     return {
-      width: '243px', minWidth: '243px', height: '106.2px', borderRadius: '53.1px',
-      background: 'url("assets/option-button.svg") center / contain no-repeat',
-      color: '#ffffff', border: 'none', font: '800 37.8px "Baloo 2", Nunito, sans-serif',
-      textShadow: '0 2px 3px rgba(0,72,151,0.35)',
+      width: '280px', minWidth: '280px', height: '112px', borderRadius: '56px',
+      background: BUTTON.face,
+      color: BUTTON.ink, border: '3px solid ' + BUTTON.edge, font: '800 42px "Baloo 2", Nunito, sans-serif',
+      textShadow: '0 1px 0 rgba(255,255,255,.5)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       cursor: revealing ? 'default' : 'pointer',
-      boxShadow: feedback ? '0 0 0 5px ' + feedback + ', 0 0 26px ' + feedback : 'none',
+      boxShadow: feedback ? '0 0 0 4px ' + feedback + ', ' + BUTTON.shadow : BUTTON.shadow,
       userSelect: 'none', boxSizing: 'border-box',
       /* their wrong pick steps back so the answer reads first */
       opacity: isWrong && revealing ? 0.5 : 1,
@@ -2876,13 +2810,15 @@ class Component extends DCLogic {
      safe area and lifted by the height of the caption that sits under it, which
      puts the finished shape's own centre on the board's optical centre — and
      that is where the point waits before it draws. */
+  ocBox() {
+    // Grow into the open sky on the right, preserving the dialogue lane on the left.
+    const size = 640;
+    return { x: (SAFE.w - size) / 2 + 70, y: -48, w: size, h: size };
+  }
   s1Box(ph) {
-    /* The question needs the lower third for the Open and Closed controls, so it
-       keeps the smaller, higher box. Nothing appears to move: that phase reveals
-       the shape afresh with the magic animation every other question uses. */
-    const size = ph === 'ask' ? 470 : 520;
-    const y = ph === 'ask' ? 44 : Math.round((SAFE.h - size) / 2) - 20;
-    return { x: Math.round((SAFE.w - size) / 2), y: y, w: size, h: size };
+    if (ph === 'ask') return this.ocBox();
+    const size = 520;
+    return { x: Math.round((SAFE.w - size) / 2), y: Math.round((SAFE.h - size) / 2) - 20, w: size, h: size };
   }
   /* The point, at whatever size and position the phase needs. The mark itself is
      one element and the breath another, because an appear and a pulse both drive
@@ -2960,7 +2896,7 @@ class Component extends DCLogic {
        screens 2 to 5, so it gets the same answer marks. */
     const marks = ph === 'ask' ? this.ocMarks('leaf') : { dots: [], hl: [], pathStyle: null };
     const card = this.buildCard({
-      key: 'leaf', x: x, y: y, w: size, h: size, plain: true,
+      key: 'leaf', x: x, y: y, w: size, h: size, plain: true, click: ph === 'ask' ? this.exploreOutline : null,
       vb: F.vb, d: ph === 'draw' && !st.drawn ? '' : drawnD, stroke: IK, sw: 20,
       svgRef: this.svgRefs[0],
       traceD: drawnD,
@@ -3004,12 +2940,12 @@ class Component extends DCLogic {
   /* ----- screens 2-5 ----- */
   viewOC(V, s) {
     const st = this.state, F = this.fig(s.fig);
-    const size = 430, x = (SAFE.w - size) / 2, y = 40;
+    const box = this.ocBox(), size = box.w, x = box.x, y = box.y;
     this.svgRefs[0] = this.svgRefs[0] || React.createRef();
     const d = this.figD(s.fig);
     const marks = this.ocMarks(s.fig);
     const card = this.buildCard({
-      key: s.fig, x: x, y: y, w: size, h: size, plain: true, vb: F.vb,
+      key: s.fig, x: x, y: y, w: size, h: size, plain: true, vb: F.vb, click: this.exploreOutline,
       d: d, extra: F.extra || '', stroke: st.ok ? GRN : IK, sw: 18, svgRef: this.svgRefs[0],
       traceD: F.traceD || d, traceStyle: st.tracing && !st.ok ? this.traceStyleFor(true, st.traceMs) : { opacity: 0 },
       dots: marks.dots, hl: marks.hl,
@@ -3046,14 +2982,17 @@ class Component extends DCLogic {
         if (st.ok === i || (s.q === 'straight' && st.sel.includes(i))) state = 'ok'; else if (st.wrong === i) state = 'bad';
       }
       let chip = '', chipBg, chipBorder, chipColor;
-      const showChip = ph !== 'open' || openIdx.indexOf(i) >= 0;
       if ((ph === 'open' && openIdx.indexOf(i) >= 0) || ph === 'closed' || ph === 'bound' || ph === 'sc' || ph === 'classify' || ph === 'done' || tappable) {
         const isOpen = openIdx.indexOf(i) >= 0;
         if (ph === 'open' && !isOpen) chip = '';
         else { chip = isOpen ? 'Open' : 'Closed'; chipBg = isOpen ? '#fff3e3' : '#e9f7ee'; chipBorder = isOpen ? '#f0c58a' : '#a6dcbb'; chipColor = isOpen ? '#a1642a' : '#26714b'; }
       }
+      const stackedChip = tappable && s.q === 'straight';
+      if (stackedChip) chip = straightIdx.includes(i) ? 'Straight lines' : 'Curved lines';
       return this.buildCard({
         key: name + i, x: x0 + i * (w + gap), y: y, w: w, h: h, vb: F.vb, d: d, extra: F.extra || '',
+        stackedChip: stackedChip,
+        tint: stackedChip && state === 'bad' ? { borderColor: '#dca99f', background: '#fffaf9', boxShadow: '0 6px 0 rgba(146,196,228,.25)' } : undefined,
         stroke: it[1], sw: 18, fill: this.figFill(name, it[1], it[2]), state: state, hl: hl,
         traceD: F.traceD || d,
         traceStyle: litBounds ? this.boundaryLitStyle() : (trace ? this.traceStyleFor(true, 1400) : { opacity: 0 }),
@@ -3079,9 +3018,9 @@ class Component extends DCLogic {
           style: { position: 'absolute', left: (left + w / 2 - 120) + 'px', top: '484px', width: '240px', zIndex: open ? 20 : 5 },
           btn: {
             height: '72px', borderRadius: '22px', boxSizing: 'border-box',
-            background: done ? 'linear-gradient(#56d995,#20995b)' : (bad ? 'linear-gradient(#ff8c7d,#d94e43)' : '#ffffff'),
-            border: '4px solid ' + (done ? '#b7f5ce' : (bad ? '#ffc6bd' : '#cfeafb')),
-            color: done || bad ? '#ffffff' : '#2c6ba8',
+            background: done ? 'linear-gradient(#56d995,#20995b)' : (bad ? 'linear-gradient(#ff8c7d,#d94e43)' : BUTTON.face),
+            border: '4px solid ' + (done ? '#b7f5ce' : (bad ? '#ffc6bd' : BUTTON.edge)),
+            color: done || bad ? '#ffffff' : BUTTON.ink,
             font: '800 30px Nunito, sans-serif', display: 'flex', alignItems: 'center',
             justifyContent: 'center', gap: '12px', padding: '0 12px', cursor: done ? 'default' : 'pointer',
             boxShadow: done ? '0 0 0 3px rgba(47,158,94,.22), 0 0 26px rgba(47,158,94,.65), 0 6px 0 rgba(47,158,94,.25)' : (bad ? '0 0 0 3px rgba(232,85,63,.22), 0 0 26px rgba(232,85,63,.65), 0 6px 0 rgba(232,85,63,.25)' : '0 6px 0 rgba(146,196,228,.35)'),
@@ -3095,10 +3034,10 @@ class Component extends DCLogic {
           menu: open ? ['Straight', 'Curved'].map((opt) => ({
             text: opt, click: this.ddPick(i, opt), nudge: opt === truth[i] ? '1' : '',
             style: {
-              height: '60px', boxSizing: 'border-box', borderRadius: '16px', background: 'linear-gradient(#46bcf5,#1684d0)', border: '3px solid #cfeafb',
-              color: '#ffffff', font: '800 28px Nunito, sans-serif', display: 'flex',
+              height: '60px', boxSizing: 'border-box', borderRadius: '16px', background: BUTTON.face, border: '3px solid ' + BUTTON.edge,
+              color: BUTTON.ink, textShadow: 'none', font: '800 28px Nunito, sans-serif', display: 'flex',
               alignItems: 'center', justifyContent: 'center', cursor: 'pointer', marginTop: '8px',
-              boxShadow: 'inset 0 2px 0 rgba(255,255,255,.4), 0 4px 0 #1268a2', animation:'fadeUp 180ms ease-out both'
+              boxShadow: 'inset 0 2px 0 rgba(255,255,255,.4), 0 4px 0 #bd6818', animation:'fadeUp 180ms ease-out both'
             }
           })) : []
         };
@@ -3127,14 +3066,29 @@ class Component extends DCLogic {
 
   /* ----- screens 8 / 9 ----- */
   viewReveal(V, s) {
-    const st = this.state, F = this.fig(s.fig), size = 420;
+    const st = this.state, F = this.fig(s.fig), size = 630;
+    const reduced = this.reducedMotion();
+    const vb = F.vb.split(' ').map(Number), pad = 20, y = 60;
+    const scale = Math.min((size - pad * 2) / vb[2], (size - pad * 2) / vb[3]);
+    const boundaryTop = y + pad + (size - pad * 2 - vb[3] * scale) / 2
+      + (Math.min(...F.pts.map(p => p[1])) - vb[1]) * scale;
     V.cards = [this.buildCard({
       key: s.fig, x: (SAFE.w - size) / 2, y: 60, w: size, h: size, plain: true,
       vb: F.vb, d: this.figD(s.fig), stroke: this.polyColor(s.fig), sw: 20,
       fill: this.figFill(s.fig, this.polyColor(s.fig)),
-      anim: st.reveal ? 'pop 700ms ease-out both' : 'none'
+      traceD: this.figD(s.fig),
+      traceStyle: st.reveal ? (reduced ? { opacity: 0.65 } : { opacity: 0, animation: 'polygonRevealGlow 900ms ease-in-out both' }) : { opacity: 0 }
     })];
-    if (st.reveal) V.callouts = [this.labelPill(s.reveal, 540)];
+    if (st.reveal) {
+      const pill = this.labelPill(s.reveal, boundaryTop - 20 - 74);
+      Object.assign(pill.style, {
+        height: '74px', boxSizing: 'border-box', padding: '8px 32px',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        border: '2px solid ' + GOLD, borderRadius: '24px',
+        boxShadow: 'none', animation: 'none', lineHeight: '1'
+      });
+      V.callouts = [pill];
+    }
   }
   labelPill(text, top) {
     return {
@@ -3148,21 +3102,39 @@ class Component extends DCLogic {
     };
   }
   viewBuild(V, s) {
-    const st = this.state, F = this.fig('pentagon'), size = 430, K = this.k('pentagon');
+    const st = this.state, F = this.fig('pentagon'), size = 645;
+    const vb = F.vb.split(' ').map(Number), pad = 20;
+    const scale = Math.min((size - pad * 2) / vb[2], (size - pad * 2) / vb[3]);
+    const boundaryTop = 50 + pad + (size - pad * 2 - vb[3] * scale) / 2
+      + (Math.min(...F.pts.map(p => p[1])) - vb[1]) * scale;
+    const outlineHalfWidth = 27 * this.k('pentagon') * scale / 2;
+    const outlineStyle = {
+      opacity: 1, strokeDasharray: 100, strokeDashoffset: 0,
+      filter: 'drop-shadow(0 0 10px rgba(34,184,230,0.85))'
+    };
+    if (!this.reducedMotion()) outlineStyle.animation = 'boundDraw 2400ms linear both';
     const d = this.figD('pentagon');
     V.cards = [this.buildCard({
       key: 'pent', x: (SAFE.w - size) / 2, y: 50, w: size, h: size, plain: true,
       vb: F.vb, d: '', stroke: this.P.C.blue, sw: 20,
-      traceD: d, traceStyle: this.traceStyleFor(true, 2400),
-      dots: F.pts.map((p) => ({ x: p[0], y: p[1], r: 16 * K, fill: '#fff', stroke: ICE, sw: 6 * K, style: { opacity: 1 } }))
+      traceD: d, traceStyle: outlineStyle
     })];
-    if (st.reveal) V.callouts = [this.labelPill(s.reveal, 530)];
+    if (st.reveal) {
+      const pill = this.labelPill(s.reveal, boundaryTop - outlineHalfWidth - 20 - 74);
+      Object.assign(pill.style, {
+        height: '74px', boxSizing: 'border-box', display: 'flex',
+        alignItems: 'center', justifyContent: 'center',
+        padding: '8px 32px', border: '2px solid ' + GOLD, borderRadius: '24px',
+        boxShadow: 'none', animation: 'none', lineHeight: '1.2'
+      });
+      V.callouts = [pill];
+    }
   }
 
   /* ----- screen 11 parts ----- */
   viewParts(V, s) {
     const st = this.state, ph = st.phase, F = this.fig('pentagon'), K = this.k('pentagon');
-    const size = 500, x = STAGE.w / 2 - SAFE.x - size / 2, y = (SAFE.h - size) / 2, box = { x: x, y: y, w: size, h: size };
+    const size = 750, x = (SAFE.w - size) / 2, y = 40, box = { x: x, y: y, w: size, h: size };
     const palette = {
       sides: { color: '#eda012', ink: '#8a5406', tint: '#fff6e2', shadow: 'rgba(237,160,18,.26)', glow: 'rgba(237,160,18,.55)' },
       vertex: { color: '#8051c9', ink: '#63349e', tint: '#f5efff', shadow: 'rgba(128,81,201,.22)' },
@@ -3207,7 +3179,7 @@ class Component extends DCLogic {
       hl.push(lit(this.segHl('pentagon', [0], null, palette.sides.color, 30)[0],
         reduced ? {} : motion('cueFade', cueDelay, 300)));
     }
-    if (ph === 'vertex') hl.push.apply(hl, this.segHl('pentagon', [1, 2], null, this.P.C.blue, 20));
+    if (ph === 'vertex') hl.push.apply(hl, this.segHl('pentagon', [1, 2], null, palette.sides.color, 30));
     if (ph === 'angle') hl.push.apply(hl, this.segHl('pentagon', [1, 2], null, this.P.C.blue, 20));
     if (ph === 'vertex' || ph === 'angle') {
       // Both strokes terminate at the shared corner, rather than continuing away.
@@ -3219,7 +3191,7 @@ class Component extends DCLogic {
       segment.style = draw(edgeStart, Math.max(100, meetTime - edgeStart));
     });
     const dots = [];
-    if (ph === 'vertex' || ph === 'angle') dots.push({ x: pts[2][0], y: pts[2][1], r: 20 * K, fill: '#fff', stroke: this.P.C.purple, sw: 9 * K, style: motion('cueFade', meetTime, 300) });
+    if (ph === 'vertex' || ph === 'angle') dots.push({ x: pts[2][0], y: pts[2][1], r: 20 * K, fill: '#fff', stroke: this.P.C.purple, sw: 9 * K, style: motion('cueFade', ph === 'vertex' ? cueDelay : meetTime, 300) });
     const vertex = pts[2], radius = 190 * K;
     const u = this.unit(vertex, pts[1]), v = this.unit(vertex, pts[3]);
     const arcStart = [vertex[0] + u[0] * radius, vertex[1] + u[1] * radius];
@@ -3242,7 +3214,7 @@ class Component extends DCLogic {
     const anglePoint = [vertex[0] + (u[0] + v[0]) / bisectorLength * radius,
       vertex[1] + (u[1] + v[1]) / bisectorLength * radius];
     const items = [
-      { key: 'sides', text: 'Side', anchor: this.mapPt(box, F.vb, segs[0].mid), off: [-20, -132] },
+      { key: 'sides', text: 'Side', anchor: this.mapPt(box, F.vb, segs[0].mid), off: [-20, -100] },
       { key: 'vertex', text: 'Vertex', anchor: this.mapPt(box, F.vb, pts[2]), off: [156, -86] },
       { key: 'angle', text: 'Angle', anchor: this.mapPt(box, F.vb, anglePoint), off: [-190, 0] }
     ];
@@ -3255,9 +3227,9 @@ class Component extends DCLogic {
       return { text: it.text, style: Object.assign({
         position: 'absolute', left: p[0] + 'px', top: p[1] + 'px', translate: '-50% -50%',
         width: '200px', height: '84px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        borderRadius: '26px', boxSizing: 'border-box', background: on ? theme.tint : '#f6f9fb',
-        border: '5px solid ' + (on ? theme.color : '#a9bed1'), whiteSpace: 'nowrap', zIndex: 4,
-        font: '800 38px "Baloo 2", Nunito, sans-serif', color: on ? theme.ink : '#466079',
+        borderRadius: '26px', boxSizing: 'border-box', background: theme.tint,
+        border: '5px solid ' + theme.color, whiteSpace: 'nowrap', zIndex: 4,
+        font: '800 38px "Baloo 2", Nunito, sans-serif', color: theme.ink,
         opacity: 1, boxShadow: on ? 'inset 0 2px 0 #fff, 0 6px 0 ' + theme.shadow + ', 0 8px 18px ' + theme.shadow : 'none',
         transition: 'border-color 260ms ease-out, background 260ms ease-out'
       }, on ? motion('cueFade', cueDelay, 320) : {}) };
@@ -3268,7 +3240,7 @@ class Component extends DCLogic {
       // Keep the arrowhead 24px from the feature and the shaft 12px from its label.
       const start = [it.anchor[0] + direction[0] * 24, it.anchor[1] + direction[1] * 24];
       const label = [it.anchor[0] + it.off[0], it.anchor[1] + it.off[1]];
-      const leader = this.leader(start, label, it.key === ph ? palette[it.key].color : '#a9bed1', it.key === ph);
+      const leader = this.leader(start, label, palette[it.key].color, it.key === ph);
       const labelEdge = Math.min(100 / Math.abs(direction[0]), 42 / Math.abs(direction[1]));
       leader.style.width = Math.max(0, distance - 24 - labelEdge - 12) + 'px';
       if (it.key === ph) Object.assign(leader.style, motion('cueFade', cueDelay, 320));
@@ -3279,14 +3251,14 @@ class Component extends DCLogic {
   /* ----- screen 12 label the parts ----- */
   labelTheme(name) {
     return {
-      side: { color: '#2879d8', light: '#edf6ff', gradient: 'linear-gradient(#54b8ff,#2477cf)' },
-      vertex: { color: '#8051c9', light: '#f5efff', gradient: 'linear-gradient(#ae89eb,#7850c4)' },
-      angle: { color: '#159ca8', light: '#eafafa', gradient: 'linear-gradient(#48c9d3,#128e9e)' }
+      side: { color: '#eda012', ink: '#8a5406', light: '#fff6e2', gradient: 'linear-gradient(#fff9eb,#ffedbe)' },
+      vertex: { color: '#8051c9', ink: '#63349e', light: '#f5efff', gradient: 'linear-gradient(#faf6ff,#e9dcfa)' },
+      angle: { color: '#159ca8', ink: '#08717c', light: '#eafafa', gradient: 'linear-gradient(#f1ffff,#d2f2f1)' }
     }[name.toLowerCase()];
   }
   viewLabels(V, s) {
     const st = this.state, F = this.fig('cross'), size = 470, K = this.k('cross');
-    const x = STAGE.w / 2 - SAFE.x - size / 2, y = 96, box = { x: x, y: y, w: size, h: size };
+    const x = (SAFE.w - size) / 2, y = 96, box = { x: x, y: y, w: size, h: size };
     const pts = F.pts;
     const hl = [], dots = [], arcs = [];
     const p = st.placed;
@@ -3328,7 +3300,7 @@ class Component extends DCLogic {
           width: '212px', height: '76px', borderRadius: '22px', boxSizing: 'border-box',
           border: (done ? '5px solid ' + theme.color : (bad ? '5px solid ' + RED : '5px dashed #299bd5')),
           background: done ? theme.light : (bad ? '#fff2ef' : (st.chip ? '#f0fbff' : '#f5fbff')),
-          color: done ? theme.color : '#2470a1', font: '800 34px "Baloo 2", Nunito, sans-serif',
+          color: done ? theme.ink : '#2470a1', font: '800 34px "Baloo 2", Nunito, sans-serif',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           cursor: done ? 'default' : 'pointer', transform:hovered ? 'scale(1.035)' : 'none', transition:'transform 150ms,box-shadow 150ms', boxShadow: hovered ? '0 0 0 4px rgba(34,184,230,.24),0 8px 22px rgba(34,184,230,.3)' : '0 6px 0 rgba(146,196,228,0.32)',
           animation: bad ? 'wig 420ms ease-in-out both' : (done ? 'pop 320ms ease-out both' : 'none'), zIndex: 6
@@ -3356,11 +3328,11 @@ class Component extends DCLogic {
         nudge: !st.chip && ci === firstFree ? '1' : '', text: t, click: this.pickChip(t), down: this.dragLabel(t),
         style: {
           width: '200px', flex: '0 0 200px', justifyContent: 'center', padding: '0 16px', height: '78px', borderRadius: '39px', boxSizing: 'border-box',
-          background: used ? '#eef4f8' : theme.gradient,
-          border: '5px solid ' + (used ? '#dbe6ee' : (active ? '#ffffff' : theme.light)),
-          color: used ? '#b3c4d0' : '#ffffff',
+          background: used ? theme.light : theme.gradient,
+          border: '5px solid ' + (active ? theme.ink : theme.color),
+          color: theme.ink,
           font: '800 36px "Baloo 2", Nunito, sans-serif', display: 'flex', alignItems: 'center',
-          touchAction:'none', cursor: used ? 'default' : 'grab', opacity: st.draggingLabel === t ? 0.35 : (used ? 0.55 : 1),
+          touchAction:'none', cursor: used ? 'default' : 'grab', opacity: st.draggingLabel === t ? 0.35 : (used ? 0.7 : 1),
           boxShadow: used ? '0 4px 0 rgba(146,196,228,.2)' : 'inset 0 2px 0 rgba(255,255,255,.4), 0 6px 0 rgba(30,85,140,.24)' , transform: active ? 'translateY(-4px)' : 'none',
           transition: 'transform 180ms ease-out, opacity 180ms ease-out, box-shadow 180ms ease-out', userSelect: 'none'
         }
@@ -3370,7 +3342,7 @@ class Component extends DCLogic {
 
   /* ----- screen 13 count ----- */
   viewCount(V, s) {
-    const st = this.state, F = this.fig('pentagon'), size = 470, K = this.k('pentagon');
+    const st = this.state, F = this.fig('pentagon'), size = 705, K = this.k('pentagon');
     const segs = this.segs('pentagon'), c = this.centroid(F.pts);
     const nums = [];
     for (let i = 0; i < st.nums; i++) {
@@ -3379,17 +3351,23 @@ class Component extends DCLogic {
     }
     const hl = st.nums > 0 ? this.segHl('pentagon', [st.nums - 1], null, ICE, 24) : [];
     V.cards = [this.buildCard({
-      key: 'pent', x: (SAFE.w - size) / 2, y: 40, w: size, h: size, plain: true, vb: F.vb,
+      key: 'pent', x: (SAFE.w - size) / 2, y: -20, w: size, h: size, plain: true, vb: F.vb,
       /* A light yellow face: it gives the outline something to enclose while
          the sides are counted, and stays pale enough for the numbers and the
          side highlight to sit on top of it. */
       d: this.figD('pentagon'), stroke: st.ok ? GRN : this.P.C.blue, sw: 18, fill: '#fff1c9', hl: hl, nums: nums
     })];
-    if (s.q === 'count') {
-      V.showCounter = true;
-      V.counters = [this.counter(0, '')];
-      V.checkStyle = this.counterCheckStyle();
+    V.showCounter = true;
+    const counter = this.counter(0, '');
+    counter.min = 0;
+    if (s.ph === 'five') {
+      // The side markers and readout share one value, so they cannot drift.
+      counter.value = String(st.nums);
+      counter.fixed = true;
+      counter.minus = null; counter.plus = null; counter.nudge = '';
     }
+    V.counters = [counter];
+    V.checkStyle = s.q === 'count' ? this.counterCheckStyle() : { display: 'none' };
   }
   counterHitStyle() {
     const viewport = document.documentElement;
@@ -3400,9 +3378,9 @@ class Component extends DCLogic {
   counterCheckStyle() {
     return { width:'144px',height:'64px',boxSizing:'border-box',borderRadius:'18px',
       display:'flex',alignItems:'center',justifyContent:'center',
-      background:'linear-gradient(#45afea,#237ec7)',border:'3px solid #b7e3fa',
-      color:'#fff',font:'800 30px "Baloo 2",Nunito,sans-serif',cursor:'pointer',
-      boxShadow:'inset 0 2px 0 rgba(255,255,255,.45),0 4px 0 #1c609d' };
+      background:BUTTON.face,border:'3px solid '+BUTTON.edge,
+      color:BUTTON.ink,font:'800 30px "Baloo 2",Nunito,sans-serif',cursor:'pointer',
+      boxShadow:BUTTON.shadow };
   }
   counter(i, caption) {
     const st = this.state, bad = st.wrong === i || st.wrong === 2, good = !!st.ok;
@@ -3410,14 +3388,14 @@ class Component extends DCLogic {
       caption, min:1, max:10,
       captionStyle:{display:caption?'block':'none',width:'116px',flexShrink:0,font:'800 23px Nunito,sans-serif',color:'#23577f',lineHeight:1.15,textAlign:'left'},
       wrap:{display:'flex',alignItems:'center',gap:'10px',padding:'10px',borderRadius:'22px',
-        background:good?'#eefaf3':bad?'#fff2ef':'#f4fbff',border:'3px solid '+(good?GRN:bad?RED:'#b8dff4'),
-        boxShadow:'inset 0 2px 0 #fff,0 4px 0 rgba(54,128,179,.2)',animation:bad?'wig 420ms ease-in-out both':'none'},
+        background:good?'#eefaf3':bad?'#fff2ef':'#fff8e8',border:'3px solid '+(good?GRN:bad?RED:'#edcf98'),
+        boxShadow:'inset 0 2px 0 #fff,0 4px 0 rgba(150,93,20,.16)',animation:bad?'wig 420ms ease-in-out both':'none'},
       btn:{width:'60px',height:'60px',boxSizing:'border-box',flexShrink:0,borderRadius:'16px',
-        background:'linear-gradient(#f8fdff,#dff2ff)',border:'2px solid #94ccec',color:'#2269a4',font:'900 38px Nunito,sans-serif',
+        background:BUTTON.face,border:'2px solid '+BUTTON.edge,color:BUTTON.ink,font:'900 38px Nunito,sans-serif',
         display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',lineHeight:1,
-        boxShadow:'inset 0 2px 0 #fff,0 3px 0 #a6cee5',userSelect:'none'},
+        boxShadow:'inset 0 2px 0 #fff,0 3px 0 #bd6818',userSelect:'none'},
       box:{width:'72px',height:'60px',boxSizing:'border-box',flexShrink:0,borderRadius:'14px',background:'#fff',
-        border:'2px solid #cce7f7',color:'#123f75',font:'900 42px Nunito,sans-serif',
+        border:'2px solid #edcf98',color:BUTTON.ink,font:'900 42px Nunito,sans-serif',
         display:'flex',alignItems:'center',justifyContent:'center'},
       value:String(st.cnt[i]),minus:this.bump(i,-1),plus:this.bump(i,1),nudge:i===0?'1':'',fixed:false
     };
@@ -3536,7 +3514,6 @@ class Component extends DCLogic {
     }];
     V.showCounter = true;
     V.counters = [Object.assign(this.counter(0, 'Sides'), { min:3, max:8, value: String(st.n), minus: this.bumpN(-1), plus: this.bumpN(1), nudge: '1' })];
-    V.showCounter = true;
     V.checkStyle = { display: 'none' };
     V.checkLabel = '';
     V.targets = [{
@@ -3719,8 +3696,8 @@ class Component extends DCLogic {
   restart = () => {
     if (this.locked()) return;
     this.sfx('tap');
+    this._guideGreeted = false;
     this.setState({ k: 0, userPts: null, dragged: false, drawn: false }, () => {
-      this.save();
       this.runStep(0, false);
     });
   };

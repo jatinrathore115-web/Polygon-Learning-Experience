@@ -33,10 +33,12 @@
       const counts = pages.map(page => (page.match(/\S+/g) || []).length);
       const total = counts.reduce((a, b) => a + b, 0);
       const wordStarts = this.wordStarts(entry, text);
+      const words = text.match(/\S+/g) || [];
+      let spoken = 0;
       let frame, pageIndex = -1, revealed = -1, stopped = false;
       const stop = () => {
         stopped = true; cancelAnimationFrame(frame);
-        audio.onplaying = audio.onpause = audio.onended = audio.onerror = audio.ontimeupdate = null;
+        audio.onplaying = audio.onpause = audio.onwaiting = audio.onstalled = audio.onended = audio.onerror = audio.ontimeupdate = null;
         audio.pause(); audio.removeAttribute('src'); audio.load();
         if (game._stopRecordedVoice === stop) game._stopRecordedVoice = null;
       };
@@ -49,9 +51,18 @@
         // Keep the duration fallback only for recordings without validated alignment.
         const spokenCount = wordStarts ? wordStarts.filter(start => start <= audio.currentTime).length : null;
         const position = wordStarts ? Math.max(0, spokenCount - 1) : Math.min(total - 0.001, Math.max(0, audio.currentTime / duration * total));
+        const audibleCount = wordStarts ? spokenCount : Math.min(total, Math.floor(position) + 1);
+        while (spoken < audibleCount) {
+          if (game.guide && game.guide.onWord) game.guide.onWord(words[spoken], game.step());
+          spoken += 1;
+        }
         let page = 0, offset = 0;
         while (page < pages.length - 1 && position >= offset + counts[page]) offset += counts[page++];
         const count = wordStarts ? Math.max(0, Math.min(counts[page], spokenCount - offset)) : Math.min(counts[page], Math.floor(position - offset) + 1);
+        if (game.step().sc === 'S8' && !game.state.reveal) {
+          const visibleWords = (pages[page].match(/\S+/g) || []).slice(0, count);
+          if (visibleWords.some(word => normalize(word) === 'polygon')) game.keyword('polygon');
+        }
         if (page !== pageIndex) {
           pageIndex = page; revealed = count;
           game.prepareNarratorReveal(pages[page]);
@@ -63,9 +74,15 @@
       function tick() { update(); if (!stopped && current() && !audio.paused) frame = requestAnimationFrame(tick); }
       audio.onplaying = () => {
         if (stopped || !current()) return;
+        if (game.storyVoiceStart) game.storyVoiceStart();
         game.setState({ voiceError: '' }); cancelAnimationFrame(frame); tick();
       };
-      audio.onpause = () => cancelAnimationFrame(frame);
+      const waiting = () => {
+        if (stopped || !current()) return;
+        cancelAnimationFrame(frame);
+        if (game.guide && game.guide.onInstructionPause) game.guide.onInstructionPause();
+      };
+      audio.onpause = audio.onwaiting = waiting;
       audio.ontimeupdate = () => { if (!audio.paused) update(); };
       audio.onerror = () => { if (!stopped && current()) { stop(); fail(); } };
       audio.onended = () => {

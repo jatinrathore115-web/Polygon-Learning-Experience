@@ -1,7 +1,9 @@
 # Polygon Learning Experience
 
+**Looking for a file or screen? Open [STRUCTURE.md](STRUCTURE.md) for the project tree, screen 1–47 map, and exact function names to search.**
+
 An interactive polygon lesson for young learners — a frozen-scene game screen where
-Swiftee, a bird perched beside the wooden sign, speaks every instruction on it, watches
+Swiftee, a bird perched on the left rock, speaks through a dialogue bubble, watches
 the learner work, and reacts to their answers. 47 screens covering open/closed figures,
 straight vs curved boundaries, sides, vertices, angles, and polygon naming from triangle
 to octagon.
@@ -41,12 +43,13 @@ polygon-data.js          figure geometry traced from the source PDF
 support.js               the Design Component runtime that boots the page
 screen-navigator.js      optional preview navigator (see note below)
 build-swiftee.cjs        regenerates assets/swiftee/ from the character pack
+styles/buttons.css       warm button effects, hover, press and focus states
 assets/                  artwork actually used at runtime
 assets/swiftee/          the guide's sheets plus the generated sheet table
-swiftee-assets/          the full character pack, not deployed
-verification/            headless checks for layout, interactions, audio, voice gating
+reference/              source artwork, old UI, uploads and working figures
+verification/            checks; output/ holds previews and results
 voiceovers/              narration script and line exports
-figs/ uploads/           working files and source material, not deployed
+design/                  design review and standalone concept, not deployed
 ```
 
 ### Scene structure
@@ -56,25 +59,26 @@ a single transform, so the composition holds from 1920×1080 down to 1024×576.
 
 | Layer | z | Position |
 |---|---|---|
-| Frozen background | 0 | full stage |
-| Ambient snow | 1 | full stage |
-| Swiftee guide | 20 | 2.78% / -2.78%, 15.66% wide |
-| Ice board | 30 | 3.43% / 14.63%, 93.13% wide |
-| Learning content | 32 | safe area inset from the ice border |
-| Wooden sign | 40 | 22.37% / 0.56%, 55.30% wide |
-| Instruction text | 41 | inside the sign's wood band |
-| Controls | 42 | top right |
+| Starry background (`assets/image.png`) | 0 | full stage |
+| Swiftee guide | 20 | left rock; feet at stage (192, 824) |
+| Activity surface | 30 | right of the guide, stage (378, 122) |
+| Learning content | 32 | stage (390, 172), 1570 × 701 logical pixels |
+| Dialogue bubble | 40 | comic bubble right of the bird on compact screens; left margin on dense activities |
+| Instruction text | 40 | natural text flow, with consistent padding inside the bubble |
 
-Swiftee sits *behind* the board in real z-order, which is what makes her read as perched
-on the snowy rim rather than floating in front of it — there is no mask or clip doing the
-work.
+Swiftee flies in once at the start, lands on the rock, and stays there between activities.
+The nameless dialogue fits each complete text passage. Its teal frame, mint center,
+speech tail anchored to Swiftee's head, and two comic accents are defined in [styles/dialogue.css](styles/dialogue.css).
+An empty reusable version is available in [design/dialogue-bubble.html](design/dialogue-bubble.html).
+It stays hidden when empty and appears after landing when text is ready. Real audio playback reveals the activity surface and
+staggered shape cards; answer controls appear after narration ends. Existing feature
+animations keep their narration cues. Reduced motion skips the flight and entrance fades.
+See [design/STORY_SCENE.md](design/STORY_SCENE.md) for timing and verification details.
 
 ### Swiftee, the guide
 
-She stands immediately left of the wooden sign and is the voice of it: the instruction
-text, the narration and her talking animation all start on the same tick, a trail of
-speech dots crosses the gap from her to the plank while a line plays, and she only stops
-talking when the audio actually ends. Then she settles into watching the learner work.
+She sits on the left rock and speaks through the dialogue above her. Her talking
+animation follows actual audio playback, then settles into watching the learner work.
 
 Two layers do the work, both in `index.html`:
 
@@ -94,14 +98,18 @@ into another. What she does, and when:
 | moment | expression |
 |---|---|
 | a new screen | `flapping` — she flies in; on the first screen she waves hello |
-| an instruction is being said | `talking` |
+| audio is playing | `talking`, following actual playback events |
+| audio is loading, paused, or blocked | `blinking` ? listening |
+| dragging, counting, or choosing a label | a brief `curious` reaction |
+| part of a task completed | `happy`, with `proud` for every third placement |
 | the learner is working | `blinking` |
 | first wrong answer | `confused` — encouraging, never punishing |
 | wrong again on the same question | `puzzleing` |
 | right first time | `happy` |
 | right after a miss | `relieved` |
 | a hand hint appears | `curious` |
-| a line that opens "Whoa" | `surprised` |
+| spoken "Whoa" / "Wow", or the first POLYGON reveal | `surprised`, at the word cue |
+| a new polygon name is spoken | a brief `proud` reaction |
 | left alone for 24s | `daydreaming`, until the next tap |
 | lesson complete | `proud`, then `celebrating` |
 
@@ -111,7 +119,7 @@ otherwise read as a second one.
 
 Under `prefers-reduced-motion` she still changes expression, because that is the feedback,
 but nothing loops: each pose is held on a single frame, and the fly-in, the speaking lean
-and the speech dots stop moving.
+and the entrance fades stop moving.
 
 ### Screen 1, the point intro
 
@@ -200,7 +208,7 @@ measures the held light in a real browser rather than from a style object.
 ### Regenerating the guide's sheets
 
 `assets/swiftee/` is generated, not hand-made. `build-swiftee.cjs` reads
-`swiftee-assets/atlas/swiftee.manifest.json` — the single source of truth for frame counts,
+`reference/swiftee-assets/swiftee-assets/atlas/swiftee.manifest.json` — the single source of truth for frame counts,
 grids, frame rate and the start/loop/stop triads — copies the @1x sheets for the
 expressions the lesson actually plays, and writes `swiftee-sheets.js`, the `window.SWIFTEE`
 table the page reads. Nothing about the sheets is hardcoded in `index.html`.
@@ -217,25 +225,21 @@ otherwise unchanged.
 ### Verifying the guide
 
 ```bash
-node verification/check-swiftee-guide.cjs
+node verification/check-guide-sync.cjs
+node verification/check-story-scene.cjs
 ```
 
-It drives the real page in headless Chrome, answers a question wrongly twice and then
-correctly, waits out the idle timer, and asserts the expression that plays at each moment,
-that every state plays its full triad, and that her cell never moves. It runs on the real
-clock rather than a virtual one: the sprite is driven by `requestAnimationFrame`, which
-headless Chrome barely ticks while virtual time is in play.
+The guide check exercises delayed playback, pauses, failure and retry, spoken word
+cues, answer priority, recovery after mistakes, progress, idle, finale, and reduced
+motion. The scene check verifies the actual browser render and all 47 screens.
 
 ## Notes before making this public
 
 - **`screen-navigator.js` ships enabled.** It adds a "Screens · N" button at the top left
   that lets anyone jump to any of the 47 steps. That's useful for a review deploy and
   wrong for a public one — delete its `<script>` tag in `index.html` to disable it.
-- **`uploads/` holds source material**, including the lesson PDF the figures were traced
+- **`reference/uploads/` holds source material**, including the lesson PDF the figures were traced
   from. Review the licensing before publishing this project publicly, or delete the folder.
 - Progress is deliberately not persisted; the lesson always opens on screen 1.
-- **`assets/mam_happy.png` and `assets/mam_sad.png` are now unused.** They were the
-  previous guide's sprites, which Swiftee replaced. They still ship; delete them if the
-  mammoth is not coming back.
-- **`verification/check-board-layout.cjs` fails, and did before the guide changed.** Its
-  harness asks for `assets/background..png`, with two dots, so the background never loads.
+- Previous UI artwork is preserved in `reference/legacy-ui/` and excluded from deployment.
+- See [verification/README.md](verification/README.md) for checks and generated output.

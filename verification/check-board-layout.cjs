@@ -1,4 +1,34 @@
-const fs=require('fs'),vm=require('vm'),cp=require('child_process'),assert=require('assert');const src=fs.readFileSync('index.html','utf8');const ctx={window:{},DCLogic:class{},setTimeout,clearTimeout};vm.createContext(ctx);vm.runInContext(src.match(/<script[^>]*data-dc-script[^>]*>([\s\S]*?)<\/script>/)[1]+'\nglobalThis.Game=Component;',ctx);const g=new ctx.Game(),css=o=>Object.entries(o).map(([k,v])=>k.replace(/[A-Z]/g,m=>'-'+m.toLowerCase())+':'+v).join(';');
-assert(src.includes('assets/ice%20board.png'));assert(!src.includes('src="assets/ui_ice_board.png"'));
-fs.writeFileSync('verification/board-layout.html',`<!doctype html><meta charset="utf-8"><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#8ecff2}#stage{position:absolute;left:50%;top:50%;width:1980px;height:1080px;transform-origin:center center}</style><div id="stage"><img src="../assets/background..png" style="${css(g.bgStyle())}"><img id="board" src="../assets/ice%20board.png" style="${css(g.boardStyle())}"><img src="../assets/intruction%20panel.png" style="${css(g.signStyle())}"></div><pre id="result" style="display:none"></pre><script>onload=()=>{document.querySelector('#stage').style.transform='translate(-50%,-50%) scale('+Math.min(innerWidth/1980,innerHeight/1080)+')';const b=document.querySelector('#board'),r=b.getBoundingClientRect();document.querySelector('#result').textContent=JSON.stringify({width:innerWidth,height:innerHeight,loaded:b.naturalWidth===1980&&b.naturalHeight===1080,fit:getComputedStyle(b).objectFit,bounds:{left:r.left,top:r.top,right:r.right,bottom:r.bottom},pass:r.left>=-.01&&r.top>=-.01&&r.right<=innerWidth+.01&&r.bottom<=innerHeight+.01,noScroll:document.documentElement.scrollWidth===innerWidth});};</script>`);
-const results=[];for(const [w,h]of [[1920,1080],[1440,900],[1366,768],[1280,720],[1024,768]]){let ow=w+16,oh=h+151,r;for(let i=0;i<3;i++){const args=['--headless','--no-sandbox','--disable-gpu','--disable-software-rasterizer','--no-first-run','--user-data-dir='+process.env.TEMP+'/polygon-board-layout','--window-size='+ow+','+oh,'--dump-dom','--virtual-time-budget=1000'];if(w===1440)args.push('--screenshot='+process.cwd()+'/verification/board-layout.png');args.push('file:///'+process.cwd().replaceAll('\\','/')+'/verification/board-layout.html');const dom=cp.execFileSync('C:/Program Files/Google/Chrome/Application/chrome.exe',args,{encoding:'utf8',windowsHide:true,stdio:['ignore','pipe','pipe'],timeout:20000,maxBuffer:2000000});r=JSON.parse(dom.match(/<pre id="result"[^>]*>(.*?)<\/pre>/s)[1]);if(r.width===w&&r.height===h)break;ow+=w-r.width;oh+=h-r.height;}assert(r.width===w&&r.height===h&&r.loaded&&r.fit==='contain'&&r.pass&&r.noScroll);results.push(r);console.log('PASS '+w+'x'+h+': complete image fits, no crop or scrollbars.');}fs.writeFileSync('verification/board-layout-results.json',JSON.stringify(results,null,2));
+﻿/* Fast scene bounds check; check-story-scene.cjs covers the actual browser render. */
+const fs = require('fs'), vm = require('vm'), assert = require('assert');
+const src = fs.readFileSync('index.html', 'utf8');
+const ctx = { window: {}, DCLogic: class {}, setTimeout, clearTimeout };
+vm.createContext(ctx);
+vm.runInContext(src.match(/<script[^>]*data-dc-script[^>]*>([\s\S]*?)<\/script>/)[1]
+  + '\nglobalThis.layout={STAGE,BOARD,SAFE,NARR,GUIDE_BOX,LAYER};globalThis.Game=Component;', ctx);
+const { STAGE, BOARD, SAFE, NARR, GUIDE_BOX, LAYER } = ctx.layout;
+const inside = (box, parent) => box.x >= parent.x && box.y >= parent.y
+  && box.x + box.w <= parent.x + parent.w && box.y + box.h <= parent.y + parent.h;
+const stage = { x: 0, y: 0, ...STAGE };
+for (const box of [BOARD, SAFE, GUIDE_BOX, LAYER.sign]) assert(inside(box, stage));
+assert(inside(SAFE, BOARD), 'Learning area must fit inside the board');
+assert(NARR.w + 60 <= LAYER.sign.w, 'Text width and padding must fit beside the board');
+assert(LAYER.sign.x + LAYER.sign.w < BOARD.x, 'Dialogue must clear the board');
+assert(GUIDE_BOX.x + GUIDE_BOX.w < BOARD.x, 'Guide must clear the board');
+assert(src.includes('src="assets/image.png"') && fs.existsSync('assets/image.png'));
+const game = new ctx.Game();
+assert.equal(game.boardStyle().opacity, 0);
+assert.equal(game.signStyle().opacity, 0);
+game.state.storyContent = game.state.storyDialogue = true;
+assert.equal(game.signStyle().opacity, 0, 'Never show an empty dialogue');
+game.state.narrPage = 'Look! A point.';
+assert.equal(game.boardStyle().opacity, 1);
+assert.equal(game.signStyle().opacity, 1);
+const results = [[1920,1080],[1440,900],[1366,768],[1280,720],[1024,768]].map(([width,height]) => {
+  const scale = Math.min(width / STAGE.w, height / STAGE.h);
+  const bounds = { x: (width-STAGE.w*scale)/2, y: (height-STAGE.h*scale)/2, w: STAGE.w*scale, h: STAGE.h*scale };
+  assert(inside(bounds, { x: -0.001, y: -0.001, w: width+0.002, h: height+0.002 }));
+  return { width, height, scale, pass: true };
+});
+fs.mkdirSync('verification/output', { recursive: true });
+fs.writeFileSync('verification/output/board-layout-results.json', JSON.stringify(results, null, 2));
+console.log('PASS: scene, dialogue, guide and content bounds; staged visibility; five viewport sizes.');

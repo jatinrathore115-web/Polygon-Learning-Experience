@@ -1,3 +1,4 @@
+require('fs').mkdirSync('verification/output', { recursive: true });
 /* Renders the sort screens at real board size so the drop layout can be eyed,
    not just asserted: full tray, mid-sort, hover preview and both columns full. */
 const fs=require('fs'),vm=require('vm'),cp=require('child_process');
@@ -29,7 +30,7 @@ const panels=[
   panel('CFU 5 — all four sorted',at('C5',[[0,0],[1,1],[2,0],[3,1]])),
   panel('CFU 2 — three in POLYGONS, two in NOT',at('C2',[[0,0],[1,1],[2,0],[3,0],[4,1]])),
 ];
-fs.writeFileSync('verification/sort-preview.html',`<!doctype html><meta charset="utf-8"><style>
+fs.writeFileSync('verification/output/sort-preview.html',`<!doctype html><meta charset="utf-8"><style>
 body{margin:0;background:#0d2b46;font-family:Nunito,sans-serif}
 figure{margin:0 0 26px}figcaption{color:#bfe6ff;font:700 22px Nunito,sans-serif;padding:10px 14px}
 .safe{position:relative;width:${SAFE.w}px;height:${SAFE.h}px;background:#fdfeff;border-radius:26px;outline:2px solid #ff5da2}
@@ -37,7 +38,7 @@ figure{margin:0 0 26px}figcaption{color:#bfe6ff;font:700 22px Nunito,sans-serif;
 </style>${panels.join('')}`);
 const args=['--headless','--no-sandbox','--disable-gpu','--hide-scrollbars','--force-device-scale-factor=1','--no-first-run',
   '--user-data-dir='+process.env.TEMP+'/polygon-sort-preview','--window-size=1620,4000','--virtual-time-budget=1500',
-  '--screenshot='+process.cwd()+'/verification/sort-preview.png',
-  'file:///'+process.cwd().split(String.fromCharCode(92)).join('/')+'/verification/sort-preview.html'];
+  '--screenshot='+process.cwd()+'/verification/output/sort-preview.png',
+  'file:///'+process.cwd().split(String.fromCharCode(92)).join('/')+'/verification/output/sort-preview.html'];
 cp.execFileSync('C:/Program Files/Google/Chrome/Application/chrome.exe',args,{windowsHide:true,stdio:'ignore',timeout:40000});
-console.log('wrote verification/sort-preview.png');
+console.log('wrote verification/output/sort-preview.png');

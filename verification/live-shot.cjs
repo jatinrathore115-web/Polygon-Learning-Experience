@@ -1,9 +1,10 @@
+require('fs').mkdirSync('verification/output', { recursive: true });
 /* Screenshots the real lesson page on one screen, so layout and type can be
    judged with the actual fonts, board art and runtime in place.
      node verification/live-shot.cjs <screen> <out.png> [stateJSON] [WxH]
    e.g. node verification/live-shot.cjs C5 live-sort.png "{\"sortAt\":{\"0\":0}}"
    Drives the component through window.__poly, the handle boot() publishes, so
-   this works without the preview navigator (which the lesson no longer loads).
+   this works without the preview navigator (which remains available for review).
    State is applied well after runStep so it wins over the narration the screen
    starts for itself, and the per-word reveal is held open — headless Chrome
    blocks audio, which otherwise leaves the tail of every line invisible. */
@@ -12,7 +13,7 @@ const [screen, out, patch, size] = process.argv.slice(2);
 if (!screen || !out) { console.error('usage: live-shot.cjs <screen> <out.png> [stateJSON] [WxH]'); process.exit(1); }
 const [w, h] = (size || '1920x1080').split('x');
 const q = String.fromCharCode(39);
-const shown = '{wordReveal:' + q + 'complete' + q + ',revealedWords:99}';
+const shown = '{wordReveal:' + q + 'complete' + q + ',revealedWords:99,storyDialogue:true,storyContent:true,storyControls:true,guideHidden:false,guideFlying:false}';
 const hook = '<script>(function(){var wait=setInterval(function(){var g=window.__poly;'
   + 'if(!g||!g.steps||!g.state.ready)return;clearInterval(wait);'
   + (screen.charAt(0)==='#'
@@ -28,8 +29,8 @@ try {
     ['--headless', '--no-sandbox', '--disable-gpu', '--hide-scrollbars', '--force-device-scale-factor=1',
      '--no-first-run', '--mute-audio', '--user-data-dir=' + process.env.TEMP + '/polygon-live-shot',
      '--window-size=' + w + ',' + h, '--virtual-time-budget=11000',
-     '--screenshot=' + process.cwd() + '/verification/' + out,
+     '--screenshot=' + process.cwd() + '/verification/output/' + out,
      'file:///' + process.cwd().split(String.fromCharCode(92)).join('/') + '/live-shot.html'],
     { windowsHide: true, stdio: 'ignore', timeout: 60000 });
 } finally { fs.unlinkSync('live-shot.html'); }
-console.log('wrote verification/' + out);
+console.log('wrote verification/output/' + out);

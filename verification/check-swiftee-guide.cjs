@@ -1,3 +1,4 @@
+require('fs').mkdirSync('verification/output', { recursive: true });
 /* Drives the real lesson and checks that Swiftee plays the right expression at
    each teaching moment, that every state plays its full start → loop → stop
    triad, and that swapping expressions never moves her on screen.
@@ -198,7 +199,7 @@ finally { fs.unlinkSync('swiftee-check.html'); }
 const m = out.match(/SWIFTEE_REPORT ([A-Za-z0-9+/=]+)/);
 assert(m, 'the page produced no report — the run did not finish');
 const r = JSON.parse(Buffer.from(m[1], 'base64').toString('utf8'));
-fs.writeFileSync('verification/swiftee-guide-results.json', JSON.stringify(r, null, 2));
+fs.writeFileSync('verification/output/swiftee-guide-results.json', JSON.stringify(r, null, 2));
 assert(!r.pageError, 'the page threw: ' + r.pageError);
 assert(!r.stalled, 'the run stalled: ' + r.stalled + ' — ' + JSON.stringify(r.gameState));
 
@@ -308,7 +309,7 @@ finally { fs.unlinkSync('swiftee-rm.html'); }
 const rmMatch = rmOut.match(/SWIFTEE_RM ([A-Za-z0-9+/=]+)/);
 assert(rmMatch, 'the reduced-motion run produced no report');
 const rm = JSON.parse(Buffer.from(rmMatch[1], 'base64').toString('utf8'));
-fs.writeFileSync('verification/swiftee-reduced-motion-results.json', JSON.stringify(rm, null, 2));
+fs.writeFileSync('verification/output/swiftee-reduced-motion-results.json', JSON.stringify(rm, null, 2));
 assert(!rm.pageError, 'the reduced-motion run threw: ' + rm.pageError);
 assert(!rm.stalled, 'the reduced-motion run stalled: ' + rm.stalled);
 
@@ -320,4 +321,4 @@ check(looping.length === 0, 'no expression animates: every clip is held on one f
 check(rm.clips.includes('confused'), 'a wrong answer still changes her face — ' + rm.clips.join(' → '));
 
 if (fail.length) { console.error('\n' + fail.length + ' check(s) failed'); process.exit(1); }
-console.log('\nall checks passed; frame logs in verification/swiftee-guide-results.json and swiftee-reduced-motion-results.json');
+console.log('\nall checks passed; frame logs in verification/output/swiftee-guide-results.json and swiftee-reduced-motion-results.json');

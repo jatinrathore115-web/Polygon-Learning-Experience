@@ -1,10 +1,11 @@
+require('fs').mkdirSync('verification/output', { recursive: true });
 const fs=require('fs'),vm=require('vm'),assert=require('assert');const html=fs.readFileSync('index.html','utf8');let spoken=[],timers=[];
 const ctx={window:{speechSynthesis:{cancel(){},speak(u){spoken.push(u);}}},SpeechSynthesisUtterance:class{constructor(text){this.text=text;}},document:{documentElement:{clientWidth:1920,clientHeight:1080}},React:{createRef:()=>({current:null})},DCLogic:class{setState(v,cb){Object.assign(this.state,typeof v==='function'?v(this.state):v);if(this.componentDidUpdate)this.componentDidUpdate();if(cb)cb();}},setTimeout,clearTimeout};vm.createContext(ctx);vm.runInContext(fs.readFileSync('polygon-data.js','utf8'),ctx);vm.runInContext(html.match(/<script[^>]*data-dc-script[^>]*>([\s\S]*?)<\/script>/)[1]+'\nglobalThis.Game=Component;',ctx);
 function game(k){const g=new ctx.Game();g.P=ctx.window.POLY;g.svgRefs={};g.state.ready=true;g.state.k=k;g.state.phase=g.step().ph||'';g.later=f=>timers.push(f);g.sfx=()=>{};g.armNudge=()=>{};return g;}
 function drain(g){let cap=100;while(g._voiceReading&&--cap){spoken.at(-1).onstart();spoken.at(-1).onend();}assert(cap>0);}
 let g=game(4);g.narrate(g.step().narr,{});assert(g.locked());assert.equal(g.safeStyle().pointerEvents,'none');g.choose('closed');assert.equal(g.state.ok,null);const first=spoken.at(-1);first.onstart();for(const timer of timers)timer();assert(g.locked());first.onend();assert.equal(spoken.at(-1),first);assert(!g.locked());assert.equal(g.safeStyle().pointerEvents,'auto');
 // An error, or an obsolete utterance completing after replay, must never unlock.
-g.narrate('Retry test',{});const failed=spoken.at(-1);failed.onerror();failed.onend();assert(g.locked());assert(g.state.voiceError);g.retryVoice();const retry=spoken.at(-1);failed.onend();assert(g.locked());retry.onstart();retry.onend();assert(!g.locked());
+g.narrate('Retry test',{});const failed=spoken.at(-1);failed.onerror();failed.onend();assert(g.locked());assert(g.state.voiceError);g.unlockAudio({isTrusted:true,type:'pointerup'});const retry=spoken.at(-1);assert.notEqual(retry,failed,'A game tap should retry blocked narration without a button');failed.onend();assert(g.locked());retry.onstart();retry.onend();assert(!g.locked());
 g.narrate('Old',{});const old=spoken.at(-1);g.narrate('New',{});old.onend();assert(g.locked());drain(g);
 // Missing voices are a blocked state, never a timed silent completion.
 const synth=ctx.window.speechSynthesis;ctx.window.speechSynthesis=null;g.narrate('Unavailable',{});assert(g.locked()&&g.state.voiceError);ctx.window.speechSynthesis=synth;
@@ -21,7 +22,7 @@ g=game(4);g.narrate(g.step().narr,{});g.advance({type:'click'});assert(!g._advan
 g=game(4);g.narrate(g.step().narr,{});const discarded=spoken.at(-1);g.gen=(g.gen||0)+1;discarded.onend();assert(g.locked());
 // Across all screens, only the brown-panel line is spoken, even with labels revealed.
 const coverage=[];for(let k=0;k<47;k++){const h=game(k);h.state.drawn=true;h.state.reveal=true;spoken=[];h.narrate(h.step().narr,{});drain(h);assert.equal(spoken.map(u=>u.text).join(' '),h.state.narr);coverage.push({step:k+1,narration:h.state.narr});}
-fs.writeFileSync('verification/voice-coverage.json',JSON.stringify(coverage,null,2));console.log('PASS: narrator-only speech on 47 screens, strict audio-end gate, errors/retry, stale events, silent labels/counters/options and drag lock.');
+fs.writeFileSync('verification/output/voice-coverage.json',JSON.stringify(coverage,null,2));console.log('PASS: narrator-only speech on 47 screens, strict audio-end gate, errors/retry, stale events, silent labels/counters/options and drag lock.');
 
 for(const row of JSON.parse(fs.readFileSync('voiceovers/narrator-lines.json','utf8'))){
  const h=game(4), pages=h.instructionPages(row.text);

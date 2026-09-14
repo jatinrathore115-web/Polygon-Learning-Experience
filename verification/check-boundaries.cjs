@@ -1,3 +1,4 @@
+require('fs').mkdirSync('verification/output', { recursive: true });
 /* The four-up compare screens, and in particular the line that names the
    boundaries.
      node verification/check-boundaries.cjs
@@ -165,7 +166,7 @@ finally { fs.unlinkSync('bounds-check.html'); }
 const m = out.match(/BOUNDS ([A-Za-z0-9+/=]+)/);
 assert(m, 'the browser run produced no report');
 const r = JSON.parse(Buffer.from(m[1], 'base64').toString('utf8'));
-fs.writeFileSync('verification/boundaries-results.json', JSON.stringify(r, null, 2));
+fs.writeFileSync('verification/output/boundaries-results.json', JSON.stringify(r, null, 2));
 assert(!r.pageError, 'the page threw: ' + r.pageError);
 assert(!r.stalled, 'the run stalled: ' + r.stalled);
 

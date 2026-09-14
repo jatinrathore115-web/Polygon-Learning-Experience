@@ -1,6 +1,6 @@
 # Kept in git, but no reason to ship them to the CDN.
-figs/
-uploads/
+reference/
+design/
 verification/
 .thumbnail
 
@@ -11,9 +11,9 @@ voiceovers/*.cjs
 voiceovers/*.txt
 voiceovers/*.md
 voiceovers/narrator-lines.json
+voiceovers/narrator-lines.csv
 
 # Character pack: 12 MB of source sheets, of which the lesson ships only the
 # expressions Swiftee actually plays. build-swiftee.cjs copies those into
 # assets/swiftee/ (~1.3 MB) and generates the sheet table from the manifest, so
 # the pack itself stays out of the deploy. Re-run it if the pack changes.
-swiftee-assets/
