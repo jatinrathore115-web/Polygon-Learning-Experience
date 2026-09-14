@@ -1,0 +1,162 @@
+{
+  "steps": [
+    {
+      "step": "screen-enter",
+      "from": 1,
+      "clips": [
+        "flapping",
+        "blinking",
+        "talk_start",
+        "talking",
+        "talk_stop",
+        "flapping",
+        "talk_start",
+        "talking",
+        "talk_stop"
+      ]
+    },
+    {
+      "step": "wrong-1",
+      "from": 10,
+      "clips": [
+        "confused_start",
+        "confused",
+        "confused_stop",
+        "blinking"
+      ]
+    },
+    {
+      "step": "wrong-2",
+      "from": 14,
+      "clips": [
+        "puzzle_start",
+        "puzzleing",
+        "puzzle_stop",
+        "blinking"
+      ]
+    },
+    {
+      "step": "correct",
+      "from": 18,
+      "clips": [
+        "relieved_start",
+        "relieved",
+        "relieved_stop",
+        "flapping",
+        "talk_start",
+        "talking"
+      ]
+    },
+    {
+      "step": "idle",
+      "from": 24,
+      "clips": [
+        "talk_stop",
+        "flapping",
+        "talk_start",
+        "talking",
+        "talk_stop",
+        "blinking",
+        "curious_start",
+        "curious",
+        "curious_stop",
+        "blinking",
+        "daydream_start",
+        "daydreaming"
+      ]
+    },
+    {
+      "step": "lesson-end",
+      "from": 36,
+      "clips": [
+        "daydreaming_stop",
+        "flapping",
+        "happy_start",
+        "happy",
+        "happy_stop",
+        "proud_start",
+        "proud",
+        "proud_stop",
+        "celebrate_start",
+        "celebrating"
+      ]
+    }
+  ],
+  "rafTicks": 3940,
+  "paintedPixels": 25642,
+  "stubErr": null,
+  "gameState": {
+    "k": 46,
+    "interactive": true,
+    "speaking": false,
+    "magicReveal": false,
+    "voiceError": "",
+    "voiceLocked": false,
+    "locked": false
+  },
+  "cellStable": true,
+  "spriteStable": true,
+  "cellBox": [
+    147.7,
+    -25.8,
+    266.7,
+    266.6
+  ],
+  "spriteBox": [
+    0,
+    0,
+    310,
+    310,
+    256,
+    256
+  ],
+  "samples": 3283,
+  "clipLog": [
+    "blinking",
+    "flapping",
+    "blinking",
+    "talk_start",
+    "talking",
+    "talk_stop",
+    "flapping",
+    "talk_start",
+    "talking",
+    "talk_stop",
+    "confused_start",
+    "confused",
+    "confused_stop",
+    "blinking",
+    "puzzle_start",
+    "puzzleing",
+    "puzzle_stop",
+    "blinking",
+    "relieved_start",
+    "relieved",
+    "relieved_stop",
+    "flapping",
+    "talk_start",
+    "talking",
+    "talk_stop",
+    "flapping",
+    "talk_start",
+    "talking",
+    "talk_stop",
+    "blinking",
+    "curious_start",
+    "curious",
+    "curious_stop",
+    "blinking",
+    "daydream_start",
+    "daydreaming",
+    "daydreaming_stop",
+    "flapping",
+    "happy_start",
+    "happy",
+    "happy_stop",
+    "proud_start",
+    "proud",
+    "proud_stop",
+    "celebrate_start",
+    "celebrating"
+  ]
+}

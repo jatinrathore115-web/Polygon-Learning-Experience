@@ -1,14 +1,19 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
 const html=fs.readFileSync('index.html','utf8');
 const ctx={window:{},document:{documentElement:{clientWidth:1920,clientHeight:1080}},React:{createRef:()=>({current:null})},DCLogic:class {setState(s){Object.assign(this.state,typeof s==='function'?s(this.state):s);}},setTimeout,clearTimeout};
-vm.createContext(ctx);vm.runInContext(fs.readFileSync('polygon-data.js','utf8'),ctx);vm.runInContext(html.match(/<script[^>]*data-dc-script[^>]*>([\s\S]*?)<\/script>/)[1]+'\nglobalThis.Game=Component;',ctx);
+vm.createContext(ctx);vm.runInContext(fs.readFileSync('polygon-data.js','utf8'),ctx);vm.runInContext(fs.readFileSync('assets/swiftee/swiftee-sheets.js','utf8'),ctx);vm.runInContext(html.match(/<script[^>]*data-dc-script[^>]*>([\s\S]*?)<\/script>/)[1]+'\nglobalThis.Game=Component;',ctx);
 const g=new ctx.Game();g.P=ctx.window.POLY;g.svgRefs={};g.state.ready=true;
 for(let k=0;k<g.steps().length;k++){g.state.k=k;g.state.phase=g.steps()[k].ph||'';for(const interactive of [false,true]){g.state.interactive=interactive;const v=g.renderVals();assert.equal(v.effectsEnabled,interactive);assert.equal(typeof v.activateKey,'function');}}
-/* the guide character is off: no screen may render him, and the sprites must
-   stay behind that flag rather than being merely moved off-stage */
-for(let k=0;k<g.steps().length;k++){g.state.k=k;assert.equal(g.renderVals().showGuide,false,'screen '+(k+1)+' renders the guide');}
-assert(html.includes('<sc-if value="{{ showGuide }}"'),'the guide sprites are not gated behind showGuide');
-assert(html.includes('const GUIDE_VISIBLE = false'),'GUIDE_VISIBLE is not off');
+/* Swiftee escorts the learner on every screen, and the sheet table generated
+   from the character pack's manifest is the single thing that turns her on:
+   without it the guide layer must disappear rather than render a broken canvas. */
+for(let k=0;k<g.steps().length;k++){g.state.k=k;assert.equal(g.renderVals().showGuide,true,'screen '+(k+1)+' does not render the guide');}
+assert(html.includes('<sc-if value="{{ showGuide }}"'),'the guide sprite is not gated behind showGuide');
+assert(html.includes('const GUIDE_VISIBLE = !!(window.SWIFTEE && window.SWIFTEE.clips)'),'GUIDE_VISIBLE no longer follows the generated sheet table');
+const bare={...ctx,window:{POLY:ctx.window.POLY}};vm.createContext(bare);
+vm.runInContext(html.match(/<script[^>]*data-dc-script[^>]*>([\s\S]*?)<\/script>/)[1]+'\nglobalThis.Game=Component;',bare);
+const gb=new bare.Game();gb.P=bare.window.POLY;gb.svgRefs={};gb.state.ready=true;
+assert.equal(gb.renderVals().showGuide,false,'the guide still renders with no sheet table loaded');
 let clicks=0,prevented=0;const target={click:()=>clicks++};const event=key=>({key,target,currentTarget:target,preventDefault:()=>prevented++});
 g.state.interactive=true;g.activateKey(event('Enter'));g.activateKey(event(' '));g.activateKey(event('Escape'));g.activateKey({...event('Enter'),repeat:true});assert.equal(clicks,2);assert.equal(prevented,2);
 g.state.interactive=false;g.activateKey(event('Enter'));assert.equal(clicks,2);

@@ -1,0 +1,32 @@
+{
+  "reducedMotion": true,
+  "frames": {
+    "flapping": {
+      "13": 1
+    },
+    "waving": {
+      "15": 1
+    },
+    "blinking": {
+      "20": 1
+    },
+    "talking": {
+      "4": 1
+    },
+    "confused": {
+      "20": 1
+    }
+  },
+  "clips": [
+    "flapping",
+    "waving",
+    "blinking",
+    "talking",
+    "flapping",
+    "talking",
+    "blinking",
+    "confused",
+    "talking",
+    "blinking"
+  ]
+}

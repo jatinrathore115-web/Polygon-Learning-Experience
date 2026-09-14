@@ -3,6 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Swiftee's sheet table, generated from the character pack's manifest by
+     build-swiftee.cjs. It loads here, not from the helmet below, because the
+     lesson script reads it while it is being evaluated. -->
+<script src="assets/swiftee/swiftee-sheets.js"></script>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -42,8 +46,23 @@
   }
   @media (prefers-reduced-motion:reduce) { .created-shape { animation:none !important; } }
   @keyframes cueFade { from { opacity: 0; } to { opacity: 1; } }
+  /* --- open / closed answers. A gap is shown as the two loose ends of the
+         boundary and the span missing between them; a closed boundary is shown
+         by a light running the whole way round and arriving back where it
+         started, which is the thing that makes it closed. --- */
+  @keyframes gapEnd { 0%,100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+  @keyframes gapHalo { 0% { transform: scale(0.55); opacity: 0.6; } 100% { transform: scale(1.55); opacity: 0; } }
+  @keyframes gapSpan { 0%,100% { opacity: 0.68; } 50% { opacity: 1; } }
+  @keyframes sealSweep { 0% { stroke-dashoffset: 100; opacity: 0; } 5% { opacity: 1; } 94% { opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 0; } }
+  @keyframes sealGlow { 0%,100% { filter: drop-shadow(0 0 4px rgba(47,158,94,0.3)); } 50% { filter: drop-shadow(0 0 17px rgba(47,158,94,0.85)); } }
   @keyframes dr { to { stroke-dashoffset: 0; } }
   @keyframes sideStep { 0% { stroke-dashoffset:100; opacity:1; } 45% { stroke-dashoffset:0; opacity:1; } 80% { stroke-dashoffset:0; opacity:1; } 100% { stroke-dashoffset:0; opacity:0; } }
+  /* "Look! The boundaries of the shapes are different too." — the four
+     boundaries draw on together and then stay lit, so the word and the thing it
+     names are on screen at the same time instead of one finishing before the
+     other starts. Only the glow animates once they are drawn. */
+  @keyframes boundDraw { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+  @keyframes boundLit { 0%,100% { filter: drop-shadow(0 0 7px rgba(34,184,230,0.55)); } 50% { filter: drop-shadow(0 0 20px rgba(34,184,230,1)); } }
   @keyframes breathe { 0%,100% { transform: scale(1) translateY(0); } 50% { transform: scale(1.014) translateY(-3px); } }
   @keyframes sway { 0%,100% { transform: rotate(-1.1deg) translateY(0); } 50% { transform: rotate(1.4deg) translateY(-4px); } }
   @keyframes nod { 0% { transform: translateY(0) scale(1); } 35% { transform: translateY(-16px) scale(1.04); } 60% { transform: translateY(2px) scale(0.99); } 100% { transform: translateY(0); } }
@@ -54,28 +73,27 @@
   @keyframes pop { 0% { transform: scale(1); } 45% { transform: scale(1.09); } 100% { transform: scale(1); } }
   @keyframes ptPulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.18); opacity: 0.86; } }
   @keyframes halo { 0% { transform: scale(0.7); opacity: 0.55; } 100% { transform: scale(2.1); opacity: 0; } }
+  /* --- screen 1: the point arrives, then keeps a slow breath so it holds the
+         eye on a large white board. Appear and breathe are on two nested
+         elements because both drive transform. --- */
+  @keyframes pointIn { 0% { opacity: 0; transform: scale(0.15); } 62% { opacity: 1; transform: scale(1.16); } 100% { opacity: 1; transform: scale(1); } }
+  @keyframes pointBreathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+  @keyframes pointRing { 0% { transform: scale(0.3); opacity: 0; } 16% { opacity: 0.6; } 100% { transform: scale(1); opacity: 0; } }
+  @keyframes pointGlow { 0%,100% { opacity: 0.75; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes handHint { 0%,100% { transform: translate(0,0); opacity: 0.9; } 50% { transform: translate(64px,-52px); opacity: 1; } }
   @keyframes nudgeTap { 0% { transform: translate(14px,30px) scale(1.1); opacity: 0; } 16% { transform: translate(0,0) scale(1.06); opacity: 1; } 38% { transform: translate(0,0) scale(0.84); } 56% { transform: translate(0,0) scale(1.04); } 82% { transform: translate(0,0) scale(1); opacity: 1; } 100% { transform: translate(0,6px) scale(1); opacity: 0; } }
   @keyframes nudgeRing { 0% { transform: scale(0.3); opacity: 0; } 34% { transform: scale(0.4); opacity: 0.85; } 100% { transform: scale(1.7); opacity: 0; } }
   @keyframes glowPulse { 0%,100% { opacity: 0.25; } 50% { opacity: 0.75; } }
   @keyframes zoneInvite { 0%,100% { box-shadow: 0 0 0 0 rgba(34,184,230,0); } 50% { box-shadow: 0 0 0 9px rgba(34,184,230,0.17); } }
-  /* --- MammothGuide poses. Every keyframe animates transform only, inside a
-         fixed-size viewport, so the character's anchor and scale never move. --- */
-  @keyframes mamRise { 0% { transform: translateY(232px); } 72% { transform: translateY(-6px); } 100% { transform: translateY(0); } }
-  @keyframes mamBreathe { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-2px) scale(1.006); } }
-  @keyframes mamTalk { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
-  @keyframes mamWatch { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-2px) scale(1.004); } }
-  @keyframes mamCurious { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
-  @keyframes mamThink { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-2px) scale(1.005); } }
-  @keyframes mamNod { 0% { transform: translateY(0); } 50% { transform: translateY(-8px); } 100% { transform: translateY(0); } }
-  @keyframes mamSuccessA { 0% { transform: translateY(0) scale(1); } 40% { transform: translateY(-16px) scale(1.02); } 100% { transform: translateY(0); } }
-  @keyframes mamSuccessB { 0% { transform: translateY(0) scale(1); } 40% { transform: translateY(-16px) scale(1.02); } 100% { transform: translateY(0); } }
-  @keyframes mamCelebrate { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-14px) scale(1.015); } }
-  @keyframes mamSurpriseA { 0% { transform: scale(1); } 35% { transform: translateY(-8px) scale(1.035); } 100% { transform: translateY(0); } }
-  @keyframes mamSurpriseB { 0% { transform: scale(1); } 35% { transform: translateY(-8px) scale(1.035); } 100% { transform: translateY(0); } }
-  @keyframes mamOopsA { 0% { transform: translateY(0) scale(1); } 100% { transform: translateY(6px) scale(0.99); } }
-  @keyframes mamOopsB { 0% { transform: translateY(0) scale(1); } 100% { transform: translateY(6px) scale(0.99); } }
+  /* --- Swiftee, the guide. Frames are blitted onto a canvas whose cell never
+         changes, so expressions swap without the bird moving a pixel; the only
+         motion here is on the wrapper — the fly-in and the lean toward the sign
+         while she speaks — and it is transform only. --- */
+  .swiftee-wrap { transform-origin: 50% 88%; transition: transform 760ms cubic-bezier(.2,.8,.25,1.04), opacity 280ms ease-out; will-change: transform; }
+  .swiftee-wrap[data-hidden="true"] { transition: none; }
+  @keyframes swifteeDot { 0%,100% { opacity:.2; transform:scale(.6); } 50% { opacity:1; transform:scale(1); } }
+  .swiftee-dot { position:absolute; border-radius:50%; background:#fff; border:2px solid #9fdcff; box-shadow:0 2px 6px rgba(20,90,150,.25); animation:swifteeDot 1.05s ease-in-out infinite; }
   /* --- ambient + interaction juice --- */
   @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
   @keyframes snowFall { 0% { transform: translateY(-70px); } 100% { transform: translateY(1180px); } }
@@ -108,6 +126,8 @@
   @media (prefers-reduced-motion:reduce) {
     .idle-hand,.idle-ring { animation:none !important; transform:none !important; opacity:1 !important; }
     .instruction-panel { animation:none !important; }
+    .swiftee-wrap { transition:none !important; }
+    .swiftee-dot { animation:none !important; opacity:1 !important; transform:none !important; }
     .drop-zone { animation:none !important; }
     .ice-board { transition:none !important; }
     .narrator-text span { animation:none !important; opacity:1 !important; transform:none !important; }
@@ -131,15 +151,17 @@
       <div style="{{ w.wrap }}"><div style="{{ w.dot }}"></div></div>
     </sc-for>
 
-    <!-- ============ mammoth guide ============ z 20 — sits BEFORE the board
-         in the DOM and below it in z, so the board occludes his lower body.
-         Off for this lesson: no screen shows the guide (see GUIDE_VISIBLE). -->
+    <!-- ============ Swiftee guide ============ z 20 — sits BEFORE the board
+         in the DOM and below it in z, so the board's snowy rim covers her feet
+         and she reads as perched behind the ice, beside the sign she speaks from. -->
     <sc-if value="{{ showGuide }}" hint-placeholder-val="{{ false }}">
-      <div style="{{ mamViewport }}">
-        <div style="{{ mammothStyle }}">
-          <img src="assets/mam_happy.png" alt="Mammoth teacher" style="{{ happyStyle }}" />
-          <img src="assets/mam_sad.png" alt="" style="{{ sadStyle }}" />
+      <div style="{{ guideViewport }}">
+        <div class="swiftee-wrap" data-hidden="{{ guideHidden }}" style="{{ guideStyle }}">
+          <canvas ref="{{ guideRef }}" width="{{ guideCell }}" height="{{ guideCell }}" role="img" aria-label="Swiftee, your guide" style="{{ guideCanvasStyle }}"></canvas>
         </div>
+        <sc-if value="{{ showSpeechDots }}" hint-placeholder-val="{{ false }}">
+          <sc-for list="{{ speechDots }}" as="dot" hint-placeholder-count="0"><div class="swiftee-dot" style="{{ dot.style }}"></div></sc-for>
+        </sc-if>
       </div>
     </sc-if>
 
@@ -319,13 +341,12 @@ const BOARD_ART = { x: 68, y: 157, w: 1844, h: 872 };
 const BOARD = { x: 87, y: 196, w: 1806, h: 854 };
 /* The plank, sized to the room left above the board. Its aspect (6.855) is
    fixed by the artwork, so width follows height. */
-const SIGN_TOP = 16, SIGN_GAP = 28;
+const SIGN_TOP = 10, SIGN_GAP = 12;
 const SIGN_H = BOARD.y - SIGN_GAP - SIGN_TOP;
 const SIGN_W = Math.round(SIGN_H * 1844 / 269);
 const LAYER = {
   board:   BOARD,
-  sign:    { x: Math.round((STAGE.w - SIGN_W) / 2), y: SIGN_TOP, w: SIGN_W, h: SIGN_H },
-  mammoth: { x: 164, y: 24,  w: 269,  h: 181 }
+  sign:    { x: Math.round((STAGE.w - SIGN_W) / 2), y: SIGN_TOP, w: SIGN_W, h: SIGN_H }
 };
 /* Learning content: inset from the ice border on all four sides so nothing
    ever touches the frozen frame. Derived from the board so the two move together. */
@@ -350,29 +371,59 @@ const SORT = {
   unite: 56, uniteGap: 24, uniteMs: 520
 };
 /* The plank's usable text band — clear of the rope bolts and both snowflakes,
-   and only as tall as the wood. Derived from t
-   he sign for the same reason. */
-
-<!-- testingggg -->
-
+   and only as tall as the wood. Derived from the sign for the same reason.
+   Width comes from sampling the plank art (1844x269) for wood that is clear
+   across the rows a centred line actually occupies: the widest run there is
+   6.2%-89.6% of the sign, and the right snowflake is the tighter side, so the
+   widest centred band is 2x39.6% ~ 79%. 80% with the pad below puts the glyph
+   edges at 11.1%/88.9% — inside the wood on both sides.
+   A single line sits in those clear middle rows and gets the wide band; a
+   second line dips into the rows the snowflakes occupy, so two-line text gets
+   the narrower one (the widest centred run across those lower rows is ~77%). */
+/* Screen 1's point: the mark's diameter, and how long it takes to travel from
+   the board's centre to the first vertex of the shape it is about to draw. */
+const S1_DOT = 62, S1_TRAVEL = 620;
+/* How long the four boundaries take to draw themselves on. The line that names
+   them reaches the word "boundaries" at about 1.9s, so they are lit and holding
+   well before it arrives, by whichever voice is reading. */
+const BOUND_DRAW = 1150;
+const NARR_ONE = 0.80, NARR_TWO = 0.7626;
 const NARR = {
-  x: Math.round(LAYER.sign.x + LAYER.sign.w * 0.1187),
-  y: Math.round(LAYER.sign.y + LAYER.sign.h * 0.2875),
-  w: Math.round(LAYER.sign.w * 0.7626),
-  h: Math.round(LAYER.sign.h * 0.5688)
+  x: Math.round(LAYER.sign.x + LAYER.sign.w * (1 - NARR_ONE) / 2),
+  y: Math.round(LAYER.sign.y + LAYER.sign.h * 0.2719),
+  w: Math.round(LAYER.sign.w * NARR_ONE),
+  w2: Math.round(LAYER.sign.w * NARR_TWO),
+  /* tall enough to hold two lines at the fixed size, centred where one line
+     sat before, so the instruction never shifts vertically between screens. */
+  h: Math.round(LAYER.sign.h * 0.60)
 };
-/* floor: the smallest one-line instruction we will accept before wrapping to
-   two lines instead — the stage scales with the viewport, so 28px here is
-   still only ~19px on a 1366-wide screen. */
-const NARR_TYPE = { size: 38, floor: 28, color: '#633c19', accent: '#2c63b9', outline: 3 };
-// Reserve animation headroom and a gap before the sign, keeping the paw baseline.
-const MAM_SAFE = { top: STAGE.h * 0.02, right: (LAYER.sign.x - LAYER.mammoth.x) * 0.05, motion: 20 };
-const MAM_BASELINE = LAYER.mammoth.y + LAYER.mammoth.h;
-const MAM_AREA = { x: LAYER.mammoth.x, y: MAM_SAFE.top,
-  w: LAYER.sign.x - LAYER.mammoth.x, h: MAM_BASELINE - MAM_SAFE.top };
-const MAM_HEIGHT = Math.min(LAYER.mammoth.h, MAM_AREA.h - MAM_SAFE.motion,
-  (MAM_AREA.w - MAM_SAFE.right) * 510 / 760);
-const MAM_WIDTH = MAM_HEIGHT * 760 / 510;
+/* One size on every screen. The sign is the lesson's speaking voice, and type
+   that resizes per sentence reads as that voice changing volume — the longest
+   line would otherwise arrive a third smaller than the shortest. So the size
+   never scales to fit: a sentence too wide for the plank takes a second,
+   balanced line instead. pad is the optical breathing room inside the band. */
+const NARR_TYPE = { size: 38, lineHeight: 1.18, pad: 24, color: '#633c19', accent: '#2c63b9', outline: 3 };
+/* Swiftee's cell, in the sky to the left of the sign. Every frame of every
+   animation in the pack shares one square cell with the pivot at its centre, so
+   the guide is one fixed box: swapping expressions can never move her. The
+   standing baseline (from the manifest) is set a little below the board's top
+   edge so the snowy rim covers her feet and she reads as perched behind the ice. */
+const SWIFTEE_CELL = 310;
+const SWIFTEE_BASELINE = (window.SWIFTEE && window.SWIFTEE.baseline) || 0.877;
+/* Where her feet stand, and the centre line she stands on. Feet land inside the
+   board rim so the snow covers them; the centre keeps a clear gap to the sign. */
+const SWIFTEE_FEET = BOARD.y + 46, SWIFTEE_CENTRE = 210;
+/* How far right she actually inks while a line is being spoken, as a fraction
+   of the cell. Taken from the manifest: puzzleing (473 of 512) is the widest
+   expression that can share the screen with narration — celebrating is wider
+   still, but it only starts once the voice has stopped. The speech trail is
+   placed against this edge, so it clears her in every pose it can appear with. */
+const SWIFTEE_INK = { right: 473 / 512 };
+const GUIDE_BOX = {
+  x: Math.round(SWIFTEE_CENTRE - SWIFTEE_CELL / 2),
+  y: Math.round(SWIFTEE_FEET - SWIFTEE_CELL * SWIFTEE_BASELINE),
+  w: SWIFTEE_CELL, h: SWIFTEE_CELL
+};
 
 function pc(v, total) { return (100 * v / total).toFixed(4) + '%'; }
 /* Turns a stage-pixel box into a percentage-positioned absolute style. */
@@ -383,96 +434,203 @@ function stageBox(L, z) {
   };
 }
 
-/* The guide character is not part of the lesson: no screen shows him. The
-   state machine below stays, dormant and free of timers, so the screens can go
-   on raising their semantic events and turning him back on is this one flag. */
-const GUIDE_VISIBLE = false;
+/* Swiftee escorts the learner on every screen. This flag stays the one switch
+   that turns the guide layer off; the state machine then ignores every event.
+   It is also off when the generated sheet constants failed to load. */
+const GUIDE_VISIBLE = !!(window.SWIFTEE && window.SWIFTEE.clips);
 
 /* ============================================================================
-   MAMMOTH GUIDE — reusable character state machine
-   Screens never pick animations themselves; they raise semantic events and the
-   guide decides the pose. Both sprites share one 760x510 canvas and every pose
-   animates transform only inside a fixed viewport, so swapping expression can
-   never change the character's anchor, scale or baseline.
+   SWIFTEE GUIDE — the bird beside the sign
+   Two layers. SwifteeSprite blits frames from the pack's uniform-grid sheets
+   onto one canvas at the manifest's frame rate and runs a queue of segments,
+   so a full start → loop → stop triad plays out before the next expression.
+   SwifteeGuide is the state machine the screens talk to: they raise semantic
+   events (instruction started, wrong attempt, hint shown…) and it picks the
+   expression, holding a reaction to the end and queueing the ambient pose
+   behind it. All grids, frame counts and triads come from window.SWIFTEE,
+   generated from the pack's manifest by build-swiftee.cjs.
    ========================================================================= */
-const MAMMOTH_STATES = {
-  ENTER: 'ENTER', IDLE: 'IDLE', TALKING: 'TALKING', ENCOURAGING: 'ENCOURAGING',
-  CURIOUS: 'CURIOUS', THINKING: 'THINKING', WATCHING: 'WATCHING',
-  SUCCESS: 'SUCCESS', WRONG: 'WRONG', SURPRISED: 'SURPRISED', CELEBRATE: 'CELEBRATE'
-};
-/* sad: true selects the mam_sad sprite. hold: ms means the pose is temporary
-   and the guide returns to its resting pose afterwards. */
-const MAMMOTH_POSE = {
-  ENTER:       { anim: 'mamRise 820ms cubic-bezier(.24,.9,.26,1) both' },
-  IDLE:        { anim: 'mamBreathe 4.6s ease-in-out infinite' },
-  TALKING:     { anim: 'mamTalk 2.1s ease-in-out infinite' },
-  WATCHING:    { anim: 'mamWatch 4.2s ease-in-out infinite' },
-  CURIOUS:     { anim: 'mamCurious 3.2s ease-in-out infinite' },
-  THINKING:    { anim: 'mamThink 3.6s ease-in-out infinite' },
-  ENCOURAGING: { anim: 'mamNod 1000ms ease-in-out both', hold: 1100 },
-  SUCCESS:     { anim: 'mamSuccess# 900ms ease-in-out both', hold: 1000, once: true },
-  CELEBRATE:   { anim: 'mamCelebrate 2.2s ease-in-out infinite' },
-  SURPRISED:   { anim: 'mamSurprise# 760ms ease-out both', hold: 900, once: true },
-  WRONG:       { anim: 'mamOops# 700ms ease-out both', hold: 1200, once: true, sad: true }
-};
+class SwifteeSprite {
+  constructor(data, canvasGetter) {
+    this.d = data; this.getCanvas = canvasGetter;
+    this.images = {}; this.queue = []; this.seg = null; this.shown = 0; this.acc = 0;
+    this.last = 0; this.running = false; this.raf = 0;
+  }
+  clip(name) { return this.d.clips[name]; }
+  image(name) {
+    let im = this.images[name];
+    if (!im) { im = new Image(); im.decoding = 'async'; im.src = this.clip(name).image; this.images[name] = im; }
+    return im;
+  }
+  ready(name) { const im = this.image(name); return im.complete && im.naturalWidth > 0; }
+  preload(names) { names.forEach(n => { if (this.clip(n)) this.image(n); }); }
+  /* segments: [{ clip, frames, onEnd }] — frames is how many to show before
+     moving on: a multiple of the clip's length for whole loops, Infinity to
+     loop until replaced. Replaces whatever was queued. */
+  set(segments) { this.queue = segments.slice(); this.next(); }
+  next() { this.seg = this.queue.shift() || null; this.shown = 0; this.acc = 0; if (this.seg) this.draw(); }
+  start() {
+    if (this.running) return;
+    this.running = true; this.last = performance.now();
+    const tick = t => { if (!this.running) return; this.step(t); this.raf = requestAnimationFrame(tick); };
+    this.raf = requestAnimationFrame(tick);
+  }
+  stop() { this.running = false; cancelAnimationFrame(this.raf); }
+  step(t) {
+    const dt = Math.min(250, t - this.last); this.last = t;
+    if (!this.seg) return;
+    /* hold the last drawn frame until this clip's sheet has arrived */
+    if (!this.ready(this.seg.clip)) { this.acc = 0; return; }
+    this.acc += dt;
+    const per = 1000 / this.d.fps;
+    if (this.acc < per) return;
+    const steps = Math.floor(this.acc / per); this.acc -= steps * per;
+    this.shown += steps;
+    if (this.shown >= this.seg.frames) { const done = this.seg; this.next(); if (done.onEnd) done.onEnd(); return; }
+    if (!this.seg.still) this.draw();
+  }
+  frameIndex() {
+    const c = this.clip(this.seg.clip);
+    /* A held segment shows one frame from the middle of the clip, where the
+       expression is fully formed rather than easing into it. */
+    if (this.seg.still) return Math.floor(c.frames / 2);
+    if (!c.pingpong) return this.shown % c.frames;
+    const span = Math.max(1, c.frames * 2 - 2), i = this.shown % span;
+    return i < c.frames ? i : span - i;
+  }
+  /* Frame i sits at col = i % cols, row = i / cols; the cell is the grid pitch. */
+  draw() {
+    const canvas = this.getCanvas();
+    if (!canvas || !this.seg || !this.ready(this.seg.clip)) return;
+    const c = this.clip(this.seg.clip), cell = this.d.cell, i = this.frameIndex();
+    const ctx = canvas.getContext('2d'); if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(this.image(this.seg.clip), (i % c.cols) * cell, Math.floor(i / c.cols) * cell, cell, cell, 0, 0, canvas.width, canvas.height);
+    canvas.dataset.clip = this.seg.clip; canvas.dataset.frame = i;
+  }
+}
 
-class MammothGuide {
+/* Ambient poses she settles into, and how long she idles before drifting off. */
+const GUIDE_REST = { WATCH: 'blinking', TALK: 'talking', CHEER: 'celebrating', DOZE: 'daydreaming' };
+const GUIDE_IDLE_MS = 24000;
+
+class SwifteeGuide {
   constructor(host) {
     this.host = host;
-    this.current = MAMMOTH_STATES.IDLE;
-    this.resting = MAMMOTH_STATES.IDLE;
-    this._hold = null;
-    this._queued = null;
+    this.d = GUIDE_VISIBLE ? window.SWIFTEE : null;
+    this.sprite = this.d ? new SwifteeSprite(this.d, () => host.guideRef && host.guideRef.current) : null;
+    this.resting = GUIDE_REST.WATCH;
+    this.reaction = null;   /* token of the reaction holding the stage, if any */
+    this.misses = 0;        /* wrong attempts on the question now on screen */
+    this.dozing = false; this.wakeTo = null; this._idle = null; this._preload = null;
   }
-  /* The single entry point. opts.then overrides where a temporary pose lands.
-     A reaction (a pose with a hold) outranks the ambient poses, so the oops
-     or the cheer plays out in full and the talking pose queues behind it —
-     otherwise the corrective line would wipe the reaction the moment it starts. */
-  setState(name, opts) {
-    if (!GUIDE_VISIBLE) return;
-    const pose = MAMMOTH_POSE[name];
-    if (!pose) return;
-    const o = opts || {};
-    const ambient = !pose.hold;
-    /* queue the ambient pose; it lands the moment the reaction finishes */
-    if (this._hold && ambient && !o.force) { this.resting = name; this._queued = name; return; }
-    if (this._hold) { clearTimeout(this._hold); this._hold = null; }
-    this._queued = null;
-    this.current = name;
-    if (ambient) this.resting = name;
-    const back = o.then || this.resting;
-    this.host.setState((st) => ({ mamState: name, mamTick: (st.mamTick || 0) + 1 }));
-    if (pose.hold) {
-      this._hold = this.host.later(() => {
-        this._hold = null;
-        const next = this._queued || back;
-        this._queued = null;
-        if (this.current === name) this.setState(next, { force: true });
-      }, o.hold || pose.hold);
+  get on() { return !!this.sprite; }
+  /* Read live rather than cached, so turning the setting on mid-lesson takes
+     effect without a reload. */
+  get reduced() {
+    return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+  mount() {
+    if (!this.on) return;
+    const s = this.d.states;
+    this.sprite.preload(['blinking', 'flapping', s.talking.start, s.talking.loop, s.talking.stop, s.waving.start, s.waving.loop, s.waving.stop]);
+    this._preload = setTimeout(() => this.sprite.preload(Object.keys(this.d.clips)), 2500);
+    this.sprite.set(this.build(GUIDE_REST.WATCH, Infinity));
+    this.sprite.start();
+  }
+  unmount() { if (this.sprite) this.sprite.stop(); this.clearIdle(); clearTimeout(this._preload); }
+  /* ---- chains. A state plays start → loop → stop; a standalone clip just plays. ---- */
+  build(name, cycles) {
+    const st = this.d.states[name], out = [];
+    const seg = (clip, frames, part) => ({ clip, frames, state: name, part });
+    /* prefers-reduced-motion: she still changes expression, because that is the
+       feedback, but nothing loops — each pose is held as a single frame, and a
+       reaction holds for about the time its triad would have taken. */
+    if (this.reduced) {
+      const clip = st ? st.loop : name;
+      return this.d.clips[clip]
+        ? [{ clip, frames: cycles === Infinity ? Infinity : 24, state: name, part: 'loop', still: true }]
+        : [];
     }
+    if (st) {
+      if (this.d.clips[st.start]) out.push(seg(st.start, this.d.clips[st.start].frames, 'start'));
+      out.push(seg(st.loop, cycles === Infinity ? Infinity : cycles * this.d.clips[st.loop].frames, 'loop'));
+      if (cycles !== Infinity && this.d.clips[st.stop]) out.push(seg(st.stop, this.d.clips[st.stop].frames, 'stop'));
+    } else if (this.d.clips[name]) {
+      out.push(seg(name, cycles === Infinity ? Infinity : Math.max(1, Math.round(cycles * this.d.clips[name].frames)), 'loop'));
+    }
+    return out;
   }
-  /* runStep clears every component timer, so any pending reaction dies with
-     them — drop the handle too or it would block ambient poses forever. */
-  reset() { this._hold = null; this._queued = null; this.resting = MAMMOTH_STATES.IDLE; }
-  /* Resolves the pose into a sprite + animation for the current render. */
-  pose() {
-    const p = MAMMOTH_POSE[this.current] || MAMMOTH_POSE.IDLE;
-    const tick = this.host.state.mamTick || 0;
-    return {
-      sad: !!p.sad,
-      anim: p.once ? p.anim.replace('#', tick % 2 ? 'A' : 'B') : p.anim
-    };
+  /* What must play before anything new: the stop clip of the state on stage,
+     so no loop is ever cut straight into another. */
+  exit() {
+    const s = this.sprite.seg;
+    if (this.reduced || !s || !s.state || s.part === 'stop') return [];
+    const st = this.d.states[s.state];
+    return st && this.d.clips[st.stop] ? [{ clip: st.stop, frames: this.d.clips[st.stop].frames, state: s.state, part: 'stop' }] : [];
   }
+  /* The pose she holds until something happens. While a reaction is playing
+     it only records where she lands afterwards — otherwise the corrective
+     line's talking would wipe the oops the moment it starts. */
+  settle(name) {
+    if (!this.on) return;
+    this.resting = name;
+    if (this.reaction) return;
+    const s = this.sprite.seg;
+    if (s && s.state === name && s.part !== 'stop') return;
+    this.sprite.set(this.exit().concat(this.build(name, Infinity)));
+  }
+  /* A list of [state, cycles] played once, in order, then back to resting. */
+  react(list) {
+    if (!this.on) return;
+    const token = this.reaction = {};
+    let segs = this.exit();
+    list.forEach(([name, cycles]) => { segs = segs.concat(this.build(name, cycles || 1)); });
+    if (!segs.length) { this.reaction = null; return; }
+    segs[segs.length - 1].onEnd = () => { if (this.reaction === token) { this.reaction = null; this.settle(this.resting); } };
+    this.sprite.set(segs);
+  }
+  /* ---- idling: left alone on a question, she drifts into a daydream ---- */
+  armIdle() {
+    this.clearIdle();
+    if (!this.on) return;
+    this._idle = setTimeout(() => {
+      this._idle = null;
+      if (this.reaction) { this.armIdle(); return; }
+      this.dozing = true; this.wakeTo = this.resting;
+      this.settle(GUIDE_REST.DOZE);
+    }, GUIDE_IDLE_MS);
+  }
+  clearIdle() { if (this._idle) { clearTimeout(this._idle); this._idle = null; } }
+  wake() { if (!this.dozing) return; this.dozing = false; this.resting = this.wakeTo || GUIDE_REST.WATCH; }
+  /* runStep clears the lesson's timers; drop ours and land back on watching. */
+  reset() { this.clearIdle(); this.dozing = false; this.reaction = null; this.misses = 0; this.resting = GUIDE_REST.WATCH; }
+
   /* ---- semantic events: the only thing screens should call ---- */
-  onScreenEnter() { this.setState(MAMMOTH_STATES.ENTER, { then: MAMMOTH_STATES.IDLE, force: true }); }
-  onInstructionStart() { this.setState(MAMMOTH_STATES.TALKING); }
-  onInstructionComplete() { this.setState(MAMMOTH_STATES.WATCHING); }
-  onInteractionStart() { this.setState(MAMMOTH_STATES.WATCHING); }
-  onCorrectProgress() { this.setState(MAMMOTH_STATES.ENCOURAGING, { then: MAMMOTH_STATES.WATCHING }); }
-  onWrongAttempt() { this.setState(MAMMOTH_STATES.WRONG, { then: MAMMOTH_STATES.WATCHING }); }
-  onCorrectAnswer() { this.setState(MAMMOTH_STATES.SUCCESS, { then: MAMMOTH_STATES.WATCHING }); }
-  onSurprise() { this.setState(MAMMOTH_STATES.SURPRISED, { then: MAMMOTH_STATES.WATCHING }); }
-  onScreenComplete() { this.setState(MAMMOTH_STATES.CELEBRATE); }
+  /* A new screen: she flies in beside the sign; on the very first one she
+     waves hello before the first instruction. */
+  onScreenEnter(first) {
+    if (!this.on) return;
+    this.clearIdle(); this.dozing = false; this.reaction = null; this.resting = GUIDE_REST.WATCH;
+    this.react(first ? [['flapping', 0.6], ['waving', 1]] : [['flapping', 0.6]]);
+  }
+  /* Instruction text, narration and her talking start on the same tick. */
+  onInstructionStart() { this.wake(); this.clearIdle(); this.settle(GUIDE_REST.TALK); }
+  /* …and she only stops talking when the audio actually ends. */
+  onInstructionComplete(awaiting) { this.settle(GUIDE_REST.WATCH); if (awaiting) this.armIdle(); else this.clearIdle(); }
+  onInteractionStart() { this.wake(); this.clearIdle(); this.react([['curious', 1]]); }
+  onCorrectProgress() { this.wake(); this.react([['happy', 1]]); this.armIdle(); }
+  /* The guide counts misses itself rather than reading the lesson's attempt
+     tally: the screens bump that inside the same setState that precedes the
+     call, so a first miss can already read as a second one. It clears with
+     every step, which is exactly when the lesson clears its own count. */
+  onWrongAttempt() { this.wake(); this.clearIdle(); this.misses += 1; this.react([[this.misses >= 2 ? 'puzzleing' : 'confused', 1]]); }
+  onCorrectAnswer() { this.wake(); this.clearIdle(); this.react([[this.misses > 0 ? 'relieved' : 'happy', 1]]); }
+  onSurprise() { this.wake(); this.react([['surprised', 1]]); }
+  /* The hand hint appears: she leans in with it. */
+  onHint() { this.wake(); this.react([['curious', 1]]); this.armIdle(); }
+  onActivity() { const woke = this.dozing; this.wake(); if (woke && !this.reaction) this.settle(this.resting); if (this._idle) this.armIdle(); }
+  onScreenComplete() { this.clearIdle(); this.dozing = false; this.resting = GUIDE_REST.CHEER; this.react([['proud', 1]]); }
 }
 
 class Component extends DCLogic {
@@ -480,23 +638,25 @@ class Component extends DCLogic {
     ready: false, k: 0, narr: '', speaking: false, voiceError: '', muted: false, scale: 1,
     sel: [], dd: [null, null, null, null], ddOpen: -1, ddWrong: [false, false, false, false],
     cnt: [4, 4], attempts: 0, wrong: null, ok: null, ocReveal: null, nudge: null,
-    mamState: 'IDLE', mamTick: 0, mamHidden: true, interactive: false,
+    guideHidden: true, interactive: false,
     narrTone: 'teach', narrTick: 0,
     hoverK: null, pressK: null, fx: [],
     userPts: null, dragged: false, reveal: false, nums: 0, hlKind: null,
     chip: null, placed: {}, badPlace: null, sortAt: {}, pickedFig: null, justPlaced: null, tick: null, united: false, say: '',
-    n: 4, recallNameN: 4, morph: null, traceKey: 0, tracing: false, drawing: false, drawn: false,
+    n: 4, recallNameN: 4, morph: null, traceKey: 0, tracing: false, drawing: false, drawn: false, penAt: null,
     zoomed: false, showHand: false, checked: false, phase: ''
   };
 
   /* One guide instance for the whole lesson; screens only raise events at it. */
-  guide = new MammothGuide(this);
+  guide = new SwifteeGuide(this);
 
   /* ---------- lifecycle ---------- */
   componentDidMount() {
     this.stageRef = React.createRef();
     this.zoneARef = React.createRef(); this.zoneBRef = React.createRef();
     this.narrRef = React.createRef();
+    this.guideRef = React.createRef();
+    this.guide.mount();
     this.safeRef = React.createRef();
     this.ghostRef = React.createRef(); this.svgRefs = {};
     this.timers = [];
@@ -544,6 +704,7 @@ class Component extends DCLogic {
   }
   componentWillUnmount() {
     this.cancelMorph();
+    this.guide.unmount();
     if (this._vertexDragCleanup) this._vertexDragCleanup();
     if (this._stopRecordedVoice) this._stopRecordedVoice();
     if (this._disposeNavigator) this._disposeNavigator();
@@ -566,6 +727,8 @@ class Component extends DCLogic {
     try { window.speechSynthesis.cancel(); } catch (e) {}
   }
   later(fn, ms) { const t = setTimeout(fn, ms); this.timers.push(t); return t; }
+  /* Read live, so turning the setting on mid-lesson takes effect immediately. */
+  reducedMotion() { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
   mapPt(box, vb, pt, pad) {
     const p = pad === undefined ? 20 : pad;
     const ix = box.x + p, iy = box.y + p, iw = box.w - 2 * p, ih = box.h - 2 * p;
@@ -759,19 +922,24 @@ class Component extends DCLogic {
       return context.measureText(display).width + display.length * NARR_TYPE.size * 0.005 + 12;
     } catch (error) { return display.length * NARR_TYPE.size * 0.62 + 12; }
   }
-  /* Can the sign hold this whole line at once? narrStyle wraps to two lines
-     before it shrinks the type below the floor, so the budget is two lines, not
-     one. Anything inside it must never be split: the pager swaps pages while the
+  /* How this sentence sits on the plank at the one fixed size: one line while
+     it clears the wide band, two balanced lines after that. narrStyle and
+     signFits both read this, so wrapping and paging can never disagree. */
+  narrFit(text) {
+    const measured = this.narratorWidth(text);
+    const wrapped = measured > NARR.w - NARR_TYPE.pad;
+    return { measured, wrapped, width: wrapped ? NARR.w2 : NARR.w };
+  }
+  /* Can the sign hold this whole sentence? The budget is two lines, not one.
+     Anything inside it must never be split: the pager swaps pages while the
      audio plays, and a swap mid-sentence reads as the instruction blinking out
      and rebuilding itself. */
   signFits(text) {
-    const measured = this.narratorWidth(text);
-    const one = Math.min(NARR_TYPE.size, NARR_TYPE.size * (NARR.w - 24) / Math.max(1, measured));
-    if (one >= NARR_TYPE.floor) return true;
-    const two = Math.min(NARR_TYPE.size, NARR.h / (2 * 1.18), one * 2);
-    /* 1.85 lines of room rather than 2: wrapping never fills both lines edge to
-       edge, and text spilling off the plank is worse than a page swap. */
-    return two >= NARR_TYPE.floor && measured * two / NARR_TYPE.size <= 1.85 * (NARR.w - 24);
+    const fit = this.narrFit(text);
+    if (!fit.wrapped) return true;
+    /* 1.85 lines of room rather than 2: a balanced wrap never fills both lines
+       edge to edge, and text spilling off the plank is worse than a page swap. */
+    return fit.measured <= 1.85 * (NARR.w2 - NARR_TYPE.pad);
   }
   instructionPages(text) {
     const clean = String(text || '').replace(/\s+/g, ' ').trim();
@@ -802,7 +970,7 @@ class Component extends DCLogic {
       this._voiceAfter = null;
       this._voiceLocked = false;
       this.setState({ speaking: false, interactive: true, voiceError: '' });
-      this.guide.onInstructionComplete();
+      this.guide.onInstructionComplete(!!this.step().q && !this._advanceAfterVoice);
       if (this._advanceAfterVoice) { this._advanceAfterVoice = false; this.advance(); }
       else if (after) after();
       else if (!this.step().auto) this.armNudge();
@@ -833,6 +1001,10 @@ class Component extends DCLogic {
       motionRun: (st.motionRun || 0) + 1,
       hlKind: o.hl !== undefined ? o.hl : st.hlKind
     }), () => { this.pumpVoice(); });
+    /* Lines that open with a gasp or a cheer get the matching face first;
+       the talking pose queues behind it. */
+    if (/^(whoa|woah|wow)\b/i.test(text)) this.guide.onSurprise();
+    else if (/^(you got it|you did it)\b/i.test(text)) this.guide.onCorrectAnswer();
     this.guide.onInstructionStart();
   }
   replay = () => { const t = this.state.narr; if (t) this.narrate(t, {}); };
@@ -1119,7 +1291,7 @@ class Component extends DCLogic {
       magicReveal: s.q === 'oc' && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches),
       narrPage: '', draggingLabel:null, labelHover:null, draggingFigure:null, sortHover:null,
       sel: [], ddOpen: -1, wrong: null, ok: null, ocReveal: null, attempts: 0, nudge: null,
-      reveal: false, nums: 0, hlKind: null, tracing: false, drawing: false,
+      reveal: false, nums: 0, hlKind: null, tracing: false, drawing: false, penAt: null,
       zoomed: false, showHand: false, checked: false, phase: s.ph || '',
       chip: null, badPlace: null, pickedFig: null, justPlaced: null, tick: null, united: false, say: '', morph: null
     };
@@ -1155,12 +1327,28 @@ class Component extends DCLogic {
       const start = () => {
         if (s.sc === 'END') this.later(() => this.confetti(), 260);
         if (s.ph === 'point') { this.later(go, 500); return; }
-        if (s.ph === 'draw') { this.setState({ drawing: true }); this.runDraw(2000, () => { this.setState({ drawn: true }); this.sfx('done'); go(); }); return; }
+        if (s.ph === 'draw') {
+          /* The point does not blink out here and reappear at the shape's first
+             vertex. It travels there, so the learner follows one object out of
+             the centre and into the drawing, and nothing about the composition
+             jumps. Reduced motion skips the travel and starts at the vertex. */
+          const trace = () => { this.setState({ drawing: true, penAt: null }); this.runDraw(2000, () => { this.setState({ drawn: true }); this.sfx('done'); go(); }); };
+          if (this.reducedMotion()) { trace(); return; }
+          this.setState({ penAt: 'centre' }, () => {
+            this.later(() => this.setState({ penAt: 'vertex' }), 70);
+            this.later(trace, S1_TRAVEL + 130);
+          });
+          return;
+        }
         if (s.ph === 'closer') { this.setState({ zoomed: true }); this.later(go, 300); return; }
         if (s.ph === 'trace') { this.runTrace(1700); this.later(go, 500); return; }
         if (s.ph === 'five' || s.count) { goCounted(s.count || 5, false); return; }
         if (s.ph === 'both') { goCounted(5, true); return; }
-        if (s.ph === 'bound') { this.runTrace(1500); this.later(go, 250); return; }
+        /* The light is held by the phase itself now, so this only has to sound
+           it and let the line start a beat after it begins drawing. */
+        /* The boundaries draw themselves on as the step opens and stay lit for
+           the whole line; this only has to sound it and let the words follow. */
+        if (s.ph === 'bound') { this.later(() => this.sfx('trace'), 60); this.later(go, 250); return; }
         if (s.ph === 'quad' && s.morphFrom) {
           const from = this.fig(s.morphFrom).pts, to = this.fig(s.fig).pts;
           this.setState({ nums: 0 });
@@ -1182,28 +1370,31 @@ class Component extends DCLogic {
   }
 
   /* ---------- screen entrance ----------
-     He starts low, behind the ice board, and rises into place. The board is a
-     later sibling in the DOM with a higher z-index, so it genuinely occludes
-     his lower body — no clip or mask is doing the work.
+     A new screen: Swiftee flies in from off stage and lands beside the sign;
+     the board is a later sibling with a higher z-index, so its snowy rim
+     genuinely covers her feet — no clip or mask is doing the work. On the very
+     first screen she waves hello before the lesson's first line.
      Returns how long the caller must hold the instruction back for. */
   enterScreen(fresh) {
     if (!fresh) {
-      if (this.state.mamHidden) this.setState({ mamHidden: false });
+      if (this.state.guideHidden) this.setState({ guideHidden: false });
       return 0;
     }
-    this.setState({ mamHidden: true });
+    const first = !this._guideGreeted;
+    this._guideGreeted = true;
+    this.setState({ guideHidden: true });
     this.later(() => {
-      this.setState({ mamHidden: false });
-      this.guide.onScreenEnter();
-      this.sfx('pop');
-      this.snowPuff();
+      this.setState({ guideHidden: false });
+      this.guide.onScreenEnter(first);
     }, 80);
-    return 760;
+    /* she touches down as the fly-in transition ends */
+    this.later(() => { this.sfx('pop'); this.snowPuff(); }, 820);
+    return first ? 3100 : 880;
   }
-  /* Snow kicks up off the board's rim where he surfaces. */
+  /* Snow kicks up off the board's rim where she lands. */
   snowPuff() {
     const items = [];
-    const originX = LAYER.mammoth.x + LAYER.mammoth.w * 0.46 - SAFE.x;
+    const originX = GUIDE_BOX.x + GUIDE_BOX.w * 0.5 - SAFE.x;
     for (let i = 0; i < 9; i++) {
       const a = -Math.PI / 2 + (i - 4) * 0.29;
       const d = 70 + Math.random() * 70;
@@ -1450,6 +1641,7 @@ class Component extends DCLogic {
     this.clearNudge();
   };
   clearNudge() {
+    this.guide.onActivity();
     this._nudgeToken = (this._nudgeToken || 0) + 1;
     this._nudgeDone = true;
     if (this.state.nudge || this.state.showHand) this.setState({ nudge: null, showHand: false });
@@ -1468,6 +1660,7 @@ class Component extends DCLogic {
       if (this.step().q === 'deform') {
         if (!this.state.dragged) {
           this.setState({ showHand: true });
+          this.guide.onHint();
           this.later(() => { if (token === this._nudgeToken && generation === (this.gen || 0)) this.setState({ showHand: false }); }, 2900);
         }
         return;
@@ -1483,6 +1676,7 @@ class Component extends DCLogic {
         const sc = p.width / SAFE.w || this.state.scale || 1;
         const pt = { x: (b.left + b.width / 2 - p.left) / sc, y: (b.top + b.height / 2 - p.top) / sc };
       this.setState({ nudge: pt });
+      this.guide.onHint();
       this.later(() => { if (token === this._nudgeToken && generation === (this.gen || 0) && !this._nudgeDone) this.setState({ nudge: null }); }, 2900);
     }, wait);
   }
@@ -1779,6 +1973,7 @@ class Component extends DCLogic {
       window.addEventListener('pointerup', up);
       window.addEventListener('pointercancel', cancel);
       this.clearNudge();
+      this.guide.onInteractionStart();
       this.setState({ showHand: false });
     };
   }
@@ -1827,7 +2022,7 @@ class Component extends DCLogic {
         if (!active && Math.hypot(e.clientX-origin.x,e.clientY-origin.y)<6) return;
         e.preventDefault(); latest=e;
         if (!active) {
-          active=true; this.clearNudge(); this.sfx('pick');
+          active=true; this.clearNudge(); this.sfx('pick'); this.guide.onInteractionStart();
           this.setState({ chip:name, draggingLabel:name });
           if (ghost) { ghost.textContent=name; Object.assign(ghost.style,{opacity:'1',width:'200px',height:'78px',boxSizing:'border-box',display:'flex',alignItems:'center',justifyContent:'center',padding:'0 16px',borderRadius:'39px',background:this.labelTheme(name).gradient,border:'3px solid white',color:'white',font:'800 34px "Baloo 2",sans-serif',boxShadow:'0 12px 24px rgba(15,100,170,.28),0 0 24px rgba(34,184,230,.55)',whiteSpace:'nowrap'}); }
         }
@@ -1908,7 +2103,7 @@ class Component extends DCLogic {
         if (!active && Math.hypot(e.clientX-origin.x,e.clientY-origin.y)<6) return;
         e.preventDefault(); latest=e;
         if (!active) {
-          active=true; this.clearNudge(); this.sfx('pick');
+          active=true; this.clearNudge(); this.sfx('pick'); this.guide.onInteractionStart();
           this.setState({ pickedFig:index, draggingFigure:index });
           if (ghost) {
             ghost.replaceChildren(artwork);
@@ -2173,6 +2368,23 @@ class Component extends DCLogic {
       filter: 'drop-shadow(0 0 10px rgba(34,184,230,0.85))'
     };
   }
+  /* All four boundaries, drawn on in the same beat and then held. One shared
+     colour rather than each figure's own, because the point of the line is that
+     every one of them has a boundary — the differences come on the next screen. */
+  boundaryLitStyle() {
+    /* The resting value is the finished one: fully drawn. The draw-on is an
+       animation over the top of it, so anything that interrupts or replays it —
+       a re-render, a remount, animations turned off — leaves the boundary lit
+       rather than half-drawn or dark. */
+    const style = {
+      opacity: 1, strokeDasharray: 100, strokeDashoffset: 0,
+      filter: 'drop-shadow(0 0 9px rgba(34,184,230,0.8))'
+    };
+    if (this.reducedMotion()) return style;
+    style.animation = 'boundDraw ' + BOUND_DRAW + 'ms cubic-bezier(.35,0,.25,1) both, '
+      + 'boundLit 2000ms ease-in-out ' + BOUND_DRAW + 'ms infinite';
+    return style;
+  }
   segHl(name, idxs, pts, color, w) {
     const segs = this.segs(name, pts);
     const kk = this.k(name);
@@ -2180,6 +2392,91 @@ class Component extends DCLogic {
       d: segs[i].d, color: color || ICE, w: +((w || 26) * kk).toFixed(2),
       style: { filter: 'drop-shadow(0 0 8px rgba(34,184,230,0.7))' }
     }));
+  }
+
+  /* The two loose ends of an open boundary, in the figure's own units. These
+     are what the learner has to see to understand "there is a gap": the places
+     the line stops. A path figure gives them as the first and last point of the
+     stroke the trace follows, which includes the little end flicks the outline
+     itself draws; a point figure gives them as its first and last vertex. */
+  gapEnds(name) {
+    const F = this.fig(name);
+    if (!F || F.closed) return null;
+    const path = F.traceD || F.d;
+    if (path) {
+      /* Only absolute, unclosed paths can be read this way — every open figure
+         in the lesson is one, and anything else falls through to the points. */
+      if (/[a-su-z]/.test(String(path)) || /z/i.test(String(path))) return null;
+      const n = String(path).match(/-?\d*\.?\d+/g);
+      if (!n || n.length < 4) return null;
+      return [[+n[0], +n[1]], [+n[n.length - 2], +n[n.length - 1]]];
+    }
+    if (F.pts && F.pts.length > 1) return [F.pts[0], F.pts[F.pts.length - 1]];
+    return null;
+  }
+  /* What to draw on a figure once the open-or-closed question is resolved.
+     Open: mark the gap. Closed and answered correctly: seal the boundary.
+     A closed figure answered wrongly already gets the blue trace, which runs
+     the same lap for the same reason, so nothing is added on top of it. */
+  ocMarks(name) {
+    const st = this.state, reduced = this.reducedMotion();
+    const out = { dots: [], hl: [], pathStyle: null };
+    const resolved = st.ok || st.ocReveal;
+    if (!resolved) return out;
+    const kk = this.k(name);
+
+    if (resolved === 'open') {
+      const ends = this.gapEnds(name);
+      if (!ends) return out;
+      /* White cores with a red ring, so the marks stay legible whether the
+         outline under them is orange or has turned green. */
+      ends.forEach((p, i) => {
+        out.dots.push({
+          x: p[0], y: p[1], r: +(66 * kk).toFixed(2), fill: 'rgba(232,85,63,0.24)', stroke: 'none', sw: 0,
+          style: reduced ? { opacity: 0.45 } : {
+            transformBox: 'fill-box', transformOrigin: 'center',
+            animation: 'gapHalo 1.6s ease-out ' + (i * 0.35) + 's infinite'
+          }
+        });
+      });
+      ends.forEach((p, i) => {
+        out.dots.push({
+          x: p[0], y: p[1], r: +(23 * kk).toFixed(2), fill: '#ffffff', stroke: RED, sw: +(10 * kk).toFixed(2),
+          style: Object.assign({ filter: 'drop-shadow(0 2px 4px rgba(20,70,120,0.35))' },
+            reduced ? {} : {
+              transformBox: 'fill-box', transformOrigin: 'center',
+              animation: 'gapEnd 1.6s ease-in-out ' + (i * 0.35) + 's infinite'
+            })
+        });
+      });
+      /* The missing span, dashed so it can never be mistaken for boundary, and
+         haloed in white so it separates from the outline's own colour.
+         The template normalises these paths to pathLength 100, so the dashes
+         come out the same count whatever the figure's scale. */
+      out.hl.push({
+        d: 'M' + ends[0][0] + ' ' + ends[0][1] + ' L' + ends[1][0] + ' ' + ends[1][1],
+        color: RED, w: +(14 * kk).toFixed(2),
+        style: Object.assign({
+          strokeDasharray: '4.5 4.5', filter: 'drop-shadow(0 0 7px rgba(255,255,255,0.98))'
+        }, reduced ? { opacity: 0.9 } : { animation: 'gapSpan 1.6s ease-in-out infinite' })
+      });
+      return out;
+    }
+
+    /* Closed, and they said so: run a light all the way round the boundary and
+       let it arrive back at its own tail, twice, over a green glow. */
+    if (st.ok === 'closed') {
+      out.hl.push({
+        d: this.figD(name), color: '#f4fff8', w: +(19 * kk).toFixed(2),
+        style: reduced ? { opacity: 0 } : {
+          strokeDasharray: '17 83', strokeDashoffset: 100,
+          filter: 'drop-shadow(0 0 12px rgba(47,158,94,1)) drop-shadow(0 0 22px rgba(47,158,94,0.7))',
+          animation: 'sealSweep 1400ms cubic-bezier(.42,0,.3,1) 2 both'
+        }
+      });
+      if (!reduced) out.pathStyle = { animation: 'sealGlow 1400ms ease-in-out 2' };
+    }
+    return out;
   }
 
   /* ---------- main view model ---------- */
@@ -2211,28 +2508,20 @@ class Component extends DCLogic {
       muteIcon: st.muted ? '✕' : '♪',
       muteLabel: st.muted ? 'Turn sound effects on' : 'Turn sound effects off',
       replay: this.replay, toggleMute: this.toggleMute,
-      narrStyle: this.narrStyle(), mammothStyle: this.mamStyle(), narrRef: this.narrRef,
+      narrStyle: this.narrStyle(), narrRef: this.narrRef,
       bgStyle: this.bgStyle(), boardStyle: this.boardStyle(), signStyle: this.signStyle(),
       signTextBox: this.signTextBox(), safeStyle: this.safeStyle(),
-      showGuide: GUIDE_VISIBLE, mamViewport: this.mamViewportStyle(), hudStyle: this.hudStyle(),
+      showGuide: GUIDE_VISIBLE, guideViewport: this.guideViewportStyle(), guideStyle: this.guideStyle(),
+      guideRef: this.guideRef, guideHidden: st.guideHidden, guideCell: (window.SWIFTEE && window.SWIFTEE.cell) || 256,
+      guideCanvasStyle: { position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block', pointerEvents: 'none' },
+      showSpeechDots: GUIDE_VISIBLE && st.speaking && !st.guideHidden, speechDots: this.speechDots(),
+      hudStyle: this.hudStyle(),
       progressStyle: this.progressStyle(),
       snow: this.snow || [], fx: this.fxStyles(false), confettiFx: this.fxStyles(true),
       stageDown: this.stageDown, hovOut: this.hovOff,
       hovReplay: this.hovOn('ui:replay'), hovMute: this.hovOn('ui:mute'),
       hovOpen: this.hovOn('oc:open'), hovClosed: this.hovOn('oc:closed'), hovCheck: this.hovOn('ui:check'),
       btnReplay: this.roundBtn('ui:replay', 24), btnMute: this.roundBtn('ui:mute', 22),
-      happyStyle: {
-        position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block',
-        objectFit: 'contain', objectPosition: 'center bottom',
-        opacity: this.guide.pose().sad ? 0 : 1, transition: 'opacity 220ms ease-out',
-        userSelect: 'none', pointerEvents: 'none'
-      },
-      sadStyle: {
-        position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block',
-        objectFit: 'contain', objectPosition: 'center bottom',
-        opacity: this.guide.pose().sad ? 1 : 0, transition: 'opacity 220ms ease-out',
-        userSelect: 'none', pointerEvents: 'none'
-      },
       ghostRef: this.ghostRef, zoneARef: this.zoneARef, zoneBRef: this.zoneBRef, stageRef: this.stageRef,
       safeRef: this.safeRef,
       /* These read lesson data, which does not exist until boot() assigns this.P.
@@ -2455,17 +2744,17 @@ class Component extends DCLogic {
     });
   }
   narrStyle() {
-    const measured = this.narratorWidth(this.state.narrPage || this.state.narr || '');
-    const one = Math.min(NARR_TYPE.size, NARR_TYPE.size * (NARR.w - 24) / Math.max(1, measured));
-    /* Two lines fit the plank's text band, so a line that would have to shrink
-       below the floor gets to be twice as big on two lines instead. */
-    const two = Math.min(NARR_TYPE.size, NARR.h / (2 * 1.18), one * 2);
-    const wrapped = one < NARR_TYPE.floor && two > one;
+    const fit = this.narrFit(this.state.narrPage || this.state.narr || '');
     return {
-      width: NARR.w + 'px',
+      width: fit.width + 'px',
       fontFamily: '"Baloo 2", Nunito, sans-serif', fontWeight: 800,
-      fontSize: (wrapped ? two : one) + 'px', lineHeight: 1.18, letterSpacing: '0.005em',
-      color: NARR_TYPE.color, textAlign: 'center', whiteSpace: wrapped ? 'normal' : 'nowrap',
+      fontSize: NARR_TYPE.size + 'px', lineHeight: NARR_TYPE.lineHeight,
+      letterSpacing: '0.005em',
+      color: NARR_TYPE.color, textAlign: 'center',
+      whiteSpace: fit.wrapped ? 'normal' : 'nowrap',
+      /* balance splits a two-line instruction evenly instead of filling line
+         one and leaving an orphan below it. */
+      textWrap: fit.wrapped ? 'balance' : 'nowrap',
       overflowWrap: 'normal',
       WebkitTextStrokeWidth: NARR_TYPE.outline + 'px',
       WebkitTextStrokeColor: '#ffffff', paintOrder: 'stroke fill',
@@ -2517,19 +2806,37 @@ class Component extends DCLogic {
       color: '#3c7bbd', letterSpacing: '0.02em', whiteSpace: 'nowrap'
     };
   }
-  /* Scene-relative safe area; only the inner character carries animation transforms. */
-  mamViewportStyle() {
-    return Object.assign(stageBox(MAM_AREA, 20), { pointerEvents: 'none', overflow: 'visible' });
+  /* Swiftee's cell, scene-relative; the wrapper inside carries the only motion. */
+  guideViewportStyle() {
+    return Object.assign(stageBox(GUIDE_BOX, 20), { pointerEvents: 'none', overflow: 'visible' });
   }
-  mamStyle() {
+  /* Fly-in and the lean toward the sign while she speaks, as transform only;
+     the canvas inside is always the whole cell, so the sprite itself never moves. */
+  guideStyle() {
     const st = this.state;
-    const box = {
-      position: 'absolute', left: 0, bottom: 0,
-      width: pc(MAM_WIDTH, MAM_AREA.w), height: pc(MAM_HEIGHT, MAM_AREA.h),
-      transformOrigin: '50% 100%'
-    };
-    if (st.mamHidden) return Object.assign(box, { transform: 'translateY(232px)' });
-    return Object.assign(box, { animation: this.guide.pose().anim });
+    const box = { position: 'absolute', inset: 0 };
+    if (st.guideHidden) return Object.assign(box, { transform: 'translate(-340px, 180px) scale(.55) rotate(-14deg)', opacity: 0 });
+    return Object.assign(box, { transform: st.speaking ? 'translate(9px, 0) rotate(3deg)' : 'translate(0, 0) rotate(0deg)', opacity: 1 });
+  }
+  /* Three dots rising from her beak to the plank while a line is being said,
+     so the sign reads as what she is saying. Stage px inside her cell. */
+  speechDots() {
+    const st = this.state;
+    if (!GUIDE_VISIBLE || !st.speaking || st.guideHidden) return [];
+    /* The trail lives in the clear sky between her silhouette and the plank:
+       it starts past her ink box (the manifest's footprint for the pose set)
+       and ends just short of the wood, so it never collides with either. */
+    const fromX = SWIFTEE_CELL * SWIFTEE_INK.right + 8;
+    const toX = LAYER.sign.x - GUIDE_BOX.x - 8;
+    const fromY = SWIFTEE_CELL * 0.44, toY = SWIFTEE_CELL * 0.30;
+    return [8, 11, 14].map((size, i) => {
+      const t = i / 2;
+      return { style: {
+        left: (fromX + (toX - fromX) * t - size / 2) + 'px',
+        top: (fromY + (toY - fromY) * t - size / 2) + 'px',
+        width: size + 'px', height: size + 'px', animationDelay: (i * 0.18) + 's'
+      } };
+    });
   }
   bigBtn(color, w) {
     return {
@@ -2564,38 +2871,104 @@ class Component extends DCLogic {
   }
 
   /* ----- screen 1 ----- */
+  /* One centred layout for the point, the drawing, the trace and the question,
+     so nothing shifts between the phases of screen 1. The box is centred on the
+     safe area and lifted by the height of the caption that sits under it, which
+     puts the finished shape's own centre on the board's optical centre — and
+     that is where the point waits before it draws. */
+  s1Box(ph) {
+    /* The question needs the lower third for the Open and Closed controls, so it
+       keeps the smaller, higher box. Nothing appears to move: that phase reveals
+       the shape afresh with the magic animation every other question uses. */
+    const size = ph === 'ask' ? 470 : 520;
+    const y = ph === 'ask' ? 44 : Math.round((SAFE.h - size) / 2) - 20;
+    return { x: Math.round((SAFE.w - size) / 2), y: y, w: size, h: size };
+  }
+  /* The point, at whatever size and position the phase needs. The mark itself is
+     one element and the breath another, because an appear and a pulse both drive
+     transform and would otherwise overwrite each other. */
+  s1Point(at, opts) {
+    const o = opts || {}, reduced = this.reducedMotion();
+    const dot = {
+      position: 'absolute', inset: '0', borderRadius: '50%', background: o.lit ? '#ffffff' : '#1d5c96',
+      boxShadow: o.lit
+        ? '0 0 0 5px ' + ICE + ', 0 0 20px rgba(34,184,230,0.95)'
+        : '0 0 0 9px rgba(255,255,255,0.95), 0 10px 22px rgba(20,70,120,0.35), 0 0 26px rgba(34,184,230,0.5)',
+      transform: o.lit ? 'scale(0.58)' : 'scale(1)'
+    };
+    if (o.travel) dot.transition = 'transform ' + S1_TRAVEL + 'ms cubic-bezier(.45,0,.2,1), background ' + S1_TRAVEL + 'ms ease-in, box-shadow ' + S1_TRAVEL + 'ms ease-in';
+    else if (!reduced) dot.animation = 'pointBreathe 3s ease-in-out 760ms infinite';
+    const wrap = {
+      position: 'absolute', left: at[0] + 'px', top: at[1] + 'px',
+      width: S1_DOT + 'px', height: S1_DOT + 'px',
+      marginLeft: (-S1_DOT / 2) + 'px', marginTop: (-S1_DOT / 2) + 'px', zIndex: 3
+    };
+    if (o.travel) wrap.transition = 'left ' + S1_TRAVEL + 'ms cubic-bezier(.45,0,.2,1), top ' + S1_TRAVEL + 'ms cubic-bezier(.45,0,.2,1)';
+    else if (!reduced) wrap.animation = 'pointIn 620ms cubic-bezier(.2,.9,.25,1.15) both';
+    return { style: wrap, arrowStyle: dot };
+  }
   viewS1(V, s) {
     const st = this.state, ph = st.phase;
     const F = this.fig('leaf');
-    // One centered layout for the point, drawing, trace and question screens.
-    const size = 470;
-    const x = (SAFE.w - size) / 2, y = 44;
-    const origin = this.mapPt({ x: x, y: y, w: size, h: size }, F.vb, F.pts[0]);
+    const box = this.s1Box(ph);
+    const size = box.w, x = box.x, y = box.y;
+    const origin = this.mapPt(box, F.vb, F.pts[0]);
+    /* The centre of the finished shape's own bounding box, not of its viewBox. */
+    const centre = this.mapPt(box, F.vb, [(12 + 988) / 2, (0 + 955) / 2]);
     this.svgRefs[0] = this.svgRefs[0] || React.createRef();
     if (ph === 'point') {
+      const reduced = this.reducedMotion();
       V.cards = [];
+      /* The caption sits exactly where the finished shape's caption will sit, so
+         only the word changes between the two phases — nothing moves. */
       V.callouts = [{
         text: 'Point', style: {
-          position: 'absolute', left: '50%', top: (origin[1] + 85) + 'px', translate: '-50% 0',
-          font: '900 40px Nunito, sans-serif', color: '#2c6ba8', animation: 'fadeUp 400ms ease-out both'
+          position: 'absolute', left: '50%', top: (y + size + 8) + 'px', translate: '-50% 0',
+          font: '900 46px Nunito, sans-serif', color: '#2c6ba8', letterSpacing: '0.01em', zIndex: 4,
+          animation: reduced ? 'none' : 'fadeUp 460ms ease-out 300ms both'
         }
       }];
-      V.leaders = [
-        { style: { position: 'absolute', left: origin[0] + 'px', top: origin[1] + 'px', width: '150px', height: '150px', marginLeft: '-75px', marginTop: '-75px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(34,184,230,0.5), rgba(34,184,230,0))', animation: 'halo 1.6s ease-out infinite' } },
-        { style: { position: 'absolute', left: origin[0] + 'px', top: origin[1] + 'px', width: '34px', height: '34px', marginLeft: '-17px', marginTop: '-17px', borderRadius: '50%', background: '#1d5c96', boxShadow: '0 0 0 6px rgba(255,255,255,0.9), 0 6px 14px rgba(20,70,120,0.4)', animation: 'ptPulse 900ms ease-in-out 3' } }
-      ];
+      /* The ripples settle at the width of the shape that is about to be drawn,
+         so the mark claims exactly the room the shape will fill and the white
+         around it reads as space rather than as nothing. They sit under the
+         caption: leaders paint after callouts, so the layering is explicit. */
+      const spread = Math.round(2 * (centre[1] - origin[1]));
+      const disc = (px, extra) => Object.assign({
+        position: 'absolute', left: centre[0] + 'px', top: centre[1] + 'px',
+        width: px + 'px', height: px + 'px', marginLeft: (-px / 2) + 'px', marginTop: (-px / 2) + 'px',
+        borderRadius: '50%', zIndex: 1
+      }, extra);
+      V.leaders = [{ style: disc(spread + 40, {
+        background: 'radial-gradient(circle, rgba(34,184,230,0.19), rgba(34,184,230,0.05) 52%, rgba(34,184,230,0) 70%)',
+        animation: reduced ? 'none' : 'pointGlow 3.4s ease-in-out infinite'
+      }) }];
+      if (!reduced) [0, 1.4].forEach(delay => V.leaders.push({ style: disc(spread, {
+        border: '3px solid rgba(34,184,230,0.5)', boxSizing: 'border-box',
+        animation: 'pointRing 2.8s cubic-bezier(.2,.65,.3,1) ' + delay + 's infinite'
+      }) }));
+      V.leaders.push(this.s1Point(centre));
       return;
     }
+    /* The travel: the same mark, moving from the centre to the shape's first
+       vertex and shrinking into the pen light that draws the outline. */
+    if (ph === 'draw' && st.penAt) {
+      V.leaders = [this.s1Point(st.penAt === 'vertex' ? origin : centre,
+        { travel: true, lit: st.penAt === 'vertex' })];
+    }
     const drawnD = this.figD('leaf');
+    /* The question at the end of this screen is the same open-or-closed check as
+       screens 2 to 5, so it gets the same answer marks. */
+    const marks = ph === 'ask' ? this.ocMarks('leaf') : { dots: [], hl: [], pathStyle: null };
     const card = this.buildCard({
       key: 'leaf', x: x, y: y, w: size, h: size, plain: true,
       vb: F.vb, d: ph === 'draw' && !st.drawn ? '' : drawnD, stroke: IK, sw: 20,
       svgRef: this.svgRefs[0],
       traceD: drawnD,
       traceStyle: st.tracing ? this.traceStyleFor(true, st.traceMs) : { opacity: 0 },
-      dots: st.drawing ? [{ dot: '1', x: F.pts[0][0], y: F.pts[0][1], r: 23, fill: '#fff', stroke: ICE, sw: 10, style: { filter: 'drop-shadow(0 0 12px rgba(34,184,230,0.9))' } }] : [],
-      hl: st.ok === 'closed' ? [{ d: drawnD, color: GRN, w: 20 * this.k('leaf'), style: {} }] : []
+      dots: st.drawing ? [{ dot: '1', x: F.pts[0][0], y: F.pts[0][1], r: 23, fill: '#fff', stroke: ICE, sw: 10, style: { filter: 'drop-shadow(0 0 12px rgba(34,184,230,0.9))' } }] : marks.dots,
+      hl: marks.hl
     });
+    if (marks.pathStyle) { card.pathStyle = marks.pathStyle; card.outlineStyle = marks.pathStyle; }
     if (st.ok === 'closed') card.traceStyle = { opacity: 0 };
     // The creation stays anchored to the point; ambient floating would move its first vertex.
     card.gStyle = { animation: 'none' };
@@ -2619,8 +2992,9 @@ class Component extends DCLogic {
     if (ph !== 'point' && (st.drawn || ph !== 'draw')) {
       V.callouts = [{
         text: 'Shape', style: {
-          position: 'absolute', left: '50%', top: (y + size + 6) + 'px', translate: '-50% 0',
-          font: '900 38px Nunito, sans-serif', color: '#2c6ba8', animation: 'fadeUp 400ms ease-out both'
+          position: 'absolute', left: '50%', top: (y + size + 8) + 'px', translate: '-50% 0',
+          font: '900 46px Nunito, sans-serif', color: '#2c6ba8', letterSpacing: '0.01em',
+          animation: 'fadeUp 400ms ease-out both'
         }
       }];
     }
@@ -2633,13 +3007,16 @@ class Component extends DCLogic {
     const size = 430, x = (SAFE.w - size) / 2, y = 40;
     this.svgRefs[0] = this.svgRefs[0] || React.createRef();
     const d = this.figD(s.fig);
-    V.cards = [this.buildCard({
+    const marks = this.ocMarks(s.fig);
+    const card = this.buildCard({
       key: s.fig, x: x, y: y, w: size, h: size, plain: true, vb: F.vb,
       d: d, extra: F.extra || '', stroke: st.ok ? GRN : IK, sw: 18, svgRef: this.svgRefs[0],
       traceD: F.traceD || d, traceStyle: st.tracing && !st.ok ? this.traceStyleFor(true, st.traceMs) : { opacity: 0 },
+      dots: marks.dots, hl: marks.hl,
       anim: st.wrong ? 'wig 420ms ease-in-out both' : 'none'
-    })];
-    V.cards[0] = this.magicCard(V.cards[0]);
+    });
+    if (marks.pathStyle) { card.pathStyle = marks.pathStyle; card.outlineStyle = marks.pathStyle; }
+    V.cards = [this.magicCard(card)];
     V.showChoice = true;
   }
 
@@ -2660,7 +3037,10 @@ class Component extends DCLogic {
       if (st.hlKind === 'segsOf' + i || st.hlKind === 'curveOf' + i) {
         hl = F.pts ? this.segHl(name, F.pts.map((p, j) => j), null, ICE, 22) : [{ d: F.traceD || [d, F.extra || ''].join(' '), color: ICE, w: 22, style: {} }];
       }
-      const trace = st.tracing && (ph === 'bound' || ph === 'sc');
+      /* The boundaries screen lights every figure at once and holds it for the
+         whole line; the others keep the one-shot trace. */
+      const litBounds = ph === 'bound';
+      const trace = st.tracing && ph === 'sc';
       let state = null;
       if (tappable) {
         if (st.ok === i || (s.q === 'straight' && st.sel.includes(i))) state = 'ok'; else if (st.wrong === i) state = 'bad';
@@ -2675,7 +3055,8 @@ class Component extends DCLogic {
       return this.buildCard({
         key: name + i, x: x0 + i * (w + gap), y: y, w: w, h: h, vb: F.vb, d: d, extra: F.extra || '',
         stroke: it[1], sw: 18, fill: this.figFill(name, it[1], it[2]), state: state, hl: hl,
-        traceD: F.traceD || d, traceStyle: trace ? this.traceStyleFor(true, 1400) : { opacity: 0 },
+        traceD: F.traceD || d,
+        traceStyle: litBounds ? this.boundaryLitStyle() : (trace ? this.traceStyleFor(true, 1400) : { opacity: 0 }),
         anim: st.wrong === i ? 'wig 420ms ease-in-out both' : (pulse ? 'pop 900ms ease-in-out infinite' : 'none'),
         chip: chip, chipBg: chipBg, chipBorder: chipBorder, chipColor: chipColor,
         click: tappable ? this.tapCard(i) : null, nudge: tappable && i === s.correct && st.ok === null,

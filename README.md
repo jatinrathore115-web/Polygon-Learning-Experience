@@ -1,9 +1,10 @@
 # Polygon Learning Experience
 
-An interactive polygon lesson for young learners — a frozen-scene game screen with a
-mammoth guide who introduces each step, watches the learner work, and reacts to their
-answers. 47 screens covering open/closed figures, straight vs curved boundaries, sides,
-vertices, angles, and polygon naming from triangle to octagon.
+An interactive polygon lesson for young learners — a frozen-scene game screen where
+Swiftee, a bird perched beside the wooden sign, speaks every instruction on it, watches
+the learner work, and reacts to their answers. 47 screens covering open/closed figures,
+straight vs curved boundaries, sides, vertices, angles, and polygon naming from triangle
+to octagon.
 
 Static site — no build step, no dependencies.
 
@@ -39,7 +40,10 @@ index.html               the lesson: scene layers, guide controller, all 47 step
 polygon-data.js          figure geometry traced from the source PDF
 support.js               the Design Component runtime that boots the page
 screen-navigator.js      optional preview navigator (see note below)
+build-swiftee.cjs        regenerates assets/swiftee/ from the character pack
 assets/                  artwork actually used at runtime
+assets/swiftee/          the guide's sheets plus the generated sheet table
+swiftee-assets/          the full character pack, not deployed
 verification/            headless checks for layout, interactions, audio, voice gating
 voiceovers/              narration script and line exports
 figs/ uploads/           working files and source material, not deployed
@@ -54,22 +58,173 @@ a single transform, so the composition holds from 1920×1080 down to 1024×576.
 |---|---|---|
 | Frozen background | 0 | full stage |
 | Ambient snow | 1 | full stage |
-| Mammoth guide | 20 | 8.28% / 2.22%, 13.59% wide |
+| Swiftee guide | 20 | 2.78% / -2.78%, 15.66% wide |
 | Ice board | 30 | 3.43% / 14.63%, 93.13% wide |
 | Learning content | 32 | safe area inset from the ice border |
 | Wooden sign | 40 | 22.37% / 0.56%, 55.30% wide |
 | Instruction text | 41 | inside the sign's wood band |
 | Controls | 42 | top right |
 
-The mammoth sits *behind* the board in real z-order, which is what makes him read as
-popping up from behind the ice — there is no mask or clip doing the work.
+Swiftee sits *behind* the board in real z-order, which is what makes her read as perched
+on the snowy rim rather than floating in front of it — there is no mask or clip doing the
+work.
 
-### Mammoth guide
+### Swiftee, the guide
 
-`MammothGuide` is a reusable character state machine. Screens never pick animations; they
-raise semantic events (`onInstructionStart`, `onWrongAttempt`, `onCorrectAnswer`, …) and the
-guide chooses the pose. Both sprites share one canvas and every pose animates a single
-transform axis, so swapping expression can never move the character's anchor or scale.
+She stands immediately left of the wooden sign and is the voice of it: the instruction
+text, the narration and her talking animation all start on the same tick, a trail of
+speech dots crosses the gap from her to the plank while a line plays, and she only stops
+talking when the audio actually ends. Then she settles into watching the learner work.
+
+Two layers do the work, both in `index.html`:
+
+- **`SwifteeSprite`** blits frames from the pack's uniform-grid sheets onto one canvas at
+  the manifest's 20 fps and runs a queue of segments. Frame `i` sits at
+  `col = i % cols, row = i / cols`, the pivot is the cell centre, and the canvas is always
+  the whole cell — so every expression shares one registration and swapping one for
+  another cannot move her a pixel.
+- **`SwifteeGuide`** is the state machine the screens talk to. They never pick an
+  animation; they raise semantic events (`onInstructionStart`, `onWrongAttempt`,
+  `onCorrectAnswer`, `onHint`, …) and the guide chooses the expression, plays it to the
+  end, and queues the ambient pose behind it.
+
+Every state plays its full `start → loop → stop` triad, so no loop is ever cut straight
+into another. What she does, and when:
+
+| moment | expression |
+|---|---|
+| a new screen | `flapping` — she flies in; on the first screen she waves hello |
+| an instruction is being said | `talking` |
+| the learner is working | `blinking` |
+| first wrong answer | `confused` — encouraging, never punishing |
+| wrong again on the same question | `puzzleing` |
+| right first time | `happy` |
+| right after a miss | `relieved` |
+| a hand hint appears | `curious` |
+| a line that opens "Whoa" | `surprised` |
+| left alone for 24s | `daydreaming`, until the next tap |
+| lesson complete | `proud`, then `celebrating` |
+
+The guide counts misses itself rather than reading the lesson's attempt tally — the
+screens bump that inside the same `setState` that precedes the call, so a first miss would
+otherwise read as a second one.
+
+Under `prefers-reduced-motion` she still changes expression, because that is the feedback,
+but nothing loops: each pose is held on a single frame, and the fly-in, the speaking lean
+and the speech dots stop moving.
+
+### Screen 1, the point intro
+
+The lesson opens on a single mark, which then draws a shape. Three numbers hold
+that sequence together, and `verification/check-point-intro.cjs` asserts all of
+them:
+
+- **The point waits where the shape will be centred.** It is placed on the centre
+  of the leaf's own bounding box, not on the first vertex, so it reads as the
+  middle of the composition rather than as something floating near the top.
+- **The ripples settle at the height the shape will fill.** The mark claims
+  exactly the room the drawing is about to take, so the white around it reads as
+  space rather than as nothing.
+- **The caption does not move.** "Point" and "Shape" are the same size at the
+  same position, so only the word changes between the two phases.
+
+Nothing jumps on the way in. When the draw begins, the mark does not blink out
+and reappear at the shape's first vertex: it travels there over
+`S1_TRAVEL` milliseconds, shrinking into the pen light that traces the outline,
+so the learner follows one object out of the centre and into the drawing.
+
+The point, the drawing, the close-up and the trace all share one box, so nothing
+shifts between them. The question is the exception — it needs the lower third for
+its Open and Closed controls, so it keeps a smaller, higher box, and that arrives
+with the magic reveal every other question uses rather than as a jump.
+
+Under `prefers-reduced-motion` the ripples are not drawn at all, the mark neither
+appears nor breathes, and the travel is skipped: the pen simply starts at the
+vertex.
+
+### The open-or-closed questions
+
+Five screens ask whether a single figure is open or closed. What the sign says
+about the answer is also shown on the shape, because a child cannot be asked to
+take the sentence on trust. `verification/check-open-closed.cjs` asserts both
+halves of that.
+
+**"There is a gap in its boundary."** The gap is marked where it actually is:
+a white-cored red cap on each of the two places the boundary stops, a halo
+pulsing out of each, and the missing span between them drawn as a dashed red
+line, haloed in white so it separates from the outline underneath. It is dashed
+so it can never be read as boundary. The two loose ends are read from the figure
+itself — the first and last point of the stroke the trace follows, which for a
+path figure includes the little end flicks the outline draws — so the marks
+cannot drift away from the geometry. They agree with the `gap` midpoints in
+`polygon-data.js` to within a few units. The same marks appear whether the
+learner got it wrong or right, so being right still shows why.
+
+**A correct "Closed"** runs a light the whole way round the boundary, twice,
+over a green glow on the outline itself. Arriving back where it started is the
+thing that makes a boundary closed, so the answer is shown rather than only
+outlined on the button. The light fades out at the end of its lap instead of
+parking a bright segment on the shape. A closed figure answered *wrongly*
+already gets the blue trace, which runs the same lap for the same reason, so
+nothing is stacked on top of it.
+
+Under `prefers-reduced-motion` the gap is still marked and simply does not move;
+the closed boundary neither pulses nor runs its light.
+
+### The four-up compare screens
+
+Four figures sit side by side while the lesson names what they have in common
+and then what differs. On **"Look! The boundaries of the shapes are different
+too."** all four boundaries light at once, in one shared colour rather than each
+figure's own, because the job of that line is to name the thing every one of
+them has. They draw themselves on together over `BOUND_DRAW` milliseconds and
+then hold, glowing, for the rest of the sentence — the word "boundaries" lands
+about 1.9 seconds in, so the thing it names is on screen when it arrives. The
+next line splits them into straight and curved, so the shared colour ends with
+this step.
+
+The resting value of that light is *fully drawn*, with the draw-on played as an
+animation over the top of it. That ordering matters: a re-render can restart a
+CSS animation, and if the finished state lived only in the animation's forwards
+fill, anything that re-rendered the board mid-sentence would send the boundaries
+back to dark and redraw them. The board does re-render mid-sentence whenever the
+voice is blocked and the "Play voiceover" fallback appears. With the resting
+value already lit, the worst such a re-render can do is replay the draw.
+
+The sign's text arrives a word at a time on this line as on every other, paused
+until the voice actually starts, and driven by per-word timings from the
+recording where one exists. `verification/check-word-animation.cjs` covers that
+for all 47 lines; `verification/check-boundaries.cjs` covers this screen, and
+measures the held light in a real browser rather than from a style object.
+
+### Regenerating the guide's sheets
+
+`assets/swiftee/` is generated, not hand-made. `build-swiftee.cjs` reads
+`swiftee-assets/atlas/swiftee.manifest.json` — the single source of truth for frame counts,
+grids, frame rate and the start/loop/stop triads — copies the @1x sheets for the
+expressions the lesson actually plays, and writes `swiftee-sheets.js`, the `window.SWIFTEE`
+table the page reads. Nothing about the sheets is hardcoded in `index.html`.
+
+```bash
+node build-swiftee.cjs        # 36 sheets + the table, ~1.3 MB
+```
+
+Edit the `SHIP` list in that script to add or drop an expression. The table loads from the
+document head rather than the helmet, because the lesson script reads it while it is being
+evaluated. If it is missing the guide layer simply does not render — the lesson is
+otherwise unchanged.
+
+### Verifying the guide
+
+```bash
+node verification/check-swiftee-guide.cjs
+```
+
+It drives the real page in headless Chrome, answers a question wrongly twice and then
+correctly, waits out the idle timer, and asserts the expression that plays at each moment,
+that every state plays its full triad, and that her cell never moves. It runs on the real
+clock rather than a virtual one: the sprite is driven by `requestAnimationFrame`, which
+headless Chrome barely ticks while virtual time is in play.
 
 ## Notes before making this public
 
@@ -79,3 +234,8 @@ transform axis, so swapping expression can never move the character's anchor or 
 - **`uploads/` holds source material**, including the lesson PDF the figures were traced
   from. Review the licensing before publishing this project publicly, or delete the folder.
 - Progress is deliberately not persisted; the lesson always opens on screen 1.
+- **`assets/mam_happy.png` and `assets/mam_sad.png` are now unused.** They were the
+  previous guide's sprites, which Swiftee replaced. They still ship; delete them if the
+  mammoth is not coming back.
+- **`verification/check-board-layout.cjs` fails, and did before the guide changed.** Its
+  harness asks for `assets/background..png`, with two dots, so the background never loads.

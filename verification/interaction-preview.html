@@ -29,8 +29,23 @@
   }
   @media (prefers-reduced-motion:reduce) { .created-shape { animation:none !important; } }
   @keyframes cueFade { from { opacity: 0; } to { opacity: 1; } }
+  /* --- open / closed answers. A gap is shown as the two loose ends of the
+         boundary and the span missing between them; a closed boundary is shown
+         by a light running the whole way round and arriving back where it
+         started, which is the thing that makes it closed. --- */
+  @keyframes gapEnd { 0%,100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+  @keyframes gapHalo { 0% { transform: scale(0.55); opacity: 0.6; } 100% { transform: scale(1.55); opacity: 0; } }
+  @keyframes gapSpan { 0%,100% { opacity: 0.68; } 50% { opacity: 1; } }
+  @keyframes sealSweep { 0% { stroke-dashoffset: 100; opacity: 0; } 5% { opacity: 1; } 94% { opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 0; } }
+  @keyframes sealGlow { 0%,100% { filter: drop-shadow(0 0 4px rgba(47,158,94,0.3)); } 50% { filter: drop-shadow(0 0 17px rgba(47,158,94,0.85)); } }
   @keyframes dr { to { stroke-dashoffset: 0; } }
   @keyframes sideStep { 0% { stroke-dashoffset:100; opacity:1; } 45% { stroke-dashoffset:0; opacity:1; } 80% { stroke-dashoffset:0; opacity:1; } 100% { stroke-dashoffset:0; opacity:0; } }
+  /* "Look! The boundaries of the shapes are different too." — the four
+     boundaries draw on together and then stay lit, so the word and the thing it
+     names are on screen at the same time instead of one finishing before the
+     other starts. Only the glow animates once they are drawn. */
+  @keyframes boundDraw { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+  @keyframes boundLit { 0%,100% { filter: drop-shadow(0 0 7px rgba(34,184,230,0.55)); } 50% { filter: drop-shadow(0 0 20px rgba(34,184,230,1)); } }
   @keyframes breathe { 0%,100% { transform: scale(1) translateY(0); } 50% { transform: scale(1.014) translateY(-3px); } }
   @keyframes sway { 0%,100% { transform: rotate(-1.1deg) translateY(0); } 50% { transform: rotate(1.4deg) translateY(-4px); } }
   @keyframes nod { 0% { transform: translateY(0) scale(1); } 35% { transform: translateY(-16px) scale(1.04); } 60% { transform: translateY(2px) scale(0.99); } 100% { transform: translateY(0); } }
@@ -41,28 +56,27 @@
   @keyframes pop { 0% { transform: scale(1); } 45% { transform: scale(1.09); } 100% { transform: scale(1); } }
   @keyframes ptPulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.18); opacity: 0.86; } }
   @keyframes halo { 0% { transform: scale(0.7); opacity: 0.55; } 100% { transform: scale(2.1); opacity: 0; } }
+  /* --- screen 1: the point arrives, then keeps a slow breath so it holds the
+         eye on a large white board. Appear and breathe are on two nested
+         elements because both drive transform. --- */
+  @keyframes pointIn { 0% { opacity: 0; transform: scale(0.15); } 62% { opacity: 1; transform: scale(1.16); } 100% { opacity: 1; transform: scale(1); } }
+  @keyframes pointBreathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+  @keyframes pointRing { 0% { transform: scale(0.3); opacity: 0; } 16% { opacity: 0.6; } 100% { transform: scale(1); opacity: 0; } }
+  @keyframes pointGlow { 0%,100% { opacity: 0.75; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes handHint { 0%,100% { transform: translate(0,0); opacity: 0.9; } 50% { transform: translate(64px,-52px); opacity: 1; } }
   @keyframes nudgeTap { 0% { transform: translate(14px,30px) scale(1.1); opacity: 0; } 16% { transform: translate(0,0) scale(1.06); opacity: 1; } 38% { transform: translate(0,0) scale(0.84); } 56% { transform: translate(0,0) scale(1.04); } 82% { transform: translate(0,0) scale(1); opacity: 1; } 100% { transform: translate(0,6px) scale(1); opacity: 0; } }
   @keyframes nudgeRing { 0% { transform: scale(0.3); opacity: 0; } 34% { transform: scale(0.4); opacity: 0.85; } 100% { transform: scale(1.7); opacity: 0; } }
   @keyframes glowPulse { 0%,100% { opacity: 0.25; } 50% { opacity: 0.75; } }
   @keyframes zoneInvite { 0%,100% { box-shadow: 0 0 0 0 rgba(34,184,230,0); } 50% { box-shadow: 0 0 0 9px rgba(34,184,230,0.17); } }
-  /* --- MammothGuide poses. Every keyframe animates transform only, inside a
-         fixed-size viewport, so the character's anchor and scale never move. --- */
-  @keyframes mamRise { 0% { transform: translateY(232px); } 72% { transform: translateY(-6px); } 100% { transform: translateY(0); } }
-  @keyframes mamBreathe { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-2px) scale(1.006); } }
-  @keyframes mamTalk { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
-  @keyframes mamWatch { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-2px) scale(1.004); } }
-  @keyframes mamCurious { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
-  @keyframes mamThink { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-2px) scale(1.005); } }
-  @keyframes mamNod { 0% { transform: translateY(0); } 50% { transform: translateY(-8px); } 100% { transform: translateY(0); } }
-  @keyframes mamSuccessA { 0% { transform: translateY(0) scale(1); } 40% { transform: translateY(-16px) scale(1.02); } 100% { transform: translateY(0); } }
-  @keyframes mamSuccessB { 0% { transform: translateY(0) scale(1); } 40% { transform: translateY(-16px) scale(1.02); } 100% { transform: translateY(0); } }
-  @keyframes mamCelebrate { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-14px) scale(1.015); } }
-  @keyframes mamSurpriseA { 0% { transform: scale(1); } 35% { transform: translateY(-8px) scale(1.035); } 100% { transform: translateY(0); } }
-  @keyframes mamSurpriseB { 0% { transform: scale(1); } 35% { transform: translateY(-8px) scale(1.035); } 100% { transform: translateY(0); } }
-  @keyframes mamOopsA { 0% { transform: translateY(0) scale(1); } 100% { transform: translateY(6px) scale(0.99); } }
-  @keyframes mamOopsB { 0% { transform: translateY(0) scale(1); } 100% { transform: translateY(6px) scale(0.99); } }
+  /* --- Swiftee, the guide. Frames are blitted onto a canvas whose cell never
+         changes, so expressions swap without the bird moving a pixel; the only
+         motion here is on the wrapper — the fly-in and the lean toward the sign
+         while she speaks — and it is transform only. --- */
+  .swiftee-wrap { transform-origin: 50% 88%; transition: transform 760ms cubic-bezier(.2,.8,.25,1.04), opacity 280ms ease-out; will-change: transform; }
+  .swiftee-wrap[data-hidden="true"] { transition: none; }
+  @keyframes swifteeDot { 0%,100% { opacity:.2; transform:scale(.6); } 50% { opacity:1; transform:scale(1); } }
+  .swiftee-dot { position:absolute; border-radius:50%; background:#fff; border:2px solid #9fdcff; box-shadow:0 2px 6px rgba(20,90,150,.25); animation:swifteeDot 1.05s ease-in-out infinite; }
   /* --- ambient + interaction juice --- */
   @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
   @keyframes snowFall { 0% { transform: translateY(-70px); } 100% { transform: translateY(1180px); } }
@@ -95,6 +109,8 @@
   @media (prefers-reduced-motion:reduce) {
     .idle-hand,.idle-ring { animation:none !important; transform:none !important; opacity:1 !important; }
     .instruction-panel { animation:none !important; }
+    .swiftee-wrap { transition:none !important; }
+    .swiftee-dot { animation:none !important; opacity:1 !important; transform:none !important; }
     .drop-zone { animation:none !important; }
     .ice-board { transition:none !important; }
     .narrator-text span { animation:none !important; opacity:1 !important; transform:none !important; }

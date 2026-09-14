@@ -1,0 +1,43 @@
+{
+  "count": 4,
+  "phase": "bound",
+  "voiceError": "",
+  "lit": [
+    {
+      "offset": 0,
+      "opacity": "1",
+      "stroke": "rgb(34, 184, 230)",
+      "anims": [
+        "boundDraw:finished",
+        "boundLit:running"
+      ]
+    },
+    {
+      "offset": 0,
+      "opacity": "1",
+      "stroke": "rgb(34, 184, 230)",
+      "anims": [
+        "boundDraw:finished",
+        "boundLit:running"
+      ]
+    },
+    {
+      "offset": 0,
+      "opacity": "1",
+      "stroke": "rgb(34, 184, 230)",
+      "anims": [
+        "boundDraw:finished",
+        "boundLit:running"
+      ]
+    },
+    {
+      "offset": 0,
+      "opacity": "1",
+      "stroke": "rgb(34, 184, 230)",
+      "anims": [
+        "boundDraw:finished",
+        "boundLit:running"
+      ]
+    }
+  ]
+}
