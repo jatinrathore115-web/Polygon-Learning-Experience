@@ -47,8 +47,8 @@ styles/buttons.css       warm button effects, hover, press and focus states
 styles/dialogue.css      soft speech bubble, anchored to Swiftee
 styles/cards.css         quiet winter card design
 styles/weather.css       gentle snow and star motion
-styles/ice-intro.css      opening blizzard scene
-ice-intro.js             intro timing and lesson handoff
+styles/ice-intro.css     the blizzard cinematic: every layer and its timing
+ice-intro.js             blizzard particles, wind audio, and the lesson handoff
 assets/runtime/          pinned React, React DOM and Babel runtime scripts
 assets/fonts/            local Baloo 2 and Nunito fonts
 assets/                  artwork actually used at runtime
@@ -127,6 +127,48 @@ otherwise read as a second one.
 Under `prefers-reduced-motion` she still changes expression, because that is the feedback,
 but nothing loops: each pose is held on a single frame, and the fly-in, the speaking lean
 and the entrance fades stop moving.
+
+### The blizzard intro
+
+The lesson opens on a cinematic. `assets/INTRO IMAGE.png` fades up out of the dark, wind
+rises, snow builds to a blizzard peak with a gust crossing the ice, then the storm settles
+and the scene crossfades into the lesson. It runs 5.8 seconds and then takes itself out
+completely — DOM, timers and audio.
+
+It is an overlay, not a change to the lesson. The only line it touches is in `boot()`: the
+ice board lays itself out immediately so the cinematic has the real screen to crossfade
+into, but screen 1 waits on `IceIntro.gate`, so no narration, entrance or input happens
+underneath it.
+
+Retune it from `#ice-intro` in [styles/ice-intro.css](styles/ice-intro.css).
+`--intro-duration` retimes the whole sequence including the wind, because
+[ice-intro.js](ice-intro.js) reads it and expresses every beat as a fraction of it.
+`--wind-tilt` is the one wind direction that the mist gradients, the streak rotations and
+every particle vector are derived from, so the storm cannot end up blowing two ways.
+
+Three things in it are deliberate and easy to undo by accident:
+
+- **The particle containers have no opacity animation.** Fading a layer that holds a
+  hundred moving children makes the browser composite them as one group every frame, which
+  cost about two thirds of the frame budget on integrated graphics. Instead every flake has
+  its own arrival and departure, so the storm builds and settles because flakes start and
+  stop coming — `arrive` and `cease` in each `FIELDS` entry. It is cheaper and it looks
+  more like weather.
+- **Nothing uses `filter: blur()`.** The out-of-focus softness is in the colour stops. Per
+  element, blur was the single most expensive thing in the file.
+- **The distant layer is tiled dot sheets, not elements.** Each drifts a whole number of
+  tiles, so the pattern lands exactly on itself and the loop cannot be seen, and each is
+  grown by its own travel so it still covers the screen at both ends of the drift.
+
+Flakes are near-opaque white with a cool rim on purpose: the artwork is an almost-white ice
+field, and faint white snow on it is simply not visible. The `--storm-shade` wash takes the
+field down far enough for snow to read, and `--lesson-night` brings the light down to meet
+the lesson's night scene so the crossfade is not a jump in brightness.
+
+Skip it with `?intro=0`; `?preview=1` skips it too, so authoring screens is not gated
+behind a six-second cinematic. `node verification/check-ice-intro.cjs` asserts the
+build-up, the gust, the settle, the handoff, the cleanup and the wind envelope, and writes
+a filmstrip to `verification/output/ice-intro/`.
 
 ### Screen 1, the point intro
 

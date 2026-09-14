@@ -59,11 +59,16 @@ const server=http.createServer((req,res)=>{
   for(const i of [2,4])await page.locator('.story-surface > .game-action').nth(i).click();
   await ready(18);await page.getByRole('button',{name:'Next',exact:true}).click();
   await ready(22);
+  await page.getByText('Drag a label, or tap a label then a ?.',{exact:true}).waitFor();
+  for(const name of ['Left question-mark target','Lower-right question-mark target','Upper-right question-mark target'])
+    assert.equal(await page.getByRole('button',{name,exact:true}).count(),1,'Each label target needs a distinct accessible name');
   const side=page.getByRole('button',{name:'Side',exact:true});
   await side.dragTo(page.locator('[data-label-target="side"]'));
   await page.waitForFunction(()=>__poly.state.placed.side==='Side');
+  await page.waitForFunction(()=>![...document.querySelectorAll('[role="button"]')].some(e=>e.innerText==='Side'),'Placed labels must stop acting as choices');
   for(const name of ['Vertex','Angle']){
-    await page.getByRole('button',{name,exact:true}).click();
+    await page.getByRole('button',{name,exact:true}).press('Enter');
+    assert.equal(await page.getByRole('button',{name,exact:true}).getAttribute('aria-pressed'),'true');
     await page.locator('[data-label-target="'+name.toLowerCase()+'"]').click();
   }
   await ready(23);

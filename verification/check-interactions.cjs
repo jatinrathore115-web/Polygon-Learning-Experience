@@ -21,7 +21,11 @@ g.state.interactive=false;g.activateKey(event('Enter'));assert.equal(clicks,2);
 g.state.interactive=true;g.narrate=()=>{};g.feedback('Try again');assert.equal(g.state.interactive,false);
 assert(html.includes('prefers-reduced-motion:reduce'));assert(!html.includes("scale: '1 -1'"));
 const luminance=hex=>{const channels=hex.slice(1).match(/../g).map(c=>parseInt(c,16)/255).map(c=>c<=.04045?c/12.92:((c+.055)/1.055)**2.4);return channels[0]*.2126+channels[1]*.7152+channels[2]*.0722;};
-assert((luminance('#ffad32')+.05)/(luminance(g.ocBtn('open').color)+.05)>=4.5,'Button text must remain readable across the gradient');assert((luminance('#ffad32')+.05)/(luminance(g.ocBtn('closed').color)+.05)>=4.5);
+for(const tone of ['primary','secondary']){
+  const skin=g.buttonSkin(tone);
+  for(const stop of skin.background.match(/#[0-9a-f]{6}/gi))
+    assert((luminance(stop)+.05)/(luminance(skin.color)+.05)>=4.5,tone+' button text must remain readable across its actual gradient');
+}
 const css=o=>Object.entries(o).map(([k,v])=>k.replace(/[A-Z]/g,m=>'-'+m.toLowerCase())+':'+(typeof v==='number'&&!['zIndex','opacity','fontWeight','lineHeight'].includes(k)&&v!==0?v+'px':v)).join(';');
 fs.writeFileSync('verification/output/interaction-preview.html',`<!doctype html><meta charset="utf-8"><style>${fs.readFileSync('styles/buttons.css','utf8')}${html.match(/<style>([\s\S]*?)<\/style>/)[1]}body{display:grid;place-items:center;background:#d9f2ff}.preview{display:flex;gap:74px;padding:70px;background:#f7fbfd;border-radius:35px}.game-action::before{animation-delay:-1.6s!important}</style><div class="preview" data-interactive="true"><div role="button" tabindex="0" class="game-action game-primary" style='${css(g.ocBtn('open')).replace('assets/','../../assets/')}'>Open</div><div role="button" tabindex="0" class="game-action game-primary" style='${css(g.ocBtn('closed')).replace('assets/','../../assets/')}'>Closed</div></div>`);
 console.log('PASS: 47 screens in ready/locked states; keyboard activation, repeat protection, feedback lock, readable labels, upright hint and reduced-motion rules.');

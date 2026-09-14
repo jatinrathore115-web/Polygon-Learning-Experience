@@ -5,13 +5,18 @@
    reach the lesson's own layers.
 
    The whole sequence is one fixed timeline: ice-intro.js adds .is-running and
-   every layer below animates off its own delay/keyframes. Layer opacity
-   keyframes are written as a percentage of --intro-duration with the real
-   second marked in a comment, so retiming the intro is one variable.
+   every layer below animates off its own delay and keyframes. Those keyframes
+   are written as a percentage of --intro-duration with the real second marked
+   in a comment, so retiming the intro is one variable.
+
+   That applies to the sheet layers — haze, mist, dust, gusts, frost, dusk.
+   The particle layers deliberately have no opacity of their own: see the note
+   above the fields, and FIELDS in ice-intro.js for when each one arrives and
+   thins out.
 
    Wind blows LEFT and slightly DOWN for every layer. --wind-tilt is that one
    angle; gradients derive their stripe angle from it and ice-intro.js derives
-   every particle's travel vector from it.
+   every particle's travel vector and streak rotation from it.
    ========================================================================= */
 
 #ice-intro {
@@ -25,21 +30,20 @@
   --handoff-at: 5.15s;
   --handoff-duration: 650ms;
 
-  /* ---- wind ---- */
+  /* ---- wind ----
+     One direction for the whole storm. The mist derives its stripe angle from
+     it here; ice-intro.js derives every particle's travel vector and every
+     streak's rotation from the same number. */
   --wind-tilt: 17deg;                                  /* below horizontal */
-  --wind-angle: calc(-1 * var(--wind-tilt));           /* streak rotation */
   --wind-gradient: calc(180deg - var(--wind-tilt));    /* mist stripe angle */
 
   /* ---- storm strength ---- */
   --storm-max-opacity: 0.9;
   --mist-travel: 92vw;
 
-  /* ---- particle layer speeds (ice-intro.js jitters within these) ---- */
-  --snow-back-speed: 5.4s;
-  --snow-mid-speed: 3.4s;
-  --snow-front-speed: 1.8s;
-  --snow-burst-speed: 0.8s;
-  --ground-drift-speed: 2.4s;
+  /* Per-layer snow speed, size, count and the windows in which each layer
+     arrives and thins out all live in FIELDS and DUST in ice-intro.js, because
+     they are per particle rather than per layer. */
 
   /* ---- palette ---- */
   --snow-white: 255, 255, 255;
@@ -47,6 +51,7 @@
   --storm-shade: 104, 152, 200;   /* the cold cast at the blizzard peak */
   --flake-rim: 96, 150, 205;      /* shadowed edge, so flakes read on white */
   --deep-cold: #0b1c33;
+  --lesson-night: 18, 51, 110;    /* the blue the lesson opens on */
 
   position: fixed;
   inset: 0;
@@ -143,7 +148,7 @@
       rgba(var(--snow-white), 0) 62%),
     /* The cold grade. Without it, white snow on a white ice field is
        invisible; with it, the field reads as weather rather than daylight. */
-    linear-gradient(rgba(var(--storm-shade), 0.36), rgba(var(--storm-shade), 0.36));
+    linear-gradient(rgba(var(--storm-shade), 0.3), rgba(var(--storm-shade), 0.3));
 }
 #ice-intro.is-running .ambient-haze { animation: hazeLife var(--intro-duration) linear both; }
 @keyframes hazeLife {
@@ -156,15 +161,20 @@
 
 /* ---------------------------------------------------------------------------
    PARTICLE FIELDS
-   Every field is oversized so flakes enter and leave off-screen. Start
-   positions are static left/top; only transform and opacity animate.
+   Each field is exactly the viewport; ice-intro.js starts flakes outside it on
+   purpose, each one placed across the band it will actually sweep. Start
+   positions are static left/top — only transform and opacity ever animate.
    ------------------------------------------------------------------------ */
 #ice-intro .snow,
 #ice-intro .ground-drift {
   position: absolute;
   inset: 0;
-  opacity: 0;
 }
+/* Deliberately NO opacity on the particle containers. Animating a container's
+   opacity forces its hundred moving children to be composited as one group
+   every frame, which on integrated graphics costs more than everything else in
+   this file put together. Instead the storm builds because flakes START
+   arriving and settles because they STOP — which is also what weather does. */
 #ice-intro .snow i,
 #ice-intro .ground-drift i {
   position: absolute;
@@ -173,43 +183,46 @@
   width: var(--w);
   height: var(--h);
   opacity: 0;
-  /* No will-change here: a running transform animation is promoted anyway,
-     and there are ~160 of these. */
-  animation-name: var(--fly, flakeFly);
+  /* No will-change: a running transform animation is promoted anyway, and
+     there are well over a hundred of these. */
+  animation-name: none;
   animation-duration: var(--dur);
   animation-delay: var(--delay);
   animation-timing-function: var(--ease, linear);
-  animation-iteration-count: infinite;
+  animation-iteration-count: var(--loops);
   animation-fill-mode: both;
 }
+/* Start the field with the timeline, never with the DOM insert. */
+#ice-intro.is-running .snow i,
+#ice-intro.is-running .ground-drift i { animation-name: var(--fly, flakeFly); }
 
 /* Three opacity profiles, handed out at random, so no two flakes share a
    life and the field never reads as one repeating loop. */
 @keyframes flakeFly {
   0%   { transform: translate3d(0, 0, 0) rotate(var(--r0)); opacity: 0; }
-  7%   { opacity: var(--o); }
-  86%  { opacity: var(--o); }
+  7%   { opacity: calc(var(--o) * var(--storm-max-opacity)); }
+  86%  { opacity: calc(var(--o) * var(--storm-max-opacity)); }
   100% { transform: translate3d(var(--tx), var(--ty), 0) rotate(var(--r1)); opacity: 0; }
 }
 /* Drops out early, as if it passed out of the light. */
 @keyframes flakeFlyB {
   0%   { transform: translate3d(0, 0, 0) rotate(var(--r0)); opacity: 0; }
-  10%  { opacity: var(--o); }
-  52%  { opacity: var(--o); }
+  10%  { opacity: calc(var(--o) * var(--storm-max-opacity)); }
+  52%  { opacity: calc(var(--o) * var(--storm-max-opacity)); }
   74%  { opacity: 0; }
   100% { transform: translate3d(var(--tx), var(--ty), 0) rotate(var(--r1)); opacity: 0; }
 }
 /* Swayed: the same travel, wandering across it. Used by the middle layer. */
 @keyframes flakeFlyC {
   0%   { transform: translate3d(0, 0, 0) rotate(var(--r0)); opacity: 0; }
-  9%   { opacity: var(--o); }
+  9%   { opacity: calc(var(--o) * var(--storm-max-opacity)); }
   25%  { transform: translate3d(calc(var(--tx) * 0.25 + var(--sway)),
                                calc(var(--ty) * 0.25), 0) rotate(var(--rm)); }
   50%  { transform: translate3d(calc(var(--tx) * 0.5 - var(--sway)),
                                calc(var(--ty) * 0.5 + var(--sway)), 0) rotate(var(--rm)); }
   75%  { transform: translate3d(calc(var(--tx) * 0.75 + var(--sway)),
                                calc(var(--ty) * 0.75), 0) rotate(var(--r1)); }
-  88%  { opacity: var(--o); }
+  88%  { opacity: calc(var(--o) * var(--storm-max-opacity)); }
   100% { transform: translate3d(var(--tx), var(--ty), 0) rotate(var(--r1)); opacity: 0; }
 }
 
@@ -221,13 +234,20 @@
    seamless — and the wind angle, so it agrees with everything else. */
 #ice-intro .dust {
   position: absolute;
-  inset: -50%;
+  /* Grown by exactly its own travel — off the right by --tx and above by --ty
+     — so the sheet still covers the viewport at both ends of its drift. A
+     fixed percentage margin leaves a bare corner on narrow screens, where the
+     travel is a larger share of the width. */
+  top: calc(-1 * var(--ty));
+  right: var(--tx);
+  bottom: 0;
+  left: 0;
   background-image: radial-gradient(circle,
     rgba(var(--snow-white), 0.95) 0,
     rgba(var(--snow-white), 0.9) var(--dot),
     rgba(var(--snow-white), 0) calc(var(--dot) * 2.1));
   background-size: var(--tile);
-  opacity: var(--o);
+  opacity: calc(var(--o) * var(--storm-max-opacity));
   animation: dustDrift var(--dur) linear infinite;
   will-change: transform;
 }
@@ -272,7 +292,7 @@
     rgba(var(--snow-white), 0) 78px);
   mask-image: linear-gradient(to bottom, transparent 0%, #000 26%, #000 78%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 26%, #000 78%, transparent 100%);
-  animation: groundSheet 1.9s linear infinite;
+  opacity: 0;
 }
 /* Travelling along the stripes tiles seamlessly at any distance. */
 @keyframes groundSheet {
@@ -280,7 +300,7 @@
   to   { transform: translate3d(calc(-1 * var(--mist-travel)),
                                 calc(0.07 * var(--mist-travel)), 0); }
 }
-#ice-intro.is-running .ground-drift { animation: groundLife var(--intro-duration) linear both; }
+#ice-intro.is-running .ground-drift::before { animation: groundSheet 1.9s linear infinite, groundLife var(--intro-duration) linear both; }
 @keyframes groundLife {
   0%, 32.8% { opacity: 0; }                                    /* 1.90s */
   48.3%     { opacity: calc(var(--storm-max-opacity) * 0.5); }  /* 2.80s */
@@ -300,16 +320,9 @@
     rgba(var(--flake-rim), 0.72) 78%,
     rgba(var(--flake-rim), 0) 100%);
 }
-#ice-intro.is-running .snow-mid { animation: snowMidLife var(--intro-duration) linear both; }
-@keyframes snowMidLife {
-  0%, 18.1% { opacity: 0; }                                    /* 1.05s */
-  34.5%     { opacity: calc(var(--storm-max-opacity) * 0.55); } /* 2.00s */
-  51.7%     { opacity: calc(var(--storm-max-opacity) * 0.9); }  /* 3.00s */
-  58.6%     { opacity: var(--storm-max-opacity); }              /* 3.40s peak */
-  74.1%     { opacity: var(--storm-max-opacity); }              /* 4.30s */
-  89.7%     { opacity: calc(var(--storm-max-opacity) * 0.55); } /* 5.20s */
-  100%      { opacity: calc(var(--storm-max-opacity) * 0.35); }
-}
+/* When this layer arrives and thins out is set by arrive/cease on its FIELDS
+   entry in ice-intro.js, not by a layer fade — see the note on the containers
+   above. */
 
 /* ---------------------------------------------------------------------------
    z 5 — WIND MIST
@@ -415,15 +428,7 @@
     rgba(var(--flake-rim), 0.6) 82%,
     rgba(var(--flake-rim), 0) 100%);
 }
-#ice-intro.is-running .snow-front { animation: snowFrontLife var(--intro-duration) linear both; }
-@keyframes snowFrontLife {
-  0%, 36.2% { opacity: 0; }                                    /* 2.10s */
-  51.7%     { opacity: calc(var(--storm-max-opacity) * 0.6); }  /* 3.00s */
-  58.6%     { opacity: var(--storm-max-opacity); }              /* 3.40s peak */
-  74.1%     { opacity: calc(var(--storm-max-opacity) * 0.95); } /* 4.30s */
-  86.2%     { opacity: calc(var(--storm-max-opacity) * 0.4); }  /* 5.00s */
-  100%      { opacity: calc(var(--storm-max-opacity) * 0.15); }
-}
+/* Timing: arrive/cease on the snow-front entry in FIELDS, in ice-intro.js. */
 
 /* ---- z 6 — PEAK STREAKS. Only alive across the blizzard peak; this is what
         makes the snow read as suddenly much faster without retiming a single
@@ -438,14 +443,7 @@
     rgba(var(--flake-rim), 0.45) 88%,
     rgba(var(--flake-rim), 0) 100%);
 }
-#ice-intro.is-running .snow-burst { animation: snowBurstLife var(--intro-duration) linear both; }
-@keyframes snowBurstLife {
-  0%, 54.3% { opacity: 0; }                                    /* 3.15s */
-  60.3%     { opacity: calc(var(--storm-max-opacity) * 0.9); }  /* 3.50s */
-  74.1%     { opacity: calc(var(--storm-max-opacity) * 0.85); } /* 4.30s */
-  77.6%     { opacity: calc(var(--storm-max-opacity) * 0.5); }  /* 4.50s */
-  86.2%, 100% { opacity: 0; }                                  /* 5.00s */
-}
+/* Timing: arrive/cease on the snow-burst entry in FIELDS, in ice-intro.js. */
 
 /* ---------------------------------------------------------------------------
    z 7 — THE GUSTS
@@ -458,8 +456,8 @@
   z-index: 7;
   top: -28%;
   left: 100%;
-  width: 112%;
-  height: 156%;
+  width: 72%;
+  height: 142%;
   opacity: 0;
   /* Three offset clouds rather than one ellipse, so the silhouette is
      irregular and it never reads as a shape sliding past. */
@@ -480,16 +478,16 @@
   will-change: transform, opacity;
 }
 @keyframes gustSweep {
-  0%   { opacity: 0;    transform: translate3d(4%, -10%, 0) scale(0.86) rotate(-3deg); }
+  0%   { opacity: 0;    transform: translate3d(6%, -10%, 0) scale(0.86) rotate(-3deg); }
   18%  { opacity: 0.9; }
   64%  { opacity: 0.95; }
-  100% { opacity: 0;    transform: translate3d(-196%, 30%, 0) scale(1.24) rotate(5deg); }
+  100% { opacity: 0;    transform: translate3d(-258%, 30%, 0) scale(1.24) rotate(5deg); }
 }
 @keyframes gustSweepSoft {
   0%   { opacity: 0;    transform: translate3d(0, -6%, 0) scale(0.9) rotate(2deg); }
   22%  { opacity: 0.52; }
   62%  { opacity: 0.58; }
-  100% { opacity: 0;    transform: translate3d(-188%, 24%, 0) scale(1.14) rotate(-4deg); }
+  100% { opacity: 0;    transform: translate3d(-250%, 24%, 0) scale(1.14) rotate(-4deg); }
 }
 
 /* ---------------------------------------------------------------------------
@@ -514,6 +512,30 @@
   58.6%     { opacity: 1; }                                    /* 3.40s */
   89.7%     { opacity: 0.7; }                                  /* 5.20s */
   100%      { opacity: 0.5; }
+}
+
+/* ---------------------------------------------------------------------------
+   z 8 — DUSK
+   The lesson behind this overlay is a deep blue night scene; the intro is a
+   bright daylight ice field. Crossfading straight between them is a jump in
+   brightness you cannot help seeing, so as the storm clears the light goes
+   down to meet it and the two scenes are close by the time they cross.
+   ------------------------------------------------------------------------ */
+#ice-intro .dusk {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  opacity: 0;
+  background: linear-gradient(to bottom,
+    rgba(var(--lesson-night), 0.92) 0%,
+    rgba(var(--lesson-night), 0.7) 46%,
+    rgba(var(--lesson-night), 0.5) 100%);
+}
+#ice-intro.is-running .dusk { animation: duskFall var(--intro-duration) ease-in both; }
+@keyframes duskFall {
+  0%, 74.1% { opacity: 0; }                                    /* 4.30s */
+  89.7%     { opacity: 0.2; }                                  /* 5.20s */
+  100%      { opacity: 0.42; }
 }
 
 /* ---------------------------------------------------------------------------

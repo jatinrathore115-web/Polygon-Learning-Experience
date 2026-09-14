@@ -12,6 +12,7 @@ Polygon Learning Experience/
 |-- polygon-data.js            Shape coordinates, geometry, and colors
 |-- screen-navigator.js        Preview menu for jumping to a screen
 |-- support.js                 Generated runtime used to load the lesson
+|-- ice-intro.js               Opening blizzard: particles, wind audio, lesson handoff
 |-- README.md                  How to run and deploy the project
 |-- STRUCTURE.md               This file guide and screen map
 |-- vercel.json                Deployment configuration
@@ -20,10 +21,12 @@ Polygon Learning Experience/
 |-- styles/dialogue.css        Reusable Swiftee-colored comic dialogue bubble
 |-- styles/cards.css           Quiet snowy silhouettes and learning card frame
 |-- styles/weather.css         Gentle falling snow and background star twinkles
+|-- styles/ice-intro.css       Opening blizzard: every layer and its timing
 |-- styles/fonts.css           Local font-face definitions
 |-- package.json               Playwright review commands and development dependencies
 |-- assets/                    Images used by the lesson
 |   |-- image.png              Current starry background with the left rock
+|   |-- INTRO IMAGE.png         Ice field used by the opening blizzard
 |   `-- swiftee/               Character sprites and sprite metadata
 |-- voiceovers/
 |   |-- recorded-player.js     Audio playback and word timing synchronization
@@ -63,6 +66,8 @@ Polygon Learning Experience/
 | Recording timestamps | [voiceovers/recordings.js](voiceovers/recordings.js) |
 | Screen jump menu | [screen-navigator.js](screen-navigator.js) |
 | Background, dialogue bubble, and bird landing | [index.html](index.html): `BOARD`, `LAYER.sign`, `GUIDE_BOX`, `enterScreen`, `storyVoiceStart`; see [story scene notes](design/STORY_SCENE.md) |
+| Opening blizzard timing, wind direction, storm strength | [styles/ice-intro.css](styles/ice-intro.css): the variables on `#ice-intro` |
+| Opening blizzard snow, gust audio, lesson handoff | [ice-intro.js](ice-intro.js): `FIELDS`, `DUST`, `GAIN_CURVE`; the gate is `boot()` in [index.html](index.html) |
 
 Narration text is matched to recordings by wording. When changing a spoken sentence, check its recording entry too.
 
@@ -106,6 +111,7 @@ For the proposed new visual style, open [design/concept.html](design/concept.htm
 Run these from the project folder using Node:
 
 ```text
+node verification/check-ice-intro.cjs
 node verification/check-guide-sync.cjs
 node verification/check-story-scene.cjs
 node verification/check-board-layout.cjs
@@ -115,6 +121,7 @@ node verification/check-label-drop.cjs
 node verification/check-recorded-voice.cjs
 ```
 
+- `check-ice-intro.cjs`: opening blizzard build-up, gust, settle, handoff, cleanup, wind audio, reduced motion and the wait for the artwork. Writes a filmstrip to `verification/output/ice-intro/`.
 - `check-interactions.cjs`: screen interactions and keyboard behavior.
 - `check-teaching-motion.cjs`: Side / Vertex / Angle timing and layout.
 - `check-label-drop.cjs`: label placement and drag behavior.

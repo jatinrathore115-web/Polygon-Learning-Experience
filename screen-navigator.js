@@ -8,18 +8,19 @@
       const host = document.createElement('div');
       host.id = 'polygon-screen-navigator';
       const root = host.attachShadow({ mode: 'open' });
+      const button = game.buttonSkin('primary', 16);
       root.innerHTML = `<style>
         :host{position:fixed;top:12px;left:12px;z-index:10000;font:14px system-ui,sans-serif;color:#123a6b}
         *{box-sizing:border-box}button,input{font:inherit}button{cursor:pointer}
-        button:focus-visible,input:focus-visible{outline:3px solid #ff9d28;outline-offset:2px}
-        #toggle{border:2px solid #fff0b5;border-radius:24px;padding:10px 16px;color:#673408;background:linear-gradient(#ffe795,#ffad32);box-shadow:0 3px 0 #bd6818;font-weight:750}
+        button:focus-visible,input:focus-visible{outline:3px solid #124e57;outline-offset:3px}
+        #toggle{border:${button.border};border-radius:${button.borderRadius};padding:10px 16px;color:${button.color};background:${button.background};box-shadow:${button.boxShadow};font-weight:750;min-height:44px}
         #panel{margin-top:10px;width:min(330px,calc(100vw - 24px));padding:14px;background:#f4fbff;border:2px solid #83d6f5;border-radius:18px;box-shadow:0 8px 28px #123a6b33}
         [hidden]{display:none!important}header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
         #close{border:0;background:transparent;color:#123a6b;font-size:24px;width:36px;height:36px}
         input{width:100%;padding:10px;border:2px solid #a3d7ed;border-radius:10px;background:white;color:#123a6b;caret-color:#123a6b;user-select:text}
         #list{display:grid;gap:6px;max-height:min(55vh,440px);overflow:auto;margin-top:10px;overscroll-behavior:contain}
         #list button{border:1px solid #c2e3f1;border-radius:10px;background:white;text-align:left;padding:10px;color:#123a6b;min-height:44px}
-        #list button:hover{background:#fff3d1}#list button[aria-current=true]{background:#ffca52;color:#673408;border-color:#e7a435}
+        #list button:hover{background:#e7f8ef}#list button[aria-current=true]{background:#ffda67;color:#164e53;border-color:#168d92}
         small{display:block;opacity:.8;margin-top:3px}#empty{padding:12px;text-align:center}
       </style>
       <button id="toggle" aria-expanded="false" aria-controls="panel">Screens</button>

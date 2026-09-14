@@ -11,6 +11,7 @@ Install review tools with `npm ci`. Playwright uses the installed Chrome:
 Playwright artifacts are saved under `verification/output/launch/`. The playthrough
 blocks external services to verify that runtime scripts, fonts, images and audio are local.
 
+- `check-ice-intro.cjs`: opening blizzard — storm build-up, the gust, the settle, input gating, the handoff into screen 1, full cleanup, the wind envelope (with and without a gesture-gated audio context), reduced motion, and that the reveal waits for the artwork. Saves a seeked filmstrip to `output/ice-intro/`.
 - `check-guide-sync.cjs`: playback-driven expressions, reaction priorities, recovery and reduced motion.
 - `check-interactions.cjs`: all 47 screens, input and keyboard behavior.
 - `check-story-scene.cjs`: browser boot, flight, narration reveal, all screens, dialogue fit, tablet and reduced motion.

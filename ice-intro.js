@@ -33,30 +33,40 @@
 
      alpha is deliberately high: the artwork is an almost-white ice field, so
      faint white snow simply is not there. Depth is carried by size, speed and
-     blur instead of by transparency. */
+     softness instead of by transparency.
+
+     arrive/cease are fractions of the whole intro: the window over which this
+     layer's flakes start turning up, and the window over which they stop. They
+     are the storm's build-up and its settling — spreading them per flake is
+     what replaces fading whole layers in and out, and it is both cheaper and
+     more like weather. */
   var FIELDS = [
     {
-      cls: 'snow snow-mid', count: 96,
+      cls: 'snow snow-mid', count: 150,
       size: [5, 11], alpha: [0.85, 1], dur: [1, 1.7],
-      travel: [34, 50], tilt: [16, 22], spin: [60, 200], sway: [0.6, 1.8]
+      travel: [34, 50], tilt: [16, 22], spin: [60, 200], sway: [0.6, 1.8],
+      arrive: [0.181, 0.448], cease: [0.793, 0.948]        /* 1.05-2.6s, 4.6-5.5s */
     },
     {
-      cls: 'snow snow-front', count: 30,
+      cls: 'snow snow-front', count: 46,
       size: [14, 28], alpha: [0.95, 1], dur: [0.4, 0.75],
       travel: [40, 62], tilt: [18, 25], spin: [0, 0],
-      streaks: 0.35, streakLen: [30, 64], streakThick: [4, 8]
+      streaks: 0.35, streakLen: [30, 64], streakThick: [4, 8],
+      arrive: [0.362, 0.569], cease: [0.750, 0.879]        /* 2.10-3.3s, 4.35-5.1s */
     },
     {
-      cls: 'snow snow-burst', count: 34,
+      cls: 'snow snow-burst', count: 48,
       size: [0, 0], alpha: [0.6, 0.95], dur: [0.18, 0.3],
       travel: [42, 62], tilt: [12, 18], spin: [0, 0],
-      streaks: 1, streakLen: [40, 100], streakThick: [1.8, 3.4]
+      streaks: 1, streakLen: [40, 100], streakThick: [1.8, 3.4],
+      arrive: [0.543, 0.638], cease: [0.741, 0.853]        /* 3.15-3.7s, 4.3-4.95s */
     },
     {
-      cls: 'ground-drift', count: 26,
+      cls: 'ground-drift', count: 36,
       size: [0, 0], alpha: [0.35, 0.68], dur: [0.55, 1],
       travel: [38, 58], tilt: [1, 4], spin: [0, 0],
       streaks: 1, streakLen: [14, 44], streakThick: [1.5, 3.5],
+      arrive: [0.328, 0.517], cease: [0.776, 0.931],       /* 1.90-3.0s, 4.5-5.4s */
       /* Loose snow lifted off the ice itself, so it lives on the ground. */
       band: [44, 88]
     }
@@ -66,12 +76,14 @@
      150 tiny identical flakes cost more frame time than the whole rest of the
      storm and carry no individuality worth paying for. Each sheet travels a
      whole number of tiles, so the pattern lands exactly on itself and the loop
-     cannot be seen; three coprime tiles at three speeds stop the grid reading
-     as a grid. */
+     cannot be seen; four coprime tiles at four speeds stop the grid reading as
+     a grid. The last one is nearer and faster, and buys a lot of apparent
+     density for a single element. */
   var DUST = [
     { tile: [118, 96],  dot: 1.15, alpha: 0.50, tiles: 6, speed: 240 },
     { tile: [83, 71],   dot: 0.90, alpha: 0.38, tiles: 8, speed: 185 },
-    { tile: [151, 127], dot: 1.50, alpha: 0.60, tiles: 5, speed: 305 }
+    { tile: [151, 127], dot: 1.50, alpha: 0.60, tiles: 5, speed: 305 },
+    { tile: [207, 173], dot: 2.40, alpha: 0.58, tiles: 6, speed: 430 }
   ];
   var DUST_TILT = 15.5;   /* degrees below horizontal, inside the wind's band */
 
@@ -89,7 +101,6 @@
     [0.603, 1150], [0.759, 780], [0.931, 380]
   ];
   var GUST_AT = 0.491;           // 2.85s of 5.8s — under the visual gust
-  var HANDOFF_AT = 0.888;        // 5.15s — the crossfade into the lesson
 
   /* ---------------------------------------------------------------------- */
 
@@ -153,6 +164,9 @@
       var top = spec.band ? spec.band[0] : -6;
       var bottom = spec.band ? spec.band[1] : 96;
 
+      var arrive = rand(spec.arrive[0], spec.arrive[1]) * spec.durationSec;
+      var cease = rand(spec.cease[0], spec.cease[1]) * spec.durationSec;
+
       var css =
         '--x:' + rand(-8, 100 + travel).toFixed(2) + '%;' +
         '--y:' + rand(top - dropVh, bottom).toFixed(2) + '%;' +
@@ -162,9 +176,11 @@
         '--tx:' + (-travel).toFixed(2) + 'vw;' +
         '--ty:' + (travel * Math.tan(tilt * Math.PI / 180)).toFixed(2) + 'vw;' +
         '--dur:' + dur.toFixed(2) + 's;' +
-        /* A negative delay means the field is already mid-storm the instant
-           its layer fades up, instead of every flake starting together. */
-        '--delay:' + (-rand(0, dur * 1.6)).toFixed(2) + 's;' +
+        /* This flake's own arrival and departure. Spread across the layer's
+           windows, the field thickens and thins the way falling snow does
+           rather than fading in and out as a sheet. */
+        '--delay:' + arrive.toFixed(2) + 's;' +
+        '--loops:' + Math.max(1, Math.round((cease - arrive) / dur)) + ';' +
         '--r0:' + rot.toFixed(1) + 'deg;' +
         '--rm:' + (rot + spin * 0.5).toFixed(1) + 'deg;' +
         '--r1:' + (rot + spin).toFixed(1) + 'deg;' +
@@ -201,8 +217,9 @@
     });
   }
 
-  function build() {
-    var calm = reducedMotion();
+  /* The shell goes in first and empty, so --intro-duration can be read off the
+     live element before a single flake is given a start time. */
+  function shell() {
     var root = document.createElement('div');
     root.id = 'ice-intro';
     root.setAttribute('aria-hidden', 'true');
@@ -220,9 +237,16 @@
         '<div class="gust gust-one"></div>' +
         '<div class="gust gust-two"></div>' +
         '<div class="ice-vignette"></div>' +
+        '<div class="dusk"></div>' +
         '<div class="whiteout-flash"></div>' +
       '</div>';
+    document.body.appendChild(root);
+    state.root = root;
+    return root;
+  }
 
+  function fill(root, durMs) {
+    var calm = reducedMotion();
     /* Fewer particles on a small screen, and far fewer when motion is
        unwelcome — the storm still reads, it just stops rushing. */
     var wide = window.innerWidth || document.documentElement.clientWidth || 1280;
@@ -235,12 +259,34 @@
       if (calm && spec.cls === 'snow snow-burst') return;   // no peak streaks
       var host = root.querySelector('.' + spec.cls.split(' ').pop());
       if (!host) return;
-      buildParticles(Object.assign({ density: density, aspect: aspect }, spec), host, calm);
+      buildParticles(Object.assign({
+        density: density, aspect: aspect, durationSec: durMs / 1000
+      }, spec), host, calm);
     });
+  }
 
-    document.body.appendChild(root);
-    state.root = root;
-    return root;
+  /* The reveal must not play over a background that has not arrived: on a slow
+     connection the storm would blow across a black screen and the artwork
+     would snap in late. Waits for the image the stylesheet actually names — so
+     the path stays in one place — and gives up after `cap` so a missing file
+     delays the lesson by a moment rather than for ever. */
+  function whenBackgroundReady(root, cap) {
+    return new Promise(function (done) {
+      var settled = false;
+      var finish = function () { if (!settled) { settled = true; done(); } };
+      setTimeout(finish, cap);
+      var url;
+      try {
+        var css = getComputedStyle(root.querySelector('.intro-bg')).backgroundImage;
+        url = (/url\(["']?(.*?)["']?\)/.exec(css) || [])[1];
+      } catch (e) {}
+      if (!url) { finish(); return; }
+      var img = new Image();
+      img.onload = finish;
+      img.onerror = finish;
+      img.src = url;
+      if (img.complete) finish();
+    });
   }
 
   function readDuration(root) {
@@ -449,28 +495,33 @@
 
     if (skipRequested() || !document.body) { finish(); return gate; }
 
-    var root = build();
+    var root = shell();
     var durMs = readDuration(root);
+    fill(root, durMs);
     state.startedAt = Date.now();
 
-    /* One frame between "in the document" and "running" so the browser has the
-       overlay painted black before the timeline's first keyframe. */
-    requestAnimationFrame(function () {
+    /* The dark screen holds until the artwork is there, then one frame between
+       "in the document" and "running" so the browser has the overlay painted
+       before the timeline's first keyframe. The clock starts here and nowhere
+       earlier: the lesson's own boot can hold the main thread for a few hundred
+       milliseconds, and timers started before that would eat the end of the
+       storm. */
+    whenBackgroundReady(root, 2500).then(function () {
       requestAnimationFrame(function () {
         if (state.finished) return;
         root.classList.add('is-running');
         state.startedAt = Date.now();
         startAudio(durMs);
+
+        /* The lesson is released the moment the crossfade completes, and the
+           overlay leaves a frame later — nothing of the storm is still
+           animating once gameplay has the screen. */
+        later(function () {
+          if (!state.finished) resolveGate();
+        }, durMs);
+        later(finish, durMs + 90);
       });
     });
-
-    /* The lesson is released the moment the crossfade completes, and the
-       overlay leaves a frame later — nothing of the storm is still animating
-       once gameplay has the screen. */
-    later(function () {
-      if (!state.finished) resolveGate();
-    }, durMs);
-    later(finish, durMs + 90);
 
     return gate;
   }
@@ -479,9 +530,7 @@
     gate: gate,
     play: play,
     /* Ends the cinematic immediately and hands the lesson over. */
-    skip: finish,
-    /* Named so the timings above stay findable from the stylesheet. */
-    HANDOFF_AT: HANDOFF_AT
+    skip: finish
   };
 
   if (document.readyState === 'loading') {

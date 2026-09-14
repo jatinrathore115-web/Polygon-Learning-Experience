@@ -158,12 +158,12 @@
       <sc-if value="{{ showZones }}" hint-placeholder-val="{{ false }}">
         <div style="{{ zoneRowStyle }}">
           <div class="drop-zone" ref="{{ zoneARef }}" style="{{ zoneAStyle }}">
-            <div style="font:900 30px Nunito,sans-serif;color:#1f6d4a;letter-spacing:0.06em">{{ zoneAName }}</div>
-            <div style="font:700 21px Nunito,sans-serif;color:#357257;margin-top:2px">{{ zoneASub }}</div>
+            <div style="font:900 30px Nunito,sans-serif;color:#11645e;letter-spacing:0.06em">{{ zoneAName }}</div>
+            <div style="font:700 21px Nunito,sans-serif;color:#286e65;margin-top:2px">{{ zoneASub }}</div>
           </div>
           <div class="drop-zone" ref="{{ zoneBRef }}" style="{{ zoneBStyle }}">
-            <div style="font:900 30px Nunito,sans-serif;color:#a8395f;letter-spacing:0.06em">{{ zoneBName }}</div>
-            <div style="font:700 21px Nunito,sans-serif;color:#944c66;margin-top:2px">{{ zoneBSub }}</div>
+            <div style="font:900 30px Nunito,sans-serif;color:#5f3289;letter-spacing:0.06em">{{ zoneBName }}</div>
+            <div style="font:700 21px Nunito,sans-serif;color:#633c84;margin-top:2px">{{ zoneBSub }}</div>
           </div>
         </div>
       </sc-if>
@@ -237,7 +237,7 @@
       <sc-if value="{{ showChips }}" hint-placeholder-val="{{ false }}">
         <div class="story-controls" style="position:absolute;left:0;bottom:10px;width:100%;display:flex;justify-content:center;gap:44px">
           <sc-for list="{{ chips }}" as="p" hint-placeholder-count="3">
-            <div class="{{ p.actionClass }}" role="{{ p.actionRole }}" tabIndex="{{ p.actionTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ p.nudge }}" onPointerDown="{{ p.down }}" onPointerEnter="{{ p.enter }}" onPointerLeave="{{ p.leave }}" onClick="{{ p.click }}" style="{{ p.style }}">{{ p.text }}</div>
+            <div class="{{ p.actionClass }}" role="{{ p.actionRole }}" tabIndex="{{ p.actionTab }}" aria-pressed="{{ p.selected }}" aria-disabled="{{ p.disabled }}" onKeyDown="{{ activateKey }}" data-nudge="{{ p.nudge }}" onPointerDown="{{ p.down }}" onPointerEnter="{{ p.enter }}" onPointerLeave="{{ p.leave }}" onClick="{{ p.click }}" style="{{ p.style }}">{{ p.text }}</div>
           </sc-for>
         </div>
       </sc-if>
@@ -299,6 +299,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1320,&quot;height&quot;:720}}">
 const IK = '#f58420', ICE = '#22b8e6', GRN = '#2f9e5e', RED = '#e8553f', GOLD = '#e9a733';
+const SHAPE_VIOLET = '#6354c7'; // Blue-violet outline against the mint learning card.
 
 /* ============================================================================
    MASTER GAME STAGE
@@ -307,8 +308,14 @@ const IK = '#f58420', ICE = '#22b8e6', GRN = '#2f9e5e', RED = '#e8553f', GOLD = 
    drift apart between 1920x1080 and 1024x576 — there is only ever one number
    driving layout. Boxes below were measured off the reference art itself.
    ========================================================================= */
-/* Warm CSS button surfaces, shared by answers, steppers and primary actions. */
-const BUTTON = { face: 'linear-gradient(#ffe795 0%, #ffca52 55%, #ffad32 100%)', ink: '#673408', edge: '#fff0b5', shadow: 'inset 0 2px 0 rgba(255,255,255,.65), 0 6px 0 #bd6818, 0 10px 18px rgba(135,73,13,.18)' };
+/* One button family: sunlit actions, mint tools, and Swiftee-teal edges. */
+const BUTTON = {
+  face: 'linear-gradient(180deg,#fff0ac 0%,#ffda67 100%)',
+  secondaryFace: 'linear-gradient(180deg,#f9fff5 0%,#d9f5e9 100%)',
+  ink: '#164e53', edge: '#168d92',
+  shadow: 'inset 0 2px 0 rgba(255,255,255,.85), 0 5px 0 #096b75, 0 9px 14px rgba(8,64,85,.18)',
+  secondaryShadow: 'inset 0 2px 0 #fff, 0 4px 0 #258c91, 0 7px 12px rgba(8,64,85,.12)'
+};
 const STAGE = { w: 1980, h: 1080 };
 /* Reserve the left rock for the guide; all activity layouts share the right surface. */
 const BOARD = { x: 378, y: 122, w: 1594, h: 846 };
@@ -1988,7 +1995,7 @@ class Component extends DCLogic {
         if (!active) {
           active=true; this.clearNudge(); this.sfx('pick'); this.guide.onInteractionStart();
           this.setState({ chip:name, draggingLabel:name });
-          if (ghost) { ghost.textContent=name; Object.assign(ghost.style,{opacity:'1',width:'200px',height:'78px',boxSizing:'border-box',display:'flex',alignItems:'center',justifyContent:'center',padding:'0 16px',borderRadius:'39px',background:this.labelTheme(name).gradient,border:'3px solid white',color:'white',font:'800 34px "Baloo 2",sans-serif',boxShadow:'0 12px 24px rgba(15,100,170,.28),0 0 24px rgba(34,184,230,.55)',whiteSpace:'nowrap'}); }
+          if (ghost) { ghost.textContent=name; Object.assign(ghost.style,this.buttonSkin('secondary',22),{opacity:'1',width:'200px',height:'78px',padding:'0 16px',background:this.labelTheme(name).gradient,border:'3px solid '+this.labelTheme(name).color,color:this.labelTheme(name).ink,font:'800 36px "Baloo 2",sans-serif',whiteSpace:'nowrap'}); }
         }
         if (frame === null) frame=requestAnimationFrame(paint);
       };
@@ -2213,8 +2220,8 @@ class Component extends DCLogic {
   cardStyleFor(state) {
     if (state === 'ok') return { borderWidth: '5px', borderStyle: 'solid', borderColor: GRN, background: '#f2fbf5', boxShadow: '0 0 0 6px rgba(47,158,94,0.16), 0 10px 0 rgba(47,158,94,0.22), 0 0 24px rgba(47,158,94,.28)' };
     if (state === 'bad') return { borderWidth: '5px', borderStyle: 'solid', borderColor: '#da9279', background: '#fff8f3', boxShadow: '0 6px 0 rgba(190,125,97,.14)' };
-    if (state === 'sel') return { borderWidth: '5px', borderStyle: 'solid', borderColor: ICE, background: '#e2f7ff', boxShadow: '0 0 0 6px rgba(34,184,230,0.18), 0 10px 0 rgba(34,184,230,0.26)' };
-    return { borderWidth: '5px', borderStyle: 'solid', borderColor: '#2f73cd', background: '#ffffff', boxShadow: '0 8px 0 rgba(146,196,228,0.35)' };
+    if (state === 'sel') return { borderWidth: '5px', borderStyle: 'solid', borderColor: '#edaa20', background: '#fff2bc', boxShadow: '0 0 0 4px rgba(255,204,65,.2), 0 8px 0 rgba(192,120,20,.28)' };
+    return { borderWidth: '5px', borderStyle: 'solid', borderColor: '#168f99', background: '#fffef6', boxShadow: 'inset 0 2px 0 #fff, 0 7px 0 rgba(8,111,124,.3)' };
   }
   describeCard(o) {
     const figure = this.P.FIG[o.key];
@@ -2227,6 +2234,7 @@ class Component extends DCLogic {
     const st = o.state;
     const base = this.cardStyleFor(st);
     const stroke = !o.stroke || o.stroke === '#123a6b' ? IK : o.stroke;
+    const outlineGlow = stroke === SHAPE_VIOLET ? 'rgba(99,84,199,.22)' : stroke === IK ? 'rgba(255,145,30,.48)' : null;
     const kk = (parseFloat(String(o.vb || '0 0 1000 1000').split(' ')[2]) || 1000) / 1000;
     const pad = o.pad === undefined ? 20 : o.pad;
     const v = String(o.vb || '0 0 1000 1000').split(' ').map(Number);
@@ -2274,8 +2282,8 @@ class Component extends DCLogic {
       accessibleLabel: this.describeCard(o),
       selected: clickable ? (st === 'sel' || st === 'ok') : undefined,
       stroke: stroke,
-      pathStyle: stroke === IK ? { filter: 'drop-shadow(0 0 ' + (7 * kk) + 'px rgba(255,145,30,.48))' } : {},
-      outlineStyle: stroke === IK ? { filter: 'drop-shadow(0 0 ' + (7 * kk) + 'px rgba(255,145,30,.48))' } : {},
+      pathStyle: outlineGlow ? { filter: 'drop-shadow(0 0 ' + (7 * kk) + 'px ' + outlineGlow + ')' } : {},
+      outlineStyle: outlineGlow ? { filter: 'drop-shadow(0 0 ' + (7 * kk) + 'px ' + outlineGlow + ')' } : {},
       sw: +((o.sw || 16) * kk).toFixed(2), wrap: wrap,
       svgStyle: {
         width: '100%', height: '100%', overflow: 'visible', display: 'block',
@@ -2518,7 +2526,7 @@ class Component extends DCLogic {
     const V = Object.assign({}, shellOnly, {
       screenLabel: s.label,
       check: this.check, checkLabel: st.checked && !s.check ? 'Next' : 'Check',
-      checkStyle: this.bigBtn(st.checked && !s.check ? GRN : '#2f8fd0', 260),
+      checkStyle: this.bigBtn(260),
       chooseOpen: this.chooseOpen, chooseClosed: this.chooseClosed,
       btnOpen: this.ocBtn('open'), btnClosed: this.ocBtn('closed')
     });
@@ -2555,14 +2563,16 @@ class Component extends DCLogic {
     };
     V.controlsState = V.storyControls ? 'ready' : 'waiting';
     V.counterClass = V.storyCounting ? '' : 'story-controls';
-    for (const item of [...V.cards, ...V.targets, ...V.chips]) meta(item, item.click, 'game-action');
+    for (const item of V.cards) meta(item, item.click, 'game-action');
+    for (const item of V.targets) meta(item, item.click, item.buttonTone === 'primary' ? 'game-action game-primary' : 'game-action');
+    for (const item of V.chips) meta(item, item.click, 'game-action game-quiet');
     for (const drop of V.drops) {
       meta(drop, drop.click, 'game-action game-quiet');
       for (const option of drop.menu || []) meta(option, option.click, 'game-action game-quiet game-dropdown-option', 'action', 'game-dropdown-option');
     }
     for (const counter of V.counters) {
-      meta(counter, counter.minus, 'game-action', 'minus');
-      meta(counter, counter.plus, 'game-action', 'plus');
+      meta(counter, counter.minus, 'game-action game-quiet', 'minus');
+      meta(counter, counter.plus, 'game-action game-quiet', 'plus');
     }
     for (const key of ['chooseOpen', 'chooseClosed', 'check']) meta(V, V[key], 'game-action game-primary', key);
   }
@@ -2604,17 +2614,17 @@ class Component extends DCLogic {
     });
     (V.chips || []).forEach((p, i) => {
       const k = 'chip' + i;
-      p.enter = this.hovOn(k); p.leave = this.hovOff; p.down = p.down || this.pressOn(k);
-      if (p.click && p.style) p.style = this.liftable(p.style, k, { lift: 6 });
+      p.enter = this.hovOn(k); p.leave = this.hovOff; p.down = p.down || (p.click ? this.pressOn(k) : null);
+      if (p.click && p.style) p.style = this.liftable(p.style, k, { lift: 2 });
     });
     (V.drops || []).forEach((d, i) => {
       const k = 'dd' + i;
       d.enter = this.hovOn(k); d.leave = this.hovOff;
-      if (d.click && d.btn) d.btn = this.liftable(d.btn, k, { lift: 4, scale: 1.02 });
+      if (d.click && d.btn) d.btn = this.liftable(d.btn, k, { lift: 2, scale: 1.01 });
       (d.menu || []).forEach((m, j) => {
         const mk = 'dm' + i + '_' + j;
         m.enter = this.hovOn(mk); m.leave = this.hovOff;
-        if (m.style) m.style = this.liftable(m.style, mk, { lift: 3, scale: 1.04 });
+        if (m.style) m.style = this.liftable(m.style, mk, { lift: 2, scale: 1.01 });
       });
     });
     if (V.showCounter && V.checkStyle && V.checkStyle.display !== 'none') V.checkStyle = Object.assign(this.counterCheckStyle(), V.counterCheckPosition || {});
@@ -2639,9 +2649,9 @@ class Component extends DCLogic {
       if(V.checkDisabled){V.check=null;Object.assign(V.checkStyle,{opacity:.48,cursor:'default',boxShadow:'none'});}
     }
     this.counterHints(V);
-    if (V.btnOpen) V.btnOpen = this.liftable(V.btnOpen, 'oc:open', { lift: 5 });
-    if (V.btnClosed) V.btnClosed = this.liftable(V.btnClosed, 'oc:closed', { lift: 5 });
-    if (!V.checkDisabled && V.checkStyle && V.checkStyle.display !== 'none') V.checkStyle = this.liftable(V.checkStyle, 'ui:check', V.showCounter ? { lift: 2, scale: 1.02 } : { lift: 5 });
+    if (V.btnOpen) V.btnOpen = this.liftable(V.btnOpen, 'oc:open', { lift: 2 });
+    if (V.btnClosed) V.btnClosed = this.liftable(V.btnClosed, 'oc:closed', { lift: 2 });
+    if (!V.checkDisabled && V.checkStyle && V.checkStyle.display !== 'none') V.checkStyle = this.liftable(V.checkStyle, 'ui:check', { lift: 2, scale: 1.01 });
   }
   counterHints(V) {
     if (!V.showCounter) return;
@@ -2781,8 +2791,9 @@ class Component extends DCLogic {
   dialogueLayout() {
     const step = this.state.ready ? this.step() : null;
     const roomy = step && (step.sc === 'S1' || step.q === 'oc');
-    // The bubble grows upward; its tail always meets the guide's head.
-    const bottom = GUIDE_BOX.y + 65 - 39;
+    // Grow upward from a fixed anchor; leave air between the tail and the crest.
+    const tailDrop = 29, headGap = 42;
+    const bottom = GUIDE_BOX.y + 65 - tailDrop - headGap;
     const viewportWidth = window.innerWidth || STAGE.w;
     const viewportHeight = window.innerHeight || STAGE.h;
     const scale = Math.max(0.55, Math.min(viewportWidth / STAGE.w, viewportHeight / STAGE.h));
@@ -2822,36 +2833,42 @@ class Component extends DCLogic {
     if (st.guideFlying && !this.reducedMotion()) return Object.assign(box, { animation: 'rockArrival 1400ms cubic-bezier(.25,.6,.35,1) both', transition: 'none', opacity: 1 });
     return Object.assign(box, { transform: 'none', opacity: 1, animation: 'none' });
   }
-  bigBtn(color, w) {
+  buttonSkin(tone = 'primary', radius = 24) {
     return {
-      minWidth: w + 'px', padding: '0 44px', height: '86px', borderRadius: '43px',
-      background: color === '#a9c7dd' ? '#f1dfb8' : BUTTON.face, border:'3px solid ' + BUTTON.edge, boxSizing:'border-box', textShadow:'0 1px 0 rgba(255,255,255,.5)', color: BUTTON.ink, font: '800 38px "Baloo 2", Nunito, sans-serif',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-      boxShadow: BUTTON.shadow, userSelect: 'none',
-      transition: 'transform 130ms ease-out, box-shadow 130ms'
+      background: tone === 'secondary' ? BUTTON.secondaryFace : BUTTON.face,
+      border: '3px solid ' + BUTTON.edge, borderRadius: radius + 'px',
+      color: BUTTON.ink, boxShadow: tone === 'secondary' ? BUTTON.secondaryShadow : BUTTON.shadow,
+      boxSizing: 'border-box', textShadow: 'none', userSelect: 'none',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
     };
+  }
+  bigBtn(w) {
+    return Object.assign(this.buttonSkin(), {
+      minWidth: w + 'px', padding: '0 44px', height: '86px',
+      font: '800 38px "Baloo 2", Nunito, sans-serif',
+      transition: 'transform 130ms ease-out, box-shadow 130ms'
+    });
   }
   ocBtn(kind) {
     const st = this.state;
     const isRight = st.ok === kind || st.ocReveal === kind;
     const isWrong = st.wrong === kind;
     const revealing = !!st.ocReveal;
-    const feedback = isRight ? GRN : (isWrong ? RED : null);
-    return {
-      width: '280px', minWidth: '280px', height: '112px', borderRadius: '56px',
-      background: BUTTON.face,
-      color: BUTTON.ink, border: '3px solid ' + BUTTON.edge, font: '800 42px "Baloo 2", Nunito, sans-serif',
-      textShadow: '0 1px 0 rgba(255,255,255,.5)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    return Object.assign(this.buttonSkin('primary', 28), {
+      width: '280px', minWidth: '280px', height: '112px',
+      font: '800 42px "Baloo 2", Nunito, sans-serif',
       cursor: revealing ? 'default' : 'pointer',
-      boxShadow: feedback ? '0 0 0 4px ' + feedback + ', ' + BUTTON.shadow : BUTTON.shadow,
+      background: isRight ? '#e9f8ef' : (isWrong ? '#fff4e9' : BUTTON.face),
+      borderColor: isRight ? '#57ac83' : (isWrong ? '#da9279' : BUTTON.edge),
+      boxShadow: isRight ? 'inset 0 2px 0 #fff, 0 4px 0 rgba(47,158,94,.25)' :
+        (isWrong ? 'inset 0 2px 0 #fff, 0 4px 0 rgba(190,125,97,.2)' : BUTTON.shadow),
       userSelect: 'none', boxSizing: 'border-box',
-      /* their wrong pick steps back so the answer reads first */
-      opacity: isWrong && revealing ? 0.5 : 1,
+      /* Surface color carries feedback while both labels remain fully readable. */
+      opacity: 1,
       transform: st.ocReveal === kind ? 'scale(1.06)' : 'scale(1)',
       animation: isWrong ? 'wig 420ms ease-in-out both' : (isRight ? 'pop 380ms ease-out both' : 'none'),
       transition: 'box-shadow 180ms, transform 220ms cubic-bezier(.2,1.2,.4,1), opacity 220ms'
-    };
+    });
   }
 
   /* ----- screen 1 ----- */
@@ -2947,7 +2964,7 @@ class Component extends DCLogic {
     const marks = ph === 'ask' ? this.ocMarks('leaf') : { dots: [], hl: [], pathStyle: null };
     const card = this.buildCard({
       key: 'leaf', x: x, y: y, w: size, h: size, plain: true, click: ph === 'ask' ? this.exploreOutline : null,
-      vb: F.vb, d: ph === 'draw' && !st.drawn ? '' : drawnD, stroke: IK, sw: 20,
+      vb: F.vb, d: ph === 'draw' && !st.drawn ? '' : drawnD, stroke: SHAPE_VIOLET, sw: 20,
       svgRef: this.svgRefs[0],
       traceD: drawnD,
       traceStyle: st.tracing ? this.traceStyleFor(true, st.traceMs) : { opacity: 0 },
@@ -2966,7 +2983,7 @@ class Component extends DCLogic {
         filter: 'drop-shadow(0 0 9px rgba(34,184,230,.42))',
         transition: 'opacity 420ms ease-out'
       };
-      card.stroke = '#1aa7d5';
+      card.stroke = SHAPE_VIOLET;
       card.fill = st.drawn ? 'rgba(75,210,245,.045)' : 'none';
       card.pathClass = st.drawn ? 'created-shape' : '';
       card.pathStyle = st.drawn ? {
@@ -2996,7 +3013,7 @@ class Component extends DCLogic {
     const marks = this.ocMarks(s.fig);
     const card = this.buildCard({
       key: s.fig, x: x, y: y, w: size, h: size, plain: true, vb: F.vb, click: this.exploreOutline,
-      d: d, extra: F.extra || '', stroke: st.ok ? GRN : IK, sw: 18, svgRef: this.svgRefs[0],
+      d: d, extra: F.extra || '', stroke: st.ok ? GRN : (s.fig === 'pot' ? SHAPE_VIOLET : IK), sw: 18, svgRef: this.svgRefs[0],
       traceD: F.traceD || d, traceStyle: st.tracing && !st.ok ? this.traceStyleFor(true, st.traceMs) : { opacity: 0 },
       dots: marks.dots, hl: marks.hl,
       anim: st.wrong ? 'wig 420ms ease-in-out both' : 'none'
@@ -3066,29 +3083,29 @@ class Component extends DCLogic {
         const open = st.ddOpen === i;
         return {
           style: { position: 'absolute', left: (left + w / 2 - 120) + 'px', top: '484px', width: '240px', zIndex: open ? 20 : 5 },
-          btn: {
+          btn: Object.assign(this.buttonSkin('secondary',22), {
             height: '72px', borderRadius: '22px', boxSizing: 'border-box',
-            background: done ? '#e9f8ef' : (bad ? '#fff4e9' : BUTTON.face),
-            border: '4px solid ' + (done ? '#b7f5ce' : (bad ? '#ffc6bd' : BUTTON.edge)),
+            background: done ? '#e9f8ef' : (bad ? '#fff4e9' : BUTTON.secondaryFace),
+            border: '3px solid ' + (done ? '#57ac83' : (bad ? '#da9279' : BUTTON.edge)),
             color: done ? '#236b49' : BUTTON.ink,
-            font: '800 30px Nunito, sans-serif', display: 'flex', alignItems: 'center',
+            font: '800 30px "Baloo 2", Nunito, sans-serif', display: 'flex', alignItems: 'center',
             justifyContent: 'center', gap: '12px', padding: '0 12px', cursor: done ? 'default' : 'pointer',
-            boxShadow: done ? '0 5px 0 rgba(47,158,94,.15)' : (bad ? '0 5px 0 rgba(190,125,97,.14)' : '0 6px 0 rgba(146,196,228,.35)'),
+            boxShadow: done ? '0 4px 0 rgba(47,158,94,.15)' : (bad ? '0 4px 0 rgba(190,125,97,.14)' : BUTTON.secondaryShadow),
             animation: bad ? 'wig 420ms ease-in-out both' : 'none'
-          },
+          }),
           nudge: !done && !open && st.dd.slice(0, i).every((v, j) => v === truth[j]) ? '1' : '',
           arrow: done ? '' : '\u25be',
-          arrowStyle: { display:done ? 'none' : 'flex', alignItems:'center', justifyContent:'center', width:'28px', height:'28px', flexShrink:0, borderRadius:'50%', background:bad ? 'rgba(255,255,255,.35)' : '#eaf6fe', fontSize:'22px', transform:open ? 'rotate(180deg)' : 'none', transition:'transform 180ms ease' },
+          arrowStyle: { display:done ? 'none' : 'flex', alignItems:'center', justifyContent:'center', width:'28px', height:'28px', flexShrink:0, borderRadius:'50%', background:bad ? 'rgba(255,255,255,.35)' : '#c4e9df', color:BUTTON.ink, fontSize:'22px', transform:open ? 'rotate(180deg)' : 'none', transition:'transform 180ms ease' },
           label: done ? truth[i] : (val || 'Select'),
           click: done ? null : this.ddToggle(i),
           menu: open ? ['Straight', 'Curved'].map((opt) => ({
             text: opt, click: this.ddPick(i, opt), nudge: opt === truth[i] ? '1' : '',
-            style: {
-              height: '60px', boxSizing: 'border-box', borderRadius: '16px', background: BUTTON.face, border: '3px solid ' + BUTTON.edge,
-              color: BUTTON.ink, textShadow: 'none', font: '800 28px Nunito, sans-serif', display: 'flex',
+            style: Object.assign(this.buttonSkin('secondary',18), {
+              height: '60px',
+              font: '800 28px "Baloo 2", Nunito, sans-serif', display: 'flex',
               alignItems: 'center', justifyContent: 'center', cursor: 'pointer', marginTop: '8px',
-              boxShadow: 'inset 0 2px 0 rgba(255,255,255,.4), 0 4px 0 #bd6818', animation:'fadeUp 180ms ease-out both'
-            }
+              animation:'fadeUp 180ms ease-out both'
+            })
           })) : []
         };
       });
@@ -3186,9 +3203,9 @@ class Component extends DCLogic {
     const st = this.state, ph = st.phase, F = this.fig('pentagon'), K = this.k('pentagon');
     const size = 750, x = (SAFE.w - size) / 2, y = 40, box = { x: x, y: y, w: size, h: size };
     const palette = {
-      sides: { color: '#eda012', ink: '#8a5406', tint: '#fff6e2', shadow: 'rgba(237,160,18,.26)', glow: 'rgba(237,160,18,.55)' },
-      vertex: { color: '#8051c9', ink: '#63349e', tint: '#f5efff', shadow: 'rgba(128,81,201,.22)' },
-      angle: { color: '#159ca8', ink: '#08717c', tint: '#eafafa', shadow: 'rgba(21,156,168,.22)' }
+      sides: { color: '#e99712', ink: '#713d08', tint: '#ffe18a', shadow: 'rgba(237,160,18,.26)', glow: 'rgba(237,160,18,.55)' },
+      vertex: { color: '#8051c9', ink: '#4e237a', tint: '#dfc5ff', shadow: 'rgba(128,81,201,.22)' },
+      angle: { color: '#159ca8', ink: '#084f51', tint: '#9ae9dc', shadow: 'rgba(21,156,168,.22)' }
     };
     const pts = F.pts, segs = this.segs('pentagon');
     const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -3301,14 +3318,14 @@ class Component extends DCLogic {
   /* ----- screen 12 label the parts ----- */
   labelTheme(name) {
     return {
-      side: { color: '#eda012', ink: '#8a5406', light: '#fff6e2', gradient: 'linear-gradient(#fff9eb,#ffedbe)' },
-      vertex: { color: '#8051c9', ink: '#63349e', light: '#f5efff', gradient: 'linear-gradient(#faf6ff,#e9dcfa)' },
-      angle: { color: '#159ca8', ink: '#08717c', light: '#eafafa', gradient: 'linear-gradient(#f1ffff,#d2f2f1)' }
+      side: { color: '#e99712', ink: '#713d08', light: '#ffe18a', gradient: 'linear-gradient(#ffe896,#ffc849)' },
+      vertex: { color: '#8051c9', ink: '#4e237a', light: '#dfc5ff', gradient: 'linear-gradient(#e4ccff,#c6a0f5)' },
+      angle: { color: '#159ca8', ink: '#084f51', light: '#9ae9dc', gradient: 'linear-gradient(#aaf2e7,#67dbc9)' }
     }[name.toLowerCase()];
   }
   viewLabels(V, s) {
-    const st = this.state, F = this.fig('cross'), size = 470, K = this.k('cross');
-    const x = (SAFE.w - size) / 2, y = 96, box = { x: x, y: y, w: size, h: size };
+    const st = this.state, F = this.fig('cross'), size = 660, K = this.k('cross');
+    const x = (SAFE.w - size) / 2, y = 3, box = { x: x, y: y, w: size, h: size };
     const pts = F.pts;
     const hl = [], dots = [], arcs = [];
     const p = st.placed;
@@ -3344,7 +3361,8 @@ class Component extends DCLogic {
       const hovered = st.labelHover === sp.key && !done;
       return {
         nudge: st.chip && st.chip.toLowerCase() === sp.key ? '1' : '',
-        labelKey: sp.key, text: done ? sp.label : '?', click: this.hitTarget(sp.key),
+        labelKey: sp.key, text: done ? sp.label : '?', click: done ? null : this.hitTarget(sp.key),
+        label: done ? sp.label : ({side:'Left question-mark target',vertex:'Lower-right question-mark target',angle:'Upper-right question-mark target'}[sp.key]),
         style: {
           position: 'absolute', left: (sp.p[0] - 106) + 'px', top: (sp.p[1] - 38) + 'px',
           width: '212px', height: '76px', borderRadius: '22px', boxSizing: 'border-box',
@@ -3375,19 +3393,23 @@ class Component extends DCLogic {
       const used = Object.keys(p).some((k) => p[k] === t);
       const active = st.chip === t, theme = this.labelTheme(t);
       return {
-        nudge: !st.chip && ci === firstFree ? '1' : '', text: t, click: this.pickChip(t), down: this.dragLabel(t),
-        style: {
-          width: '200px', flex: '0 0 200px', justifyContent: 'center', padding: '0 16px', height: '78px', borderRadius: '39px', boxSizing: 'border-box',
+        nudge: !st.chip && ci === firstFree ? '1' : '', text: t, click: used ? null : this.pickChip(t), down: used ? null : this.dragLabel(t),
+        selected: active, disabled: used,
+        style: Object.assign(this.buttonSkin('secondary',22), {
+          width: '200px', flex: '0 0 200px', justifyContent: 'center', padding: '0 16px', height: '78px',
           background: used ? theme.light : theme.gradient,
-          border: '5px solid ' + (active ? theme.ink : theme.color),
+          border: '3px solid ' + (active ? theme.ink : theme.color),
           color: theme.ink,
           font: '800 36px "Baloo 2", Nunito, sans-serif', display: 'flex', alignItems: 'center',
           touchAction:'none', cursor: used ? 'default' : 'grab', opacity: st.draggingLabel === t ? 0.35 : (used ? 0.7 : 1),
-          boxShadow: used ? '0 4px 0 rgba(146,196,228,.2)' : 'inset 0 2px 0 rgba(255,255,255,.4), 0 6px 0 rgba(30,85,140,.24)' , transform: active ? 'translateY(-4px)' : 'none',
+          boxShadow: used ? 'none' : BUTTON.secondaryShadow, transform: active ? 'translateY(-4px)' : 'none',
           transition: 'transform 180ms ease-out, opacity 180ms ease-out, box-shadow 180ms ease-out', userSelect: 'none'
-        }
+        })
       };
     });
+    V.callouts = [{text: st.chip ? 'Now tap a ? to place ' + st.chip + '.' : 'Drag a label, or tap a label then a ?.',
+      style: {position:'absolute',left:'50%',top:'0px',translate:'-50% 0',
+        font:'800 28px Nunito,sans-serif',color:'#355e73',whiteSpace:'nowrap',pointerEvents:'none'}}];
   }
 
   /* ----- screen 13 count ----- */
@@ -3426,11 +3448,9 @@ class Component extends DCLogic {
     return {position:'absolute',left:'50%',top:'50%',width:Math.max(60,44/scale)+'px',height:Math.max(60,44/scale)+'px',transform:'translate(-50%,-50%)'};
   }
   counterCheckStyle() {
-    return { width:'144px',height:'64px',boxSizing:'border-box',borderRadius:'18px',
-      display:'flex',alignItems:'center',justifyContent:'center',
-      background:BUTTON.face,border:'3px solid '+BUTTON.edge,
-      color:BUTTON.ink,font:'800 30px "Baloo 2",Nunito,sans-serif',cursor:'pointer',
-      boxShadow:BUTTON.shadow };
+    return Object.assign(this.buttonSkin('primary',18), {
+      width:'144px',height:'64px',font:'800 30px "Baloo 2",Nunito,sans-serif'
+    });
   }
   counter(i, caption) {
     const st = this.state, bad = st.wrong === i || st.wrong === 2, good = !!st.ok;
@@ -3438,14 +3458,12 @@ class Component extends DCLogic {
       caption, min:1, max:10,
       captionStyle:{display:caption?'block':'none',width:'116px',flexShrink:0,font:'800 23px Nunito,sans-serif',color:'#23577f',lineHeight:1.15,textAlign:'left'},
       wrap:{display:'flex',alignItems:'center',gap:'10px',padding:'10px',borderRadius:'22px',
-        background:good?'#eefaf3':bad?'#fff2ef':'#fff8e8',border:'3px solid '+(good?GRN:bad?RED:'#edcf98'),
-        boxShadow:'inset 0 2px 0 #fff,0 4px 0 rgba(150,93,20,.16)',animation:bad?'wig 420ms ease-in-out both':'none'},
-      btn:{width:'60px',height:'60px',boxSizing:'border-box',flexShrink:0,borderRadius:'16px',
-        background:BUTTON.face,border:'2px solid '+BUTTON.edge,color:BUTTON.ink,font:'900 38px Nunito,sans-serif',
-        display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',lineHeight:1,
-        boxShadow:'inset 0 2px 0 #fff,0 3px 0 #bd6818',userSelect:'none'},
+        background:good?'#eefaf3':bad?'#fff2ef':'#effbf6',border:'3px solid '+(good?GRN:bad?RED:'#a6d7cb'),
+        boxShadow:'inset 0 2px 0 #fff,0 3px 0 rgba(8,111,124,.14)',animation:bad?'wig 420ms ease-in-out both':'none'},
+      btn:Object.assign(this.buttonSkin('secondary',16),{width:'60px',height:'60px',flexShrink:0,
+        font:'800 38px "Baloo 2",Nunito,sans-serif',lineHeight:1}),
       box:{width:'72px',height:'60px',boxSizing:'border-box',flexShrink:0,borderRadius:'14px',background:'#fff',
-        border:'2px solid #edcf98',color:BUTTON.ink,font:'900 42px Nunito,sans-serif',
+        border:'2px solid #a6d7cb',color:BUTTON.ink,font:'800 42px "Baloo 2",Nunito,sans-serif',
         display:'flex',alignItems:'center',justifyContent:'center'},
       value:String(st.cnt[i]),minus:this.bump(i,-1),plus:this.bump(i,1),nudge:i===0?'1':'',fixed:false
     };
@@ -3567,8 +3585,8 @@ class Component extends DCLogic {
     V.checkStyle = { display: 'none' };
     V.checkLabel = '';
     V.targets = [{
-      text: 'Next', click: this.advance, nudge: '',
-      style: Object.assign({ position: 'absolute', right: '10px', bottom: '14px', zIndex: 8 }, this.bigBtn(GRN, 200))
+      text: 'Next', click: this.advance, nudge: '', buttonTone: 'primary',
+      style: Object.assign({ position: 'absolute', right: '10px', bottom: '14px', zIndex: 8 }, this.bigBtn(200))
     }];
   }
 
@@ -3611,13 +3629,13 @@ class Component extends DCLogic {
       if (V.checkDisabled) V.check = null;
       V.nudgeCheck = st.checked || done ? '1' : '';
       V.checkLabel = st.checked ? 'Next' : 'Check';
-      V.checkStyle = this.bigBtn(st.checked ? GRN : (st.sel.length ? '#2f8fd0' : '#a9c7dd'), 250);
+      V.checkStyle = this.bigBtn(250);
       if (V.checkDisabled) Object.assign(V.checkStyle, {cursor:'default',transform:'none'});
     } else if (done) {
       V.showCheck = true;
       V.nudgeCheck = '1';
       V.checkLabel = 'Next';
-      V.checkStyle = this.bigBtn(GRN, 230);
+      V.checkStyle = this.bigBtn(230);
       V.check = this.advance;
     }
   }
@@ -3632,12 +3650,12 @@ class Component extends DCLogic {
        columns says nothing. Correctness is a moment, not a label — the tick
        rides along for a beat and leaves. */
     const ZONE = [
-      { edge: '#68b7df', bg: '#eaf8ff', hot: '#d4f1ff', slot: '#5aafdf', wash: 'rgba(90,175,223,0.14)',
-        tint: { borderColor: '#3f9fd0', background: '#ffffff',
-          boxShadow: '0 0 0 6px rgba(63,159,208,0.16), 0 10px 0 rgba(63,159,208,0.22)' } },
-      { edge: '#a995e4', bg: '#f2edff', hot: '#e9ddff', slot: '#a07fe0', wash: 'rgba(160,127,224,0.14)',
-        tint: { borderColor: '#8f74d8', background: '#ffffff',
-          boxShadow: '0 0 0 6px rgba(143,116,216,0.16), 0 10px 0 rgba(143,116,216,0.22)' } }
+      { edge: '#20aaa5', bg: '#ddf8ef', hot: '#b5eede', slot: '#1fa49b', wash: 'rgba(31,164,155,0.14)',
+        tint: { borderColor: '#168f99', background: '#f5fffb',
+          boxShadow: '0 0 0 4px rgba(31,164,155,.16), 0 8px 0 rgba(8,111,124,.22)' } },
+      { edge: '#9463d0', bg: '#efe2ff', hot: '#e0c5ff', slot: '#9463d0', wash: 'rgba(148,99,208,0.14)',
+        tint: { borderColor: '#8051c9', background: '#fcf8ff',
+          boxShadow: '0 0 0 4px rgba(128,81,201,.16), 0 8px 0 rgba(128,81,201,.22)' } }
     ];
     const zoneW = this.sortZoneW();
     const holding = st.pickedFig !== null && st.pickedFig !== undefined;
@@ -3774,10 +3792,10 @@ class Component extends DCLogic {
       }
     }];
     V.targets = [{
-      text: 'Play again', click: this.restart, nudge: '',
+      text: 'Play again', click: this.restart, nudge: '', buttonTone: 'primary',
       style: Object.assign({
         position: 'absolute', left: '50%', top: '620px', translate: '-50% 0', zIndex: 8
-      }, this.bigBtn(GRN, 300))
+      }, this.bigBtn(300))
     }];
   }
 }

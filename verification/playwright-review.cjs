@@ -1,5 +1,6 @@
 const fs = require('fs'), path = require('path'), http = require('http');
 const { chromium } = require('playwright');
+const assert = require('assert');
 const root = path.resolve(__dirname, '..'), out = path.join(__dirname, 'output', 'launch');
 fs.mkdirSync(out, { recursive: true });
 const mime = {'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png','.webp':'image/webp','.svg':'image/svg+xml','.mp3':'audio/mpeg','.woff2':'font/woff2'};
@@ -28,13 +29,43 @@ const server = http.createServer((req,res)=>{
     // Rendering audit isolates each screen; interactive paths are tested separately.
     await page.evaluate(()=>{const g=__poly;g.timers.forEach(clearTimeout);g._stopRecordedVoice?.();g.later=()=>0;});
     const screens=[];
-    for(let k=0;k<47;k++){
-      await page.evaluate(k=>{const g=__poly,s=g.steps()[k];g.setState({k});g.runStep(k,false);g.prepareNarratorReveal(g.instructionPages(s.narr)[0]);g._voiceLocked=false;g.setState({wordReveal:'complete',storyContent:true,storyDialogue:true,storyControls:true,interactive:true,speaking:false,magicReveal:false,drawn:!(s.sc==='S1'&&['point','draw'].includes(s.ph)),reveal:true,nums:s.count||0,voiceElapsedMs:10000});},k);
+    const showScreen=async(k,patch={})=>{
+      await page.evaluate(({k,patch})=>{const g=__poly,s=g.steps()[k];g.setState({k});g.runStep(k,false);g.prepareNarratorReveal(g.instructionPages(s.narr)[0]);g._voiceLocked=false;g.setState({wordReveal:'complete',storyContent:true,storyDialogue:true,storyControls:true,interactive:true,speaking:false,magicReveal:false,drawn:!(s.sc==='S1'&&['point','draw'].includes(s.ph)),reveal:true,nums:s.count||0,voiceElapsedMs:10000,...patch});},{k,patch});
       await page.waitForTimeout(300);
+    };
+    for(let k=0;k<47;k++){
+      await showScreen(k);
       screens.push(await page.evaluate(()=>({k:__poly.state.k+1,question:__poly.step().q,buttons:[...document.querySelectorAll('.game-action')].map(e=>({text:e.innerText,label:e.getAttribute('aria-label'),role:e.getAttribute('role'),tab:e.getAttribute('tabindex')})),text:document.querySelector('.narrator-text').innerText})));
-      if([0,4,8,10,15,17,22,23,25,29,34,39,42,45,46].includes(k)) await page.screenshot({path:path.join(out,'screen-'+(k+1)+'.png')});
+      if([0,4,5,8,10,15,17,22,23,25,29,34,39,42,45,46].includes(k)) await page.screenshot({path:path.join(out,'screen-'+(k+1)+'.png')});
     }
-    fs.writeFileSync(path.join(out,'audit.json'),JSON.stringify({startup,errors,failed,screens},null,2));
-    console.log('AUDIT',JSON.stringify({screens:screens.length,errors,failed,firstButtons:screens[4].buttons}));
+    const states=[];
+    for(const [name,k,patch]of [
+      ['correct',4,{ok:'closed',interactive:false}],
+      ['incorrect',4,{wrong:'open',ocReveal:'closed',interactive:false}],
+      ['disabled',23,{cnt:[0,0]}],
+      ['enabled',23,{cnt:[2,0]}]
+    ]){
+      await showScreen(k,patch);await page.waitForTimeout(300);
+      if(name==='incorrect')assert.equal(await page.getByRole('button',{name:'Open',exact:true}).evaluate(e=>getComputedStyle(e).opacity),'1','Incorrect answer text must not fade');
+      if(name==='disabled')assert.equal(await page.locator('[aria-disabled="true"]').filter({hasText:'Check'}).count(),1);
+      await page.screenshot({path:path.join(out,'buttons-'+name+'.png')});
+      states.push(name);
+    }
+    await showScreen(4);
+    await page.getByRole('button',{name:'Open',exact:true}).focus();
+    await page.keyboard.press('Tab');
+    assert(await page.getByRole('button',{name:'Closed',exact:true}).evaluate(e=>e.matches(':focus-visible')),'Keyboard focus must be visible');
+    await page.screenshot({path:path.join(out,'buttons-focus.png')});
+    await page.setViewportSize({width:390,height:844});
+    await showScreen(23,{cnt:[2,0]});
+    const plus=page.getByRole('button',{name:'Increase number of sides'});
+    await plus.scrollIntoViewIfNeeded();
+    const hit=await plus.locator('span').boundingBox();
+    assert(hit.width>=43.9&&hit.height>=43.9,'Phone counter hit area must remain at least 44px');
+    await page.screenshot({path:path.join(out,'buttons-phone.png')});
+    assert.equal(errors.length,0,errors.join('\n'));
+    assert.equal(failed.length,0,JSON.stringify(failed));
+    fs.writeFileSync(path.join(out,'audit.json'),JSON.stringify({startup,errors,failed,screens,buttonStates:states,keyboardFocus:true,phoneHitArea:hit},null,2));
+    console.log('AUDIT',JSON.stringify({screens:screens.length,errors,failed,buttonStates:states,keyboardFocus:true,phoneHitArea:hit}));
   } finally {await browser.close();server.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;server.close();});

@@ -15,8 +15,8 @@ screens use fewer particles; reduced motion hides snow and keeps stars static.
 - Right: a quiet, pale activity surface preserves the existing 1570 × 701 logical
   learning area. Shape geometry and drag/drop coordinates use the same coordinate system.
 - Dialogue has no name tag. It sizes itself to each complete passage, with a fixed
-  tail anchor at the bird's head, 46px dark teal text, a thin teal border, mint surface, and comfortable padding.
-  The softly curved tail uses only CSS in `styles/dialogue.css`; decorative pop lines are removed.
+  tail aligned above the bird's head, 46px dark teal text, a thin teal border, warm cream surface, and comfortable padding.
+  A shorter curved CSS tail leaves breathing room above the crest. `dialogueLayout()` controls the fixed gap, so longer text grows upward without moving the pointer toward the bird.
   On narrow screens, bubble width follows the visible viewport while keeping the head anchor.
   Empty game dialogue is hidden; `design/dialogue-bubble.html` previews the reusable empty shell.
 - The 47 steps, questions, correct answers, and recording text remain in `steps()`.
