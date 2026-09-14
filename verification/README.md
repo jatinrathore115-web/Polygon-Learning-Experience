@@ -2,6 +2,15 @@
 
 Run `node verification/check-<name>.cjs` from the project root. The checks use Node; browser checks also use the installed Google Chrome.
 
+Install review tools with `npm ci`. Playwright uses the installed Chrome:
+
+- `npm test`: actual 47-screen playthrough with real audio accelerated to 6x,
+  keyboard input, wrong-answer recovery, clicks, drag/drop, steppers, sorting and restart.
+- `npm run test:review`: screenshot and accessibility-binding audit of every screen.
+
+Playwright artifacts are saved under `verification/output/launch/`. The playthrough
+blocks external services to verify that runtime scripts, fonts, images and audio are local.
+
 - `check-guide-sync.cjs`: playback-driven expressions, reaction priorities, recovery and reduced motion.
 - `check-interactions.cjs`: all 47 screens, input and keyboard behavior.
 - `check-story-scene.cjs`: browser boot, flight, narration reveal, all screens, dialogue fit, tablet and reduced motion.
@@ -12,6 +21,6 @@ Run `node verification/check-<name>.cjs` from the project root. The checks use N
 
 `output/` holds generated screenshots, preview HTML and JSON reports. Older previews are historical snapshots, not game entrypoints. New outputs are ignored by Git. Generators recreate this directory when needed.
 
-`runtime/` holds optional ignored browser-test copies of React, React DOM and Babel. The story check uses these if present, otherwise the page uses its configured CDN. These files are not production dependencies.
+`runtime/` holds optional ignored browser-test copies of React, React DOM and Babel. Production uses the pinned local scripts in `assets/runtime/` and fonts in `assets/fonts/`.
 
 The entire verification folder is excluded from deployment. Edit `../index.html` to change the game.

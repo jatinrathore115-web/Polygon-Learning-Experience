@@ -1,0 +1,36 @@
+/* Quiet winter scenery stays at the edges, behind the learning content. */
+.story-board {
+  overflow: hidden;
+  box-sizing: border-box;
+  border: 5px solid #59b6b7;
+  border-bottom-color: #358f9b;
+  border-radius: 42px;
+  background: linear-gradient(155deg, #fffef8 0%, #f5fbff 44%, #f0faf9 100%);
+  box-shadow: inset 0 0 0 7px rgba(255,255,255,.8),
+    inset 0 -6px 0 rgba(174,210,222,.16),
+    0 6px 0 rgba(30,106,122,.3),
+    0 12px 28px rgba(8,38,92,.16);
+  pointer-events: none;
+}
+.story-board::before,
+.story-board::after {
+  content: '';
+  position: absolute;
+  bottom: 7px;
+  width: 30%;
+  height: 20%;
+  max-height: 130px;
+  pointer-events: none;
+}
+.story-board::before {
+  left: 7px;
+  background: #dfedf4;
+  opacity: .7;
+  clip-path: polygon(0 40%, 14% 53%, 34% 12%, 61% 67%, 74% 46%, 100% 100%, 0 100%);
+}
+.story-board::after {
+  right: 7px;
+  background: #deefeb;
+  opacity: .75;
+  clip-path: polygon(0 100%, 24% 61%, 39% 76%, 67% 15%, 85% 47%, 100% 30%, 100% 100%);
+}

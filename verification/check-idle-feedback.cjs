@@ -25,8 +25,9 @@ jobs = []; g.tapCard(1)(); assert.equal(g.state.wrong, 1); assert.equal(g.state.
 g.state.hoverK = 'card:c1b';
 const V = { cards: [] }; g.viewMulti(V, g.step());
 assert(V.cards[1].wrap.animation.includes('wrongTap'));
-assert.equal(V.cards[1].wrap.borderColor, '#e8553f');
-assert(V.cards[1].wrap.boxShadow.includes('232,85,63'));
+assert.equal(V.cards[1].wrap.borderColor, '#da9279');
+assert.equal(V.cards[1].wrap.background, '#fff8f3');
+assert(!V.cards[1].wrap.boxShadow.includes('24px'), 'Incorrect feedback uses a soft shadow without a large glow');
 const oldReset = jobs.find(j => j.ms === 650);
 const firstAnimation = V.cards[1].wrap.animation;
 g.tapCard(1)(); g.viewMulti(V, g.step());

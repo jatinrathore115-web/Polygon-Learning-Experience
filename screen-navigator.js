@@ -3,6 +3,8 @@
   'use strict';
   window.PolygonScreenNavigator = {
     mount(game) {
+      const local = ['localhost', '127.0.0.1', '::1'].includes(location.hostname);
+      if (!local && new URLSearchParams(location.search).get('preview') !== '1') return () => {};
       const host = document.createElement('div');
       host.id = 'polygon-screen-navigator';
       const root = host.attachShadow({ mode: 'open' });

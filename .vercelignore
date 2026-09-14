@@ -2,6 +2,11 @@
 reference/
 design/
 verification/
+node_modules/
+.env*
+.git/
+.codex/
+.agents/
 .thumbnail
 
 # The lesson loads recordings.js, recorded-player.js and the 75 mp3s at

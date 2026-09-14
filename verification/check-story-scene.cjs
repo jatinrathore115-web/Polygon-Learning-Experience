@@ -25,14 +25,14 @@ await call('Runtime.enable');await call('Page.enable');await call('Emulation.set
 // Optional local copies keep the visual test usable when the CDN is unavailable.
 const runtimeMap={};
 for(const [url,file] of [['https://unpkg.com/react@18.3.1/umd/react.production.min.js','react-test-runtime.js'],['https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js','react-dom-test-runtime.js'],['https://unpkg.com/@babel/standalone@7.29.0/babel.min.js','babel-test-runtime.js']])if(fs.existsSync('verification/runtime/'+file))runtimeMap[url]='/verification/runtime/'+file;
-await call('Page.addScriptToEvaluateOnNewDocument',{source:'window.__resources='+JSON.stringify(runtimeMap)});
-await call('Page.navigate',{url:'http://127.0.0.1:'+port+'/index.html'});
+await call('Page.addScriptToEvaluateOnNewDocument',{source:'window.__resources='+JSON.stringify(runtimeMap)+';window.__storyFlightSeen=false;(function watch(){if(window.__poly&&__poly.state.guideFlying){window.__storyFlightSeen=true;return;}requestAnimationFrame(watch);})()'});
+await call('Page.navigate',{url:'http://127.0.0.1:'+port+'/index.html?intro=0'});
 for(let i=0;i<60;i++){if(await evaluate('!!(window.__poly && window.__poly.state.ready)'))break;await sleep(100);}
 assert(await evaluate('!!window.__poly'),'Lesson failed to boot: '+JSON.stringify(errors)+' '+await evaluate('document.body.innerText.slice(0,1200)'));
 const initial=await evaluate('({content:__poly.state.storyContent,flying:__poly.state.guideFlying})');
 assert(!initial.content,'Activity flashed before introduction');
 await sleep(700);
-assert(await evaluate('__poly.state.guideFlying'),'Bird should fly before landing');
+assert(await evaluate('window.__storyFlightSeen'),'Bird must play its flight before landing');
 await call('Page.captureScreenshot',{format:'png'}).then(r=>fs.writeFileSync('verification/output/story-flight.png',Buffer.from(r.data,'base64')));
 // Wait for the scheduled 1740ms dialogue reveal; screenshot time varies by machine.
 for(let i=0;i<20;i++){if(await evaluate('__poly.state.storyDialogue'))break;await sleep(100);}
@@ -40,14 +40,20 @@ assert(await evaluate('!__poly.state.guideFlying && __poly.state.storyDialogue')
 for(let i=0;i<60;i++){if(await evaluate('__poly.state.storyContent || __poly.state.voiceError'))break;await sleep(100);}
 assert(await evaluate('__poly.state.storyContent'),'Real narration reveals activity: '+JSON.stringify(await evaluate('({voiceError:__poly.state.voiceError,speaking:__poly.state.speaking,pose:__poly.guide.sprite.seg,active:__poly.guide.voiceActive,reading:__poly._voiceReading,started:__poly._voiceStarted,recorded:!!window.PolygonRecordedVoice,queue:__poly._voiceQueue})'))+' '+JSON.stringify(errors));
 await evaluate(`window.__storySavedLater=__poly.later; __poly.timers.forEach(clearTimeout); if(__poly._stopRecordedVoice)__poly._stopRecordedVoice(); __poly.later=()=>0;`);
+const weather=await evaluate(`(()=>{const layer=document.querySelector('.scene-weather'),snow=document.querySelector('.scene-snow i'),star=document.querySelector('.scene-sparkles i');return {hidden:layer.getAttribute('aria-hidden'),input:getComputedStyle(layer).pointerEvents,behind:+getComputedStyle(layer).zIndex<+getComputedStyle(document.querySelector('.story-board')).zIndex,snow:getComputedStyle(snow).animationName,star:getComputedStyle(star).animationName,position:snow.getBoundingClientRect().top};})()`);
+assert(weather.hidden==='true'&&weather.input==='none'&&weather.behind,'Weather must remain decorative behind gameplay');
+assert(weather.snow==='snowDrift'&&weather.star==='skyTwinkle','Ambient animations must load');
+await sleep(200);
+assert(await evaluate(`document.querySelector('.scene-snow i').getBoundingClientRect().top`)!==weather.position,'Snow must actually move');
 const results=[];
 for(let k=0;k<47;k++){
   const result=await evaluate(`(()=>{const g=__poly,s=g.steps()[${k}];g.setState({k:${k}});g.runStep(${k},false);g.prepareNarratorReveal(g.instructionPages(s.narr)[0]);g.setState({narr:s.narr,wordReveal:'complete',storyContent:true,storyDialogue:true,storyControls:true,guideHidden:false,guideFlying:false,interactive:true,speaking:false,reveal:true,nums:s.count||((s.ph==='five')?5:0),voiceElapsedMs:10000});return {step:${k+1},flying:g.state.guideFlying};})()`);
   await sleep(25);results.push(result);
   if([4,5,16,20,22,23,42,46].includes(k)){
     await sleep(700);
-    const layout=await evaluate(`(()=>{const n=document.querySelector('.narrator-text'),b=document.querySelector('.dialogue-box'),a=n.getBoundingClientRect(),c=b.getBoundingClientRect();return {text:a.bottom<=c.bottom-8&&a.top>=c.top&&a.left>=c.left&&a.right<=c.right,content:!!document.querySelector('.story-surface'),bird:document.querySelector('.swiftee-wrap').getBoundingClientRect().right<document.querySelector('.story-board').getBoundingClientRect().left};})()`);
+    const layout=await evaluate(`(()=>{const n=document.querySelector('.narrator-text'),b=document.querySelector('.dialogue-box'),a=n.getBoundingClientRect(),c=b.getBoundingClientRect();return {text:a.bottom<=c.bottom-8&&a.top>=c.top&&a.left>=c.left&&a.right<=c.right,content:!!document.querySelector('.story-surface'),bird:(()=>{const canvas=document.querySelector('.swiftee-wrap canvas'),r=canvas.getBoundingClientRect(),pixels=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;let edge=0;for(let y=0;y<canvas.height;y++)for(let x=0;x<canvas.width;x++)if(pixels[(y*canvas.width+x)*4+3]>32)edge=Math.max(edge,x);return r.left+(edge+1)/canvas.width*r.width<document.querySelector('.story-board').getBoundingClientRect().left;})()};})()`);
     assert(layout.text,'Dialogue overflow on screen '+(k+1));
+    assert(layout.bird,'Visible guide overlaps the activity card on screen '+(k+1));
     if(k===4||k===5){
       const compact=await evaluate(`(()=>{const board=document.querySelector('.story-board').getBoundingClientRect(),safe=document.querySelector('.story-surface').getBoundingClientRect(),buttons=[...document.querySelectorAll('.story-controls > div')].map(e=>e.getBoundingClientRect());return {small:board.width<safe.width*.5,outside:buttons.length===2&&buttons.every(b=>b.top>=board.bottom+12&&b.bottom<=innerHeight),centered:buttons.length===2&&Math.abs((buttons[0].left+buttons[1].right)/2-(board.left+board.right)/2)<2};})()`);
       assert(compact.small&&compact.outside&&compact.centered,'Compact card and external buttons: '+JSON.stringify(compact));
@@ -72,10 +78,19 @@ assert(new Set(dialogueSizes.map(b=>Math.round(b.height))).size>=3,'Dialogue hei
 assert(new Set(dialogueSizes.map(b=>Math.round(b.width))).size>=2,'Short passages should have a narrower bubble');
 assert(Math.max(...dialogueSizes.map(b=>b.bottom))-Math.min(...dialogueSizes.map(b=>b.bottom))<1,'Dialogue tail should stay anchored');
 await call('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
+assert(await evaluate(`getComputedStyle(document.querySelector('.scene-snow')).display==='none'&&getComputedStyle(document.querySelector('.scene-sparkles i')).animationName==='none'`),'Reduced motion must stop ambient weather');
 const rm=await evaluate(`(()=>{const g=__poly;g._guideGreeted=false;g.enterScreen(true);return {flying:g.state.guideFlying,content:g.guideStyle().animation,dialogue:g.state.storyDialogue};})()`);
 assert(!rm.flying&&rm.dialogue&&rm.content==='none','Reduced motion must skip the flight');
 await call('Emulation.setDeviceMetricsOverride',{width:1024,height:768,deviceScaleFactor:1,mobile:false});await sleep(200);
 assert(await evaluate(`(()=>{const a=document.querySelector('.story-board').getBoundingClientRect();return a.left>=0&&a.right<=innerWidth+1&&a.top>=0&&a.bottom<=innerHeight+1;})()`),'Tablet board is clipped');
+// Keep the dialogue visible on phones without moving its bird anchor.
+for(const width of [320,390,768]){
+  await call('Emulation.setDeviceMetricsOverride',{width,height:740,deviceScaleFactor:1,mobile:false});await sleep(150);
+  for(const k of [0,16]){
+    await evaluate(`(()=>{const g=__poly;g.setState({k:${k}});g.runStep(${k},false);g.prepareNarratorReveal(g.instructionPages(g.steps()[${k}].narr)[0]);g.setState({wordReveal:'complete',storyDialogue:true,storyContent:true});})()`);await sleep(60);
+    assert(await evaluate(`(()=>{const r=document.querySelector('.dialogue-box').getBoundingClientRect();return r.left>=0&&r.right<=innerWidth+1&&r.top>=0&&r.bottom<=innerHeight&&!document.querySelector('.comic-accent');})()`),'Responsive dialogue bounds at '+width+'px on screen '+(k+1));
+  }
+}
 await evaluate(`__poly.later=window.__storySavedLater;`);
 fs.writeFileSync('verification/output/story-scene-results.json',JSON.stringify({intro:true,dialoguePages:pages.length,tabletFits:true,reducedMotion:true,steps:results.length,errors},null,2));
 console.log('PASS: real flight, landing, playback-led reveal, 47 screens, '+pages.length+' dynamic dialogue pages, no name tag, tablet bounds, and reduced motion.');

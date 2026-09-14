@@ -1,22 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polygon Adventure</title>
+<meta name="description" content="Explore shapes, sides, vertices, and angles with Swiftee in a playful polygon adventure.">
+<link rel="preload" href="assets/fonts/baloo-2-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles/fonts.css">
 <!-- Swiftee's sheet table, generated from the character pack's manifest by
      build-swiftee.cjs. It loads here, not from the helmet below, because the
      lesson script reads it while it is being evaluated. -->
 <script src="assets/swiftee/swiftee-sheets.js"></script>
+<script src="assets/runtime/resources.js"></script>
 <script src="./support.js"></script>
+<!-- The blizzard cinematic. It loads from the real head rather than the helmet
+     below so the overlay is styled and on screen before the lesson's runtime
+     has mounted anything; the lesson then waits on IceIntro.gate. -->
+<link rel="stylesheet" href="styles/ice-intro.css">
+<script src="ice-intro.js"></script>
 </head>
 <body>
 <x-dc>
 <helmet>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="styles/buttons.css" />
 <link rel="stylesheet" href="styles/dialogue.css" />
+<link rel="stylesheet" href="styles/cards.css" />
+<link rel="stylesheet" href="styles/weather.css" />
 <style>
   html, body { margin: 0; padding: 0; height: 100%; background: #8b7edc; overflow: hidden; }
   a { color: #2f6fd0; } a:hover { color: #1546a0; }
@@ -68,7 +77,8 @@
   @keyframes polygonRevealGlow { 0%,100% { opacity: 0; filter: drop-shadow(0 0 0 rgba(34,184,230,0)); } 40% { opacity: 1; filter: drop-shadow(0 0 18px rgba(34,184,230,.85)); } }
   @keyframes storyArrive { from { opacity:0; } to { opacity:1; } }
   @keyframes rockArrival { 0% { transform:translate(-440px,-400px) rotate(-12deg) scale(.78); opacity:0; } 18% { opacity:1; } 62% { transform:translate(42px,-160px) rotate(8deg) scale(1); } 84% { transform:translate(0,-22px) rotate(-3deg); } 93% { transform:translate(0,5px) scale(1.035,.965); } 100% { transform:translate(0,0) rotate(0); opacity:1; } }
-  .story-surface .story-controls { transition:opacity 260ms ease-out; }
+  .story-surface .story-controls { z-index:20; pointer-events:none; transition:opacity 260ms ease-out; }
+  .story-surface[data-controls="ready"] .story-controls > div { pointer-events:auto; }
   .story-surface[data-controls="waiting"] .story-controls { opacity:0; visibility:hidden; pointer-events:none; }
   @media(prefers-reduced-motion:reduce) { .story-board,.story-surface,.dialogue-box,.story-controls { transition:none!important; } }
   @keyframes wig { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-11px); } 45% { transform: translateX(9px); } 70% { transform: translateX(-6px); } }
@@ -124,6 +134,10 @@
 
     <!-- ============ frozen background ============ z 0 -->
     <img src="assets/image.png" alt="" style="{{ bgStyle }}" />
+    <div class="scene-weather" aria-hidden="true">
+      <div class="scene-snow"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="scene-sparkles"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
 
     <!-- ============ Swiftee guide ============ z 20, perched on the left rock -->
     <sc-if value="{{ showGuide }}" hint-placeholder-val="{{ false }}">
@@ -135,10 +149,11 @@
     </sc-if>
 
     <!-- ============ ice board ============ z 30 -->
-    <div class="story-board" aria-hidden="true" style="{{ boardStyle }}"></div>
+    <div class="story-board" aria-hidden="true" style="{{ boardStyle }}">
+    </div>
 
     <!-- ============ learning content ============ z 32, inside the board's safe area -->
-    <div class="story-surface" ref="{{ safeRef }}" data-controls="{{ storyControls ? 'ready' : 'waiting' }}" data-screen-label="{{ screenLabel }}" data-interactive="{{ effectsEnabled }}" onPointerDown="{{ stageDown }}" style="{{ safeStyle }}">
+    <div class="story-surface" ref="{{ safeRef }}" data-controls="{{ controlsState }}" data-screen-label="{{ screenLabel }}" data-interactive="{{ effectsEnabled }}" onPointerDown="{{ stageDown }}" style="{{ safeStyle }}">
 
       <sc-if value="{{ showZones }}" hint-placeholder-val="{{ false }}">
         <div style="{{ zoneRowStyle }}">
@@ -154,7 +169,7 @@
       </sc-if>
 
       <sc-for list="{{ cards }}" as="c" hint-placeholder-count="0">
-        <div class="{{ c.click ? 'game-action' : '' }}" role="{{ c.click ? 'button' : undefined }}" tabIndex="{{ c.click && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" aria-label="{{ c.accessibleLabel }}" aria-pressed="{{ c.selected }}" data-nudge="{{ c.nudge }}" style="{{ c.wrap }}" onPointerDown="{{ c.down }}" onPointerEnter="{{ c.enter }}" onPointerLeave="{{ c.leave }}" onClick="{{ c.click }}">
+        <div class="{{ c.actionClass }}" role="{{ c.actionRole }}" tabIndex="{{ c.actionTab }}" onKeyDown="{{ activateKey }}" aria-label="{{ c.accessibleLabel }}" aria-pressed="{{ c.selected }}" data-nudge="{{ c.nudge }}" style="{{ c.wrap }}" onPointerDown="{{ c.down }}" onPointerEnter="{{ c.enter }}" onPointerLeave="{{ c.leave }}" onClick="{{ c.click }}">
           <div style="{{ c.glow }}"></div>
           <svg viewBox="{{ c.vb }}" style="{{ c.svgStyle }}" ref="{{ c.svgRef }}">
             <g style="{{ c.gStyle }}">
@@ -188,7 +203,7 @@
       </sc-for>
 
       <sc-for list="{{ targets }}" as="t" hint-placeholder-count="0">
-        <div class="{{ t.click ? 'game-action' : '' }}" role="{{ t.click ? 'button' : undefined }}" aria-label="{{ t.label }}" tabIndex="{{ t.click && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-label-target="{{ t.labelKey }}" data-nudge="{{ t.nudge }}" style="{{ t.style }}" onPointerEnter="{{ t.enter }}" onPointerLeave="{{ t.leave }}" onFocus="{{ t.enter }}" onBlur="{{ t.leave }}" onClick="{{ t.click }}">{{ t.text }}</div>
+        <div class="{{ t.actionClass }}" role="{{ t.actionRole }}" aria-label="{{ t.label }}" tabIndex="{{ t.actionTab }}" onKeyDown="{{ activateKey }}" data-label-target="{{ t.labelKey }}" data-nudge="{{ t.nudge }}" style="{{ t.style }}" onPointerEnter="{{ t.enter }}" onPointerLeave="{{ t.leave }}" onFocus="{{ t.enter }}" onBlur="{{ t.leave }}" onClick="{{ t.click }}">{{ t.text }}</div>
       </sc-for>
 
       <sc-for list="{{ callouts }}" as="o" hint-placeholder-count="0">
@@ -202,48 +217,48 @@
       <sc-for list="{{ drops }}" as="d" hint-placeholder-count="0">
         <div style="{{ d.style }}">
 
-          <div class="{{ d.click ? 'game-action game-quiet' : '' }}" role="{{ d.click ? 'button' : undefined }}" tabIndex="{{ d.click && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ d.nudge }}" onClick="{{ d.click }}" onPointerEnter="{{ d.enter }}" onPointerLeave="{{ d.leave }}" style="{{ d.btn }}">
+          <div class="{{ d.actionClass }}" role="{{ d.actionRole }}" tabIndex="{{ d.actionTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ d.nudge }}" onClick="{{ d.click }}" onPointerEnter="{{ d.enter }}" onPointerLeave="{{ d.leave }}" style="{{ d.btn }}">
             <span>{{ d.label }}</span>
             <span aria-hidden="true" style="{{ d.arrowStyle }}">{{ d.arrow }}</span>
           </div>
           <sc-for list="{{ d.menu }}" as="m" hint-placeholder-count="0">
-            <div class="{{ m.click ? 'game-action game-quiet game-dropdown-option' : 'game-dropdown-option' }}" role="{{ m.click ? 'button' : undefined }}" tabIndex="{{ m.click && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ m.nudge }}" onClick="{{ m.click }}" onPointerEnter="{{ m.enter }}" onPointerLeave="{{ m.leave }}" style="{{ m.style }}">{{ m.text }}</div>
+            <div class="{{ m.actionClass }}" role="{{ m.actionRole }}" tabIndex="{{ m.actionTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ m.nudge }}" onClick="{{ m.click }}" onPointerEnter="{{ m.enter }}" onPointerLeave="{{ m.leave }}" style="{{ m.style }}">{{ m.text }}</div>
           </sc-for>
         </div>
       </sc-for>
 
       <sc-if value="{{ showChoice }}" hint-placeholder-val="{{ false }}">
         <div class="story-controls" style="{{ choiceRowStyle }}">
-          <div class="{{ chooseOpen ? 'game-action game-primary' : '' }}" role="{{ chooseOpen ? 'button' : undefined }}" tabIndex="{{ chooseOpen && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeOC }}" onClick="{{ chooseOpen }}" onPointerEnter="{{ hovOpen }}" onPointerLeave="{{ hovOut }}" style="{{ btnOpen }}">Open</div>
-          <div class="{{ chooseClosed ? 'game-action game-primary' : '' }}" role="{{ chooseClosed ? 'button' : undefined }}" tabIndex="{{ chooseClosed && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeClosed }}" onClick="{{ chooseClosed }}" onPointerEnter="{{ hovClosed }}" onPointerLeave="{{ hovOut }}" style="{{ btnClosed }}">Closed</div>
+          <div class="{{ chooseOpenClass }}" role="{{ chooseOpenRole }}" tabIndex="{{ chooseOpenTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeOC }}" onClick="{{ chooseOpen }}" onPointerEnter="{{ hovOpen }}" onPointerLeave="{{ hovOut }}" style="{{ btnOpen }}">Open</div>
+          <div class="{{ chooseClosedClass }}" role="{{ chooseClosedRole }}" tabIndex="{{ chooseClosedTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeClosed }}" onClick="{{ chooseClosed }}" onPointerEnter="{{ hovClosed }}" onPointerLeave="{{ hovOut }}" style="{{ btnClosed }}">Closed</div>
         </div>
       </sc-if>
 
       <sc-if value="{{ showChips }}" hint-placeholder-val="{{ false }}">
         <div class="story-controls" style="position:absolute;left:0;bottom:10px;width:100%;display:flex;justify-content:center;gap:44px">
           <sc-for list="{{ chips }}" as="p" hint-placeholder-count="3">
-            <div class="{{ p.click ? 'game-action' : '' }}" role="{{ p.click ? 'button' : undefined }}" tabIndex="{{ p.click && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ p.nudge }}" onPointerDown="{{ p.down }}" onPointerEnter="{{ p.enter }}" onPointerLeave="{{ p.leave }}" onClick="{{ p.click }}" style="{{ p.style }}">{{ p.text }}</div>
+            <div class="{{ p.actionClass }}" role="{{ p.actionRole }}" tabIndex="{{ p.actionTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ p.nudge }}" onPointerDown="{{ p.down }}" onPointerEnter="{{ p.enter }}" onPointerLeave="{{ p.leave }}" onClick="{{ p.click }}" style="{{ p.style }}">{{ p.text }}</div>
           </sc-for>
         </div>
       </sc-if>
 
       <sc-if value="{{ showCounter }}" hint-placeholder-val="{{ false }}">
-        <div class="{{ storyCounting ? '' : 'story-controls' }}" style="{{ counterRowStyle }}">
+        <div class="{{ counterClass }}" style="{{ counterRowStyle }}">
           <sc-for list="{{ counters }}" as="n" hint-placeholder-count="1">
             <div role="group" aria-label="{{ n.accessibleLabel }}" style="{{ n.wrap }}">
               <div style="{{ n.captionStyle }}">{{ n.caption }}</div>
-              <div class="{{ n.minus ? 'game-action' : '' }}" aria-disabled="{{ n.minusDisabled }}" aria-label="Decrease number of sides" role="{{ n.minus ? 'button' : undefined }}" tabIndex="{{ n.minus && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ n.minusNudge }}" onClick="{{ n.minus }}" onPointerEnter="{{ n.mIn }}" onPointerLeave="{{ n.out }}" style="{{ n.btnM }}"><span aria-hidden="true" style="{{ n.hitStyle }}"></span>–</div>
+              <div class="{{ n.minusClass }}" aria-disabled="{{ n.minusDisabled }}" aria-label="Decrease number of sides" role="{{ n.minusRole }}" tabIndex="{{ n.minusTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ n.minusNudge }}" onClick="{{ n.minus }}" onPointerEnter="{{ n.mIn }}" onPointerLeave="{{ n.out }}" style="{{ n.btnM }}"><span aria-hidden="true" style="{{ n.hitStyle }}"></span>–</div>
               <div style="{{ n.box }}">{{ n.value }}</div>
-              <div class="{{ n.plus ? 'game-action' : '' }}" aria-disabled="{{ n.plusDisabled }}" aria-label="Increase number of sides" role="{{ n.plus ? 'button' : undefined }}" tabIndex="{{ n.plus && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ n.nudge }}" onClick="{{ n.plus }}" onPointerEnter="{{ n.pIn }}" onPointerLeave="{{ n.out }}" style="{{ n.btnP }}"><span aria-hidden="true" style="{{ n.hitStyle }}"></span>+</div>
+              <div class="{{ n.plusClass }}" aria-disabled="{{ n.plusDisabled }}" aria-label="Increase number of sides" role="{{ n.plusRole }}" tabIndex="{{ n.plusTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ n.nudge }}" onClick="{{ n.plus }}" onPointerEnter="{{ n.pIn }}" onPointerLeave="{{ n.out }}" style="{{ n.btnP }}"><span aria-hidden="true" style="{{ n.hitStyle }}"></span>+</div>
             </div>
           </sc-for>
-          <div class="{{ check ? 'game-action game-primary' : '' }}" role="{{ check ? 'button' : undefined }}" tabIndex="{{ check && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeCheck }}" onClick="{{ check }}" onPointerEnter="{{ hovCheck }}" onPointerLeave="{{ hovOut }}" aria-disabled="{{ checkDisabled }}" style="{{ checkStyle }}"><span aria-hidden="true" style="{{ checkHitStyle }}"></span>{{ checkLabel }}</div>
+          <div class="{{ checkClass }}" role="{{ checkRole }}" tabIndex="{{ checkTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeCheck }}" onClick="{{ check }}" onPointerEnter="{{ hovCheck }}" onPointerLeave="{{ hovOut }}" aria-disabled="{{ checkDisabled }}" style="{{ checkStyle }}"><span aria-hidden="true" style="{{ checkHitStyle }}"></span>{{ checkLabel }}</div>
         </div>
       </sc-if>
 
       <sc-if value="{{ showCheck }}" hint-placeholder-val="{{ false }}">
         <div class="story-controls" style="position:absolute;left:0;bottom:6px;width:100%;display:flex;justify-content:center">
-          <div class="{{ check ? 'game-action game-primary' : '' }}" role="{{ check ? 'button' : undefined }}" tabIndex="{{ check && effectsEnabled ? 0 : -1 }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeCheck }}" onClick="{{ check }}" onPointerEnter="{{ hovCheck }}" onPointerLeave="{{ hovOut }}" aria-disabled="{{ checkDisabled }}" style="{{ checkStyle }}">{{ checkLabel }}</div>
+          <div class="{{ checkClass }}" role="{{ checkRole }}" tabIndex="{{ checkTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeCheck }}" onClick="{{ check }}" onPointerEnter="{{ hovCheck }}" onPointerLeave="{{ hovOut }}" aria-disabled="{{ checkDisabled }}" style="{{ checkStyle }}">{{ checkLabel }}</div>
         </div>
       </sc-if>
 
@@ -269,7 +284,6 @@
       <div class="dialogue-inner"><div class="dialogue-text">
       <div class="narrator-text" ref="{{ narrRef }}" style="{{ narrStyle }}"><sc-for list="{{ narratorParts }}" as="part" hint-placeholder-count="0"><span key="{{ part.key }}" style="{{ part.style }}">{{ part.text }}</span></sc-for></div>
       </div></div>
-      <div class="comic-accent" aria-hidden="true"><span></span><span></span></div>
     </div>
 
     </div>
@@ -334,7 +348,7 @@ const NARR_TYPE = { size: 46, lineHeight: 1.2, pad: 8, color: '#174b52', accent:
 const SWIFTEE_CELL = 340;
 const SWIFTEE_BASELINE = (window.SWIFTEE && window.SWIFTEE.baseline) || 0.877;
 /* Feet and centre line aligned to the left rock in assets/image.png. */
-const SWIFTEE_FEET = 824, SWIFTEE_CENTRE = 192;
+const SWIFTEE_FEET = 824, SWIFTEE_CENTRE = Math.round(192 * 1.3);
 const GUIDE_BOX = {
   x: Math.round(SWIFTEE_CENTRE - SWIFTEE_CELL / 2),
   y: Math.round(SWIFTEE_FEET - SWIFTEE_CELL * SWIFTEE_BASELINE),
@@ -631,9 +645,18 @@ class Component extends DCLogic {
       /* The lesson always opens on screen 1 so the guide's entrance plays every
          time. Clear any progress an earlier build persisted. */
       try { localStorage.removeItem('polyLessonV1'); } catch (e) {}
-      this.setState({ ready: true, k: 0, userPts: null }, () => this.runStep(0, true));
+      /* The ice board lays itself out straight away so the blizzard intro has
+         the real screen to crossfade into, but screen 1 — Swiftee's entrance,
+         the narration, the first point — is held until the cinematic has
+         finished and handed control over. */
+      const begin = () => { if (!this._gone) this.runStep(0, true); };
+      const intro = window.IceIntro && window.IceIntro.gate;
+      this.setState({ ready: true, k: 0, userPts: null }, () => {
+        if (intro && intro.then) intro.then(begin, begin); else begin();
+      });
     };
-    boot();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(boot, boot);
+    else boot();
     window.__poly = this;
     if (window.PolygonScreenNavigator) this._disposeNavigator = window.PolygonScreenNavigator.mount(this);
     this.fit = () => {
@@ -659,6 +682,7 @@ class Component extends DCLogic {
     this._fitTimer = setInterval(() => this.fit(), 120);
   }
   componentWillUnmount() {
+    this._gone = true;
     this.cancelMorph();
     this.guide.unmount();
     if (this._vertexDragCleanup) this._vertexDragCleanup();
@@ -831,8 +855,9 @@ class Component extends DCLogic {
       failed = true;
       this.guide.onInstructionPause();
       this._voiceRetry = () => this.speak(text, cb, durationMs);
-      this.setState({ wordReveal: 'complete' });
-      this.setState({ voiceError: 'Play voiceover', interactive: false });
+      this.prepareNarratorReveal('Tap anywhere to continue.');
+      this.setState({ wordReveal: 'complete', storyDialogue: true,
+        voiceError: 'Tap anywhere to continue.', interactive: false });
     };
     const recording = window.PolygonRecordedVoice && window.PolygonRecordedVoice.find(text);
     if (recording) return window.PolygonRecordedVoice.play(this, text, recording, current, cb, fail);
@@ -2187,7 +2212,7 @@ class Component extends DCLogic {
   /* ---------- card building (number badges are HTML overlays) ---------- */
   cardStyleFor(state) {
     if (state === 'ok') return { borderWidth: '5px', borderStyle: 'solid', borderColor: GRN, background: '#f2fbf5', boxShadow: '0 0 0 6px rgba(47,158,94,0.16), 0 10px 0 rgba(47,158,94,0.22), 0 0 24px rgba(47,158,94,.28)' };
-    if (state === 'bad') return { borderWidth: '5px', borderStyle: 'solid', borderColor: RED, background: '#fff4f2', boxShadow: '0 0 0 6px rgba(232,85,63,0.14), 0 10px 0 rgba(232,85,63,0.22), 0 0 24px rgba(232,85,63,.24)' };
+    if (state === 'bad') return { borderWidth: '5px', borderStyle: 'solid', borderColor: '#da9279', background: '#fff8f3', boxShadow: '0 6px 0 rgba(190,125,97,.14)' };
     if (state === 'sel') return { borderWidth: '5px', borderStyle: 'solid', borderColor: ICE, background: '#e2f7ff', boxShadow: '0 0 0 6px rgba(34,184,230,0.18), 0 10px 0 rgba(34,184,230,0.26)' };
     return { borderWidth: '5px', borderStyle: 'solid', borderColor: '#2f73cd', background: '#ffffff', boxShadow: '0 8px 0 rgba(146,196,228,0.35)' };
   }
@@ -2517,7 +2542,29 @@ class Component extends DCLogic {
     else if (s.sc === 'END') this.viewEnd(V, s);
     this.fitActivityPanel(V, s);
     this.decorate(V);
+    this.prepareControlBindings(V);
     return V;
+  }
+
+  /* The template accepts property paths, not JavaScript ternaries or &&. */
+  prepareControlBindings(V) {
+    const meta = (item, click, classes, prefix = 'action', fallback = '') => {
+      item[prefix + 'Class'] = click ? classes : fallback;
+      item[prefix + 'Role'] = click ? 'button' : undefined;
+      item[prefix + 'Tab'] = click && V.effectsEnabled ? 0 : -1;
+    };
+    V.controlsState = V.storyControls ? 'ready' : 'waiting';
+    V.counterClass = V.storyCounting ? '' : 'story-controls';
+    for (const item of [...V.cards, ...V.targets, ...V.chips]) meta(item, item.click, 'game-action');
+    for (const drop of V.drops) {
+      meta(drop, drop.click, 'game-action game-quiet');
+      for (const option of drop.menu || []) meta(option, option.click, 'game-action game-quiet game-dropdown-option', 'action', 'game-dropdown-option');
+    }
+    for (const counter of V.counters) {
+      meta(counter, counter.minus, 'game-action', 'minus');
+      meta(counter, counter.plus, 'game-action', 'plus');
+    }
+    for (const key of ['chooseOpen', 'chooseClosed', 'check']) meta(V, V[key], 'game-action game-primary', key);
   }
 
   /* Keep the logical stage stable while fitting the visible panel around its activity. */
@@ -2727,8 +2774,6 @@ class Component extends DCLogic {
   }
   boardStyle() {
     return Object.assign(stageBox(BOARD, 30), {
-      background: 'rgba(248,253,255,.96)', border: '2px solid rgba(191,229,251,.9)',
-      borderRadius: '42px', boxSizing: 'border-box', boxShadow: '0 18px 50px rgba(8,38,92,.18)',
       opacity: this.state.storyContent ? 1 : 0, transition: 'opacity 260ms ease-out',
       pointerEvents: 'none'
     });
@@ -2737,8 +2782,13 @@ class Component extends DCLogic {
     const step = this.state.ready ? this.step() : null;
     const roomy = step && (step.sc === 'S1' || step.q === 'oc');
     // The bubble grows upward; its tail always meets the guide's head.
-    const bottom = GUIDE_BOX.y + 65 - 57;
-    return { x:22, y:bottom - 272, w:roomy ? 620 : NARR.w + 60, h:272 };
+    const bottom = GUIDE_BOX.y + 65 - 39;
+    const viewportWidth = window.innerWidth || STAGE.w;
+    const viewportHeight = window.innerHeight || STAGE.h;
+    const scale = Math.max(0.55, Math.min(viewportWidth / STAGE.w, viewportHeight / STAGE.h));
+    const x = roomy ? SWIFTEE_CENTRE - 86 : 22;
+    const availableWidth = viewportWidth < 700 ? viewportWidth / scale - x - 22 : STAGE.w;
+    return { x, y:bottom - 272, w:Math.min(roomy ? 540 : NARR.w + 60, availableWidth), h:272 };
   }
   signStyle() {
     const box = this.dialogueLayout();
@@ -2747,7 +2797,7 @@ class Component extends DCLogic {
       position: 'absolute', left: pc(box.x, STAGE.w),
       bottom: pc(STAGE.h - box.y - box.h, STAGE.h),
       zIndex: 40,
-      '--dialogue-tail-x': (SWIFTEE_CENTRE - box.x - 5) + 'px',
+      '--dialogue-tail-x': (SWIFTEE_CENTRE - box.x - 41) + 'px',
       width: 'max-content', minWidth: '280px', maxWidth: box.w + 'px', height: 'auto',
       display: 'block', userSelect: 'none', pointerEvents: 'none',
       opacity: this.state.storyDialogue && !!text ? 1 : 0,
@@ -3018,12 +3068,12 @@ class Component extends DCLogic {
           style: { position: 'absolute', left: (left + w / 2 - 120) + 'px', top: '484px', width: '240px', zIndex: open ? 20 : 5 },
           btn: {
             height: '72px', borderRadius: '22px', boxSizing: 'border-box',
-            background: done ? 'linear-gradient(#56d995,#20995b)' : (bad ? 'linear-gradient(#ff8c7d,#d94e43)' : BUTTON.face),
+            background: done ? '#e9f8ef' : (bad ? '#fff4e9' : BUTTON.face),
             border: '4px solid ' + (done ? '#b7f5ce' : (bad ? '#ffc6bd' : BUTTON.edge)),
-            color: done || bad ? '#ffffff' : BUTTON.ink,
+            color: done ? '#236b49' : BUTTON.ink,
             font: '800 30px Nunito, sans-serif', display: 'flex', alignItems: 'center',
             justifyContent: 'center', gap: '12px', padding: '0 12px', cursor: done ? 'default' : 'pointer',
-            boxShadow: done ? '0 0 0 3px rgba(47,158,94,.22), 0 0 26px rgba(47,158,94,.65), 0 6px 0 rgba(47,158,94,.25)' : (bad ? '0 0 0 3px rgba(232,85,63,.22), 0 0 26px rgba(232,85,63,.65), 0 6px 0 rgba(232,85,63,.25)' : '0 6px 0 rgba(146,196,228,.35)'),
+            boxShadow: done ? '0 5px 0 rgba(47,158,94,.15)' : (bad ? '0 5px 0 rgba(190,125,97,.14)' : '0 6px 0 rgba(146,196,228,.35)'),
             animation: bad ? 'wig 420ms ease-in-out both' : 'none'
           },
           nudge: !done && !open && st.dd.slice(0, i).every((v, j) => v === truth[j]) ? '1' : '',

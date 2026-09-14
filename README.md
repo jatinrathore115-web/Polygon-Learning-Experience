@@ -8,7 +8,7 @@ the learner work, and reacts to their answers. 47 screens covering open/closed f
 straight vs curved boundaries, sides, vertices, angles, and polygon naming from triangle
 to octagon.
 
-Static site — no build step, no dependencies.
+Static site — no build step. Runtime scripts and fonts ship locally; Playwright is a development dependency.
 
 ## Run it locally
 
@@ -44,6 +44,13 @@ support.js               the Design Component runtime that boots the page
 screen-navigator.js      optional preview navigator (see note below)
 build-swiftee.cjs        regenerates assets/swiftee/ from the character pack
 styles/buttons.css       warm button effects, hover, press and focus states
+styles/dialogue.css      soft speech bubble, anchored to Swiftee
+styles/cards.css         quiet winter card design
+styles/weather.css       gentle snow and star motion
+styles/ice-intro.css      opening blizzard scene
+ice-intro.js             intro timing and lesson handoff
+assets/runtime/          pinned React, React DOM and Babel runtime scripts
+assets/fonts/            local Baloo 2 and Nunito fonts
 assets/                  artwork actually used at runtime
 assets/swiftee/          the guide's sheets plus the generated sheet table
 reference/              source artwork, old UI, uploads and working figures
@@ -68,7 +75,7 @@ a single transform, so the composition holds from 1920×1080 down to 1024×576.
 
 Swiftee flies in once at the start, lands on the rock, and stays there between activities.
 The nameless dialogue fits each complete text passage. Its teal frame, mint center,
-speech tail anchored to Swiftee's head, and two comic accents are defined in [styles/dialogue.css](styles/dialogue.css).
+rounded speech tail anchored to Swiftee's head are defined in [styles/dialogue.css](styles/dialogue.css).
 An empty reusable version is available in [design/dialogue-bubble.html](design/dialogue-bubble.html).
 It stays hidden when empty and appears after landing when text is ready. Real audio playback reveals the activity surface and
 staggered shape cards; answer controls appear after narration ends. Existing feature

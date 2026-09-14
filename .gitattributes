@@ -1,0 +1,2 @@
+# Integrity-pinned vendor scripts must retain identical bytes on every platform.
+assets/runtime/*.min.js -text

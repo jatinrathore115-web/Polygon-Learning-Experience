@@ -18,6 +18,10 @@ Polygon Learning Experience/
 |-- build-swiftee.cjs          Character asset generation script
 |-- styles/buttons.css         Shared button effects and interaction states
 |-- styles/dialogue.css        Reusable Swiftee-colored comic dialogue bubble
+|-- styles/cards.css           Quiet snowy silhouettes and learning card frame
+|-- styles/weather.css         Gentle falling snow and background star twinkles
+|-- styles/fonts.css           Local font-face definitions
+|-- package.json               Playwright review commands and development dependencies
 |-- assets/                    Images used by the lesson
 |   |-- image.png              Current starry background with the left rock
 |   `-- swiftee/               Character sprites and sprite metadata

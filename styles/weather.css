@@ -1,0 +1,62 @@
+/* Slow ambient motion lives behind the guide, opaque cards, and dialogue. */
+.scene-weather { position: absolute; inset: 0; z-index: 5; overflow: hidden; pointer-events: none; }
+.scene-weather * { pointer-events: none; }
+.scene-snow i {
+  position: absolute;
+  top: -24px;
+  left: var(--x);
+  width: var(--size, 5px);
+  height: var(--size, 5px);
+  border-radius: 50%;
+  background: #f0fbff;
+  opacity: 0;
+  animation: snowDrift var(--time, 25s) linear var(--delay, 0s) infinite;
+}
+@keyframes snowDrift {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  8%, 90% { opacity: var(--alpha, .35); }
+  100% { transform: translate3d(var(--drift, 50px), 1120px, 0); opacity: 0; }
+}
+.scene-sparkles i {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 12px;
+  height: 12px;
+  background: #e4faff;
+  clip-path: polygon(50% 0, 60% 38%, 100% 50%, 60% 62%, 50% 100%, 40% 62%, 0 50%, 40% 38%);
+  opacity: .15;
+  animation: skyTwinkle var(--time, 7s) ease-in-out var(--delay, 0s) infinite;
+}
+@keyframes skyTwinkle {
+  0%, 100% { opacity: .12; transform: scale(.7); }
+  50% { opacity: .55; transform: scale(1.12); }
+}
+.scene-snow i:nth-child(1) { --x: 3%; --time: 27s; --delay: -11s; --drift: 35px; }
+.scene-snow i:nth-child(2) { --x: 9%; --time: 31s; --delay: -24s; --size: 4px; }
+.scene-snow i:nth-child(3) { --x: 16%; --time: 23s; --delay: -4s; --drift: -28px; }
+.scene-snow i:nth-child(4) { --x: 23%; --time: 29s; --delay: -17s; --size: 7px; --alpha: .25; }
+.scene-snow i:nth-child(5) { --x: 31%; --time: 25s; --delay: -8s; }
+.scene-snow i:nth-child(6) { --x: 39%; --time: 32s; --delay: -26s; --size: 4px; }
+.scene-snow i:nth-child(7) { --x: 46%; --time: 24s; --delay: -13s; --drift: -40px; }
+.scene-snow i:nth-child(8) { --x: 54%; --time: 30s; --delay: -2s; --size: 6px; --alpha: .3; }
+.scene-snow i:nth-child(9) { --x: 63%; --time: 26s; --delay: -20s; }
+.scene-snow i:nth-child(10) { --x: 71%; --time: 28s; --delay: -9s; --size: 4px; }
+.scene-snow i:nth-child(11) { --x: 79%; --time: 23s; --delay: -18s; --drift: -32px; }
+.scene-snow i:nth-child(12) { --x: 86%; --time: 32s; --delay: -5s; --size: 7px; --alpha: .25; }
+.scene-snow i:nth-child(13) { --x: 93%; --time: 27s; --delay: -21s; }
+.scene-snow i:nth-child(14) { --x: 5%; --time: 30s; --delay: -6s; --size: 3px; }
+.scene-snow i:nth-child(15) { --x: 35%; --time: 26s; --delay: -23s; --size: 3px; }
+.scene-snow i:nth-child(16) { --x: 96%; --time: 29s; --delay: -14s; --drift: -48px; }
+.scene-sparkles i:nth-child(1) { --x: 7%; --y: 12%; --time: 7s; --delay: -2s; }
+.scene-sparkles i:nth-child(2) { --x: 24%; --y: 5%; --time: 9s; --delay: -6s; }
+.scene-sparkles i:nth-child(3) { --x: 42%; --y: 8%; --time: 8s; --delay: -4s; }
+.scene-sparkles i:nth-child(4) { --x: 65%; --y: 4%; --time: 10s; --delay: -8s; }
+.scene-sparkles i:nth-child(5) { --x: 87%; --y: 9%; --time: 8s; --delay: -1s; }
+.scene-sparkles i:nth-child(6) { --x: 97%; --y: 26%; --time: 9s; --delay: -5s; }
+@media (max-width: 700px) { .scene-snow i:nth-child(n+11) { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .scene-snow { display: none; }
+  .scene-weather i { animation: none; }
+  .scene-sparkles i { opacity: .18; }
+}
