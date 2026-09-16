@@ -78,13 +78,9 @@ const shapeH = shapeBottom - shapeTop;
 check(shapeH / SAFE.h > 0.6,
   'the shape fills ' + (100 * shapeH / SAFE.h).toFixed(0) + '% of the board\'s height');
 
-/* ---- the caption does not move when the word changes ---- */
-check(near(px(point.callouts[0].style.top), px(drawn.callouts[0].style.top)),
-  'the caption holds one position: "Point" and "Shape" both sit at '
-  + px(point.callouts[0].style.top).toFixed(0) + 'px');
-check(point.callouts[0].style.fontSize === undefined
-      && point.callouts[0].style.font === drawn.callouts[0].style.font,
-  'and both are set in the same type');
+/* ---- the introductory board stays free of redundant captions ---- */
+check(point.callouts.length === 0 && drawn.callouts.length === 0,
+  'the Point and Shape captions are hidden');
 
 /* ---- the point does not blink from one place to another ---- */
 const penAt = (at) => {
@@ -123,6 +119,15 @@ const stillDot = still.leaders.find(l => l.style.width === '62px');
 check(!stillDot.style.animation && !stillDot.arrowStyle.animation,
   'and the mark neither appears nor breathes, it is simply there');
 delete ctx.window.matchMedia;
+
+/* The opening nine numbered screens share one whiteboard frame. */
+const frames = [];
+for (let k = 0; k < 9; k++) {
+  Object.assign(g.state, { k, phase: steps[k].ph || '', drawn: true });
+  const board = g.renderVals().boardStyle;
+  frames.push(['left','top','width','height'].map(key => board[key]).join('|'));
+}
+check(new Set(frames).size === 1, 'Screens 1–9 use the same shifted board size and position');
 
 if (fail.length) { console.error('\n' + fail.length + ' check(s) failed'); process.exit(1); }
 console.log('\nall checks passed');

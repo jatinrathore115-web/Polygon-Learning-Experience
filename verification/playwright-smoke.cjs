@@ -27,7 +27,7 @@ let server;
     await page.waitForFunction(()=>window.__poly?.state.voiceError,null,{timeout:45000}).catch(async e=>{console.log('BOOT',await page.evaluate(()=>({intro:!!document.querySelector('#ice-intro'),state:window.__poly?.state,text:document.body.innerText})),errors,failed);throw e;});
     assert.equal(await page.locator('.narrator-text').innerText(),'Tap anywhere to continue.');
     assert.equal(await page.locator('#ice-intro').count(),0,'Intro must release the lesson');
-    if(target)assert.equal(await page.locator('#polygon-screen-navigator').count(),0,'Authoring navigation must be hidden in production');
+    assert.equal(await page.locator('#polygon-screen-navigator').count(),1,'Screen navigation must be available');
     await page.mouse.click(700,200);
     await page.waitForFunction(()=>__poly.state.k===4&&!__poly.locked(),{},{timeout:60000});
     await page.getByRole('button',{name:'Closed',exact:true}).waitFor();

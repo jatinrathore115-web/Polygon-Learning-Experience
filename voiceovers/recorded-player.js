@@ -53,7 +53,8 @@
         const position = wordStarts ? Math.max(0, spokenCount - 1) : Math.min(total - 0.001, Math.max(0, audio.currentTime / duration * total));
         const audibleCount = wordStarts ? spokenCount : Math.min(total, Math.floor(position) + 1);
         while (spoken < audibleCount) {
-          if (game.guide && game.guide.onWord) game.guide.onWord(words[spoken], game.step());
+          if (game.boundaryScene && game.boundaryScene()) game.keyword(words[spoken]);
+          else if (game.guide && game.guide.onWord) game.guide.onWord(words[spoken], game.step());
           spoken += 1;
         }
         let page = 0, offset = 0;

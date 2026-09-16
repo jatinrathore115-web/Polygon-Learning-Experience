@@ -1,4 +1,7 @@
 /* Slow ambient motion lives behind the guide, opaque cards, and dialogue. */
+@media (prefers-reduced-motion: reduce) {
+  .boundary-background { transition: none !important; }
+}
 .scene-weather { position: absolute; inset: 0; z-index: 5; overflow: hidden; pointer-events: none; }
 .scene-weather * { pointer-events: none; }
 .scene-snow i {

@@ -48,9 +48,8 @@ const server=http.createServer((req,res)=>{
   console.log('PASS all five open/closed questions and comparison narration');
   fs.writeFileSync(path.join(out,'live-controls.json'),JSON.stringify(await page.locator('[role="button"]').evaluateAll(es=>es.map(e=>({text:e.innerText,label:e.getAttribute('aria-label'),tab:e.tabIndex}))),null,2));
   await page.screenshot({path:path.join(out,'classification-live.png')});
-  for(const answer of ['Straight','Straight','Curved','Curved']){
-    await page.getByRole('button',{name:/^Select/}).first().click();
-    await page.locator('.game-dropdown-option').filter({hasText:new RegExp('^'+answer+'$')}).click();
+  for(const [i,answer] of ['Straight','Straight','Curved','Curved'].entries()){
+    await page.getByRole('button',{name:'Figure '+(i+1)+': '+answer,exact:true}).click();
     await page.waitForTimeout(1700);
   }
   await ready(15);
@@ -110,7 +109,7 @@ const server=http.createServer((req,res)=>{
   await page.getByRole('button',{name:'Next',exact:true}).click();await ready(45);
   for(const [i,zone]of [0,1,0,1].entries()){
     await page.locator('.story-surface > .game-action').filter({has:page.locator('svg')}).first().click();
-    await page.getByRole('button',{name:zone?'HEPTAGON, 7 sides':'HEXAGON, 6 sides',exact:true}).click();
+    await page.getByRole('button',{name:zone?'HEPTAGON':'HEXAGON',exact:true}).click();
     await page.waitForFunction(n=>Object.keys(__poly.state.sortAt).length===n,i+1);
   }
   await ready(46);

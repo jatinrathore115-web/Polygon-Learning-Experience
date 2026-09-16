@@ -56,7 +56,7 @@ for(const sc of ['C2','C5']){
     const i=done,zone=s.answer[i];
     g.state.pickedFig=i;g.state.sortHover=zone;
     const v=g.renderVals(),slot=v.callouts[v.callouts.length-1];
-    assert(v.callouts.length===2&&slot.style.border.includes('dashed'),sc+': no drop slot while hovering');
+    assert(v.callouts.length===1&&slot.style.border.includes('dashed'),sc+': no drop slot while hovering');
     const promised=g.sortPlaces(Object.assign({},g.state.sortAt,{[i]:zone}))[i];
     near(px(slot.style.left),promised.x,0.51,sc+': slot left != landing spot');
     near(px(slot.style.top),promised.y,0.51,sc+': slot top != landing spot');
@@ -79,17 +79,16 @@ for(const sc of ['C2','C5']){
   for(const hover of [null,-1,undefined]){
     g.state.sortAt={};g.state.pickedFig=1;g.state.sortHover=hover;g.state.hoverK=null;
     const v=g.renderVals();
-    assert.equal(v.callouts.length,1,sc+': slot drawn with no column hovered');
-    assert(v.callouts[0].text.length>0,sc+': prompt missing while holding');
+    assert.equal(v.callouts.length,0,sc+': extra text or slot drawn with no column hovered');
     assert(!v.zoneAStyle.border.includes('solid')&&!v.zoneBStyle.border.includes('solid'),sc+': column lit with no hover');
     assert(v.zoneAStyle.animation.startsWith('zoneInvite'),sc+': waiting column does not invite');
     checks++;
   }
   /* tap a figure, then hover a column: same slot preview as the drag path */
   g.state.sortAt={};g.state.pickedFig=0;g.state.sortHover=null;g.state.hoverK='tg'+s.answer[0];
-  {const v=g.renderVals();assert.equal(v.callouts.length,2,sc+': tap-then-hover shows no slot');
+  {const v=g.renderVals();assert.equal(v.callouts.length,1,sc+': tap-then-hover shows no slot');
    const promised=g.sortPlaces({[0]:s.answer[0]})[0];
-   near(px(v.callouts[1].style.left),promised.x,0.51,sc+': tap-path slot off');}
+   near(px(v.callouts[0].style.left),promised.x,0.51,sc+': tap-path slot off');}
   g.state.hoverK=null;checks++;
 
   /* a settled tile belongs to its column: it wears that column's colour, is
@@ -180,14 +179,13 @@ for(const sc of ['C2','C5']){
   g.state.wrong=null;
   console.log('PASS '+sc+': tray and both columns stay centred, gapless and inside the board through every drop.');
 }
-/* the captions carry the whole distinction (6 sides vs 7), so they must clear
-   AA on the column background and on its hover tint alike */
+/* Keep category headers readable on the column background and its hover tint. */
 {const page=fs.readFileSync('index.html','utf8');
  const lum=h=>{const c=h.replace('#','').match(/../g).map(x=>parseInt(x,16)/255).map(v=>v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4));return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2];};
  const ratio=(a,b)=>{const l1=lum(a),l2=lum(b);return (Math.max(l1,l2)+0.05)/(Math.min(l1,l2)+0.05);};
- const caption=/font:700 21px Nunito,sans-serif;color:(#[0-9a-f]{6})/gi;
+ const caption=/font:900 30px Nunito,sans-serif;color:(#[0-9a-f]{6})/gi;
  const found=[];let m;while((m=caption.exec(page)))found.push(m[1]);
- assert.equal(found.length,2,'expected two column captions, found '+found.length);
+ assert.equal(found.length,2,'expected two column headers, found '+found.length);
  g.state.k=g.steps().findIndex(x=>x.sc==='C5');g.state.pickedFig=null;g.state.sortHover=null;
  const rest=g.renderVals();g.state.pickedFig=0;
  [[0,'A'],[1,'B']].forEach(([zone,tag])=>{
@@ -200,7 +198,7 @@ for(const sc of ['C2','C5']){
    });
  });
  g.state.sortHover=null;g.state.pickedFig=null;
- console.log('PASS captions: both side-count captions clear 4.5:1 on resting and hovered columns.');}
+ console.log('PASS headers: both category headers clear 4.5:1 on resting and hovered columns.');}
 
 assert(checks>10);
 console.log('PASS: '+checks+' layout states verified; hover slot, landing spot and drag settle all agree.');

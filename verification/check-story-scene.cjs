@@ -50,7 +50,8 @@ for(let k=0;k<47;k++){
   const result=await evaluate(`(()=>{const g=__poly,s=g.steps()[${k}];g.setState({k:${k}});g.runStep(${k},false);g.prepareNarratorReveal(g.instructionPages(s.narr)[0]);g.setState({narr:s.narr,wordReveal:'complete',storyContent:true,storyDialogue:true,storyControls:true,guideHidden:false,guideFlying:false,interactive:true,speaking:false,reveal:true,nums:s.count||((s.ph==='five')?5:0),voiceElapsedMs:10000});return {step:${k+1},flying:g.state.guideFlying};})()`);
   await sleep(25);results.push(result);
   if([4,5,16,20,22,23,42,46].includes(k)){
-    await sleep(700);
+    // The boundary scene moves the guide and board over 950ms on entry/exit.
+    await sleep(1100);
     const layout=await evaluate(`(()=>{const n=document.querySelector('.narrator-text'),b=document.querySelector('.dialogue-box'),a=n.getBoundingClientRect(),c=b.getBoundingClientRect();return {text:a.bottom<=c.bottom-8&&a.top>=c.top&&a.left>=c.left&&a.right<=c.right,content:!!document.querySelector('.story-surface'),bird:(()=>{const canvas=document.querySelector('.swiftee-wrap canvas'),r=canvas.getBoundingClientRect(),pixels=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;let edge=0;for(let y=0;y<canvas.height;y++)for(let x=0;x<canvas.width;x++)if(pixels[(y*canvas.width+x)*4+3]>32)edge=Math.max(edge,x);return r.left+(edge+1)/canvas.width*r.width<document.querySelector('.story-board').getBoundingClientRect().left;})()};})()`);
     assert(layout.text,'Dialogue overflow on screen '+(k+1));
     assert(layout.bird,'Visible guide overlaps the activity card on screen '+(k+1));

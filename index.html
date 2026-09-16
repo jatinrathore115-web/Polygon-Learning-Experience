@@ -6,6 +6,8 @@
 <title>Polygon Adventure</title>
 <meta name="description" content="Explore shapes, sides, vertices, and angles with Swiftee in a playful polygon adventure.">
 <link rel="preload" href="assets/fonts/baloo-2-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/instructiion%20board.png" as="image">
+<link rel="preload" href="assets/backgound%20%2002.png" as="image">
 <link rel="stylesheet" href="styles/fonts.css">
 <!-- Swiftee's sheet table, generated from the character pack's manifest by
      build-swiftee.cjs. It loads here, not from the helmet below, because the
@@ -120,8 +122,6 @@
     .ice-board { transition:none !important; }
     .narrator-text span { animation:none !important; opacity:1 !important; transform:none !important; }
     .game-action,.game-action::before,.game-action::after,.game-action *,.game-handle { animation:none !important; transition:none !important; }
-    [data-interactive="true"] .game-action::before { opacity:.55; }
-    .game-primary::after { display:none; }
   }
 </style>
 <script src="polygon-data.js"></script>
@@ -130,10 +130,11 @@
 <script src="voiceovers/recorded-player.js"></script>
 </helmet>
 <div ref="{{ stageRef }}" onScroll="{{ layoutScroll }}" style="{{ viewportStyle }}">
-  <div style="{{ scalerStyle }}">
+  <div data-lesson="{{ lessonScene }}" style="{{ scalerStyle }}">
 
     <!-- ============ frozen background ============ z 0 -->
     <img src="assets/image.png" alt="" style="{{ bgStyle }}" />
+    <img class="boundary-background" src="assets/backgound%20%2002.png" alt="" draggable="false" style="{{ boundaryBackgroundStyle }}" />
     <div class="scene-weather" aria-hidden="true">
       <div class="scene-snow"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <div class="scene-sparkles"><i></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -159,11 +160,9 @@
         <div style="{{ zoneRowStyle }}">
           <div class="drop-zone" ref="{{ zoneARef }}" style="{{ zoneAStyle }}">
             <div style="font:900 30px Nunito,sans-serif;color:#11645e;letter-spacing:0.06em">{{ zoneAName }}</div>
-            <div style="font:700 21px Nunito,sans-serif;color:#286e65;margin-top:2px">{{ zoneASub }}</div>
           </div>
           <div class="drop-zone" ref="{{ zoneBRef }}" style="{{ zoneBStyle }}">
             <div style="font:900 30px Nunito,sans-serif;color:#5f3289;letter-spacing:0.06em">{{ zoneBName }}</div>
-            <div style="font:700 21px Nunito,sans-serif;color:#633c84;margin-top:2px">{{ zoneBSub }}</div>
           </div>
         </div>
       </sc-if>
@@ -203,7 +202,7 @@
       </sc-for>
 
       <sc-for list="{{ targets }}" as="t" hint-placeholder-count="0">
-        <div class="{{ t.actionClass }}" role="{{ t.actionRole }}" aria-label="{{ t.label }}" tabIndex="{{ t.actionTab }}" onKeyDown="{{ activateKey }}" data-label-target="{{ t.labelKey }}" data-nudge="{{ t.nudge }}" style="{{ t.style }}" onPointerEnter="{{ t.enter }}" onPointerLeave="{{ t.leave }}" onFocus="{{ t.enter }}" onBlur="{{ t.leave }}" onClick="{{ t.click }}">{{ t.text }}</div>
+        <div class="{{ t.actionClass }}" role="{{ t.actionRole }}" aria-label="{{ t.label }}" aria-disabled="{{ t.disabled }}" aria-pressed="{{ t.selected }}" data-feedback="{{ t.feedback }}" tabIndex="{{ t.actionTab }}" onKeyDown="{{ activateKey }}" data-label-target="{{ t.labelKey }}" data-nudge="{{ t.nudge }}" style="{{ t.style }}" onPointerEnter="{{ t.enter }}" onPointerLeave="{{ t.leave }}" onFocus="{{ t.enter }}" onBlur="{{ t.leave }}" onClick="{{ t.click }}">{{ t.text }}</div>
       </sc-for>
 
       <sc-for list="{{ callouts }}" as="o" hint-placeholder-count="0">
@@ -229,8 +228,8 @@
 
       <sc-if value="{{ showChoice }}" hint-placeholder-val="{{ false }}">
         <div class="story-controls" style="{{ choiceRowStyle }}">
-          <div class="{{ chooseOpenClass }}" role="{{ chooseOpenRole }}" tabIndex="{{ chooseOpenTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeOC }}" onClick="{{ chooseOpen }}" onPointerEnter="{{ hovOpen }}" onPointerLeave="{{ hovOut }}" style="{{ btnOpen }}">Open</div>
-          <div class="{{ chooseClosedClass }}" role="{{ chooseClosedRole }}" tabIndex="{{ chooseClosedTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeClosed }}" onClick="{{ chooseClosed }}" onPointerEnter="{{ hovClosed }}" onPointerLeave="{{ hovOut }}" style="{{ btnClosed }}">Closed</div>
+          <div class="{{ chooseOpenClass }}" role="{{ chooseOpenRole }}" data-feedback="{{ openFeedback }}" tabIndex="{{ chooseOpenTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeOC }}" onClick="{{ chooseOpen }}" onPointerEnter="{{ hovOpen }}" onPointerLeave="{{ hovOut }}" style="{{ btnOpen }}">Open</div>
+          <div class="{{ chooseClosedClass }}" role="{{ chooseClosedRole }}" data-feedback="{{ closedFeedback }}" tabIndex="{{ chooseClosedTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeClosed }}" onClick="{{ chooseClosed }}" onPointerEnter="{{ hovClosed }}" onPointerLeave="{{ hovOut }}" style="{{ btnClosed }}">Closed</div>
         </div>
       </sc-if>
 
@@ -284,6 +283,10 @@
       <div class="dialogue-inner"><div class="dialogue-text">
       <div class="narrator-text" ref="{{ narrRef }}" style="{{ narrStyle }}"><sc-for list="{{ narratorParts }}" as="part" hint-placeholder-count="0"><span key="{{ part.key }}" style="{{ part.style }}">{{ part.text }}</span></sc-for></div>
       </div></div>
+      <svg class="dialogue-tail" viewBox="0 -8 44 42" aria-hidden="true">
+        <path class="dialogue-tail-fill" d="M4 -8 H42 V0 C36 12 24 22 2 34 C8 24 8 12 4 0 Z"></path>
+        <path class="dialogue-tail-stroke" d="M42 0 C36 12 24 22 2 34 C8 24 8 12 4 0"></path>
+      </svg>
     </div>
 
     </div>
@@ -303,22 +306,23 @@ const SHAPE_VIOLET = '#6354c7'; // Blue-violet outline against the mint learning
 
 /* ============================================================================
    MASTER GAME STAGE
-   Every layer is placed as a percentage of this 1980x1080 reference stage and
+   Every layer is placed as a percentage of this 16:9 reference stage and
    the whole stage is scaled by one transform, so the composition can never
    drift apart between 1920x1080 and 1024x576 — there is only ever one number
    driving layout. Boxes below were measured off the reference art itself.
    ========================================================================= */
-/* One button family: sunlit actions, mint tools, and Swiftee-teal edges. */
+/* Fallback colors for the shared icy-rim button in styles/buttons.css. */
 const BUTTON = {
-  face: 'linear-gradient(180deg,#fff0ac 0%,#ffda67 100%)',
-  secondaryFace: 'linear-gradient(180deg,#f9fff5 0%,#d9f5e9 100%)',
-  ink: '#164e53', edge: '#168d92',
-  shadow: 'inset 0 2px 0 rgba(255,255,255,.85), 0 5px 0 #096b75, 0 9px 14px rgba(8,64,85,.18)',
-  secondaryShadow: 'inset 0 2px 0 #fff, 0 4px 0 #258c91, 0 7px 12px rgba(8,64,85,.12)'
+  face: 'linear-gradient(180deg,#ffdb51 0%,#ffad2c 26%,#ff8128 48%,#ff682c 75%,#ff5050 100%)',
+  secondaryFace: 'linear-gradient(180deg,#ffdb51 0%,#ffad2c 26%,#ff8128 48%,#ff682c 75%,#ff5050 100%)',
+  ink: '#164e53', edge: '#87cdff',
+  shadow: 'inset 0 2px 0 #ffffff60, 0 4px 0 #2877bd, 0 7px 11px #173d6b24',
+  secondaryShadow: 'inset 0 2px 0 #ffffff60, 0 4px 0 #2877bd, 0 7px 11px #173d6b24'
 };
-const STAGE = { w: 1980, h: 1080 };
+const STAGE = { w: 1980, h: 1980 * 9 / 16 };
 /* Reserve the left rock for the guide; all activity layouts share the right surface. */
-const BOARD = { x: 378, y: 122, w: 1594, h: 846 };
+const BOARD = { x: 378, y: 102, w: 1594, h: 886 };
+const OPENING_BOARD = { x:816, y:116, w:992, h:834 };
 const LAYER = {
   board:   BOARD,
   sign:    { x: 22, y: 236, w: 344, h: 272 }
@@ -334,7 +338,7 @@ const SAFE = {
    headSub the "6 sides" caption under it, which CFU 2 does not have; the tile
    row is centred in whatever is left, so it sits evenly inside the column. */
 const SORT = {
-  trayW: 190, trayGap: 26, trayY: 24, calloutY: 236,
+  trayW: 190, trayGap: 26, trayY: 24,
   zoneTop: 292, zoneH: 404, zoneGap: 52, head: 57, headSub: 31,
   tile: 176, tileGap: 26,
   /* Finished: each column gives up unite px of width and the gap closes, so
@@ -587,6 +591,13 @@ class SwifteeGuide {
   onWord(word, step) {
     if (!this.voiceActive) return;
     const w = String(word).toLowerCase().replace(/[^a-z]/g, '');
+    if (this.host.boundaryScene && this.host.boundaryScene()) {
+      const gesture = w === 'look' ? 'surprised' : w === 'which' ? 'curious' :
+        /^(boundaries|straight|curved)$/.test(w) && step.ph !== 'classify' ? 'waving' : null;
+      if (gesture && !this.wordCues.has(w)) {
+        this.wordCues.add(w); this.react([[gesture, .55]], 2);
+      }
+    }
     let cue = /^(whoa|woah|wow)$/.test(w) ? 'surprise' : null;
     if (step.sc === 'S8' && w === 'polygon') cue = 'surprise';
     if (!step.q && /^(triangle|quadrilateral|pentagon|hexagon|heptagon|octagon)$/.test(w)) cue = 'proud';
@@ -613,6 +624,7 @@ class SwifteeGuide {
 class Component extends DCLogic {
   state = {
     ready: false, k: 0, narr: '', speaking: false, voiceError: '', muted: false, scale: 1,
+    boundaryBackgroundReady: false,
     sel: [], dd: [null, null, null, null], ddOpen: -1, ddWrong: [false, false, false, false],
     cnt: [4, 4], attempts: 0, wrong: null, ok: null, ocReveal: null, nudge: null,
     guideHidden: true, interactive: false,
@@ -630,6 +642,7 @@ class Component extends DCLogic {
 
   /* ---------- lifecycle ---------- */
   componentDidMount() {
+    this.loadBoundaryBackground();
     this.stageRef = React.createRef();
     this.zoneARef = React.createRef(); this.zoneBRef = React.createRef();
     this.narrRef = React.createRef();
@@ -673,7 +686,7 @@ class Component extends DCLogic {
       if (!w || !h) return;
       if (this._hintLayout && (this._hintLayout.w !== w || this._hintLayout.h !== h)) this.clearNudge();
       this._hintLayout = { w, h };
-      const sc = Math.min(w / 1980, h / 1080);
+      const sc = Math.min(w / STAGE.w, h / STAGE.h);
       if (Math.abs(sc - this.state.scale) > 0.0005) this.setState({ scale: sc });
     };
     this.fit();
@@ -914,7 +927,7 @@ class Component extends DCLogic {
     const display = String(text).replace(/\b(?:triangles?|quadrilaterals?|pentagons?|hexagons?|heptagons?|octagons?|polygons?)\b/gi, word => word.toUpperCase());
     try {
       const canvas = document.createElement('canvas'), context = canvas.getContext('2d');
-      context.font = '800 ' + NARR_TYPE.size + 'px "Baloo 2", Nunito, sans-serif';
+      context.font = '800 ' + NARR_TYPE.size + 'px Nunito, sans-serif';
       return context.measureText(display).width + display.length * NARR_TYPE.size * 0.005 + 12;
     } catch (error) { return display.length * NARR_TYPE.size * 0.62 + 12; }
   }
@@ -972,6 +985,13 @@ class Component extends DCLogic {
   }
   keyword(w) {
     this.guide.onWord(w, this.step());
+    if (this.boundaryScene()) {
+      const word = w.toLowerCase().replace(/[^a-z]/g, '');
+      const phase = this.step().ph;
+      const focus = phase === 'bound' && word === 'boundaries' ? 'all' :
+        phase === 'sc' && /^(straight|curved)$/.test(word) ? word : null;
+      if (focus) this.setState({ boundaryFocus: focus });
+    }
     const map = { straight: 'straight', curved: 'curved', open: 'open', closed: 'closed', sides: 'sides', side: 'sides', vertex: 'vertex', angle: 'angle', polygon: 'polygon', triangle: 'name', quadrilateral: 'name', pentagon: 'name', hexagon: 'name', heptagon: 'name', octagon: 'name' };
     const key = map[w.toLowerCase().replace(/[^a-z]/g, '')]; if (!key) return;
     if (this.state.hlKind !== key) this.setState({ hlKind: key });
@@ -1200,14 +1220,15 @@ class Component extends DCLogic {
       { sc: 'S16', ph: 'name', label: '16 · Naming', narr: 'So the number of sides gives us a good way to name polygons.', ba: true, auto: true },
       { sc: 'S17', ph: 'tri', label: '17 · Triangle', narr: 'A polygon with 3 sides is called a triangle.', fig: 'triangle', count: 3, reveal: 'Triangle', auto: true },
       { sc: 'S17', ph: 'quad', label: '17 · Quadrilateral', narr: 'A polygon with 4 sides is called a quadrilateral.', fig: 'quad', count: 4, reveal: 'Quadrilateral', morphFrom: 'triangle', auto: true },
-      { sc: 'S18', label: '18 · Quadrilaterals', narr: 'Select all the quadrilaterals.', set: 'q36', q: 'multi', correct: [0, 2, 3] },
+      { sc: 'S18', label: '18 · Quadrilaterals', narr: 'Select all the quadrilaterals.', set: 'q36', q: 'multi', correct: [0, 2, 3],
+        fb: { ok: 'That’s right! Quadrilaterals are polygons with 4 sides.' } },
       { sc: 'S19', label: '19 · Pentagon', narr: 'A polygon with 5 sides is called a pentagon.', fig: 'pentagon', count: 5, reveal: 'Pentagon', auto: true },
       { sc: 'S20', label: '20 · Hexagon', narr: 'A polygon with 6 sides is called a hexagon.', fig: 'hexagon', count: 6, reveal: 'Hexagon', auto: true },
       { sc: 'S21', label: '21 · Heptagon', narr: 'A polygon with 7 sides is called a heptagon.', fig: 'heptagon', count: 7, reveal: 'Heptagon', auto: true },
       { sc: 'S22', label: '22 · Octagon', narr: 'A polygon with 8 sides is called an octagon.', fig: 'octagon', count: 8, reveal: 'Octagon', auto: true },
       { sc: 'S23', label: '23 · Recall', narr: "Let's recall the different types of polygons we learnt about.", q: 'recall' },
       {
-        sc: 'C1', label: 'CFU 1', narr: 'Which of these is a polygon?', sub: 'Select all that are polygons.',
+        sc: 'C1', label: 'CFU 1', narr: 'Which of these are polygons?',
         set: 'cfu1', q: 'multi', check: true, correct: [0, 2],
         fb: { ok: 'Yes! Closed, with only straight sides.', one: 'Is it closed? Does it have only straight sides?', two: 'A polygon is closed, with only straight sides. Try again.' }
       },
@@ -1218,17 +1239,17 @@ class Component extends DCLogic {
         fb: { ok: 'Great job! You sorted the figures correctly.', one: 'Wrong group. Check for gaps or curved sides.', two: 'Polygons are closed, with only straight sides. Try again.' }
       },
       {
-        sc: 'C3', label: 'CFU 3', narr: 'Find the odd one out. Which figure is NOT a polygon?', set: 'cfu3', q: 'tap1', correct: 3,
+        sc: 'C3', label: 'CFU 3', narr: 'Which figure is NOT a polygon?', set: 'cfu3', q: 'tap1', correct: 3,
         fb: { ok: 'You found it! That is not a polygon.', one: 'Which figure breaks the rule for a polygon?', two: 'Is it closed? Does it have only straight sides?' }
       },
       {
-        sc: 'C4', label: 'CFU 4', narr: 'Which of these is a pentagon?', sub: 'Select all that are pentagons.',
+        sc: 'C4', label: 'CFU 4', narr: 'Which of these are pentagons?',
         set: 'cfu4', q: 'multi', check: true, correct: [0, 1, 3],
         fb: { ok: 'Exactly! A pentagon always has 5 sides.', one: 'Count the sides of each figure carefully.', two: 'Look for every figure with exactly 5 sides.' }
       },
       {
         sc: 'C5', label: 'CFU 5', narr: 'Classify each figure as a hexagon or a heptagon.', set: 'cfu5', q: 'sort',
-        zones: ['HEXAGON', 'HEPTAGON', '6 sides', '7 sides'], answer: [0, 1, 0, 1],
+        zones: ['HEXAGON', 'HEPTAGON'], answer: [0, 1, 0, 1],
         fb: { ok: 'Well done! Hexagons have 6 sides and heptagons have 7 sides.', one: 'Count the sides of the ones you placed wrong.', two: '6 sides make a hexagon, 7 make a heptagon.' }
       },
       { sc: 'END', label: 'Finished', narr: 'You did it! Now you know what makes a figure a polygon.' }
@@ -1268,12 +1289,12 @@ class Component extends DCLogic {
       magicReveal: s.q === 'oc' && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches),
       narrPage: '', draggingLabel:null, labelHover:null, draggingFigure:null, sortHover:null,
       sel: [], ddOpen: -1, wrong: null, ok: null, ocReveal: null, attempts: 0, nudge: null,
-      reveal: false, nums: 0, hlKind: null, tracing: false, drawing: false, penAt: null,
+      reveal: false, nums: 0, hlKind: null, boundaryFocus: null, tracing: false, drawing: false, penAt: null,
       zoomed: false, showHand: false, checked: false, phase: s.ph || '',
       chip: null, badPlace: null, pickedFig: null, justPlaced: null, tick: null, united: false, say: '', morph: null
     };
     if (s.ph === 'draw') reset.drawn = false;
-    if (s.sc !== 'S6') { reset.dd = [null, null, null, null]; reset.ddWrong = [false, false, false, false]; }
+    if (s.sc !== 'S6' || s.ph === 'classify') { reset.dd = [null, null, null, null]; reset.ddWrong = [false, false, false, false]; }
     if (s.sc !== 'S12') reset.placed = {};
     if (s.sc !== 'C2' && s.sc !== 'C5') reset.sortAt = {};
     if (s.sc === 'S13') reset.cnt = [0, 4];
@@ -1355,6 +1376,19 @@ class Component extends DCLogic {
      Later screens keep the guide perched. Return the narration delay. */
   enterScreen(fresh) {
     const first = !this._guideGreeted;
+    const boundary = this.boundaryScene();
+    const moving = !first && boundary !== !!this._boundaryAt;
+    this._boundaryAt = boundary;
+    if (moving) {
+      const reduced = this.reducedMotion();
+      this.setState({ guideHidden: false, guideFlying: false, boundaryTravel: !reduced, storyDialogue: reduced });
+      if (!reduced) this.guide.onScreenEnter(true);
+      this.later(() => {
+        this.setState({ boundaryTravel: false, storyDialogue: true });
+        this.guide.settle(GUIDE_REST.WATCH);
+      }, reduced ? 0 : 950);
+      return reduced ? 0 : 1080;
+    }
     if (!first) {
       this.setState({ guideHidden: false, guideFlying: false, storyDialogue: true });
       return fresh ? 240 : 0;
@@ -1709,11 +1743,12 @@ class Component extends DCLogic {
       this.clearNudge();
       this.sfx('tap');
       const s = this.step(), truth = ['Straight', 'Straight', 'Curved', 'Curved'];
+      if (s.ph !== 'classify' || this.state.dd[i] === truth[i]) return;
       const dd = this.state.dd.slice(), bad = this.state.ddWrong.slice();
       this.setState({ ddOpen: -1 });
       if (val === truth[i]) {
         dd[i] = val; bad[i] = false;
-        this.setState({ dd: dd, ddWrong: bad }); this.react('happy'); this.confetti();
+        this.setState({ dd: dd, ddWrong: bad, interactive: false }); this.react('happy'); this.confetti();
         const generation = this.gen;
         this.later(() => {
           if (generation !== this.gen) return;
@@ -1792,7 +1827,7 @@ class Component extends DCLogic {
             if (finished) this.react('happy'); else { this.burstHere(); this.guide.onCorrectProgress(); }
             if (finished) {
               this.setState({ checked: true });
-              this.feedback('That is right! These are the ones.', () => {});
+              this.feedback((s.fb && s.fb.ok) || 'That is right! These are the ones.', () => {});
             }
           } else {
             this.setState({ wrong: i, attempts: this.state.attempts + 1 }); this.sfx('no'); this.react('wrong');
@@ -1995,7 +2030,7 @@ class Component extends DCLogic {
         if (!active) {
           active=true; this.clearNudge(); this.sfx('pick'); this.guide.onInteractionStart();
           this.setState({ chip:name, draggingLabel:name });
-          if (ghost) { ghost.textContent=name; Object.assign(ghost.style,this.buttonSkin('secondary',22),{opacity:'1',width:'200px',height:'78px',padding:'0 16px',background:this.labelTheme(name).gradient,border:'3px solid '+this.labelTheme(name).color,color:this.labelTheme(name).ink,font:'800 36px "Baloo 2",sans-serif',whiteSpace:'nowrap'}); }
+          if (ghost) { ghost.className='ice-button'; ghost.textContent=name; Object.assign(ghost.style,this.buttonSkin('secondary',22),{opacity:'1',width:'200px',height:'78px',padding:'0 16px',background:this.labelTheme(name).gradient,border:'3px solid '+this.labelTheme(name).color,color:this.labelTheme(name).ink,font:'800 36px "Baloo 2",sans-serif',whiteSpace:'nowrap'}); }
         }
         if (frame === null) frame=requestAnimationFrame(paint);
       };
@@ -2238,7 +2273,8 @@ class Component extends DCLogic {
     const kk = (parseFloat(String(o.vb || '0 0 1000 1000').split(' ')[2]) || 1000) / 1000;
     const pad = o.pad === undefined ? 20 : o.pad;
     const v = String(o.vb || '0 0 1000 1000').split(' ').map(Number);
-    const iw = o.w - 2 * pad, ih = o.h - 2 * pad;
+    const numberInset = o.numberInset || 0;
+    const iw = o.w - 2 * pad - 2 * numberInset, ih = o.h - 2 * pad - 2 * numberInset;
     const fsc = Math.min(iw / v[2], ih / v[3]);
     const ox = pad + (iw - v[2] * fsc) / 2, oy = pad + (ih - v[3] * fsc) / 2;
     const toPx = (p) => [ox + (p[0] - v[0]) * fsc, oy + (p[1] - v[1]) * fsc];
@@ -2470,7 +2506,7 @@ class Component extends DCLogic {
     const compact = viewport.clientWidth < 700;
     const scale = compact ? Math.max(0.55, viewportScale) : Math.min(st.scale, viewportScale || st.scale);
     const scaler = {
-      position: 'absolute', left: '50%', top: '50%', width: '1980px', height: '1080px',
+      position: 'absolute', left: '50%', top: '50%', width: STAGE.w + 'px', height: STAGE.h + 'px',
       transform: 'translate(-50%, -50%) scale(' + scale + ')', transformOrigin: 'center center'
     };
     if (compact) Object.assign(scaler, {position:'relative',left:0,top:0,transform:'none',zoom:scale});
@@ -2488,6 +2524,8 @@ class Component extends DCLogic {
       zoneRowStyle: {}, liveMsg: this.state.say || '',
       narrStyle: this.narrStyle(), narrRef: this.narrRef,
       bgStyle: this.bgStyle(), boardStyle: this.boardStyle(), signStyle: this.signStyle(),
+      boundaryBackgroundStyle: this.boundaryBackgroundStyle(),
+      lessonScene: this.boundaryScene() ? 'boundary' : 'standard',
       safeStyle: this.safeStyle(),
       showGuide: GUIDE_VISIBLE, guideViewport: this.guideViewportStyle(), guideStyle: this.guideStyle(),
       guideRef: this.guideRef, guideHidden: st.guideHidden, guideCell: (window.SWIFTEE && window.SWIFTEE.cell) || 256,
@@ -2559,36 +2597,37 @@ class Component extends DCLogic {
     const meta = (item, click, classes, prefix = 'action', fallback = '') => {
       item[prefix + 'Class'] = click ? classes : fallback;
       item[prefix + 'Role'] = click ? 'button' : undefined;
-      item[prefix + 'Tab'] = click && V.effectsEnabled ? 0 : -1;
+      item[prefix + 'Tab'] = click && !item.disabled && V.effectsEnabled ? 0 : -1;
     };
     V.controlsState = V.storyControls ? 'ready' : 'waiting';
     V.counterClass = V.storyCounting ? '' : 'story-controls';
     for (const item of V.cards) meta(item, item.click, 'game-action');
-    for (const item of V.targets) meta(item, item.click, item.buttonTone === 'primary' ? 'game-action game-primary' : 'game-action');
-    for (const item of V.chips) meta(item, item.click, 'game-action game-quiet');
+    for (const item of V.targets) meta(item, item.click, item.text ? 'game-action game-primary ice-button' : 'game-action', 'action', item.text ? 'ice-button' : '');
+    for (const item of V.chips) meta(item, item.click, 'game-action game-quiet ice-button', 'action', 'ice-button');
     for (const drop of V.drops) {
-      meta(drop, drop.click, 'game-action game-quiet');
-      for (const option of drop.menu || []) meta(option, option.click, 'game-action game-quiet game-dropdown-option', 'action', 'game-dropdown-option');
+      meta(drop, drop.click, 'game-action game-quiet ice-button', 'action', 'ice-button');
+      for (const option of drop.menu || []) meta(option, option.click, 'game-action game-quiet game-dropdown-option ice-button', 'action', 'game-dropdown-option ice-button');
     }
     for (const counter of V.counters) {
-      meta(counter, counter.minus, 'game-action game-quiet', 'minus');
-      meta(counter, counter.plus, 'game-action game-quiet', 'plus');
+      meta(counter, counter.minus, 'game-action game-quiet ice-button', 'minus', 'ice-button');
+      meta(counter, counter.plus, 'game-action game-quiet ice-button', 'plus', 'ice-button');
     }
-    for (const key of ['chooseOpen', 'chooseClosed', 'check']) meta(V, V[key], 'game-action game-primary', key);
+    for (const key of ['chooseOpen', 'chooseClosed', 'check']) meta(V, V[key], 'game-action game-primary ice-button', key, 'ice-button');
+    for (const kind of ['open', 'closed']) V[kind + 'Feedback'] = this.state.ok === kind || this.state.ocReveal === kind ? 'correct' : (this.state.wrong === kind ? 'incorrect' : '');
   }
 
-  /* Keep the logical stage stable while fitting the visible panel around its activity. */
+  /* One frame and center line for the opening figures and answer buttons. */
   fitActivityPanel(V, s) {
     if (s.q !== 'oc' && s.sc !== 'S1') return;
     const card = V.cards[0];
-    const box = card ? { x: parseFloat(card.wrap.left), y: parseFloat(card.wrap.top),
-      w: parseFloat(card.wrap.width), h: parseFloat(card.wrap.height) } : this.s1Box(s.ph);
-    const padding = 32, caption = V.showChoice ? 0 : 76;
+    const box = this.ocBox();
+    const padding = 32;
     const panel = { x: SAFE.x + box.x - padding, y: SAFE.y + box.y - padding,
-      w: box.w + padding * 2, h: box.h + caption + padding * 2 };
-    V.boardStyle = Object.assign(this.boardStyle(), stageBox(panel, 30));
+      w: box.w + padding * 2, h: box.h + padding * 2 };
+    const boardPanel = this.state.k < 9 ? OPENING_BOARD : panel;
+    V.boardStyle = Object.assign(this.boardStyle(), stageBox(boardPanel, 30));
     if (V.showChoice) {
-      V.choiceRowStyle = { position:'absolute',left:(box.x + box.w / 2 - SAFE.w / 2)+'px',top:(panel.y + panel.h - SAFE.y + 28)+'px',
+      V.choiceRowStyle = { position:'absolute',left:(boardPanel.x + boardPanel.w / 2 - SAFE.x - SAFE.w / 2)+'px',top:(boardPanel.y + boardPanel.h - SAFE.y + 28)+'px',
         width:'100%',display:'flex',justifyContent:'center',gap:'32px' };
       if (card) {
         card.accessibleLabel = 'Trace the shape outline. Then choose Open or Closed.';
@@ -2610,7 +2649,7 @@ class Component extends DCLogic {
     (V.targets || []).forEach((t, i) => {
       const k = 'tg' + i;
       t.enter = this.hovOn(k); t.leave = this.hovOff;
-      if (t.click && t.style) t.style = this.liftable(t.style, k, { lift: 4, scale: 1.03 });
+      if (t.click && !t.disabled && t.style) t.style = this.liftable(t.style, k, { lift: 4, scale: 1.03 });
     });
     (V.chips || []).forEach((p, i) => {
       const k = 'chip' + i;
@@ -2764,7 +2803,7 @@ class Component extends DCLogic {
   narrStyle() {
     return {
       width: 'auto', maxWidth: '100%',
-      fontFamily: '"Baloo 2", Nunito, sans-serif', fontWeight: 800,
+      fontFamily: 'Nunito, sans-serif', fontWeight: 800,
       fontSize: NARR_TYPE.size + 'px', lineHeight: NARR_TYPE.lineHeight,
       letterSpacing: '0.005em',
       color: NARR_TYPE.color, textAlign: 'center',
@@ -2778,21 +2817,53 @@ class Component extends DCLogic {
     };
   }
   /* ---------- scene layers, all derived from the same stage box ---------- */
+  loadBoundaryBackground() {
+    const image = new Image();
+    image.onload = async () => {
+      try {
+        if (image.decode) await image.decode();
+        if (!this._gone && image.naturalWidth) this.setState({boundaryBackgroundReady:true});
+      } catch (_) { /* Keep the original scenery if the replacement cannot decode. */ }
+    };
+    image.src = 'assets/backgound%20%2002.png';
+  }
+  boundaryBackgroundStyle() {
+    // A persistent layer lets entry, exit, and rapid navigation crossfade naturally.
+    return Object.assign(stageBox({x:0,y:0,w:STAGE.w,h:STAGE.h},1), {
+      display:'block',objectFit:'cover',pointerEvents:'none',userSelect:'none',
+      opacity:this.state.ready && this.state.k === 13 && this.state.boundaryBackgroundReady ? 1 : 0,
+      transition:this.reducedMotion() ? 'none' : 'opacity 1200ms cubic-bezier(.4,0,.2,1)'
+    });
+  }
+  boundaryScene() {
+    return !!(this.P && this.state.ready && this.step().sc === 'S6' && ['bound','sc','classify','done'].includes(this.step().ph));
+  }
+  boundaryCueStyle() {
+    return {opacity:1,strokeDasharray:'100',strokeDashoffset:0,
+      filter:'drop-shadow(0 0 5px rgba(34,184,230,.35))',
+      animation:this.reducedMotion()?'none':'boundDraw 850ms ease-out both, boundaryEmphasis 1800ms ease-out both'};
+  }
   bgStyle() {
     return Object.assign(stageBox({ x: 0, y: 0, w: STAGE.w, h: STAGE.h }, 0),
-      { display: 'block', objectFit: 'cover', userSelect: 'none', pointerEvents: 'none' });
+      { display: 'block', objectFit: 'cover', userSelect: 'none', pointerEvents: 'none',
+        filter: this.boundaryScene() ? 'saturate(1.06) brightness(1.04)' : 'none', transition: this.reducedMotion() ? 'none' : 'filter 1000ms ease-in-out' });
   }
   boardStyle() {
-    return Object.assign(stageBox(BOARD, 30), {
-      opacity: this.state.storyContent ? 1 : 0, transition: 'opacity 260ms ease-out',
+    const boundaryWidth = BOARD.w + 64;
+    const box = this.boundaryScene() ? {x:(STAGE.w-boundaryWidth)/2,y:70,w:boundaryWidth,h:740} : BOARD;
+    const travel = this.boundaryScene() || this.state.boundaryTravel;
+    return Object.assign(stageBox(box, 30), {
+      opacity: this.state.storyContent ? 1 : 0, transition: this.reducedMotion() ? 'none' :
+        (travel ? 'opacity 260ms ease-out, left 900ms ease-in-out, top 900ms ease-in-out, height 900ms ease-in-out' : 'opacity 260ms ease-out'),
       pointerEvents: 'none'
     });
   }
   dialogueLayout() {
+    if (this.boundaryScene()) return {x:610,y:780,w:940,h:220};
     const step = this.state.ready ? this.step() : null;
     const roomy = step && (step.sc === 'S1' || step.q === 'oc');
     // Grow upward from a fixed anchor; leave air between the tail and the crest.
-    const tailDrop = 29, headGap = 42;
+    const tailDrop = 48, headGap = 42;
     const bottom = GUIDE_BOX.y + 65 - tailDrop - headGap;
     const viewportWidth = window.innerWidth || STAGE.w;
     const viewportHeight = window.innerHeight || STAGE.h;
@@ -2804,31 +2875,44 @@ class Component extends DCLogic {
   signStyle() {
     const box = this.dialogueLayout();
     const text = this.state.narrPage === undefined ? this.state.narr : this.state.narrPage;
+    const boundary = this.boundaryScene();
     return {
       position: 'absolute', left: pc(box.x, STAGE.w),
       bottom: pc(STAGE.h - box.y - box.h, STAGE.h),
       zIndex: 40,
-      '--dialogue-tail-x': (SWIFTEE_CENTRE - box.x - 41) + 'px',
-      width: 'max-content', minWidth: '280px', maxWidth: box.w + 'px', height: 'auto',
+      '--dialogue-tail-x': boundary ? 'calc(100% - 10px)' : (SWIFTEE_CENTRE - box.x - 3) + 'px',
+      '--dialogue-tail-top': boundary ? 'calc(50% - 29px)' : 'calc(100% - 4px)',
+      '--dialogue-tail-transform': boundary ? 'rotate(-90deg)' : 'none',
+      width: boundary ? box.w+'px' : 'max-content', minWidth: '280px', maxWidth: box.w + 'px', height: 'auto',
       display: 'block', userSelect: 'none', pointerEvents: 'none',
       opacity: this.state.storyDialogue && !!text ? 1 : 0,
-      transition: 'opacity 240ms ease-out'
+      transform: this.state.storyDialogue && !!text ? 'scale(1)' : 'scale(.94)',
+      transformOrigin: boundary ? '100% 60%' : (SWIFTEE_CENTRE - box.x) + 'px 100%',
+      transition: this.reducedMotion() ? 'none' : 'opacity 220ms ease-out, transform 360ms cubic-bezier(.2,.9,.3,1.2)'
     };
   }
-  safeStyle() { return Object.assign(stageBox(SAFE, 32), {
+  safeStyle() { return Object.assign(stageBox(this.boundaryScene() ? Object.assign({},SAFE,{x:(STAGE.w-BOARD.w)/2+12,y:125}) : SAFE, 32), {
     pointerEvents: this.locked() || !this.state.storyContent ? 'none' : 'auto',
     opacity: this.state.storyContent ? 1 : 0, visibility: this.state.storyContent ? 'visible' : 'hidden',
-    transition: 'opacity 240ms ease-out'
+    transition: this.reducedMotion() ? 'none' : 'opacity 240ms ease-out, left 900ms ease-in-out, top 900ms ease-in-out'
   }); }
   /* Swiftee's cell, scene-relative; the wrapper inside carries the only motion. */
   guideViewportStyle() {
-    return Object.assign(stageBox(GUIDE_BOX, 20), { pointerEvents: 'none', overflow: 'visible' });
+    const boundary = this.boundaryScene();
+    return Object.assign(stageBox(boundary ? {x:1570,y:760,w:340,h:340} : GUIDE_BOX, boundary ? 44 : 20), {
+      pointerEvents: 'none', overflow: 'visible', transition: this.reducedMotion() ? 'none' : 'left 900ms ease-in-out, top 900ms ease-in-out'
+    });
   }
   /* Fly-in and the lean toward the sign while she speaks, as transform only;
      the canvas inside is always the whole cell, so the sprite itself never moves. */
   guideStyle() {
     const st = this.state;
     const box = { position: 'absolute', inset: 0 };
+    if (st.boundaryTravel && !this.reducedMotion()) return Object.assign(box,{animation:'boundaryTravel 950ms ease-in-out both'});
+    if (this.boundaryScene() && !st.guideHidden) return Object.assign(box,{
+      opacity:1,transform: st.boundaryFocus && !this.reducedMotion() ? 'rotate(-4deg)' : 'none',
+      transformOrigin:'50% 88%',transition:'transform 320ms ease-out',animation:'none'
+    });
     if (st.guideHidden) return Object.assign(box, { opacity: 0, transition: 'none' });
     if (st.guideFlying && !this.reducedMotion()) return Object.assign(box, { animation: 'rockArrival 1400ms cubic-bezier(.25,.6,.35,1) both', transition: 'none', opacity: 1 });
     return Object.assign(box, { transform: 'none', opacity: 1, animation: 'none' });
@@ -2837,14 +2921,14 @@ class Component extends DCLogic {
     return {
       background: tone === 'secondary' ? BUTTON.secondaryFace : BUTTON.face,
       border: '3px solid ' + BUTTON.edge, borderRadius: radius + 'px',
-      color: BUTTON.ink, boxShadow: tone === 'secondary' ? BUTTON.secondaryShadow : BUTTON.shadow,
-      boxSizing: 'border-box', textShadow: 'none', userSelect: 'none',
+      color: '#fff', boxShadow: tone === 'secondary' ? BUTTON.secondaryShadow : BUTTON.shadow,
+      boxSizing: 'border-box', textShadow: '0 1px 2px #641518b3', userSelect: 'none',
       display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
     };
   }
   bigBtn(w) {
     return Object.assign(this.buttonSkin(), {
-      minWidth: w + 'px', padding: '0 44px', height: '86px',
+      minWidth: Math.min(w, 200) + 'px', padding: '0 24px', height: '86px',
       font: '800 38px "Baloo 2", Nunito, sans-serif',
       transition: 'transform 130ms ease-out, box-shadow 130ms'
     });
@@ -2855,7 +2939,7 @@ class Component extends DCLogic {
     const isWrong = st.wrong === kind;
     const revealing = !!st.ocReveal;
     return Object.assign(this.buttonSkin('primary', 28), {
-      width: '280px', minWidth: '280px', height: '112px',
+      width: '244px', minWidth: '244px', height: '100px',
       font: '800 42px "Baloo 2", Nunito, sans-serif',
       cursor: revealing ? 'default' : 'pointer',
       background: isRight ? '#e9f8ef' : (isWrong ? '#fff4e9' : BUTTON.face),
@@ -2872,20 +2956,26 @@ class Component extends DCLogic {
   }
 
   /* ----- screen 1 ----- */
-  /* One centred layout for the point, the drawing, the trace and the question,
-     so nothing shifts between the phases of screen 1. The box is centred on the
-     safe area and lifted by the height of the caption that sits under it, which
-     puts the finished shape's own centre on the board's optical centre — and
-     that is where the point waits before it draws. */
+  /* Center the visible outline, including figures with asymmetric viewBox padding. */
+  openingFigureBox(size, name) {
+    const F = this.fig(name);
+    const centre = F.pts ? [0,1].map(axis => {
+      const values = F.pts.map(point => point[axis]);
+      return (Math.min(...values) + Math.max(...values)) / 2;
+    // Centers of the curved paths' bounds, including the pot's open lip.
+    }) : ({pot:[490,594],crescent:[340.57352,224.18343]})[name];
+    const box = {x:0,y:0,w:size,h:size};
+    const mapped = this.mapPt(box,F.vb,centre);
+    box.x = OPENING_BOARD.x + OPENING_BOARD.w / 2 - SAFE.x - mapped[0];
+    box.y = OPENING_BOARD.y + OPENING_BOARD.h / 2 - SAFE.y - mapped[1];
+    return box;
+  }
   ocBox() {
-    // Grow into the open sky on the right, preserving the dialogue lane on the left.
-    const size = 640;
-    return { x: (SAFE.w - size) / 2 + 70, y: -48, w: size, h: size };
+    return this.openingFigureBox(720,this.step().fig || 'leaf');
   }
   s1Box(ph) {
     if (ph === 'ask') return this.ocBox();
-    const size = 520;
-    return { x: Math.round((SAFE.w - size) / 2), y: Math.round((SAFE.h - size) / 2) - 20, w: size, h: size };
+    return this.openingFigureBox(580,'leaf');
   }
   /* The point, at whatever size and position the phase needs. The mark itself is
      one element and the breath another, because an appear and a pulse both drive
@@ -2922,19 +3012,9 @@ class Component extends DCLogic {
     if (ph === 'point') {
       const reduced = this.reducedMotion();
       V.cards = [];
-      /* The caption sits exactly where the finished shape's caption will sit, so
-         only the word changes between the two phases — nothing moves. */
-      V.callouts = [{
-        text: 'Point', style: {
-          position: 'absolute', left: '50%', top: (y + size + 8) + 'px', translate: '-50% 0',
-          font: '900 46px Nunito, sans-serif', color: '#2c6ba8', letterSpacing: '0.01em', zIndex: 4,
-          animation: reduced ? 'none' : 'fadeUp 460ms ease-out 300ms both'
-        }
-      }];
       /* The ripples settle at the width of the shape that is about to be drawn,
          so the mark claims exactly the room the shape will fill and the white
-         around it reads as space rather than as nothing. They sit under the
-         caption: leaders paint after callouts, so the layering is explicit. */
+         around it reads as space rather than as nothing. */
       const spread = Math.round(2 * (centre[1] - origin[1]));
       const disc = (px, extra) => Object.assign({
         position: 'absolute', left: centre[0] + 'px', top: centre[1] + 'px',
@@ -2992,15 +3072,6 @@ class Component extends DCLogic {
       } : {};
     }
     V.cards = [ph === 'ask' ? this.magicCard(card) : card];
-    if (ph !== 'point' && (st.drawn || ph !== 'draw')) {
-      V.callouts = [{
-        text: 'Shape', style: {
-          position: 'absolute', left: '50%', top: (y + size + 8) + 'px', translate: '-50% 0',
-          font: '900 46px Nunito, sans-serif', color: '#2c6ba8', letterSpacing: '0.01em',
-          animation: 'fadeUp 400ms ease-out both'
-        }
-      }];
-    }
     if (ph === 'ask') { V.showChoice = true; V.callouts = []; }
   }
 
@@ -3042,7 +3113,11 @@ class Component extends DCLogic {
       }
       /* The boundaries screen lights every figure at once and holds it for the
          whole line; the others keep the one-shot trace. */
-      const litBounds = ph === 'bound';
+      const boundary = this.boundaryScene();
+      const focused = boundary && (st.boundaryFocus === 'all' ||
+        st.boundaryFocus === 'straight' && straightIdx.includes(i) ||
+        st.boundaryFocus === 'curved' && curvedIdx.includes(i));
+      const litBounds = !boundary && ph === 'bound';
       const trace = st.tracing && ph === 'sc';
       let state = null;
       if (tappable) {
@@ -3062,8 +3137,8 @@ class Component extends DCLogic {
         tint: stackedChip && state === 'bad' ? { borderColor: '#dca99f', background: '#fffaf9', boxShadow: '0 6px 0 rgba(146,196,228,.25)' } : undefined,
         stroke: it[1], sw: 18, fill: this.figFill(name, it[1], it[2]), state: state, hl: hl,
         traceD: F.traceD || d,
-        traceStyle: litBounds ? this.boundaryLitStyle() : (trace ? this.traceStyleFor(true, 1400) : { opacity: 0 }),
-        anim: st.wrong === i ? 'wig 420ms ease-in-out both' : (pulse ? 'pop 900ms ease-in-out infinite' : 'none'),
+        traceStyle: focused ? this.boundaryCueStyle() : (litBounds ? this.boundaryLitStyle() : (trace ? this.traceStyleFor(true, 1400) : { opacity: 0 })),
+        anim: st.wrong === i ? 'wig 420ms ease-in-out both' : (pulse && !boundary ? 'pop 900ms ease-in-out infinite' : 'none'),
         chip: chip, chipBg: chipBg, chipBorder: chipBorder, chipColor: chipColor,
         click: tappable ? this.tapCard(i) : null, nudge: tappable && i === s.correct && st.ok === null,
         opacity: tappable && s.q !== 'straight' && st.ok !== null && st.ok !== i ? 0 : 1
@@ -3073,44 +3148,44 @@ class Component extends DCLogic {
   viewCompare(V, s) {
     const st = this.state, ph = st.phase;
     V.cards = this.cmpCards(V, s, false);
-    if (ph === 'classify' || ph === 'done') {
-      const truth = ['Straight', 'Straight', 'Curved', 'Curved'];
-      V.drops = st.dd.map((val, i) => {
-        const card = V.cards[i];
-        const left = parseFloat(card.wrap.left), w = parseFloat(card.wrap.width);
-        const done = ph === 'done' || val === truth[i];
-        const bad = st.ddWrong[i];
-        const open = st.ddOpen === i;
-        return {
-          style: { position: 'absolute', left: (left + w / 2 - 120) + 'px', top: '484px', width: '240px', zIndex: open ? 20 : 5 },
-          btn: Object.assign(this.buttonSkin('secondary',22), {
-            height: '72px', borderRadius: '22px', boxSizing: 'border-box',
-            background: done ? '#e9f8ef' : (bad ? '#fff4e9' : BUTTON.secondaryFace),
-            border: '3px solid ' + (done ? '#57ac83' : (bad ? '#da9279' : BUTTON.edge)),
-            color: done ? '#236b49' : BUTTON.ink,
-            font: '800 30px "Baloo 2", Nunito, sans-serif', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', gap: '12px', padding: '0 12px', cursor: done ? 'default' : 'pointer',
-            boxShadow: done ? '0 4px 0 rgba(47,158,94,.15)' : (bad ? '0 4px 0 rgba(190,125,97,.14)' : BUTTON.secondaryShadow),
-            animation: bad ? 'wig 420ms ease-in-out both' : 'none'
-          }),
-          nudge: !done && !open && st.dd.slice(0, i).every((v, j) => v === truth[j]) ? '1' : '',
-          arrow: done ? '' : '\u25be',
-          arrowStyle: { display:done ? 'none' : 'flex', alignItems:'center', justifyContent:'center', width:'28px', height:'28px', flexShrink:0, borderRadius:'50%', background:bad ? 'rgba(255,255,255,.35)' : '#c4e9df', color:BUTTON.ink, fontSize:'22px', transform:open ? 'rotate(180deg)' : 'none', transition:'transform 180ms ease' },
-          label: done ? truth[i] : (val || 'Select'),
-          click: done ? null : this.ddToggle(i),
-          menu: open ? ['Straight', 'Curved'].map((opt) => ({
-            text: opt, click: this.ddPick(i, opt), nudge: opt === truth[i] ? '1' : '',
-            style: Object.assign(this.buttonSkin('secondary',18), {
-              height: '60px',
-              font: '800 28px "Baloo 2", Nunito, sans-serif', display: 'flex',
-              alignItems: 'center', justifyContent: 'center', cursor: 'pointer', marginTop: '8px',
-              animation:'fadeUp 180ms ease-out both'
-            })
-          })) : []
-        };
+    if (ph !== 'classify' && ph !== 'done') return;
+    const truth = ['Straight', 'Straight', 'Curved', 'Curved'];
+    V.cards.forEach((card, i) => {
+      const left = parseFloat(card.wrap.left), width = parseFloat(card.wrap.width);
+      const done = ph === 'done' || st.dd[i] === truth[i];
+      const bad = st.ddWrong[i];
+      Object.assign(card.wrap, {
+        border:'3px solid ' + (done ? '#55bc88' : '#63cddd'), borderRadius:'28px',
+        background:done ? '#f0fcf4' : 'linear-gradient(150deg,#fffef8,#f4fcff)',
+        boxShadow:done ? '0 0 0 4px rgba(85,188,136,.12), 0 5px 0 #c5e8d5' : '0 5px 0 rgba(99,205,221,.2)'
       });
-    }
-
+      ['Straight', 'Curved'].forEach((option, j) => {
+        const selected = (ph === 'done' ? truth[i] : st.dd[i]) === option;
+        const correct = done && selected;
+        const incorrect = bad && selected;
+        const disabled = done || this.locked();
+        const blue = option === 'Straight';
+        const face = blue ? 'linear-gradient(#e0f6ff,#abe4ff)' : 'linear-gradient(#fff1db,#ffdfb5)';
+        const edge = blue ? '#69c7eb' : '#f2b979';
+        const ink = blue ? '#14518a' : '#78430e';
+        V.targets.push({
+          text:(correct ? '✓ ' : '') + option, label:'Figure ' + (i+1) + ': ' + option,
+          selected:selected, disabled:disabled, feedback:correct ? 'correct' : (incorrect ? 'incorrect' : ''), click:this.ddPick(i, option),
+          style:{
+            position:'absolute', left:(left + j * (width + 12) / 2)+'px', top:'484px',
+            width:((width-12)/2)+'px', height:'88px', boxSizing:'border-box', borderRadius:'17px',
+            display:'flex', alignItems:'center', justifyContent:'center', gap:'6px',
+            font:'900 26px Nunito, sans-serif', color:correct ? '#19653f' : ink,
+            background:correct ? '#daf6e5' : (incorrect ? '#ffe5dd' : face),
+            border:'3px solid ' + (correct ? '#55bc88' : (incorrect ? '#d98770' : edge)),
+            boxShadow:'inset 0 2px 0 rgba(255,255,255,.8), 0 4px 0 ' + (blue ? '#9dd8ec' : '#edcba4'),
+            opacity:st.storyControls || ph === 'done' ? 1 : 0,
+            visibility:st.storyControls || ph === 'done' ? 'visible' : 'hidden',
+            pointerEvents:disabled ? 'none' : 'auto', cursor:disabled ? 'default' : 'pointer'
+          }
+        });
+      });
+    });
   }
   viewTapOne(V, s, isCmp) {
     const st = this.state;
@@ -3499,24 +3574,27 @@ class Component extends DCLogic {
     const y = 40;
     const leftX = SAFE.w / 2 - gapX - size, rightX = SAFE.w / 2 + gapX - 0;
     const segsO = this.segs('pentagon'), segsU = this.segs('pentagon', user);
-    const cO = this.centroid(orig), cU = this.centroid(user);
+    const pad = 36, vb = F.vb.split(' ').map(Number);
+    const shapeScale = Math.min((size - 2 * pad - 10) / vb[2], (size - 2 * pad - 10) / vb[3]);
     const mk = (which) => {
-      const pts = which ? user : orig, segs = which ? segsU : segsO, cc = which ? cU : cO;
+      const pts = which ? user : orig, segs = which ? segsU : segsO;
       const n = which ? (st.numsB || 0) : (st.nums || 0);
       const nums = [];
-      /* The Before figure was counted on the screen before this one, so it
-         reports its total instead of being walked through 1 to 5 again — only
-         the 5 appears, and the counting belongs to the After figure. */
+      // Use the edge's outward normal, not the centre of a potentially concave shape.
+      const winding = Math.sign(pts.reduce((area, a, i) => {
+        const b = pts[(i + 1) % pts.length];
+        return area + a[0] * b[1] - b[0] * a[1];
+      }, 0)) || 1;
       const pin = (i, label) => {
-        const m = segs[i].mid, u = this.unit(cc, m), o = 56 * K;
-        nums.push({ x: +(m[0] + u[0] * o).toFixed(1), y: +(m[1] + u[1] * o).toFixed(1), ty: +(m[1] + u[1] * o + 14 * K).toFixed(1), r: 36 * K, sw: 8 * K, fs: 44 * K, t: String(label) });
+        const edge = segs[i], m = edge.mid, u = this.unit(edge.a, edge.b), offset = 24 / shapeScale;
+        nums.push({ x: m[0] + winding * u[1] * offset, y: m[1] - winding * u[0] * offset,
+          fs: 30 / shapeScale, t: String(label) });
       };
-      if (which) { for (let i = 0; i < n; i++) pin(i, i + 1); }
-      else if (n >= segs.length) pin(segs.length - 1, segs.length);
+      for (let i = 0; i < Math.min(n, segs.length); i++) pin(i, i + 1);
       const glow = st.phase === 'b' ? [{ d: this.dPath(pts, true), color: 'rgba(34,184,230,0.55)', w: 34 * K, style: { animation: 'glowPulse 1.4s ease-in-out infinite' } }] : [];
       return this.buildCard({
         key: which ? 'after' : 'before', x: which ? rightX : leftX, y: y, w: size, h: size,
-        vb: F.vb, d: this.dPath(pts, true), stroke: which ? this.P.C.orange : this.P.C.blue, sw: 18,
+        vb: F.vb, pad: pad, numberInset: 5, d: this.dPath(pts, true), stroke: which ? this.P.C.orange : this.P.C.blue, sw: 18,
         fill: this.tint(which ? this.P.C.orange : this.P.C.blue), hl: glow, nums: nums,
         badge: which ? 'After' : 'Before',
         anim: st.phase === 'a' ? 'pop 1200ms ease-in-out 2' : 'none'
@@ -3526,17 +3604,12 @@ class Component extends DCLogic {
     if (s.q === 'count2') {
       V.showCounter = true;
       V.counterRowStyle = {position:'absolute',inset:0,pointerEvents:'none'};
-      V.counters = [leftX, rightX].map((cardX, i) => {
-        const counter = this.counter(i, '');
-        /* Before is stated, After is asked — so the hint sits on the one the
-           learner has to move. */
-        counter.fixed = i === 0;
-        counter.nudge = i === 0 ? '' : '1';
-        counter.accessibleLabel = i ? 'Number of sides after' : 'Number of sides before, 5';
-        Object.assign(counter.wrap, {position:'absolute',left:(cardX+size/2)+'px',top:(y+size+64)+'px',translate:'-50% 0',pointerEvents:'auto'});
-        return counter;
-      });
-      V.counterCheckPosition = {position:'absolute',left:'50%',top:(y+size+180)+'px',translate:'-50% 0',pointerEvents:'auto'};
+      const counter = this.counter(1, '');
+      counter.nudge = '1';
+      counter.accessibleLabel = 'Number of sides after';
+      Object.assign(counter.wrap, {position:'absolute',left:(rightX+size/2)+'px',top:(y+size+64)+'px',translate:'-50% 0',pointerEvents:'auto'});
+      V.counters = [counter];
+      V.counterCheckPosition = {position:'absolute',left:(rightX+size/2)+'px',top:(y+size+180)+'px',translate:'-50% 0',pointerEvents:'auto'};
     }
   }
 
@@ -3596,7 +3669,7 @@ class Component extends DCLogic {
     const n = S.length;
     const w = n >= 6 ? 236 : (n === 5 ? 272 : 300), gap = n >= 6 ? 26 : 38;
     const total = n * w + (n - 1) * gap;
-    const x0 = (SAFE.w - total) / 2, y = s.sub ? 150 : 130;
+    const x0 = (SAFE.w - total) / 2, y = 130;
     const done = s.correct.every((c) => st.sel.indexOf(c) >= 0) && st.sel.length === s.correct.length;
     V.cards = S.map((it, i) => {
       const F = this.fig(it[0]);
@@ -3615,14 +3688,6 @@ class Component extends DCLogic {
         anim: st.wrong === i ? ((s.set === 'cfu1' ? (this._wrongTapToken % 2 ? 'wrongTapA' : 'wrongTapB') : 'wig') + ' 420ms ease-in-out both') : (coach ? 'pop 900ms ease-in-out infinite' : 'none')
       });
     });
-    if (s.sub) {
-      V.callouts = [{
-        text: s.sub, style: {
-          position: 'absolute', left: '50%', top: '46px', translate: '-50% 0',
-          font: '800 32px Nunito, sans-serif', color: '#4c86bd', whiteSpace: 'nowrap'
-        }
-      }];
-    }
     if (s.check) {
       V.showCheck = true;
       V.checkDisabled = this.locked() || (!st.checked && !st.sel.length);
@@ -3672,7 +3737,6 @@ class Component extends DCLogic {
       transition: 'left ' + SORT.uniteMs + 'ms cubic-bezier(.22,.9,.24,1), width ' + SORT.uniteMs + 'ms cubic-bezier(.22,.9,.24,1), gap ' + SORT.uniteMs + 'ms cubic-bezier(.22,.9,.24,1)'
     };
     V.zoneAName = s.zones[0]; V.zoneBName = s.zones[1];
-    V.zoneASub = s.zones[2] || ''; V.zoneBSub = s.zones[3] || '';
     const zoneStyle = (which) => {
       const hot = hoverZone === which;
       return {
@@ -3727,7 +3791,7 @@ class Component extends DCLogic {
     const target = (zone) => ({
       text: '', click: this.dropInto(zone),
       enter: this.hovOn('tg' + zone), leave: this.hovOff,
-      label: (s.zones[zone] || '') + (s.zones[zone + 2] ? ', ' + s.zones[zone + 2] : ''),
+      label: s.zones[zone] || '',
       /* No nudge here on purpose: this is a check for understanding, and the
          idle hint used to park the hand over the correct column, which handed
          the answer over. Both columns already pulse while a figure is held —
@@ -3740,13 +3804,7 @@ class Component extends DCLogic {
       }
     });
     V.targets = [target(0), target(1)];
-    V.callouts = [{
-      text: !queue.length ? '' : (!holding ? 'Drag or tap each figure into its column' : 'Now choose a column'),
-      style: {
-        position: 'absolute', left: '50%', top: SORT.calloutY + 'px', translate: '-50% 0',
-        font: '800 28px Nunito, sans-serif', color: '#3d76ad', whiteSpace: 'nowrap'
-      }
-    }];
+    V.callouts = [];
     if (preview) {
       const slot = places[st.pickedFig];
       V.callouts.push({ text: '', style: {

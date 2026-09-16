@@ -1,36 +1,21 @@
-/* Quiet winter scenery stays at the edges, behind the learning content. */
+/* Render the supplied PNG continuously so its gradients have no slice seams.
+   Compensate for transparent margins to retain the existing visible board bounds. */
 .story-board {
-  overflow: hidden;
-  box-sizing: border-box;
-  border: 5px solid #20b9ad;
-  border-bottom-color: #087f85;
-  border-radius: 42px;
-  background: linear-gradient(155deg, #fffdf0 0%, #f3fffc 46%, #e8faf8 100%);
-  box-shadow: inset 0 0 0 7px #fff3b9,
-    inset 0 -6px 0 rgba(74,190,177,.18),
-    0 7px 0 #096d78,
-    0 14px 28px rgba(8,38,92,.22);
-  pointer-events: none;
-}
-.story-board::before,
-.story-board::after {
-  content: '';
-  position: absolute;
-  bottom: 7px;
-  width: 30%;
-  height: 20%;
-  max-height: 130px;
-  pointer-events: none;
+  overflow:hidden;
+  box-sizing:border-box;
+  border:0;
+  border-radius:34px;
+  background:transparent;
+  filter:drop-shadow(0 8px 12px rgba(8,38,92,.18));
+  pointer-events:none;
 }
 .story-board::before {
-  left: 7px;
-  background: #c9eee9;
-  opacity: .7;
-  clip-path: polygon(0 40%, 14% 53%, 34% 12%, 61% 67%, 74% 46%, 100% 100%, 0 100%);
-}
-.story-board::after {
-  right: 7px;
-  background: #bde9de;
-  opacity: .75;
-  clip-path: polygon(0 100%, 24% 61%, 39% 76%, 67% 15%, 85% 47%, 100% 30%, 100% 100%);
+  content:'';
+  position:absolute;
+  top:-9%;
+  right:-1.23%;
+  bottom:-15.74%;
+  left:-1.72%;
+  background:url('../assets/instructiion%20board.png') center / 100% 100% no-repeat;
+  pointer-events:none;
 }

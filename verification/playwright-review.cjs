@@ -29,6 +29,7 @@ const server = http.createServer((req,res)=>{
     // Rendering audit isolates each screen; interactive paths are tested separately.
     await page.evaluate(()=>{const g=__poly;g.timers.forEach(clearTimeout);g._stopRecordedVoice?.();g.later=()=>0;});
     const screens=[];
+    let styledButtons=0;
     const showScreen=async(k,patch={})=>{
       await page.evaluate(({k,patch})=>{const g=__poly,s=g.steps()[k];g.setState({k});g.runStep(k,false);g.prepareNarratorReveal(g.instructionPages(s.narr)[0]);g._voiceLocked=false;g.setState({wordReveal:'complete',storyContent:true,storyDialogue:true,storyControls:true,interactive:true,speaking:false,magicReveal:false,drawn:!(s.sc==='S1'&&['point','draw'].includes(s.ph)),reveal:true,nums:s.count||0,voiceElapsedMs:10000,...patch});},{k,patch});
       await page.waitForTimeout(300);
@@ -36,7 +37,20 @@ const server = http.createServer((req,res)=>{
     for(let k=0;k<47;k++){
       await showScreen(k);
       screens.push(await page.evaluate(()=>({k:__poly.state.k+1,question:__poly.step().q,buttons:[...document.querySelectorAll('.game-action')].map(e=>({text:e.innerText,label:e.getAttribute('aria-label'),role:e.getAttribute('role'),tab:e.getAttribute('tabindex')})),text:document.querySelector('.narrator-text').innerText})));
-      if([0,4,5,8,10,15,17,22,23,25,29,34,39,42,45,46].includes(k)) await page.screenshot({path:path.join(out,'screen-'+(k+1)+'.png')});
+      const buttonAudit=await page.evaluate(()=>{
+        const buttons=[...document.querySelectorAll('.story-surface .ice-button')].filter(e=>e.getBoundingClientRect().width&&getComputedStyle(e).visibility!=='hidden');
+        return buttons.map(e=>{
+          const cs=getComputedStyle(e),box=e.getBoundingClientRect();
+          const walker=document.createTreeWalker(e,NodeFilter.SHOW_TEXT);let node;const bounds=[];
+          while(node=walker.nextNode())if(node.textContent.trim()){const range=document.createRange();range.selectNodeContents(node);bounds.push(range.getBoundingClientRect());}
+          return {text:e.innerText,white:cs.color==='rgb(255, 255, 255)',rim:cs.backgroundImage.includes('gradient'),
+            fits:bounds.every(r=>r.left>=box.left-1&&r.right<=box.right+1&&r.top>=box.top-1&&r.bottom<=box.bottom+1)};
+        });
+      });
+      styledButtons+=buttonAudit.length;
+      assert(buttonAudit.every(b=>b.white&&b.rim&&b.fits),'Button style/text fit on screen '+(k+1)+': '+JSON.stringify(buttonAudit));
+      assert(await page.evaluate(()=>__poly.step().q!=='sort'||__poly.renderVals().targets.every(t=>!t.actionClass.includes('ice-button'))),'Sort drop areas must keep visible headers and dashed outlines');
+      if([0,4,5,8,10,13,15,17,22,23,25,29,34,39,42,45,46].includes(k)) await page.screenshot({path:path.join(out,'screen-'+(k+1)+'.png')});
     }
     const states=[];
     for(const [name,k,patch]of [
@@ -56,6 +70,12 @@ const server = http.createServer((req,res)=>{
     await page.keyboard.press('Tab');
     assert(await page.getByRole('button',{name:'Closed',exact:true}).evaluate(e=>e.matches(':focus-visible')),'Keyboard focus must be visible');
     await page.screenshot({path:path.join(out,'buttons-focus.png')});
+    const nav=page.locator('#polygon-screen-navigator');
+    await nav.locator('#toggle').click();
+    assert.equal(await nav.locator('#list button').count(),47);
+    assert(await nav.locator('button').evaluateAll(es=>es.every(e=>e.classList.contains('ice-button')&&getComputedStyle(e).color==='rgb(255, 255, 255)')),'Navigator shares white text and button style');
+    await page.screenshot({path:path.join(out,'buttons-navigator.png')});
+    await nav.locator('#close').click();
     await page.setViewportSize({width:390,height:844});
     await showScreen(23,{cnt:[2,0]});
     const plus=page.getByRole('button',{name:'Increase number of sides'});
@@ -66,6 +86,6 @@ const server = http.createServer((req,res)=>{
     assert.equal(errors.length,0,errors.join('\n'));
     assert.equal(failed.length,0,JSON.stringify(failed));
     fs.writeFileSync(path.join(out,'audit.json'),JSON.stringify({startup,errors,failed,screens,buttonStates:states,keyboardFocus:true,phoneHitArea:hit},null,2));
-    console.log('AUDIT',JSON.stringify({screens:screens.length,errors,failed,buttonStates:states,keyboardFocus:true,phoneHitArea:hit}));
+    console.log('AUDIT',JSON.stringify({screens:screens.length,styledButtons,errors,failed,buttonStates:states,keyboardFocus:true,phoneHitArea:hit}));
   } finally {await browser.close();server.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;server.close();});

@@ -1,45 +1,58 @@
-  /* Interactive affordances live on separate layers so feedback animations keep their transforms. */
-  @keyframes actionGlow { 0%,100% { opacity:0; } 50% { opacity:.55; } }
-  @keyframes actionShine { 0%,65% { background-position:180% 0; } 100% { background-position:-80% 0; } }
-  .game-action { position:relative; isolation:isolate; touch-action:manipulation; transition:scale 140ms ease; }
-  .game-action::before { content:''; position:absolute; inset:-4px; border-radius:inherit; pointer-events:none; opacity:0; box-shadow:0 0 0 2px rgba(91,204,187,.45); transition:opacity 180ms; }
-  /* Announce primary actions once. Idle cards stay quiet so shapes hold focus. */
-  [data-interactive="true"] .game-primary::before { animation:actionGlow 1.8s ease-in-out both; }
-  [data-interactive="true"] .game-action:hover::before,
-  [data-interactive="true"] .game-action:focus-visible::before { animation:none; opacity:1; box-shadow:0 0 0 2px #80dcca; }
-  [data-interactive="true"] .game-action:active { scale:.98; }
-  .game-action:focus-visible { outline:3px solid #124e57; outline-offset:6px; }
-  .game-primary::after { content:''; position:absolute; inset:7px; border-radius:inherit; pointer-events:none; background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.35) 49%,transparent 63%) 180% 0 / 250% 100% no-repeat; opacity:0; }
-  [data-interactive="true"] .game-primary::after { opacity:1; animation:actionShine 1.8s ease-in-out both; }
-  [data-interactive="true"] .game-handle { filter:drop-shadow(0 0 9px #22b8e6); }
-  /* Quiet controls: no pulsing halo, no shine sweep — a crisp lift on hover, so
-     they still answer the pointer without glowing like a primary button. */
-  .game-quiet { transition:translate 140ms ease, border-color 140ms ease, box-shadow 140ms ease; }
-  .game-quiet::before, .game-quiet::after { display:none !important; }
-  [data-interactive="true"] .game-quiet:hover { filter:brightness(1.025); }
-  [data-interactive="true"] .game-quiet:active { translate:0 2px; }
-
-/* A gentle lift and light sweep signal that the button is ready. */
-[data-interactive="true"] .game-primary:hover { filter:brightness(1.025); }
-.game-primary { transition:translate 160ms ease,scale 140ms ease,filter 160ms ease; }
-[data-interactive="true"] .game-primary:active { translate:0 3px; filter:brightness(.97); }
-.game-action[aria-disabled="true"] { cursor:default; }
-.game-action[aria-disabled="true"]::before,.game-action[aria-disabled="true"]::after { display:none; }
-.game-action[aria-disabled="true"]:hover,.game-action[aria-disabled="true"]:active { scale:1; translate:none; filter:none; }
-/* Muted surfaces communicate unavailable actions without washing out the words. */
-.story-surface [aria-disabled="true"]:not([aria-pressed]) {
-  opacity:1!important;
-  background:#e2efec!important;
-  border-color:#aecdc7!important;
-  color:#506f6c!important;
-  box-shadow:none!important;
-  cursor:default!important;
+/* Shared CSS button: icy rim, warm glossy face, and readable white lettering. */
+.game-action { position:relative; isolation:isolate; touch-action:manipulation; transition:scale 140ms ease; }
+.game-action:focus-visible { outline:3px solid #123a6b; outline-offset:5px; }
+[data-interactive="true"] .game-action:active { scale:.98; }
+[data-interactive="true"] .game-handle { filter:drop-shadow(0 0 9px #22b8e6); }
+.ice-button {
+  --button-face:linear-gradient(180deg,#ffdb51 0%,#ffad2c 26%,#ff8128 48%,#ff682c 75%,#ff5050 100%);
+  --button-rim:linear-gradient(180deg,#ffffff 0%,#d6f4ff 24%,#89d6ff 62%,#4ba5f4 100%);
+  --button-letter-edge:#873015;
+  position:relative; isolation:isolate; box-sizing:border-box;
+  border:6px solid transparent!important;
+  border-radius:24% / 42%!important;
+  background:var(--button-face) padding-box,var(--button-rim) border-box!important;
+  box-shadow:inset 0 3px 0 #ffffff66,inset 0 -3px 0 #dc442740,0 7px 0 #2362b4,0 10px 0 #123f7826,0 13px 16px #173d6b26!important;
+  color:#fff!important; -webkit-text-fill-color:#fff;
+  font-family:Nunito,sans-serif!important; font-weight:900!important;
+  line-height:1.1!important; text-align:center;
+  -webkit-text-stroke:.07em var(--button-letter-edge); paint-order:stroke fill;
+  text-shadow:0 2px 0 var(--button-letter-edge),0 3px 3px #a7461733;
+  white-space:nowrap; user-select:none; cursor:pointer; touch-action:manipulation;
+  transition:translate 140ms ease,scale 140ms ease,filter 140ms ease,box-shadow 140ms ease;
 }
+.ice-button::before {
+  content:''; position:absolute; z-index:-1; inset:2px 8px auto; height:30%;
+  border-radius:45% 45% 48% 48%; background:linear-gradient(#ffffff32,#ffffff08);
+  pointer-events:none;
+}
+.ice-button::after {
+  content:''; position:absolute; z-index:-1; left:10px; top:6px; width:20%; max-width:46px; height:4px;
+  border-radius:999px; background:#fff8; pointer-events:none;
+}
+.ice-button:not([aria-disabled="true"]):not(:disabled):hover {
+  filter:brightness(1.035); translate:0 -3px;
+  box-shadow:inset 0 3px 0 #ffffff88,inset 0 -3px 0 #dc442740,0 9px 0 #2362b4,0 15px 18px #173d6b30!important;
+}
+.ice-button:not([aria-disabled="true"]):not(:disabled):active {
+  translate:0 5px; scale:.97;
+  box-shadow:inset 0 2px 3px #78252240,0 1px 0 #2362ad,0 3px 5px #173d6b25!important;
+}
+.ice-button:focus-visible { outline:3px solid #123a6b; outline-offset:5px; }
+.ice-button[aria-pressed="true"],.ice-button[aria-current="true"] { outline:3px solid #13655b; outline-offset:3px; }
+.ice-button[data-feedback="correct"] { --button-face:linear-gradient(#55ae82,#23704c 40%,#185d43); }
+.ice-button[data-feedback="incorrect"] { --button-face:linear-gradient(#f06e55,#ac2f2b 40%,#92222b); }
+.ice-button[aria-disabled="true"],.ice-button:disabled {
+  --button-letter-edge:#344d62;
+  --button-face:linear-gradient(#7b91a9,#51697e 40%,#405c76);
+  --button-rim:linear-gradient(#d7e6f5,#91aac6);
+  opacity:1!important; cursor:default!important; filter:none!important; translate:none!important; scale:1!important;
+  box-shadow:inset 0 1px 0 #ffffff40,0 2px 0 #58728f!important;
+  text-shadow:0 1px 1px #22384c;
+}
+/* A settled answer keeps its success cue even though it no longer accepts input. */
+.ice-button[data-feedback="correct"][aria-disabled="true"] { --button-face:linear-gradient(#55ae82,#23704c 40%,#185d43); }
+.ice-button[data-feedback="incorrect"][aria-disabled="true"] { --button-face:linear-gradient(#f06e55,#ac2f2b 40%,#92222b); }
 @media(prefers-reduced-motion:reduce) {
-  .game-action,.game-action::before,.game-action::after { animation:none!important; transition:none!important; }
-  .game-primary:hover,.game-primary:active,.game-quiet:hover,.game-quiet:active { translate:none!important; scale:1!important; }
-  .game-primary::after { display:none; }
+  .game-action,.game-action::before,.game-action::after,.ice-button,.ice-button::before,.ice-button::after { animation:none!important; transition:none!important; }
+  .ice-button:hover,.ice-button:active { translate:none!important; scale:1!important; }
 }
-
-/* Menu text shares the same dark teal ink as the other controls. */
-.game-dropdown-option { color:#164e53; -webkit-text-fill-color:#164e53; text-shadow:none; }

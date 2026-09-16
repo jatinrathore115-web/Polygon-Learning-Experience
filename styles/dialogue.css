@@ -1,8 +1,8 @@
-/* Soft, reusable speech bubble; the game supplies its text and head anchor. */
+/* Adapted from the supplied swiftee-bubble.html; the lesson owns voice and timing. */
 .comic-dialogue {
   --dialogue-width: 520px;
   --dialogue-height: 230px;
-  --dialogue-radius: 40px;
+  --dialogue-radius: 29px;
   --dialogue-edge: #169f99;
   --dialogue-paper: #fffbea;
   position: relative;
@@ -10,18 +10,14 @@
   width: min(100%, var(--dialogue-width));
   min-height: var(--dialogue-height);
   box-sizing: border-box;
-  padding: 10px;
-  /* Preserve text spacing; the outline is drawn around the joined silhouette. */
-  border: 3px solid transparent;
+  padding: 9px;
+  border: 4px solid var(--dialogue-edge);
   border-radius: var(--dialogue-radius);
   background: var(--dialogue-paper);
-  box-shadow: inset 0 2px 0 #ffffff;
-  filter: drop-shadow(0 -1.5px 0 var(--dialogue-edge))
-    drop-shadow(1.5px 0 0 var(--dialogue-edge))
-    drop-shadow(0 1.5px 0 var(--dialogue-edge))
-    drop-shadow(-1.5px 0 0 var(--dialogue-edge))
-    drop-shadow(0 3px 0 #86ddc9)
-    drop-shadow(0 6px 8px rgba(12,64,78,.16));
+  box-shadow: inset 0 2px 0 #ffffff,
+    0 0 14px 2px rgba(22,159,153,.16),
+    0 0 30px 8px rgba(22,159,153,.07),
+    0 8px 20px rgba(12,64,78,.16);
 }
 .dialogue-inner {
   position: relative;
@@ -41,23 +37,62 @@
   box-sizing: border-box;
   text-align: center;
   color: #174b52;
-  font: 800 28px/1.25 'Baloo 2', Nunito, sans-serif;
+  font: 800 28px/1.2 Nunito, sans-serif;
 }
-/* The paper tail overlaps the paper body. One parent filter outlines their
-   combined silhouette, so no horizontal border or inset triangle crosses the join. */
+/* A small catch-light from the reference keeps the cream surface playful. */
 .comic-dialogue::before {
   content: '';
   position: absolute;
+  left: 16px;
+  top: 12px;
+  width: 23px;
+  height: 8px;
+  border-radius: 999px;
+  background: #ffffff;
+  transform: rotate(-22deg);
+  pointer-events: none;
+}
+/* The fill covers the body border; only the two free edges are stroked. */
+.dialogue-tail {
+  position: absolute;
   left: var(--dialogue-tail-x, calc(70% - 35px));
-  top: calc(100% - 10px);
-  width: 64px;
-  height: 44px;
+  top: var(--dialogue-tail-top, calc(100% - 4px));
+  transform: var(--dialogue-tail-transform, none);
+  transform-origin: center;
+  width: 60px;
+  height: auto;
+  overflow: visible;
   pointer-events: none;
   z-index: 1;
-  background: var(--dialogue-paper);
-  clip-path: path("M 0 0 H 64 C 56 11 49 24 41 36 Q 37 41 34 37 C 29 24 17 10 0 0 Z");
+}
+.dialogue-tail-fill { fill: var(--dialogue-paper); }
+.dialogue-tail-stroke {
+  fill: none;
+  stroke: var(--dialogue-edge);
+  stroke-width: 4px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
 }
 .comic-dialogue::after {
   content: none;
 }
 .comic-dialogue.dialogue-box { --dialogue-height: 0px; }
+
+/* The boundary lesson opens out into a centred teaching scene. */
+@keyframes boundaryTravel {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  45% { transform: translateY(-95px) rotate(-7deg); }
+  85% { transform: translateY(-10px) rotate(3deg); }
+}
+@keyframes boundaryEmphasis {
+  0% { opacity: .35; }
+  35%, 65% { opacity: 1; }
+  100% { opacity: .65; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-lesson="boundary"] *, [data-lesson="boundary"] *::before {
+    animation: none !important;
+    transition: none !important;
+  }
+}
