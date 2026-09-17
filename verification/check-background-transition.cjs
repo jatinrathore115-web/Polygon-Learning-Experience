@@ -21,19 +21,42 @@ const server = http.createServer((req,res) => {
       await p.waitForFunction(()=>window.__poly?.state.ready);
       await p.evaluate(()=>{const g=__poly;g.timers.forEach(clearTimeout);g._stopRecordedVoice?.();g.later=()=>0;});
     };
-    const show = async k => page.evaluate(k=>{
+    const show = async (k,pauseBackground=false) => page.evaluate(async ({k,pauseBackground})=>{
       const g=__poly;g.setState({k});g.runStep(k,false);g._voiceLocked=false;
       g.prepareNarratorReveal(g.instructionPages(g.step().narr)[0]);
       g.setState({wordReveal:'complete',storyContent:true,storyDialogue:true,storyControls:true,interactive:true,speaking:false});
-    },k);
+      if(pauseBackground) {
+        await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+        const bg=document.querySelector('.boundary-background');
+        bg.getAnimations().forEach(a=>{a.pause();a.currentTime=400;});
+        return Number(getComputedStyle(bg).opacity);
+      }
+    },{k,pauseBackground});
     const opacity = ()=>page.locator('.boundary-background').evaluate(e=>Number(getComputedStyle(e).opacity));
     await boot(page);
     await page.waitForFunction(()=>__poly.state.boundaryBackgroundReady);
+    // Both horizontal edges must follow the same interpolation, entering and leaving.
+    const boardBox=()=>page.locator('.story-board').evaluate(e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,width:r.width};});
+    await show(32);await page.waitForTimeout(1000);const sideBoard=await boardBox();
+    await show(9);await page.waitForTimeout(1000);const centredBoard=await boardBox();
+    for (const [k,from,to] of [[32,centredBoard,sideBoard],[9,sideBoard,centredBoard]]) {
+      await show(k);await page.waitForTimeout(50);
+      const transitions=await page.locator('.story-board').evaluate(e=>{
+        const animations=e.getAnimations().filter(a=>['left','width'].includes(a.transitionProperty));
+        animations.forEach(a=>{a.pause();a.currentTime=450;});
+        return animations.map(a=>({property:a.transitionProperty,duration:a.effect.getTiming().duration,easing:a.effect.getTiming().easing}));
+      });
+      assert.equal(transitions.length,2,'Position and width must both animate');
+      assert(transitions.every(t=>t.duration===900&&t.easing==='ease-in-out'));
+      const mid=await boardBox();
+      for(const edge of ['left','right','width']) assert(Math.abs(mid[edge]-(from[edge]+to[edge])/2)<1,'Uneven board '+edge);
+      await page.locator('.story-board').evaluate(e=>e.getAnimations().forEach(a=>a.finish()));
+    }
     await show(12);await page.waitForTimeout(1300);
     assert.equal(await opacity(),0);
     const before=await page.locator('.story-board').boundingBox();
-    await show(13);await page.waitForTimeout(400);
-    const midway=await opacity();assert(midway>0&&midway<1,'Entry must crossfade; opacity='+midway);
+    const midway=await show(13,true);assert(midway>0&&midway<1,'Entry must crossfade; opacity='+midway);
+    await page.locator('.boundary-background').evaluate(e=>e.getAnimations().forEach(a=>a.finish()));
     await page.waitForTimeout(900);
     assert.equal(await opacity(),1);
     assert.deepEqual(await page.locator('.story-board').boundingBox(),before,'Board stays steady');
@@ -42,8 +65,7 @@ const server = http.createServer((req,res) => {
     await page.screenshot({path:path.join(out,'screen-14.png')});
     await page.getByRole('button',{name:'Figure 1: Straight',exact:true}).click();
     await page.waitForFunction(()=>__poly.state.dd[0]==='Straight');
-    await show(14);await page.waitForTimeout(400);
-    const exit=await opacity();assert(exit>0&&exit<1,'Exit must crossfade');
+    const exit=await show(14,true);assert(exit>0&&exit<1,'Exit must crossfade');
     await show(13);await page.waitForTimeout(1300);assert.equal(await opacity(),1,'Rapid reentry settles');
     await show(14);await page.waitForTimeout(1300);assert.equal(await opacity(),0);
     await page.emulateMedia({reducedMotion:'reduce'});

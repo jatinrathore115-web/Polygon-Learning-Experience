@@ -63,11 +63,10 @@
          boundary and the span missing between them; a closed boundary is shown
          by a light running the whole way round and arriving back where it
          started, which is the thing that makes it closed. --- */
-  @keyframes gapEnd { 0%,100% { transform: scale(1); } 50% { transform: scale(1.2); } }
-  @keyframes gapHalo { 0% { transform: scale(0.55); opacity: 0.6; } 100% { transform: scale(1.55); opacity: 0; } }
-  @keyframes gapSpan { 0%,100% { opacity: 0.68; } 50% { opacity: 1; } }
-  @keyframes sealSweep { 0% { stroke-dashoffset: 100; opacity: 0; } 5% { opacity: 1; } 94% { opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 0; } }
-  @keyframes sealGlow { 0%,100% { filter: drop-shadow(0 0 4px rgba(47,158,94,0.3)); } 50% { filter: drop-shadow(0 0 17px rgba(47,158,94,0.85)); } }
+  @keyframes gapDotReveal { from { opacity:0; transform:scale(.4); } to { opacity:1; transform:scale(1); } }
+  @media (prefers-reduced-motion:reduce) { circle[data-dot="gap"] { animation:none!important; opacity:1!important; transform:none!important; } }
+  @keyframes answerSuccess { 0% { transform:scale(.97); } 45% { transform:scale(1.035); } 100% { transform:scale(1); } }
+  @keyframes answerRetry { 0%,100% { transform:translateX(0); } 25% { transform:translateX(-5px); } 60% { transform:translateX(4px); } }
   @keyframes dr { to { stroke-dashoffset: 0; } }
   @keyframes sideStep { 0% { stroke-dashoffset:100; opacity:1; } 45% { stroke-dashoffset:0; opacity:1; } 80% { stroke-dashoffset:0; opacity:1; } 100% { stroke-dashoffset:0; opacity:0; } }
   /* "Look! The boundaries of the shapes are different too." — the four
@@ -75,6 +74,10 @@
      names are on screen at the same time instead of one finishing before the
      other starts. Only the glow animates once they are drawn. */
   @keyframes boundDraw { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+  @keyframes boundaryCardPulse {
+    0%, 100% { outline: 0 solid rgba(12,143,205,0); outline-offset: 0; box-shadow: inset 0 0 0 180px rgba(71,202,245,0), 0 5px 0 rgba(99,205,221,.2); }
+    20%, 55% { outline: 7px solid rgba(12,143,205,.9); outline-offset: 5px; box-shadow: inset 0 0 0 180px rgba(71,202,245,.2), 0 0 22px rgba(48,188,238,.3), 0 5px 0 rgba(99,205,221,.2); }
+  }
   @keyframes boundLit { 0%,100% { filter: drop-shadow(0 0 7px rgba(34,184,230,0.55)); } 50% { filter: drop-shadow(0 0 20px rgba(34,184,230,1)); } }
   @keyframes polygonRevealGlow { 0%,100% { opacity: 0; filter: drop-shadow(0 0 0 rgba(34,184,230,0)); } 40% { opacity: 1; filter: drop-shadow(0 0 18px rgba(34,184,230,.85)); } }
   @keyframes storyArrive { from { opacity:0; } to { opacity:1; } }
@@ -202,7 +205,7 @@
       </sc-for>
 
       <sc-for list="{{ targets }}" as="t" hint-placeholder-count="0">
-        <div class="{{ t.actionClass }}" role="{{ t.actionRole }}" aria-label="{{ t.label }}" aria-disabled="{{ t.disabled }}" aria-pressed="{{ t.selected }}" data-feedback="{{ t.feedback }}" tabIndex="{{ t.actionTab }}" onKeyDown="{{ activateKey }}" data-label-target="{{ t.labelKey }}" data-nudge="{{ t.nudge }}" style="{{ t.style }}" onPointerEnter="{{ t.enter }}" onPointerLeave="{{ t.leave }}" onFocus="{{ t.enter }}" onBlur="{{ t.leave }}" onClick="{{ t.click }}">{{ t.text }}</div>
+        <div class="{{ t.actionClass }}" role="{{ t.actionRole }}" aria-label="{{ t.label }}" aria-disabled="{{ t.disabled }}" aria-pressed="{{ t.selected }}" data-feedback="{{ t.feedback }}" data-sequence-state="{{ t.sequenceState }}" tabIndex="{{ t.actionTab }}" onKeyDown="{{ activateKey }}" data-label-target="{{ t.labelKey }}" data-nudge="{{ t.nudge }}" style="{{ t.style }}" onPointerEnter="{{ t.enter }}" onPointerLeave="{{ t.leave }}" onFocus="{{ t.enter }}" onBlur="{{ t.leave }}" onClick="{{ t.click }}">{{ t.text }}</div>
       </sc-for>
 
       <sc-for list="{{ callouts }}" as="o" hint-placeholder-count="0">
@@ -228,15 +231,16 @@
 
       <sc-if value="{{ showChoice }}" hint-placeholder-val="{{ false }}">
         <div class="story-controls" style="{{ choiceRowStyle }}">
-          <div class="{{ chooseOpenClass }}" role="{{ chooseOpenRole }}" data-feedback="{{ openFeedback }}" tabIndex="{{ chooseOpenTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeOC }}" onClick="{{ chooseOpen }}" onPointerEnter="{{ hovOpen }}" onPointerLeave="{{ hovOut }}" style="{{ btnOpen }}">Open</div>
-          <div class="{{ chooseClosedClass }}" role="{{ chooseClosedRole }}" data-feedback="{{ closedFeedback }}" tabIndex="{{ chooseClosedTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeClosed }}" onClick="{{ chooseClosed }}" onPointerEnter="{{ hovClosed }}" onPointerLeave="{{ hovOut }}" style="{{ btnClosed }}">Closed</div>
+          <div class="{{ chooseOpenClass }}" role="{{ chooseOpenRole }}" aria-label="Open" data-oc-choice="true" data-feedback="{{ openFeedback }}" tabIndex="{{ chooseOpenTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeOC }}" onClick="{{ chooseOpen }}" onPointerEnter="{{ hovOpen }}" onPointerLeave="{{ hovOut }}" style="{{ btnOpen }}">{{ openText }}</div>
+          <div class="{{ chooseClosedClass }}" role="{{ chooseClosedRole }}" aria-label="Closed" data-oc-choice="true" data-feedback="{{ closedFeedback }}" tabIndex="{{ chooseClosedTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeClosed }}" onClick="{{ chooseClosed }}" onPointerEnter="{{ hovClosed }}" onPointerLeave="{{ hovOut }}" style="{{ btnClosed }}">{{ closedText }}</div>
         </div>
       </sc-if>
 
       <sc-if value="{{ showChips }}" hint-placeholder-val="{{ false }}">
-        <div class="story-controls" style="position:absolute;left:0;bottom:10px;width:100%;display:flex;justify-content:center;gap:44px">
+        <span role="status" aria-live="polite" aria-atomic="true" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;">{{ liveMsg }}</span>
+        <div class="story-controls" style="{{ chipRowStyle }}">
           <sc-for list="{{ chips }}" as="p" hint-placeholder-count="3">
-            <div class="{{ p.actionClass }}" role="{{ p.actionRole }}" tabIndex="{{ p.actionTab }}" aria-pressed="{{ p.selected }}" aria-disabled="{{ p.disabled }}" onKeyDown="{{ activateKey }}" data-nudge="{{ p.nudge }}" onPointerDown="{{ p.down }}" onPointerEnter="{{ p.enter }}" onPointerLeave="{{ p.leave }}" onClick="{{ p.click }}" style="{{ p.style }}">{{ p.text }}</div>
+            <div class="{{ p.actionClass }}" role="{{ p.actionRole }}" tabIndex="{{ p.actionTab }}" aria-pressed="{{ p.selected }}" aria-disabled="{{ p.disabled }}" data-label-chip="{{ p.text }}" onKeyDown="{{ activateKey }}" data-nudge="{{ p.nudge }}" onPointerDown="{{ p.down }}" onPointerEnter="{{ p.enter }}" onPointerLeave="{{ p.leave }}" onClick="{{ p.click }}" style="{{ p.style }}">{{ p.text }}</div>
           </sc-for>
         </div>
       </sc-if>
@@ -247,16 +251,16 @@
             <div role="group" aria-label="{{ n.accessibleLabel }}" style="{{ n.wrap }}">
               <div style="{{ n.captionStyle }}">{{ n.caption }}</div>
               <div class="{{ n.minusClass }}" aria-disabled="{{ n.minusDisabled }}" aria-label="Decrease number of sides" role="{{ n.minusRole }}" tabIndex="{{ n.minusTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ n.minusNudge }}" onClick="{{ n.minus }}" onPointerEnter="{{ n.mIn }}" onPointerLeave="{{ n.out }}" style="{{ n.btnM }}"><span aria-hidden="true" style="{{ n.hitStyle }}"></span>–</div>
-              <div style="{{ n.box }}">{{ n.value }}</div>
+              <div role="status" aria-live="{{ n.valueLive }}" aria-atomic="true" aria-label="{{ n.valueLabel }}" style="{{ n.box }}">{{ n.value }}</div>
               <div class="{{ n.plusClass }}" aria-disabled="{{ n.plusDisabled }}" aria-label="Increase number of sides" role="{{ n.plusRole }}" tabIndex="{{ n.plusTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ n.nudge }}" onClick="{{ n.plus }}" onPointerEnter="{{ n.pIn }}" onPointerLeave="{{ n.out }}" style="{{ n.btnP }}"><span aria-hidden="true" style="{{ n.hitStyle }}"></span>+</div>
             </div>
           </sc-for>
-          <div class="{{ checkClass }}" role="{{ checkRole }}" tabIndex="{{ checkTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeCheck }}" onClick="{{ check }}" onPointerEnter="{{ hovCheck }}" onPointerLeave="{{ hovOut }}" aria-disabled="{{ checkDisabled }}" style="{{ checkStyle }}"><span aria-hidden="true" style="{{ checkHitStyle }}"></span>{{ checkLabel }}</div>
+          <div class="{{ checkClass }}" role="{{ checkRole }}" tabIndex="{{ checkTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeCheck }}" data-feedback="{{ checkFeedback }}" onClick="{{ check }}" onPointerEnter="{{ hovCheck }}" onPointerLeave="{{ hovOut }}" aria-disabled="{{ checkDisabled }}" style="{{ checkStyle }}"><span aria-hidden="true" style="{{ checkHitStyle }}"></span>{{ checkLabel }}</div>
         </div>
       </sc-if>
 
       <sc-if value="{{ showCheck }}" hint-placeholder-val="{{ false }}">
-        <div class="story-controls" style="position:absolute;left:0;bottom:6px;width:100%;display:flex;justify-content:center">
+        <div class="story-controls" style="{{ checkRowStyle }}">
           <div class="{{ checkClass }}" role="{{ checkRole }}" tabIndex="{{ checkTab }}" onKeyDown="{{ activateKey }}" data-nudge="{{ nudgeCheck }}" onClick="{{ check }}" onPointerEnter="{{ hovCheck }}" onPointerLeave="{{ hovOut }}" aria-disabled="{{ checkDisabled }}" style="{{ checkStyle }}">{{ checkLabel }}</div>
         </div>
       </sc-if>
@@ -313,8 +317,8 @@ const SHAPE_VIOLET = '#6354c7'; // Blue-violet outline against the mint learning
    ========================================================================= */
 /* Fallback colors for the shared icy-rim button in styles/buttons.css. */
 const BUTTON = {
-  face: 'linear-gradient(180deg,#ffdb51 0%,#ffad2c 26%,#ff8128 48%,#ff682c 75%,#ff5050 100%)',
-  secondaryFace: 'linear-gradient(180deg,#ffdb51 0%,#ffad2c 26%,#ff8128 48%,#ff682c 75%,#ff5050 100%)',
+  face: 'linear-gradient(180deg,#88ecfb 0%,#50bbdc 26%,#3198c6 52%,#287eb8 100%)',
+  secondaryFace: 'linear-gradient(180deg,#88ecfb 0%,#50bbdc 26%,#3198c6 52%,#287eb8 100%)',
   ink: '#164e53', edge: '#87cdff',
   shadow: 'inset 0 2px 0 #ffffff60, 0 4px 0 #2877bd, 0 7px 11px #173d6b24',
   secondaryShadow: 'inset 0 2px 0 #ffffff60, 0 4px 0 #2877bd, 0 7px 11px #173d6b24'
@@ -643,6 +647,7 @@ class Component extends DCLogic {
   /* ---------- lifecycle ---------- */
   componentDidMount() {
     this.loadBoundaryBackground();
+    this.loadDrawingSound();
     this.stageRef = React.createRef();
     this.zoneARef = React.createRef(); this.zoneBRef = React.createRef();
     this.narrRef = React.createRef();
@@ -804,27 +809,31 @@ class Component extends DCLogic {
       o.start(t0); o.stop(t0 + dur + 0.05);
     });
   }
+  loadDrawingSound() {
+    if (!this._drawingLoad) this._drawingLoad = fetch('assets/sfx/pencil-draw.wav')
+      .then(response => { if (!response.ok) throw new Error('Drawing audio unavailable'); return response.arrayBuffer(); })
+      .then(data => { const ac = this.ac(); return ac ? ac.decodeAudioData(data) : null; })
+      .then(buffer => { if (!this._gone) this._drawingBuffer = buffer; })
+      .catch(() => {}); // A missing sound must never prevent the lesson from playing.
+    return this._drawingLoad;
+  }
   startDrawingSound(ms) {
     this.stopDrawingSound();
     const token = this._drawingToken, requested = Date.now();
     this.withAudio(ac => {
       if (token !== this._drawingToken) return;
       const remaining = ms - (Date.now() - requested);
-      if (remaining <= 0) return;
-      // Soft, filtered pencil friction with small variations in the grain.
-      const buffer = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate);
-      const samples = buffer.getChannelData(0);
-      let smooth = 0;
-      for (let i = 0; i < samples.length; i++) {
-        smooth = smooth * 0.65 + (Math.random() * 2 - 1) * 0.35;
-        samples[i] = smooth * (0.75 + 0.25 * Math.sin(i / ac.sampleRate * 83));
-      }
+      if (remaining <= 0 || !this._drawingBuffer) return;
+      // Real pencil friction, mixed softly and shaped by the drawing's speed.
       const source = ac.createBufferSource(), filter = ac.createBiquadFilter(), gain = ac.createGain();
-      source.buffer = buffer; source.loop = true;
-      filter.type = 'bandpass'; filter.frequency.value = 1800; filter.Q.value = 0.65;
-      gain.gain.setValueAtTime(0.045, ac.currentTime);
+      source.buffer = this._drawingBuffer;
+      filter.type = 'lowpass'; filter.frequency.value = 5200; filter.Q.value = 0.4;
+      gain.gain.setValueAtTime(0, ac.currentTime);
       source.connect(filter); filter.connect(gain); gain.connect(this._sfxOutput);
-      source.onended = () => { source.disconnect(); filter.disconnect(); gain.disconnect(); };
+      source.onended = () => {
+        source.disconnect(); filter.disconnect(); gain.disconnect();
+        if (this._drawingSound && this._drawingSound.source === source) this._drawingSound = null;
+      };
       this._drawingSound = { source, filter, gain, ac };
       source.start(); source.stop(ac.currentTime + remaining / 1000 + 0.04);
       this.updateDrawingSound(this.drawProgress || 0);
@@ -833,8 +842,9 @@ class Component extends DCLogic {
   updateDrawingSound(t) {
     const sound = this._drawingSound; if (!sound) return;
     const speed = 4 * t * (1 - t);
-    sound.gain.gain.setTargetAtTime(0.045 + 0.24 * speed, sound.ac.currentTime, 0.025);
-    sound.filter.frequency.setTargetAtTime(1200 + 900 * speed, sound.ac.currentTime, 0.04);
+    sound.gain.gain.setTargetAtTime(0.06 + 0.29 * speed, sound.ac.currentTime, 0.035);
+    sound.filter.frequency.setTargetAtTime(4200 + 1000 * speed, sound.ac.currentTime, 0.04);
+    sound.source.playbackRate.setTargetAtTime(0.95 + 0.12 * speed, sound.ac.currentTime, 0.05);
   }
   stopDrawingSound() {
     this._drawingToken = (this._drawingToken || 0) + 1;
@@ -976,27 +986,44 @@ class Component extends DCLogic {
       const after = this._voiceAfter;
       this._voiceAfter = null;
       this._voiceLocked = false;
-      this.setState({ speaking: false, interactive: true, voiceError: '', storyControls: true });
+      this.setState({ speaking: false, interactive: true, voiceError: '', storyControls: true, boundaryFocus: null });
       this.guide.onInstructionComplete(!!this.step().q && !this._advanceAfterVoice);
       if (this._advanceAfterVoice) { this._advanceAfterVoice = false; this.advance(); }
       else if (after) after();
       else if (!this.step().auto) this.armNudge();
     });
   }
-  keyword(w) {
+  keyword(w, timing) {
     this.guide.onWord(w, this.step());
     if (this.boundaryScene()) {
       const word = w.toLowerCase().replace(/[^a-z]/g, '');
       const phase = this.step().ph;
-      const focus = phase === 'bound' && word === 'boundaries' ? 'all' :
-        phase === 'sc' && /^(straight|curved)$/.test(word) ? word : null;
-      if (focus) this.setState({ boundaryFocus: focus });
+      const correcting = phase === 'classify' && Number.isInteger(this.state.wrong);
+      const correctKind = this.state.wrong < 2 ? 'straight' : 'curved';
+      const focus = correcting ? (word === 'boundary' || word === correctKind ? 'figure'+this.state.wrong : null) :
+        (phase === 'open' || phase === 'closed') && word === phase ? phase :
+        phase === 'bound' && word === 'boundaries' ? 'all' :
+        ['sc','classify','done'].includes(phase) && /^(straight|curved)$/.test(word) ? word : null;
+      if (focus) {
+        const mediaCue = timing && Number.isFinite(timing.wordStartMs);
+        this.setState({ boundaryFocus: focus,
+          boundaryPulseStart: mediaCue ? timing.wordStartMs : null,
+          boundaryPulseElapsed: mediaCue ? Math.max(0, timing.mediaTimeMs - timing.wordStartMs) : 0,
+          boundaryPulseMs: mediaCue ? Math.max(120, Math.min(1000, timing.durationMs - timing.wordStartMs - 30)) : 600 });
+      }
     }
     const map = { straight: 'straight', curved: 'curved', open: 'open', closed: 'closed', sides: 'sides', side: 'sides', vertex: 'vertex', angle: 'angle', polygon: 'polygon', triangle: 'name', quadrilateral: 'name', pentagon: 'name', hexagon: 'name', heptagon: 'name', octagon: 'name' };
     const key = map[w.toLowerCase().replace(/[^a-z]/g, '')]; if (!key) return;
     if (this.state.hlKind !== key) this.setState({ hlKind: key });
     if (key === 'name' && !this.state.reveal) this.setState({ reveal: true });
     if (key === 'polygon' && this.step().sc === 'S8' && !this.state.reveal) this.setState({ reveal: true });
+  }
+  syncBoundaryPulse(mediaTimeMs) {
+    const st = this.state;
+    if (!st.boundaryFocus || st.boundaryPulseStart == null || this.reducedMotion()) return;
+    const elapsed = Math.max(0, Math.min(st.boundaryPulseMs, mediaTimeMs - st.boundaryPulseStart));
+    if (Math.abs(elapsed - st.boundaryPulseElapsed) >= 16 || elapsed === st.boundaryPulseMs && st.boundaryPulseElapsed !== elapsed)
+      this.setState({ boundaryPulseElapsed: elapsed });
   }
   /* Queue the instruction; actual playback events start and stop the talking pose. */
   narrate(text, opts) {
@@ -1017,7 +1044,7 @@ class Component extends DCLogic {
         this.later(() => this.advance(), polygonReveal ? 1800 : 420);
       }
     };
-    this.setState((st) => ({ narr: text, speaking: true, interactive: false,
+    this.setState((st) => ({ narr: text, speaking: true, interactive: false, boundaryFocus: null,
       voiceError: '', nudge: null, muted: false, voiceElapsedMs: null,
       motionRun: (st.motionRun || 0) + 1,
       hlKind: o.hl !== undefined ? o.hl : st.hlKind
@@ -1289,21 +1316,30 @@ class Component extends DCLogic {
       magicReveal: s.q === 'oc' && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches),
       narrPage: '', draggingLabel:null, labelHover:null, draggingFigure:null, sortHover:null,
       sel: [], ddOpen: -1, wrong: null, ok: null, ocReveal: null, attempts: 0, nudge: null,
-      reveal: false, nums: 0, hlKind: null, boundaryFocus: null, tracing: false, drawing: false, penAt: null,
+      reveal: false, nums: 0, numsB: 0, hlKind: null, boundaryFocus: null, tracing: false, drawing: false, penAt: null,
       zoomed: false, showHand: false, checked: false, phase: s.ph || '',
-      chip: null, badPlace: null, pickedFig: null, justPlaced: null, tick: null, united: false, say: '', morph: null
+      chip: null, labelPrompt: false, badPlace: null, pickedFig: null, justPlaced: null, tick: null, united: false, say: '', morph: null
     };
     if (s.ph === 'draw') reset.drawn = false;
-    if (s.sc !== 'S6' || s.ph === 'classify') { reset.dd = [null, null, null, null]; reset.ddWrong = [false, false, false, false]; }
+    if (s.sc !== 'S6' || s.ph === 'classify') { reset.dd = [null, null, null, null]; reset.ddWrong = [false, false, false, false]; reset.ddActive = 0; }
     if (s.sc !== 'S12') reset.placed = {};
     if (s.sc !== 'C2' && s.sc !== 'C5') reset.sortAt = {};
     if (s.sc === 'S13') reset.cnt = [0, 4];
+    if (s.q === 'deform') reset.dragged = false;
     if (s.q === 'count2') reset.cnt = [5, 4];
     if (s.q === 'recall') { reset.n = 4; reset.recallNameN = 4; }
-    /* A new screen = a new entrance. Sub-phases of one screen keep him on stage. */
-    const fresh = this._lastSc !== s.sc;
+    /* The comparison lesson and its follow-up share one persistent teaching scene. */
+    const continuingComparison = ['S6','S7'].includes(this._lastSc) && ['S6','S7'].includes(s.sc);
+    const fresh = this._lastSc !== s.sc && !continuingComparison;
     reset.storyControls = false;
     if (fresh) { reset.storyContent = false; reset.storyDialogue = false; }
+    // Keep the existing board visible while it reshapes into the introduction layout.
+    if (['S8','S9','S10'].includes(s.sc)) {
+      reset.storyContent = true; reset.storyDialogue = false; reset.narr = ''; reset.narrPage = '';
+      reset.reveal = s.sc === 'S9';
+    }
+    reset.polygonTravel = false;
+    if (this.learningReferenceScene(k)) { reset.storyContent = true; reset.storyDialogue = false; reset.narr = ''; reset.narrPage = ''; }
     this._lastSc = s.sc;
     reset.narrTone = 'teach'; reset.fx = [];
     reset.hoverK = null; reset.pressK = null;
@@ -1327,6 +1363,10 @@ class Component extends DCLogic {
         this.narrate(s.narr, { hl: s.hl, then: () => this.advanceAfterCount() });
       };
       const start = () => {
+        if (s.q === 'recall') {
+          this.narrate(s.narr, {then:() => this.later(() => this.runRecallReview(3), 420)});
+          return;
+        }
         if (s.ph === 'draw') this.setState({ storyContent: true });
         if (s.sc === 'END') this.later(() => this.confetti(), 260);
         if (s.ph === 'point') { this.later(go, 500); return; }
@@ -1345,6 +1385,10 @@ class Component extends DCLogic {
         }
         if (s.ph === 'closer') { this.setState({ zoomed: true }); this.later(go, 300); return; }
         if (s.ph === 'trace') { this.runTrace(1700); this.later(go, 500); return; }
+        if (s.ph === 'quad' && s.morphFrom) {
+          this.morphTo(this.figureInViewBox(s.morphFrom,s.fig),this.fig(s.fig).pts,1100,() => goCounted(s.count,false));
+          return;
+        }
         if (s.ph === 'five' || s.count) { goCounted(s.count || 5, false); return; }
         if (s.ph === 'both') { goCounted(5, true); return; }
         /* The light is held by the phase itself now, so this only has to sound
@@ -1352,16 +1396,6 @@ class Component extends DCLogic {
         /* The boundaries draw themselves on as the step opens and stay lit for
            the whole line; this only has to sound it and let the words follow. */
         if (s.ph === 'bound') { this.later(() => this.sfx('trace'), 60); this.later(go, 250); return; }
-        if (s.ph === 'quad' && s.morphFrom) {
-          const from = this.fig(s.morphFrom).pts, to = this.fig(s.fig).pts;
-          this.setState({ nums: 0 });
-          this.morphTo(from, to, 1500, () => {
-            this.countUntil = performance.now() + this.countDur(4);
-            this.narrate(s.narr, { then: () => this.advanceAfterCount() });
-            this.countSides(4, 0);
-          });
-          return;
-        }
         if (s.q === 'deform') {
           this.narrate(s.narr, { then: () => this.armNudge() });
           return;
@@ -1376,6 +1410,39 @@ class Component extends DCLogic {
      Later screens keep the guide perched. Return the narration delay. */
   enterScreen(fresh) {
     const first = !this._guideGreeted;
+    const parts = this.learningReferenceScene(), continuingParts = !!this._partsAt;
+    this._partsAt = parts;
+    if (parts) {
+      const reduced = this.reducedMotion();
+      const moving = !continuingParts && !reduced;
+      this._guideGreeted = true; this._polygonAt = false; this._boundaryAt = false;
+      this.setState({guideHidden:false,guideFlying:false,boundaryTravel:moving,storyDialogue:!moving});
+      if (moving) this.guide.onScreenEnter(true);
+      this.later(() => {
+        this.setState({boundaryTravel:false,storyDialogue:true});
+        this.guide.settle(GUIDE_REST.WATCH);
+      }, moving ? 950 : 0);
+      return moving ? 1080 : 0;
+    }
+    const polygon = this.polygonIntroScene();
+    const fromPolygon = !!this._polygonAt;
+    this._polygonAt = polygon;
+    if (polygon) {
+      const reduced = this.reducedMotion();
+      const fromPerch = !first && !!this._boundaryAt;
+      this._guideGreeted = true;
+      this._boundaryAt = false;
+      // The second explanation keeps the perch; a new entry brings Swiftee in.
+      const fly = !fromPolygon && !reduced;
+      this.setState({ guideHidden: false, guideFlying: false, boundaryTravel: false,
+        polygonTravel: fly, polygonFromPerch: fromPerch, storyDialogue: reduced || fromPolygon });
+      if (fly) this.guide.onScreenEnter(true);
+      this.later(() => {
+        this.setState({ polygonTravel: false, storyDialogue: true });
+        this.guide.settle(GUIDE_REST.WATCH);
+      }, fly ? 1100 : 0);
+      return fly ? 1240 : (reduced ? 0 : 380);
+    }
     const boundary = this.boundaryScene();
     const moving = !first && boundary !== !!this._boundaryAt;
     this._boundaryAt = boundary;
@@ -1508,8 +1575,7 @@ class Component extends DCLogic {
       // Browser autoplay permission may require the learner's first tap.
       try {
         const ac = this.state.muted ? null : this.ac();
-        if (ac && ac.state !== 'running') this.unlockAudio().then(begin);
-        else begin();
+        Promise.all([this.loadDrawingSound(),ac && ac.state !== 'running' ? this.unlockAudio() : Promise.resolve()]).then(begin);
       } catch (error) { begin(); }
     });
   }
@@ -1597,6 +1663,13 @@ class Component extends DCLogic {
   // Keyboard activation uses the same click handlers and answer guards as pointer input.
   activateKey = (event) => {
     if (event.target !== event.currentTarget || this.locked() || event.repeat) return;
+    if (event.key === 'Escape' && this.step().sc === 'S12' && this.state.chip) {
+      event.preventDefault();
+      const chip = this.state.chip;
+      this.clearNudge();
+      this.setState({chip:null,labelHover:null,say:chip+' selection cancelled.'}, () => this.focusLabelControl('[data-label-chip="'+chip+'"]'));
+      return;
+    }
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault(); event.currentTarget.click();
     }
@@ -1677,7 +1750,7 @@ class Component extends DCLogic {
       });
       if (!el) return;
         const b = el.getBoundingClientRect(), p = box.getBoundingClientRect();
-        const sc = p.width / SAFE.w || this.state.scale || 1;
+        const sc = p.width / (this.learningReferenceScene() ? STAGE.w : SAFE.w) || this.state.scale || 1;
         const pt = { x: (b.left + b.width / 2 - p.left) / sc, y: (b.top + b.height / 2 - p.top) / sc };
       this.setState({ nudge: pt });
       this.guide.onHint();
@@ -1708,27 +1781,33 @@ class Component extends DCLogic {
   }
 
   /* ---------- open / closed ---------- */
+  showBoundaryFeedback(text) {
+    const started = Date.now();
+    this.runTrace(1800);
+    this.feedback(text, () => {
+      // Finish the trace and leave time to read the revealed answer before moving on.
+      this.later(this.advance, Math.max(650, 2500 - (Date.now() - started)));
+    });
+  }
   choose = (val) => {
     /* ocReveal: the answer is already on screen and an advance is queued, so
        further taps must not re-evaluate a resolved question. */
     const s = this.step(); if (this.state.ok || this.state.ocReveal || this.locked()) return;
     this.clearNudge(); this.sfx('tap');
     if (val === s.ans) {
-      this.setState({ ok: val, wrong: null }); this.react('happy'); this.confetti();
-      this.runTrace(1100);
-      this.feedback(val === 'closed' ? 'Yes! It is closed.' : 'Yes! It is open.', () => this.later(this.advance, 250));
+      this.setState({ ok:val,wrong:null,interactive:false,narrTone:'ok' });
+      this.guide.onCorrectAnswer(); this.sfx('ok');
+      if (!this.reducedMotion()) this.burst(OPENING_BOARD.x+OPENING_BOARD.w/2-SAFE.x,
+        OPENING_BOARD.y+OPENING_BOARD.h-SAFE.y+60,{n:7,d:12,cols:['#ffffff','#8ee9ff','#b9b4ff']});
+      this.showBoundaryFeedback(val === 'closed' ? 'Yes! It is closed.' : 'Yes! It is open.');
     } else {
-      /* Show the answer rather than asking for another guess: mark the choice,
-         light up the correct option, point at the evidence on the shape, say
-         why, then move to the next shape. Input stays locked throughout so a
-         second tap cannot skip the explanation. */
+      /* Reveal the correct answer, explain the boundary, then move to the next figure. */
       this.setState({
         wrong: val, ocReveal: s.ans, interactive: false,
         attempts: this.state.attempts + 1
       });
       this.sfx('no'); this.react('wrong');
-      this.runTrace(1800);
-      this.feedback(s.fb[s.ans], () => this.later(this.advance, 900));
+      this.showBoundaryFeedback(s.fb[s.ans]);
     }
   };
   chooseOpen = () => this.choose('open');
@@ -1740,25 +1819,37 @@ class Component extends DCLogic {
     return (ev) => {
       if (ev && ev.stopPropagation) ev.stopPropagation();
       if (this.locked()) return;
-      this.clearNudge();
-      this.sfx('tap');
       const s = this.step(), truth = ['Straight', 'Straight', 'Curved', 'Curved'];
-      if (s.ph !== 'classify' || this.state.dd[i] === truth[i]) return;
+      if (s.ph !== 'classify' || i !== (this.state.ddActive || 0) || this.state.dd[i] === truth[i]) return;
+      this.clearNudge(); this.sfx('tap');
+      const moveKeyboardFocus = !!(ev && ev.currentTarget && ev.currentTarget === document.activeElement);
       const dd = this.state.dd.slice(), bad = this.state.ddWrong.slice();
       this.setState({ ddOpen: -1 });
       if (val === truth[i]) {
         dd[i] = val; bad[i] = false;
-        this.setState({ dd: dd, ddWrong: bad, interactive: false }); this.react('happy'); this.confetti();
+        const complete = dd.every((v, j) => v === truth[j]);
+        this.setState({ dd: dd, ddWrong: bad, interactive: false }); this.react('happy'); this.sfx('ok');
+        if (complete) this.confetti();
+        else if (!this.reducedMotion()) this.burst(227+i*372,484,{n:7,d:12,cols:['#ffffff','#8ee9ff','#94e4bb']});
         const generation = this.gen;
         this.later(() => {
           if (generation !== this.gen) return;
           if (dd.every((v, j) => v === truth[j])) this.advance();
-          else this.setState({ interactive: true });
-        }, 1600);
+          else {
+            this.setState({ ddActive:i+1, hoverK:null, pressK:null, boundaryFocus:null });
+            this.later(() => {
+              if (generation !== this.gen) return;
+              this.setState({ interactive:true }, () => {
+                if (moveKeyboardFocus) this.safeRef.current?.querySelector('[data-sequence-state="active"][aria-disabled="false"]')?.focus();
+                this.armNudge();
+              });
+            }, this.reducedMotion() ? 0 : 360);
+          }
+        }, complete ? 1000 : 650);
       } else {
         dd[i] = val; bad[i] = true;
         this.setState({ dd: dd, ddWrong: bad, wrong: i }); this.sfx('no'); this.react('wrong');
-        this.setState({ hlKind: val === 'Curved' ? 'segsOf' + i : 'curveOf' + i });
+        this.setState({ hlKind: null });
         this.feedback(val === 'Curved'
           ? "Look! This boundary isn't curved. It is made of straight lines."
           : 'Look closely. This boundary bends smoothly. It is curved.',
@@ -1827,7 +1918,7 @@ class Component extends DCLogic {
             if (finished) this.react('happy'); else { this.burstHere(); this.guide.onCorrectProgress(); }
             if (finished) {
               this.setState({ checked: true });
-              this.feedback((s.fb && s.fb.ok) || 'That is right! These are the ones.', () => {});
+              this.feedback((s.fb && s.fb.ok) || 'That is right! These are the ones.', () => this.later(this.advance, 420));
             }
           } else {
             this.setState({ wrong: i, attempts: this.state.attempts + 1 }); this.sfx('no'); this.react('wrong');
@@ -1860,7 +1951,7 @@ class Component extends DCLogic {
       this.sfx('tap');
       if (sel === truth) {
         this.setState({ checked: true, ok: 1 }); this.sfx('ok'); this.react('happy'); this.confetti();
-        this.feedback(s.fb.ok, () => this.armNudge());
+        this.feedback(s.fb.ok, () => this.later(this.advance, 420));
       } else {
         const a = this.state.attempts + 1;
         this.setState({ attempts: a, wrong: 'set' }); this.sfx('no'); this.react('wrong');
@@ -1912,6 +2003,17 @@ class Component extends DCLogic {
   }
 
   /* ---------- recall stepper ---------- */
+  runRecallReview(n) {
+    const names = {3:'triangle',4:'quadrilateral',5:'pentagon',6:'hexagon',7:'heptagon',8:'octagon'};
+    const speak = () => {
+      this.setState({n,recallNameN:n});
+      this.narrate('A polygon with ' + n + ' sides is called ' + (n === 8 ? 'an ' : 'a ') + names[n] + '.', {then:() => {
+        this.later(n === 8 ? this.advance : () => this.runRecallReview(n+1), 420);
+      }});
+    };
+    if (n === 3 || this.reducedMotion()) { speak(); return; }
+    this.morphTo(this.recallPoints(n-1),this.recallPoints(n),650,speak,{n});
+  }
   recallPoints(n) { return this.P.reg(n, 500, 500, 300, 180 / n); }
   bumpN(d) {
     return () => {
@@ -1967,8 +2069,7 @@ class Component extends DCLogic {
         cleanup();
         if (generation !== this.gen || this.locked()) return;
         this.setState({ showHand: false });
-        const o = this.fig('pentagon').pts;
-        const moved = pts.some((p, j) => Math.hypot(p[0] - o[j][0], p[1] - o[j][1]) > 26);
+        const moved = pts.some((p, j) => Math.hypot(p[0] - base[j][0], p[1] - base[j][1]) > 26);
         if (moved && !this.state.dragged) {
           this.setState({ dragged: true }); this.sfx('done'); this.react('happy');
           this.later(this.advance, 700);
@@ -1997,7 +2098,7 @@ class Component extends DCLogic {
       const findTarget = e => {
         const board = this.safeRef.current;
         if (!board) return null;
-        const margin = 24 * board.getBoundingClientRect().width / SAFE.w;
+        const margin = 24 * board.getBoundingClientRect().width / (this.learningReferenceScene() ? STAGE.w : SAFE.w);
         return Array.from(board.querySelectorAll('[data-label-target]')).filter(node => !this.state.placed[node.getAttribute('data-label-target')])
           .map(node => ({ node, r: node.getBoundingClientRect() }))
           .filter(({r}) => e.clientX >= r.left-margin && e.clientX <= r.right+margin && e.clientY >= r.top-margin && e.clientY <= r.bottom+margin)
@@ -2030,7 +2131,7 @@ class Component extends DCLogic {
         if (!active) {
           active=true; this.clearNudge(); this.sfx('pick'); this.guide.onInteractionStart();
           this.setState({ chip:name, draggingLabel:name });
-          if (ghost) { ghost.className='ice-button'; ghost.textContent=name; Object.assign(ghost.style,this.buttonSkin('secondary',22),{opacity:'1',width:'200px',height:'78px',padding:'0 16px',background:this.labelTheme(name).gradient,border:'3px solid '+this.labelTheme(name).color,color:this.labelTheme(name).ink,font:'800 36px "Baloo 2",sans-serif',whiteSpace:'nowrap'}); }
+          if (ghost) { ghost.className='label-tile'; ghost.textContent=name; Object.assign(ghost.style,this.labelTileStyle(name),{opacity:'1'}); }
         }
         if (frame === null) frame=requestAnimationFrame(paint);
       };
@@ -2158,38 +2259,54 @@ class Component extends DCLogic {
       window.addEventListener('pointermove',move,{passive:false}); window.addEventListener('pointerup',up); window.addEventListener('pointercancel',cancel);
     };
   }
+  focusLabelControl(selector) {
+    this.later(() => this.safeRef.current?.querySelector(selector)?.focus({preventScroll:true}), 0);
+  }
   pickChip(name) {
-    return () => {
+    return (event) => {
       if (this.locked()) return;
       if (Date.now() < (this._labelClickUntil || 0) || Object.values(this.state.placed).includes(name)) return;
       this.clearNudge(); this.sfx('pick');
       const pick = this.state.chip === name ? null : name;
       if (pick) this.guide.onInteractionStart();
-      this.setState({ chip: pick }, () => { if (pick) this.armStage2(); });
+      this.setState({ chip: pick, labelPrompt:false, say:pick ? pick+' selected. Choose a question-mark target. Press Escape to cancel.' : name+' selection cancelled.' }, () => {
+        if (pick) {
+          this.armStage2();
+          if (event && event.detail === 0) this.focusLabelControl('[data-label-target][aria-disabled="false"]');
+        }
+      });
     };
   }
   hitTarget(key) {
-    return () => {
+    return (event) => {
       if (this.locked()) return;
       this.clearNudge();
       const want = { side: 'Side', vertex: 'Vertex', angle: 'Angle' }[key];
       const chip = this.state.chip;
-      if (!chip) return;
+      const keyboard = !!(event && event.detail === 0);
+      if (!chip) {
+        this.setState({labelPrompt:true,say:'Choose a coloured label first, then choose a question-mark target.'});
+        this.later(() => this.setState({labelPrompt:false}), 1200);
+        if (keyboard) this.focusLabelControl('[data-label-chip][aria-disabled="false"]');
+        return;
+      }
       if (this.state.placed[key]) return;
       if (chip === want) {
         const placed = Object.assign({}, this.state.placed); placed[key] = chip;
         const done = Object.keys(placed).length === 3;
-        this.setState({ placed: placed, chip: null }); this.sfx('snap');
+        this.setState({ placed: placed, chip: null, labelPrompt:false, say:chip+' correctly placed.' }, () => {
+          if (keyboard && !done) this.focusLabelControl('[data-label-chip][aria-disabled="false"]');
+        }); this.sfx('snap');
         if (done) this.react('happy'); else { this.burstHere(); this.guide.onCorrectProgress(); }
         if (done) {
           this.sfx('done'); this.confetti();
           this.feedback('Perfect! Side, vertex and angle — all labelled.', () => this.later(this.advance, 400));
         }
       } else {
-        this.setState({ badPlace: key, chip: null }); this.sfx('no'); this.react('wrong');
+        this.setState({ badPlace: key, chip: null, say:'That label does not fit here. Choose a label and try again.' }); this.sfx('no'); this.react('wrong');
         this.later(() => this.setState({ badPlace: null }), 700);
         this.feedback('Not that one. A side is straight, a vertex is a corner.',
-          () => this.restoreQuestion());
+          () => { this.restoreQuestion(); if (keyboard) this.focusLabelControl('[data-label-chip="'+chip+'"]'); });
       }
     };
   }
@@ -2295,7 +2412,8 @@ class Component extends DCLogic {
     /* Hover lifts the card; pressing gives tactile feedback. */
     const hk = 'card:' + o.key;
     const clickable = !!o.click;
-    const hov = clickable && this.state.hoverK === hk;
+    const quietFigure = o.plain && this.state.k < 9;
+    const hov = clickable && !quietFigure && this.state.hoverK === hk;
     const prs = clickable && this.state.pressK === hk;
     const still = !o.anim || o.anim === 'none';
     if (hov && !o.plain && st !== 'bad') {
@@ -2332,8 +2450,8 @@ class Component extends DCLogic {
         borderRadius: '34px', pointerEvents: 'none',
         background: 'radial-gradient(circle at 50% 45%, rgba(34,184,230,0.16), rgba(34,184,230,0) 68%)'
       } : { display: 'none' },
-      enter: clickable ? this.hovOn(hk) : null,
-      leave: clickable ? this.hovOff : null,
+      enter: clickable && !quietFigure ? this.hovOn(hk) : null,
+      leave: clickable && !quietFigure ? this.hovOff : null,
       svgRef: o.svgRef, hl: o.hl || [], arcs: (o.arcs || []).map(arc => Object.assign({ fill: 'none' }, arc)), dots: o.dots || [], nums: o.nums || [],
       handles: o.handles || [], traceD: o.traceD || '', traceW: +(((o.sw || 16) + 7) * kk).toFixed(2),
       pins: (o.nums || []).map((n) => {
@@ -2428,10 +2546,7 @@ class Component extends DCLogic {
     if (F.pts && F.pts.length > 1) return [F.pts[0], F.pts[F.pts.length - 1]];
     return null;
   }
-  /* What to draw on a figure once the open-or-closed question is resolved.
-     Open: mark the gap. Closed and answered correctly: seal the boundary.
-     A closed figure answered wrongly already gets the blue trace, which runs
-     the same lap for the same reason, so nothing is added on top of it. */
+  /* Open figures retain their gap dots; both outcomes use the same blue trace. */
   ocMarks(name) {
     const st = this.state, reduced = this.reducedMotion();
     const out = { dots: [], hl: [], pathStyle: null };
@@ -2442,54 +2557,22 @@ class Component extends DCLogic {
     if (resolved === 'open') {
       const ends = this.gapEnds(name);
       if (!ends) return out;
-      /* White cores with a red ring, so the marks stay legible whether the
-         outline under them is orange or has turned green. */
-      ends.forEach((p, i) => {
-        out.dots.push({
-          x: p[0], y: p[1], r: +(66 * kk).toFixed(2), fill: 'rgba(232,85,63,0.24)', stroke: 'none', sw: 0,
-          style: reduced ? { opacity: 0.45 } : {
-            transformBox: 'fill-box', transformOrigin: 'center',
-            animation: 'gapHalo 1.6s ease-out ' + (i * 0.35) + 's infinite'
-          }
+      /* Individual dots reveal the missing span in order, then stay still.
+         Leave both endpoints bare so the original opening stays easy to read. */
+      const dx = ends[1][0] - ends[0][0], dy = ends[1][1] - ends[0][1];
+      const count = Math.max(5, Math.min(12, Math.round(Math.hypot(dx,dy) / (32 * kk))));
+      for (let i = 0; i < count; i++) {
+        const t = (i + 1) / (count + 1);
+        out.dots.push({dot:'gap',x:ends[0][0]+dx*t,y:ends[0][1]+dy*t,
+          r:6.5*kk,fill:SHAPE_VIOLET,stroke:'none',sw:0,
+          style:{opacity:1,transformBox:'fill-box',transformOrigin:'center',
+            filter:'drop-shadow(0 0 3px rgba(255,255,255,.9))',
+            animation:reduced ? 'none' : 'gapDotReveal 160ms ease-out '+(i*90)+'ms both'}
         });
-      });
-      ends.forEach((p, i) => {
-        out.dots.push({
-          x: p[0], y: p[1], r: +(23 * kk).toFixed(2), fill: '#ffffff', stroke: RED, sw: +(10 * kk).toFixed(2),
-          style: Object.assign({ filter: 'drop-shadow(0 2px 4px rgba(20,70,120,0.35))' },
-            reduced ? {} : {
-              transformBox: 'fill-box', transformOrigin: 'center',
-              animation: 'gapEnd 1.6s ease-in-out ' + (i * 0.35) + 's infinite'
-            })
-        });
-      });
-      /* The missing span, dashed so it can never be mistaken for boundary, and
-         haloed in white so it separates from the outline's own colour.
-         The template normalises these paths to pathLength 100, so the dashes
-         come out the same count whatever the figure's scale. */
-      out.hl.push({
-        d: 'M' + ends[0][0] + ' ' + ends[0][1] + ' L' + ends[1][0] + ' ' + ends[1][1],
-        color: RED, w: +(14 * kk).toFixed(2),
-        style: Object.assign({
-          strokeDasharray: '4.5 4.5', filter: 'drop-shadow(0 0 7px rgba(255,255,255,0.98))'
-        }, reduced ? { opacity: 0.9 } : { animation: 'gapSpan 1.6s ease-in-out infinite' })
-      });
+      }
       return out;
     }
 
-    /* Closed, and they said so: run a light all the way round the boundary and
-       let it arrive back at its own tail, twice, over a green glow. */
-    if (st.ok === 'closed') {
-      out.hl.push({
-        d: this.figD(name), color: '#f4fff8', w: +(19 * kk).toFixed(2),
-        style: reduced ? { opacity: 0 } : {
-          strokeDasharray: '17 83', strokeDashoffset: 100,
-          filter: 'drop-shadow(0 0 12px rgba(47,158,94,1)) drop-shadow(0 0 22px rgba(47,158,94,0.7))',
-          animation: 'sealSweep 1400ms cubic-bezier(.42,0,.3,1) 2 both'
-        }
-      });
-      if (!reduced) out.pathStyle = { animation: 'sealGlow 1400ms ease-in-out 2' };
-    }
     return out;
   }
 
@@ -2518,14 +2601,16 @@ class Component extends DCLogic {
       storyCounting: !!(st.ready && this.P && this.step().sc === 'S13' && this.step().ph === 'five'),
       layoutScroll: () => this.clearNudge(), viewportStyle, scalerStyle: scaler, narration: st.narr || '', narratorParts: this.narratorParts(), screenLabel: 'loading',
       choiceRowStyle: { position:'absolute',left:0,bottom:'6px',width:'100%',display:'flex',justifyContent:'center',gap:'74px' },
+      checkRowStyle: {position:'absolute',left:0,bottom:'6px',width:'100%',display:'flex',justifyContent:'center'},
+      chipRowStyle: {position:'absolute',left:0,bottom:'10px',width:'100%',display:'flex',justifyContent:'center',gap:'44px'},
       cards: [], targets: [], callouts: [], leaders: [], drops: [], chips: [], counters: [],
       counterRowStyle: {position:'absolute',left:0,bottom:'8px',width:'100%',display:'flex',justifyContent:'center',alignItems:'center',gap:'24px'},
       showChoice: false, showChips: false, showCounter: false, showCheck: false, showZones: false, showHand: false,
-      zoneRowStyle: {}, liveMsg: this.state.say || '',
+      zoneRowStyle: {}, liveMsg: this.state.say || '', checkFeedback: '',
       narrStyle: this.narrStyle(), narrRef: this.narrRef,
       bgStyle: this.bgStyle(), boardStyle: this.boardStyle(), signStyle: this.signStyle(),
       boundaryBackgroundStyle: this.boundaryBackgroundStyle(),
-      lessonScene: this.boundaryScene() ? 'boundary' : 'standard',
+      lessonScene: this.learningReferenceScene() ? 'parts-reference' : this.polygonIntroScene() ? 'polygon-intro' : this.boundaryScene() ? 'boundary' : 'standard',
       safeStyle: this.safeStyle(),
       showGuide: GUIDE_VISIBLE, guideViewport: this.guideViewportStyle(), guideStyle: this.guideStyle(),
       guideRef: this.guideRef, guideHidden: st.guideHidden, guideCell: (window.SWIFTEE && window.SWIFTEE.cell) || 256,
@@ -2563,9 +2648,11 @@ class Component extends DCLogic {
     const s = this.step();
     const V = Object.assign({}, shellOnly, {
       screenLabel: s.label,
-      check: this.check, checkLabel: st.checked && !s.check ? 'Next' : 'Check',
+      check: this.check, checkLabel: 'Check',
       checkStyle: this.bigBtn(260),
       chooseOpen: this.chooseOpen, chooseClosed: this.chooseClosed,
+      openText:((st.ok||st.ocReveal)==='open'?'✓ ':st.wrong==='open'?'× ':'')+'Open',
+      closedText:((st.ok||st.ocReveal)==='closed'?'✓ ':st.wrong==='closed'?'× ':'')+'Closed',
       btnOpen: this.ocBtn('open'), btnClosed: this.ocBtn('closed')
     });
 
@@ -2602,8 +2689,12 @@ class Component extends DCLogic {
     V.controlsState = V.storyControls ? 'ready' : 'waiting';
     V.counterClass = V.storyCounting ? '' : 'story-controls';
     for (const item of V.cards) meta(item, item.click, 'game-action');
-    for (const item of V.targets) meta(item, item.click, item.text ? 'game-action game-primary ice-button' : 'game-action', 'action', item.text ? 'ice-button' : '');
-    for (const item of V.chips) meta(item, item.click, 'game-action game-quiet ice-button', 'action', 'ice-button');
+    for (const item of V.targets) {
+      // Label sockets become teaching annotations, not another row of buttons.
+      if (item.labelKey) meta(item, item.click, 'game-action label-socket', 'action', 'label-socket');
+      else meta(item, item.click, item.text ? 'game-action game-primary ice-button' : 'game-action', 'action', item.text ? 'ice-button' : '');
+    }
+    for (const item of V.chips) meta(item, item.click, 'game-action game-quiet label-tile', 'action', 'label-tile');
     for (const drop of V.drops) {
       meta(drop, drop.click, 'game-action game-quiet ice-button', 'action', 'ice-button');
       for (const option of drop.menu || []) meta(option, option.click, 'game-action game-quiet game-dropdown-option ice-button', 'action', 'game-dropdown-option ice-button');
@@ -2613,6 +2704,7 @@ class Component extends DCLogic {
       meta(counter, counter.plus, 'game-action game-quiet ice-button', 'plus', 'ice-button');
     }
     for (const key of ['chooseOpen', 'chooseClosed', 'check']) meta(V, V[key], 'game-action game-primary ice-button', key, 'ice-button');
+    if (V.showCounter) V.checkRole = 'button';
     for (const kind of ['open', 'closed']) V[kind + 'Feedback'] = this.state.ok === kind || this.state.ocReveal === kind ? 'correct' : (this.state.wrong === kind ? 'incorrect' : '');
   }
 
@@ -2649,7 +2741,7 @@ class Component extends DCLogic {
     (V.targets || []).forEach((t, i) => {
       const k = 'tg' + i;
       t.enter = this.hovOn(k); t.leave = this.hovOff;
-      if (t.click && !t.disabled && t.style) t.style = this.liftable(t.style, k, { lift: 4, scale: 1.03 });
+      if (t.click && !t.disabled && t.style && !t.labelKey) t.style = this.liftable(t.style, k, { lift: 4, scale: 1.03 });
     });
     (V.chips || []).forEach((p, i) => {
       const k = 'chip' + i;
@@ -2678,10 +2770,13 @@ class Component extends DCLogic {
       c.btnM = c.minusDisabled ? Object.assign({},base,disabledStyle) : this.liftable(base,mk,{lift:2,scale:1.03});
       c.btnP = c.plusDisabled ? Object.assign({},base,disabledStyle) : this.liftable(base,pk,{lift:2,scale:1.03});
       c.hitStyle = this.counterHitStyle();
+      c.valueLive = c.fixed ? 'off' : 'polite';
+      c.valueLabel = c.value + (Number(c.value) === 1 ? ' side' : ' sides');
       if(c.minusDisabled){c.minus=null;c.mIn=null;}
       if(c.plusDisabled){c.plus=null;c.pIn=null;c.nudge='';}
     });
     if(V.showCounter && V.checkStyle && V.checkStyle.display !== 'none') {
+      V.checkFeedback = this.state.ok ? 'correct' : this.state.wrong !== null ? 'incorrect' : '';
       V.checkDisabled = this.locked() || !!this.state.ok || (this.step().q === 'count' && this.state.cnt[0] === 0);
       V.checkHitStyle = this.counterHitStyle();
       V.checkStyle.position = V.checkStyle.position || 'relative';
@@ -2836,12 +2931,34 @@ class Component extends DCLogic {
     });
   }
   boundaryScene() {
-    return !!(this.P && this.state.ready && this.step().sc === 'S6' && ['bound','sc','classify','done'].includes(this.step().ph));
+    // Keep the same teaching composition from the open/closed introduction onward.
+    return !!(this.P && this.state.ready && ['S6','S7'].includes(this.step().sc));
   }
-  boundaryCueStyle() {
-    return {opacity:1,strokeDasharray:'100',strokeDashoffset:0,
-      filter:'drop-shadow(0 0 5px rgba(34,184,230,.35))',
-      animation:this.reducedMotion()?'none':'boundDraw 850ms ease-out both, boundaryEmphasis 1800ms ease-out both'};
+  polygonIntroScene() {
+    return !!(this.P && this.state.ready && ['S8','S9','S10'].includes(this.step().sc));
+  }
+  learningReferenceScene(k = this.state.k) {
+    // Screens 20–32 and 34–35 share Screen 22's teaching composition.
+    return !!(this.P && this.state.ready && ((k >= 19 && k <= 31) || k === 33 || k === 34));
+  }
+  learningFigureBox() {
+    return {x:900,y:190,w:700,h:700};
+  }
+  figureInViewBox(fromKey,toKey) {
+    // Preserve the source silhouette's on-screen size when the SVG viewBox changes.
+    const source=this.fig(fromKey),a=source.vb.split(' ').map(Number),b=this.fig(toKey).vb.split(' ').map(Number);
+    const sa=1/Math.max(a[2],a[3]),sb=1/Math.max(b[2],b[3]);
+    return source.pts.map(p=>p.map((v,axis)=>b[axis]+((v-a[axis])*sa+(1-a[axis+2]*sa)/2-(1-b[axis+2]*sb)/2)/sb));
+  }
+  polygonIntroLayout() {
+    // The board itself is centred on both axes; all teaching content stays inside it.
+    const w = BOARD.w + 64, h = 760;
+    return {
+      board: {x:(STAGE.w-w)/2,y:(STAGE.h-h)/2,w,h},
+      guide: {x:1450,y:580,w:340,h:340},
+      dialogue: {x:950,y:325,w:760,h:225},
+      figure: {x:300,y:270,w:650,h:650}
+    };
   }
   bgStyle() {
     return Object.assign(stageBox({ x: 0, y: 0, w: STAGE.w, h: STAGE.h }, 0),
@@ -2850,16 +2967,19 @@ class Component extends DCLogic {
   }
   boardStyle() {
     const boundaryWidth = BOARD.w + 64;
-    const box = this.boundaryScene() ? {x:(STAGE.w-boundaryWidth)/2,y:70,w:boundaryWidth,h:740} : BOARD;
-    const travel = this.boundaryScene() || this.state.boundaryTravel;
+    const box = this.learningReferenceScene() ? {x:100,y:(STAGE.h-900)/2,w:1780,h:900} : this.polygonIntroScene() ? this.polygonIntroLayout().board : this.boundaryScene() ? {x:(STAGE.w-boundaryWidth)/2,y:112,w:boundaryWidth,h:698} : BOARD;
+    const travel = this.learningReferenceScene() || this.polygonIntroScene() || this.boundaryScene() || this.state.boundaryTravel;
     return Object.assign(stageBox(box, 30), {
       opacity: this.state.storyContent ? 1 : 0, transition: this.reducedMotion() ? 'none' :
-        (travel ? 'opacity 260ms ease-out, left 900ms ease-in-out, top 900ms ease-in-out, height 900ms ease-in-out' : 'opacity 260ms ease-out'),
+        (travel ? 'opacity 260ms ease-out, left 900ms ease-in-out, top 900ms ease-in-out, width 900ms ease-in-out, height 900ms ease-in-out' : 'opacity 260ms ease-out'),
       pointerEvents: 'none'
     });
   }
   dialogueLayout() {
-    if (this.boundaryScene()) return {x:610,y:780,w:940,h:220};
+    if (this.learningReferenceScene()) return {x:140,y:450,w:500,h:200};
+    if (this.P && this.state.ready && this.step().sc === 'S10') return {x:1170,y:285,w:550,h:220};
+    if (this.polygonIntroScene()) return this.polygonIntroLayout().dialogue;
+    if (this.boundaryScene()) return {x:510,y:810,w:1000,h:190};
     const step = this.state.ready ? this.step() : null;
     const roomy = step && (step.sc === 'S1' || step.q === 'oc');
     // Grow upward from a fixed anchor; leave air between the tail and the crest.
@@ -2868,39 +2988,43 @@ class Component extends DCLogic {
     const viewportWidth = window.innerWidth || STAGE.w;
     const viewportHeight = window.innerHeight || STAGE.h;
     const scale = Math.max(0.55, Math.min(viewportWidth / STAGE.w, viewportHeight / STAGE.h));
-    const x = roomy ? SWIFTEE_CENTRE - 86 : 22;
+    const x = roomy ? SWIFTEE_CENTRE - 86 : 8;
     const availableWidth = viewportWidth < 700 ? viewportWidth / scale - x - 22 : STAGE.w;
-    return { x, y:bottom - 272, w:Math.min(roomy ? 540 : NARR.w + 60, availableWidth), h:272 };
+    // Compact legacy sidebars keep their width within the clear left lane.
+    return { x, y:bottom - 210, w:Math.min(roomy ? 620 : 360, availableWidth), h:210 };
   }
   signStyle() {
     const box = this.dialogueLayout();
     const text = this.state.narrPage === undefined ? this.state.narr : this.state.narrPage;
-    const boundary = this.boundaryScene();
+    const boundary = this.boundaryScene() || this.polygonIntroScene();
     return {
       position: 'absolute', left: pc(box.x, STAGE.w),
       bottom: pc(STAGE.h - box.y - box.h, STAGE.h),
       zIndex: 40,
-      '--dialogue-tail-x': boundary ? 'calc(100% - 10px)' : (SWIFTEE_CENTRE - box.x - 3) + 'px',
-      '--dialogue-tail-top': boundary ? 'calc(50% - 29px)' : 'calc(100% - 4px)',
-      '--dialogue-tail-transform': boundary ? 'rotate(-90deg)' : 'none',
-      width: boundary ? box.w+'px' : 'max-content', minWidth: '280px', maxWidth: box.w + 'px', height: 'auto',
+      '--dialogue-tail-x': this.learningReferenceScene() ? (320-box.x)+'px' : this.polygonIntroScene() ? 'calc(82% - 30px)' : boundary ? 'calc(100% - 10px)' : (SWIFTEE_CENTRE - box.x - 3) + 'px',
+      '--dialogue-tail-top': this.polygonIntroScene() ? 'calc(100% - 4px)' : boundary ? 'calc(50% - 29px)' : 'calc(100% - 4px)',
+      '--dialogue-tail-transform': this.polygonIntroScene() ? 'none' : boundary ? 'rotate(-90deg)' : 'none',
+      width: box.w+'px', minWidth: '280px', maxWidth: box.w + 'px', height: 'auto',
       display: 'block', userSelect: 'none', pointerEvents: 'none',
       opacity: this.state.storyDialogue && !!text ? 1 : 0,
+      visibility: text ? 'visible' : 'hidden',
       transform: this.state.storyDialogue && !!text ? 'scale(1)' : 'scale(.94)',
       transformOrigin: boundary ? '100% 60%' : (SWIFTEE_CENTRE - box.x) + 'px 100%',
       transition: this.reducedMotion() ? 'none' : 'opacity 220ms ease-out, transform 360ms cubic-bezier(.2,.9,.3,1.2)'
     };
   }
-  safeStyle() { return Object.assign(stageBox(this.boundaryScene() ? Object.assign({},SAFE,{x:(STAGE.w-BOARD.w)/2+12,y:125}) : SAFE, 32), {
+  safeStyle() { return Object.assign(stageBox(this.polygonIntroScene() || this.learningReferenceScene() ? {x:0,y:0,w:STAGE.w,h:STAGE.h} : this.boundaryScene() ? Object.assign({},SAFE,{x:(STAGE.w-BOARD.w)/2+12,y:125}) : SAFE, 32), {
     pointerEvents: this.locked() || !this.state.storyContent ? 'none' : 'auto',
     opacity: this.state.storyContent ? 1 : 0, visibility: this.state.storyContent ? 'visible' : 'hidden',
-    transition: this.reducedMotion() ? 'none' : 'opacity 240ms ease-out, left 900ms ease-in-out, top 900ms ease-in-out'
+    transition: this.reducedMotion() ? 'none' : this.polygonIntroScene() || this.learningReferenceScene() ? 'opacity 240ms ease-out' : 'opacity 240ms ease-out, left 900ms ease-in-out, top 900ms ease-in-out'
   }); }
   /* Swiftee's cell, scene-relative; the wrapper inside carries the only motion. */
   guideViewportStyle() {
     const boundary = this.boundaryScene();
-    return Object.assign(stageBox(boundary ? {x:1570,y:760,w:340,h:340} : GUIDE_BOX, boundary ? 44 : 20), {
-      pointerEvents: 'none', overflow: 'visible', transition: this.reducedMotion() ? 'none' : 'left 900ms ease-in-out, top 900ms ease-in-out'
+    const polygon = this.polygonIntroScene();
+    const parts = this.learningReferenceScene();
+    return Object.assign(stageBox(parts ? {x:180,y:700,w:300,h:300} : polygon ? this.polygonIntroLayout().guide : boundary ? {x:1570,y:760,w:340,h:340} : GUIDE_BOX, boundary || polygon || parts ? 44 : 20), {
+      pointerEvents: 'none', overflow: 'visible', transition: this.reducedMotion() ? 'none' : 'left 900ms ease-in-out, top 900ms ease-in-out, width 900ms ease-in-out, height 900ms ease-in-out'
     });
   }
   /* Fly-in and the lean toward the sign while she speaks, as transform only;
@@ -2908,6 +3032,9 @@ class Component extends DCLogic {
   guideStyle() {
     const st = this.state;
     const box = { position: 'absolute', inset: 0 };
+    if (st.polygonTravel && !this.reducedMotion()) return Object.assign(box,{
+      opacity:1, animation:(st.polygonFromPerch ? 'polygonPerchLanding' : 'polygonLanding') + ' 1100ms cubic-bezier(.22,.7,.3,1) both'
+    });
     if (st.boundaryTravel && !this.reducedMotion()) return Object.assign(box,{animation:'boundaryTravel 950ms ease-in-out both'});
     if (this.boundaryScene() && !st.guideHidden) return Object.assign(box,{
       opacity:1,transform: st.boundaryFocus && !this.reducedMotion() ? 'rotate(-4deg)' : 'none',
@@ -2922,7 +3049,7 @@ class Component extends DCLogic {
       background: tone === 'secondary' ? BUTTON.secondaryFace : BUTTON.face,
       border: '3px solid ' + BUTTON.edge, borderRadius: radius + 'px',
       color: '#fff', boxShadow: tone === 'secondary' ? BUTTON.secondaryShadow : BUTTON.shadow,
-      boxSizing: 'border-box', textShadow: '0 1px 2px #641518b3', userSelect: 'none',
+      boxSizing: 'border-box', textShadow: '0 2px 0 #205b80', WebkitTextStroke: '.07em #205b80', paintOrder:'stroke fill', userSelect: 'none',
       display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
     };
   }
@@ -2949,8 +3076,8 @@ class Component extends DCLogic {
       userSelect: 'none', boxSizing: 'border-box',
       /* Surface color carries feedback while both labels remain fully readable. */
       opacity: 1,
-      transform: st.ocReveal === kind ? 'scale(1.06)' : 'scale(1)',
-      animation: isWrong ? 'wig 420ms ease-in-out both' : (isRight ? 'pop 380ms ease-out both' : 'none'),
+      transform: 'scale(1)',
+      animation: this.reducedMotion() ? 'none' : isWrong ? 'answerRetry 340ms ease-out both' : st.ok===kind ? 'answerSuccess 520ms ease-out both' : 'none',
       transition: 'box-shadow 180ms, transform 220ms cubic-bezier(.2,1.2,.4,1), opacity 220ms'
     });
   }
@@ -3045,6 +3172,7 @@ class Component extends DCLogic {
     const card = this.buildCard({
       key: 'leaf', x: x, y: y, w: size, h: size, plain: true, click: ph === 'ask' ? this.exploreOutline : null,
       vb: F.vb, d: ph === 'draw' && !st.drawn ? '' : drawnD, stroke: SHAPE_VIOLET, sw: 20,
+      fill:'rgba(75,210,245,.07)',
       svgRef: this.svgRefs[0],
       traceD: drawnD,
       traceStyle: st.tracing ? this.traceStyleFor(true, st.traceMs) : { opacity: 0 },
@@ -3052,7 +3180,6 @@ class Component extends DCLogic {
       hl: marks.hl
     });
     if (marks.pathStyle) { card.pathStyle = marks.pathStyle; card.outlineStyle = marks.pathStyle; }
-    if (st.ok === 'closed') card.traceStyle = { opacity: 0 };
     // The creation stays anchored to the point; ambient floating would move its first vertex.
     card.gStyle = { animation: 'none' };
     if (ph === 'draw') {
@@ -3084,10 +3211,11 @@ class Component extends DCLogic {
     const marks = this.ocMarks(s.fig);
     const card = this.buildCard({
       key: s.fig, x: x, y: y, w: size, h: size, plain: true, vb: F.vb, click: this.exploreOutline,
-      d: d, extra: F.extra || '', stroke: st.ok ? GRN : (s.fig === 'pot' ? SHAPE_VIOLET : IK), sw: 18, svgRef: this.svgRefs[0],
-      traceD: F.traceD || d, traceStyle: st.tracing && !st.ok ? this.traceStyleFor(true, st.traceMs) : { opacity: 0 },
+      d: d, extra: F.extra || '', stroke: s.fig === 'pot' ? SHAPE_VIOLET : IK, sw: 18, svgRef: this.svgRefs[0],
+      fill:F.closed ? 'rgba(75,210,245,.07)' : 'none',
+      traceD: F.traceD || d, traceStyle: st.tracing ? this.traceStyleFor(true, st.traceMs) : { opacity: 0 },
       dots: marks.dots, hl: marks.hl,
-      anim: st.wrong ? 'wig 420ms ease-in-out both' : 'none'
+      anim: 'none'
     });
     if (marks.pathStyle) { card.pathStyle = marks.pathStyle; card.outlineStyle = marks.pathStyle; }
     V.cards = [this.magicCard(card)];
@@ -3108,13 +3236,15 @@ class Component extends DCLogic {
       if (ph === 'closed' && closedIdx.indexOf(i) >= 0) pulse = true;
       if (!tappable && st.hlKind === 'straight' && straightIdx.indexOf(i) >= 0) pulse = true;
       if (!tappable && st.hlKind === 'curved' && curvedIdx.indexOf(i) >= 0) pulse = true;
-      if (st.hlKind === 'segsOf' + i || st.hlKind === 'curveOf' + i) {
+      if (!this.boundaryScene() && (st.hlKind === 'segsOf' + i || st.hlKind === 'curveOf' + i)) {
         hl = F.pts ? this.segHl(name, F.pts.map((p, j) => j), null, ICE, 22) : [{ d: F.traceD || [d, F.extra || ''].join(' '), color: ICE, w: 22, style: {} }];
       }
-      /* The boundaries screen lights every figure at once and holds it for the
-         whole line; the others keep the one-shot trace. */
+      /* Voice cues pulse the card rim; the geometry stays completely unchanged. */
       const boundary = this.boundaryScene();
-      const focused = boundary && (st.boundaryFocus === 'all' ||
+      const focused = boundary && (ph !== 'classify' || i === (st.ddActive || 0)) && (st.boundaryFocus === 'all' ||
+        st.boundaryFocus === 'figure'+i ||
+        st.boundaryFocus === 'open' && openIdx.includes(i) ||
+        st.boundaryFocus === 'closed' && closedIdx.includes(i) ||
         st.boundaryFocus === 'straight' && straightIdx.includes(i) ||
         st.boundaryFocus === 'curved' && curvedIdx.includes(i));
       const litBounds = !boundary && ph === 'bound';
@@ -3130,19 +3260,28 @@ class Component extends DCLogic {
         else { chip = isOpen ? 'Open' : 'Closed'; chipBg = isOpen ? '#fff3e3' : '#e9f7ee'; chipBorder = isOpen ? '#f0c58a' : '#a6dcbb'; chipColor = isOpen ? '#a1642a' : '#26714b'; }
       }
       const stackedChip = tappable && s.q === 'straight';
-      if (stackedChip) chip = straightIdx.includes(i) ? 'Straight lines' : 'Curved lines';
-      return this.buildCard({
+      if (st.k >= 11 && (chip === 'Open' || chip === 'Closed')) chip = '';
+      if (stackedChip) {
+        const straight = straightIdx.includes(i);
+        chip = straight ? 'Straight lines' : 'Curved lines';
+        chipBg = straight ? '#e5f5ff' : '#f0eaff';
+        chipBorder = straight ? '#9ed7ef' : '#ceb9eb';
+        chipColor = straight ? '#215e90' : '#684596';
+      }
+      const card = this.buildCard({
         key: name + i, x: x0 + i * (w + gap), y: y, w: w, h: h, vb: F.vb, d: d, extra: F.extra || '',
         stackedChip: stackedChip,
         tint: stackedChip && state === 'bad' ? { borderColor: '#dca99f', background: '#fffaf9', boxShadow: '0 6px 0 rgba(146,196,228,.25)' } : undefined,
         stroke: it[1], sw: 18, fill: this.figFill(name, it[1], it[2]), state: state, hl: hl,
         traceD: F.traceD || d,
-        traceStyle: focused ? this.boundaryCueStyle() : (litBounds ? this.boundaryLitStyle() : (trace ? this.traceStyleFor(true, 1400) : { opacity: 0 })),
-        anim: st.wrong === i ? 'wig 420ms ease-in-out both' : (pulse && !boundary ? 'pop 900ms ease-in-out infinite' : 'none'),
+        traceStyle: boundary ? { opacity: 0 } : (litBounds ? this.boundaryLitStyle() : (trace ? this.traceStyleFor(true, 1400) : { opacity: 0 })),
+        anim: focused && !this.reducedMotion() ? 'boundaryCardPulse '+(st.boundaryPulseMs || 600)+'ms ease-in-out '+(st.boundaryPulseStart == null ? 'both' : '-'+(st.boundaryPulseElapsed || 0)+'ms both paused') : (st.wrong === i ? 'wig 420ms ease-in-out both' : (pulse && !boundary ? 'pop 900ms ease-in-out infinite' : 'none')),
         chip: chip, chipBg: chipBg, chipBorder: chipBorder, chipColor: chipColor,
         click: tappable ? this.tapCard(i) : null, nudge: tappable && i === s.correct && st.ok === null,
         opacity: tappable && s.q !== 'straight' && st.ok !== null && st.ok !== i ? 0 : 1
       });
+      if (stackedChip) Object.assign(card.chipStyle,{whiteSpace:'nowrap',lineHeight:'1.2',padding:'7px 18px'});
+      return card;
     });
   }
   viewCompare(V, s) {
@@ -3153,27 +3292,32 @@ class Component extends DCLogic {
     V.cards.forEach((card, i) => {
       const left = parseFloat(card.wrap.left), width = parseFloat(card.wrap.width);
       const done = ph === 'done' || st.dd[i] === truth[i];
+      const active = ph === 'classify' && i === (st.ddActive || 0);
+      const pending = !done && !active;
       const bad = st.ddWrong[i];
       Object.assign(card.wrap, {
-        border:'3px solid ' + (done ? '#55bc88' : '#63cddd'), borderRadius:'28px',
+        border:'3px solid ' + (done ? '#55bc88' : active ? '#179cd3' : '#63cddd'), borderRadius:'28px',
         background:done ? '#f0fcf4' : 'linear-gradient(150deg,#fffef8,#f4fcff)',
-        boxShadow:done ? '0 0 0 4px rgba(85,188,136,.12), 0 5px 0 #c5e8d5' : '0 5px 0 rgba(99,205,221,.2)'
+        boxShadow:done ? '0 0 0 4px rgba(85,188,136,.12), 0 5px 0 #c5e8d5' : active ? '0 0 0 5px rgba(23,156,211,.2), 0 7px 16px rgba(23,156,211,.16)' : '0 5px 0 rgba(99,205,221,.2)',
+        filter:pending ? 'blur(3px)' : 'none', opacity:pending ? .4 : done && !active && ph !== 'done' ? .82 : 1,
+        transition:this.reducedMotion() ? 'none' : 'filter 360ms ease, opacity 360ms ease, box-shadow 360ms ease, border-color 360ms ease'
       });
-      ['Straight', 'Curved'].forEach((option, j) => {
+      (done ? [truth[i]] : ['Straight', 'Curved']).forEach((option, j) => {
         const selected = (ph === 'done' ? truth[i] : st.dd[i]) === option;
         const correct = done && selected;
         const incorrect = bad && selected;
-        const disabled = done || this.locked();
+        const disabled = done || pending || this.locked();
         const blue = option === 'Straight';
         const face = blue ? 'linear-gradient(#e0f6ff,#abe4ff)' : 'linear-gradient(#fff1db,#ffdfb5)';
         const edge = blue ? '#69c7eb' : '#f2b979';
         const ink = blue ? '#14518a' : '#78430e';
         V.targets.push({
           text:(correct ? '✓ ' : '') + option, label:'Figure ' + (i+1) + ': ' + option,
-          selected:selected, disabled:disabled, feedback:correct ? 'correct' : (incorrect ? 'incorrect' : ''), click:this.ddPick(i, option),
+          selected:selected, disabled:disabled, sequenceState:done ? 'complete' : pending ? 'pending' : 'active',
+          feedback:correct ? 'correct' : (incorrect ? 'incorrect' : ''), click:this.ddPick(i, option),
           style:{
-            position:'absolute', left:(left + j * (width + 12) / 2)+'px', top:'484px',
-            width:((width-12)/2)+'px', height:'88px', boxSizing:'border-box', borderRadius:'17px',
+            position:'absolute', left:(done ? left+(width-208)/2 : left + j * (width + 12) / 2)+'px', top:'484px',
+            width:(done ? 208 : (width-12)/2)+'px', height:'88px', boxSizing:'border-box', borderRadius:'17px',
             display:'flex', alignItems:'center', justifyContent:'center', gap:'6px',
             font:'900 26px Nunito, sans-serif', color:correct ? '#19653f' : ink,
             background:correct ? '#daf6e5' : (incorrect ? '#ffe5dd' : face),
@@ -3208,6 +3352,7 @@ class Component extends DCLogic {
 
   /* ----- screens 8 / 9 ----- */
   viewReveal(V, s) {
+    if (this.polygonIntroScene()) { this.viewPolygonIntro(V, s, false); return; }
     const st = this.state, F = this.fig(s.fig), size = 630;
     const reduced = this.reducedMotion();
     const vb = F.vb.split(' ').map(Number), pad = 20, y = 60;
@@ -3244,6 +3389,7 @@ class Component extends DCLogic {
     };
   }
   viewBuild(V, s) {
+    if (this.polygonIntroScene()) { this.viewPolygonIntro(V, s, true); return; }
     const st = this.state, F = this.fig('pentagon'), size = 645;
     const vb = F.vb.split(' ').map(Number), pad = 20;
     const scale = Math.min((size - pad * 2) / vb[2], (size - pad * 2) / vb[3]);
@@ -3273,10 +3419,48 @@ class Component extends DCLogic {
     }
   }
 
+  viewPolygonIntro(V, s, build) {
+    const layout = this.polygonIntroLayout(), box = layout.figure;
+    const name = build ? 'pentagon' : s.fig, F = this.fig(name);
+    const fill = build ? '#dceede' : '#fbe0e8';
+    const stroke = build ? '#249f60' : '#e93690';
+    const reduced = this.reducedMotion(), d = this.figD(name);
+    const card = this.buildCard({
+      key: 'intro-' + name, x:box.x, y:box.y, w:box.w, h:box.h,
+      plain:true, vb:F.vb, d, stroke, fill, sw:14,
+      traceD: build ? d : '',
+      traceStyle: build ? {
+        opacity:1, stroke, strokeDasharray:100, strokeDashoffset:0,
+        animation:reduced ? 'none' : 'boundDraw 2400ms linear 400ms both'
+      } : {opacity:0}
+    });
+    // One restrained arrival, without a second card fade or a contrasting glow.
+    card.wrap.animation = reduced ? 'none' : 'polygonFigureArrive 650ms cubic-bezier(.22,.7,.3,1) 300ms both';
+    card.wrap.filter = 'drop-shadow(0 6px 8px rgba(8,48,105,.08))';
+    card.traceW = card.sw;
+    if (build && !reduced) card.pathStyle = {animation:'polygonFillIn 500ms ease-out 2800ms both'};
+    V.cards = [card];
+    if (this.state.reveal) {
+      const pill = this.labelPill('Polygon', layout.board.y + 50);
+      Object.assign(pill.style, {
+        left:(box.x + box.w/2)+'px',
+        height:'74px', padding:'8px 32px', boxSizing:'border-box',
+        display:'flex', alignItems:'center', justifyContent:'center',
+        border:'2px solid #80cbe8', borderRadius:'24px', background:'#f2fcff',
+        color:'#176184', boxShadow:'0 4px 0 rgba(37,133,180,.12)',
+        animation:reduced ? 'none' : 'storyArrive 300ms ease-out both'
+      });
+      V.callouts = [pill];
+    }
+  }
+
   /* ----- screen 11 parts ----- */
   viewParts(V, s) {
     const st = this.state, ph = st.phase, F = this.fig('pentagon'), K = this.k('pentagon');
-    const size = 750, x = (SAFE.w - size) / 2, y = 40, box = { x: x, y: y, w: size, h: size };
+    const reference = this.learningReferenceScene();
+    const size = reference ? 800 : 750, x = reference ? 740 : (SAFE.w - size) / 2, y = reference ? 255 : 40;
+    const box = { x, y, w:size, h:size };
+    const figureColor = reference ? '#3478d4' : this.polyColor('pentagon');
     const palette = {
       sides: { color: '#e99712', ink: '#713d08', tint: '#ffe18a', shadow: 'rgba(237,160,18,.26)', glow: 'rgba(237,160,18,.55)' },
       vertex: { color: '#8051c9', ink: '#4e237a', tint: '#dfc5ff', shadow: 'rgba(128,81,201,.22)' },
@@ -3346,9 +3530,9 @@ class Component extends DCLogic {
       { d: 'M' + arcStart.join(' ') + curve, color: palette.angle.color, w: 13 * K, style: draw(cue('form', 2720), Math.max(100, cueDelay - cue('form', 2720) - 100)) }
     ] : [];
     V.cards = [this.buildCard({
-      key: 'pent-' + ph + '-' + st.motionRun, x: x, y: y, w: size, h: size, plain: true, vb: F.vb,
-      d: this.figD('pentagon'), stroke: this.polyColor('pentagon'), sw: 18,
-      fill: this.figFill('pentagon', this.polyColor('pentagon')),
+      key: 'pent-' + ph + '-' + st.motionRun, x: x, y: y, w: size, h: size, plain: true, vb: F.vb, snap: reference,
+      d: this.figD('pentagon'), stroke: figureColor, sw: 18,
+      fill: this.figFill('pentagon', figureColor),
       hl: hl, dots: dots, arcs: arcs
     })];
     // Approach from inside the polygon: no edge crossing or collision with the vertex.
@@ -3398,9 +3582,22 @@ class Component extends DCLogic {
       angle: { color: '#159ca8', ink: '#084f51', light: '#9ae9dc', gradient: 'linear-gradient(#aaf2e7,#67dbc9)' }
     }[name.toLowerCase()];
   }
+  labelTileStyle(name) {
+    const theme = this.labelTheme(name);
+    return {
+      width:'200px', height:'78px', flex:'0 0 200px', padding:'0 18px', boxSizing:'border-box',
+      display:'flex', alignItems:'center', justifyContent:'center', borderRadius:'22px',
+      background:theme.gradient, border:'3px solid '+theme.color, color:theme.ink,
+      font:'900 36px Nunito,sans-serif', lineHeight:'1.1', whiteSpace:'nowrap',
+      boxShadow:'inset 0 3px 0 #ffffffaa,0 6px 0 '+theme.color+',0 10px 16px #174f7326',
+      touchAction:'none', userSelect:'none', cursor:'grab'
+    };
+  }
   viewLabels(V, s) {
-    const st = this.state, F = this.fig('cross'), size = 660, K = this.k('cross');
-    const x = (SAFE.w - size) / 2, y = 3, box = { x: x, y: y, w: size, h: size };
+    const reference = this.learningReferenceScene();
+    const st = this.state, F = this.fig('cross'), size = reference ? 700 : 660, K = this.k('cross');
+    const x = reference ? 910 : (SAFE.w - size) / 2, y = reference ? 200 : 3, box = {x,y,w:size,h:size};
+    const figureColor = reference ? '#3478d4' : this.polyColor('cross');
     const pts = F.pts;
     const hl = [], dots = [], arcs = [];
     const p = st.placed;
@@ -3416,9 +3613,9 @@ class Component extends DCLogic {
     arcs.push({ d:'M'+angleVertex.join(' ')+' L'+arcStart.join(' ')+curve+' Z', fill:p.angle?'rgba(21,156,168,.14)':'rgba(96,125,152,.08)',color:'none',w:0 });
     arcs.push({ d:'M'+arcStart.join(' ')+curve,color:p.angle?this.labelTheme('angle').color:'#607d98',w:11*K });
     V.cards = [this.buildCard({
-      key: 'cross', x: x, y: y, w: size, h: size, plain: true, vb: F.vb,
-      d: this.figD('cross'), stroke: this.polyColor('cross'), sw: 12, hl: hl, dots: dots, arcs: arcs,
-      fill: this.figFill('cross', this.polyColor('cross'))
+      key: 'cross', x: x, y: y, w: size, h: size, plain: true, vb: F.vb, snap: reference,
+      d: this.figD('cross'), stroke: figureColor, sw: 12, hl: hl, dots: dots, arcs: arcs,
+      fill: this.figFill('cross', figureColor)
     })];
     const segsC = this.segs('cross');
     const anchors = {
@@ -3434,18 +3631,20 @@ class Component extends DCLogic {
     V.targets = spots.map((sp) => {
       const done = !!p[sp.key], bad = st.badPlace === sp.key, theme = this.labelTheme(sp.key);
       const hovered = st.labelHover === sp.key && !done;
+      const ready = !!st.chip && !done;
       return {
         nudge: st.chip && st.chip.toLowerCase() === sp.key ? '1' : '',
         labelKey: sp.key, text: done ? sp.label : '?', click: done ? null : this.hitTarget(sp.key),
-        label: done ? sp.label : ({side:'Left question-mark target',vertex:'Lower-right question-mark target',angle:'Upper-right question-mark target'}[sp.key]),
+        disabled: done, feedback: bad ? 'incorrect' : (done ? 'correct' : ''),
+        label: done ? sp.label + ', correctly placed' : ({side:'Left question-mark target',vertex:'Lower-right question-mark target',angle:'Upper-right question-mark target'}[sp.key]),
         style: {
           position: 'absolute', left: (sp.p[0] - 106) + 'px', top: (sp.p[1] - 38) + 'px',
           width: '212px', height: '76px', borderRadius: '22px', boxSizing: 'border-box',
-          border: (done ? '5px solid ' + theme.color : (bad ? '5px solid ' + RED : '5px dashed #299bd5')),
-          background: done ? theme.light : (bad ? '#fff2ef' : (st.chip ? '#f0fbff' : '#f5fbff')),
-          color: done ? theme.ink : '#2470a1', font: '800 34px "Baloo 2", Nunito, sans-serif',
+          border: (done ? '5px solid ' + theme.color : (bad ? '5px solid ' + RED : '5px dashed ' + theme.color)),
+          background: done ? theme.light : (bad ? '#fff2ef' : 'linear-gradient(155deg,#ffffff,' + theme.light + 'bb)'),
+          color: theme.ink, font: '900 34px Nunito, sans-serif',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          cursor: done ? 'default' : 'pointer', transform:hovered ? 'scale(1.035)' : 'none', transition:'transform 150ms,box-shadow 150ms', boxShadow: hovered ? '0 0 0 4px rgba(34,184,230,.24),0 8px 22px rgba(34,184,230,.3)' : '0 6px 0 rgba(146,196,228,0.32)',
+          cursor: done ? 'default' : 'pointer', transform:'none', transition:'background 200ms,border-color 200ms,box-shadow 150ms', boxShadow: hovered ? 'inset 0 2px 0 #fff,0 0 0 5px '+theme.color+'55,0 8px 22px '+theme.color+'55' : (ready ? 'inset 0 2px 0 #fff,0 0 0 3px '+theme.color+'44,0 5px 0 '+theme.color+'44' : 'inset 0 2px 0 #fff,0 5px 0 '+theme.color+'44'),
           animation: bad ? 'wig 420ms ease-in-out both' : (done ? 'pop 320ms ease-out both' : 'none'), zIndex: 6
         }
       };
@@ -3456,12 +3655,13 @@ class Component extends DCLogic {
       const ux = dx/distance, uy = dy/distance;
       const featureGap = sp.key === 'side' ? 0 : 16;
       const start = [anchor[0]+ux*featureGap, anchor[1]+uy*featureGap];
-      const leader = this.leader(start, sp.p, p[sp.key] ? this.labelTheme(sp.key).color : '#9fd0ec');
+      const leader = this.leader(start, sp.p, this.labelTheme(sp.key).color);
       const labelEdge = Math.min(106/Math.abs(ux),38/Math.abs(uy));
       leader.style.width = Math.max(0,distance-featureGap-labelEdge-12)+'px';
       return leader;
     });
     V.showChips = true;
+    if (reference) V.chipRowStyle = {position:'absolute',left:'916px',top:'900px',width:'688px',display:'flex',justifyContent:'center',gap:'44px'};
     const chipNames = ['Side', 'Vertex', 'Angle'];
     const firstFree = chipNames.findIndex((t) => !Object.keys(p).some((k) => p[k] === t));
     V.chips = chipNames.map((t, ci) => {
@@ -3470,26 +3670,23 @@ class Component extends DCLogic {
       return {
         nudge: !st.chip && ci === firstFree ? '1' : '', text: t, click: used ? null : this.pickChip(t), down: used ? null : this.dragLabel(t),
         selected: active, disabled: used,
-        style: Object.assign(this.buttonSkin('secondary',22), {
-          width: '200px', flex: '0 0 200px', justifyContent: 'center', padding: '0 16px', height: '78px',
-          background: used ? theme.light : theme.gradient,
-          border: '3px solid ' + (active ? theme.ink : theme.color),
-          color: theme.ink,
-          font: '800 36px "Baloo 2", Nunito, sans-serif', display: 'flex', alignItems: 'center',
+        style: Object.assign(this.labelTileStyle(t), {
+          background: used ? theme.light : theme.gradient, borderColor: active ? theme.ink : theme.color,
           touchAction:'none', cursor: used ? 'default' : 'grab', opacity: st.draggingLabel === t ? 0.35 : (used ? 0.7 : 1),
-          boxShadow: used ? 'none' : BUTTON.secondaryShadow, transform: active ? 'translateY(-4px)' : 'none',
+          boxShadow: used ? 'inset 0 2px 0 #ffffff88' : this.labelTileStyle(t).boxShadow, transform: active ? 'translateY(-4px)' : 'none',
+          animation: st.labelPrompt && ci === firstFree && !this.reducedMotion() ? 'labelInvite 650ms ease-in-out both' : 'none',
           transition: 'transform 180ms ease-out, opacity 180ms ease-out, box-shadow 180ms ease-out', userSelect: 'none'
         })
       };
     });
-    V.callouts = [{text: st.chip ? 'Now tap a ? to place ' + st.chip + '.' : 'Drag a label, or tap a label then a ?.',
-      style: {position:'absolute',left:'50%',top:'0px',translate:'-50% 0',
-        font:'800 28px Nunito,sans-serif',color:'#355e73',whiteSpace:'nowrap',pointerEvents:'none'}}];
+    V.callouts = [];
   }
 
   /* ----- screen 13 count ----- */
   viewCount(V, s) {
-    const st = this.state, F = this.fig('pentagon'), size = 705, K = this.k('pentagon');
+    const reference = this.learningReferenceScene();
+    const st = this.state, F = this.fig('pentagon'), K = this.k('pentagon');
+    const box = reference ? this.learningFigureBox() : {x:(SAFE.w-705)/2,y:-20,w:705,h:705};
     const segs = this.segs('pentagon'), c = this.centroid(F.pts);
     const nums = [];
     for (let i = 0; i < st.nums; i++) {
@@ -3498,23 +3695,31 @@ class Component extends DCLogic {
     }
     const hl = st.nums > 0 ? this.segHl('pentagon', [st.nums - 1], null, ICE, 24) : [];
     V.cards = [this.buildCard({
-      key: 'pent', x: (SAFE.w - size) / 2, y: -20, w: size, h: size, plain: true, vb: F.vb,
+      key: 'pent', ...box, plain: true, vb: F.vb, snap: reference,
       /* A light yellow face: it gives the outline something to enclose while
          the sides are counted, and stays pale enough for the numbers and the
          side highlight to sit on top of it. */
-      d: this.figD('pentagon'), stroke: st.ok ? GRN : this.P.C.blue, sw: 18, fill: '#fff1c9', hl: hl, nums: nums
+      d: this.figD('pentagon'), stroke: st.ok ? GRN : this.P.C.blue, sw: 18, fill: reference ? this.figFill('pentagon',this.P.C.blue) : '#fff1c9', hl: hl, nums: nums
     })];
     V.showCounter = true;
-    const counter = this.counter(0, '');
+    const counter = this.counter(0, reference && s.ph === 'five' ? 'Sides' : '');
+    counter.accessibleLabel = 'Number of sides';
     counter.min = 0;
     if (s.ph === 'five') {
       // The side markers and readout share one value, so they cannot drift.
       counter.value = String(st.nums);
       counter.fixed = true;
       counter.minus = null; counter.plus = null; counter.nudge = '';
+      if (reference) counter.btn.display = 'none';
     }
     V.counters = [counter];
     V.checkStyle = s.q === 'count' ? this.counterCheckStyle() : { display: 'none' };
+    if (reference) {
+      // Centre the stepper itself beneath the polygon; Check sits alongside it.
+      // Counted-side markers use the extra lower space on the explanation screen.
+      V.counterRowStyle = {position:'absolute',left:(box.x+box.w/2)+'px',top:(s.q==='count'?828:878)+'px',width:'max-content',translate:'-50% 0',display:'flex',alignItems:'center'};
+      V.counterCheckPosition = {position:'absolute',left:'calc(100% + 24px)',top:'calc(50% - 38px)'};
+    }
   }
   counterHitStyle() {
     const viewport = document.documentElement;
@@ -3524,7 +3729,7 @@ class Component extends DCLogic {
   }
   counterCheckStyle() {
     return Object.assign(this.buttonSkin('primary',18), {
-      width:'144px',height:'64px',font:'800 30px "Baloo 2",Nunito,sans-serif'
+      width:'144px',height:'76px',font:'800 30px "Baloo 2",Nunito,sans-serif'
     });
   }
   counter(i, caption) {
@@ -3532,12 +3737,12 @@ class Component extends DCLogic {
     return {
       caption, min:1, max:10,
       captionStyle:{display:caption?'block':'none',width:'116px',flexShrink:0,font:'800 23px Nunito,sans-serif',color:'#23577f',lineHeight:1.15,textAlign:'left'},
-      wrap:{display:'flex',alignItems:'center',gap:'10px',padding:'10px',borderRadius:'22px',
+      wrap:{display:'flex',alignItems:'center',gap:'12px',padding:'10px',borderRadius:'22px',
         background:good?'#eefaf3':bad?'#fff2ef':'#effbf6',border:'3px solid '+(good?GRN:bad?RED:'#a6d7cb'),
         boxShadow:'inset 0 2px 0 #fff,0 3px 0 rgba(8,111,124,.14)',animation:bad?'wig 420ms ease-in-out both':'none'},
-      btn:Object.assign(this.buttonSkin('secondary',16),{width:'60px',height:'60px',flexShrink:0,
+      btn:Object.assign(this.buttonSkin('secondary',16),{width:'76px',height:'76px',flexShrink:0,
         font:'800 38px "Baloo 2",Nunito,sans-serif',lineHeight:1}),
-      box:{width:'72px',height:'60px',boxSizing:'border-box',flexShrink:0,borderRadius:'14px',background:'#fff',
+      box:{width:'80px',height:'76px',boxSizing:'border-box',flexShrink:0,borderRadius:'14px',background:'#fff',
         border:'2px solid #a6d7cb',color:BUTTON.ink,font:'800 42px "Baloo 2",Nunito,sans-serif',
         display:'flex',alignItems:'center',justifyContent:'center'},
       value:String(st.cnt[i]),minus:this.bump(i,-1),plus:this.bump(i,1),nudge:i===0?'1':'',fixed:false
@@ -3546,18 +3751,21 @@ class Component extends DCLogic {
 
   /* ----- screen 14 deform ----- */
   viewDeform(V, s) {
-    const st = this.state, F = this.fig('pentagon'), size = 470, K = this.k('pentagon');
+    const reference = this.learningReferenceScene();
+    const st = this.state, F = this.fig('pentagon'), K = this.k('pentagon');
+    const box = reference ? this.learningFigureBox() : {x:(SAFE.w-470)/2,y:60,w:470,h:470};
     const pts = st.userPts || F.pts;
     this.svgRefs[0] = this.svgRefs[0] || React.createRef();
-    const showHandles = st.phase === 'drag' || st.phase === 'wow';
+    const showHandles = st.phase === 'drag' || (!reference && st.phase === 'wow');
+    const color = reference ? this.P.C.blue : this.polyColor('pentagon');
     V.cards = [this.buildCard({
-      key: 'pent', x: (SAFE.w - size) / 2, y: 60, w: size, h: size, plain: true, vb: F.vb,
-      d: this.dPath(pts, true), stroke: this.polyColor('pentagon'), sw: 18, svgRef: this.svgRefs[0],
-      fill: this.tint(this.polyColor('pentagon')),
+      key: 'pent', ...box, plain: true, vb: F.vb, snap: reference,
+      d: this.dPath(pts, true), stroke: color, sw: 18, svgRef: this.svgRefs[0],
+      fill: reference ? this.figFill('pentagon',color) : this.tint(color),
       handles: showHandles ? pts.map((p, i) => ({ x: p[0], y: p[1], r: 34 * K, hit: 130 * K, sw: 11 * K, down: this.handleDown(i) })) : []
     })];
     V.showHand = st.showHand;
-    const grab = this.mapPt({ x: (SAFE.w - size) / 2, y: 60, w: size, h: size }, F.vb, pts[0]);
+    const grab = this.mapPt(box, F.vb, pts[0]);
     V.handStyle = {
       position: 'absolute', left: (grab[0] - 12) + 'px', top: (grab[1] - 4) + 'px',
       width: '92px', height: 'auto', display: 'block', pointerEvents: 'none', zIndex: 9,
@@ -3568,11 +3776,13 @@ class Component extends DCLogic {
 
   /* ----- screens 15 / 16 ----- */
   viewBA(V, s) {
+    const reference = this.learningReferenceScene();
     const st = this.state, F = this.fig('pentagon'), K = this.k('pentagon');
     const orig = F.pts, user = st.userPts || F.pts;
-    const size = 380, gapX = 110;
-    const y = 40;
-    const leftX = SAFE.w / 2 - gapX - size, rightX = SAFE.w / 2 + gapX - 0;
+    const size = reference ? 440 : 380, gapX = 110;
+    const y = reference ? 300 : 40;
+    // Keep the comparison pair balanced while reserving room for Check at the right.
+    const leftX = reference ? 750 : SAFE.w / 2 - gapX - size, rightX = reference ? 1290 : SAFE.w / 2 + gapX;
     const segsO = this.segs('pentagon'), segsU = this.segs('pentagon', user);
     const pad = 36, vb = F.vb.split(' ').map(Number);
     const shapeScale = Math.min((size - 2 * pad - 10) / vb[2], (size - 2 * pad - 10) / vb[3]);
@@ -3591,14 +3801,19 @@ class Component extends DCLogic {
           fs: 30 / shapeScale, t: String(label) });
       };
       for (let i = 0; i < Math.min(n, segs.length); i++) pin(i, i + 1);
-      const glow = st.phase === 'b' ? [{ d: this.dPath(pts, true), color: 'rgba(34,184,230,0.55)', w: 34 * K, style: { animation: 'glowPulse 1.4s ease-in-out infinite' } }] : [];
-      return this.buildCard({
+      const glow = st.phase === 'b' ? [{ d: this.dPath(pts, true), color: 'rgba(34,184,230,0.55)', w: 34 * K, style: { animation: reference ? 'glowPulse 1.4s ease-in-out 2' : 'glowPulse 1.4s ease-in-out infinite' } }] : [];
+      const card = this.buildCard({
         key: which ? 'after' : 'before', x: which ? rightX : leftX, y: y, w: size, h: size,
         vb: F.vb, pad: pad, numberInset: 5, d: this.dPath(pts, true), stroke: which ? this.P.C.orange : this.P.C.blue, sw: 18,
         fill: this.tint(which ? this.P.C.orange : this.P.C.blue), hl: glow, nums: nums,
-        badge: which ? 'After' : 'Before',
-        anim: st.phase === 'a' ? 'pop 1200ms ease-in-out 2' : 'none'
+        badge: reference ? '' : which ? 'After' : 'Before',
+        chip: reference ? (which ? 'After' : 'Before') : '',
+        chipBg: which ? '#fff0dc' : '#e8f4ff', chipBorder: which ? '#f6ba72' : '#9fd8f4', chipColor: which ? '#965113' : '#2c6ba8',
+        snap: reference,
+        anim: !reference && st.phase === 'a' ? 'pop 1200ms ease-in-out 2' : 'none'
       });
+      if (reference) Object.assign(card.wrap,{borderColor:which?'#f6ba72':'#9fd8f4',boxShadow:'inset 0 2px 0 #fff,0 7px 0 '+(which?'#e0b57c66':'#72bbdd66')});
+      return card;
     };
     V.cards = [mk(false), mk(true)];
     if (s.q === 'count2') {
@@ -3610,12 +3825,22 @@ class Component extends DCLogic {
       Object.assign(counter.wrap, {position:'absolute',left:(rightX+size/2)+'px',top:(y+size+64)+'px',translate:'-50% 0',pointerEvents:'auto'});
       V.counters = [counter];
       V.counterCheckPosition = {position:'absolute',left:(rightX+size/2)+'px',top:(y+size+180)+'px',translate:'-50% 0',pointerEvents:'auto'};
+      if (reference) {
+        V.counterRowStyle = {position:'absolute',left:(rightX+size/2)+'px',top:'790px',width:'max-content',translate:'-50% 0',display:'flex',alignItems:'center'};
+        Object.assign(counter.wrap,{position:'relative',left:'auto',top:'auto',translate:'none'});
+        V.counterCheckPosition = {position:'absolute',left:'calc(100% + 24px)',top:'calc(50% - 38px)',pointerEvents:'auto'};
+        const known = this.labelPill('5 sides',790);
+        Object.assign(known.style,{left:(leftX+size/2)+'px',font:'900 34px Nunito,sans-serif',padding:'18px 30px',borderWidth:'3px',borderRadius:'22px',background:'#e8f4ff',borderColor:'#9fd8f4',color:'#2c6ba8',boxShadow:'0 4px 0 #72bbdd66',animation:'none'});
+        Object.assign(known.style,{height:'102px',boxSizing:'border-box',display:'flex',alignItems:'center'});
+        V.callouts = [known];
+      }
     }
   }
 
   /* ----- naming screens ----- */
   viewName(V, s) {
-    const st = this.state, F = this.fig(s.fig), size = 440, K = this.k(s.fig);
+    const reference = this.learningReferenceScene();
+    const st = this.state, F = this.fig(s.fig), size = reference ? 650 : 440, K = this.k(s.fig);
     const pts = st.morph || F.pts;
     const segs = this.segs(s.fig, st.morph ? null : F.pts), c = this.centroid(F.pts);
     const nums = [];
@@ -3627,11 +3852,17 @@ class Component extends DCLogic {
     }
     const hl = !st.morph && st.nums > 0 ? this.segHl(s.fig, [st.nums - 1], null, ICE, 26) : [];
     V.cards = [this.buildCard({
-      key: s.fig, x: (SAFE.w - size) / 2, y: 40, w: size, h: size, plain: true,
+      key: s.fig, x: reference ? 925 : (SAFE.w - size) / 2, y: reference ? 230 : 40, w: size, h: size, plain: true, snap: reference,
       vb: F.vb, d: this.dPath(pts, true), stroke: this.polyColor(s.fig), sw: 18,
       fill: this.tint(this.polyColor(s.fig)), hl: hl, nums: nums
     })];
-    if (st.reveal || st.nums >= (s.count || 99)) V.callouts = [this.labelPill(s.reveal, 540)];
+    if (st.reveal || st.nums >= (s.count || 99)) {
+      // Anchor the name below the silhouette and its side numbers, not the board edge.
+      const bottom = this.mapPt({x:925,y:230,w:size,h:size},F.vb,[F.pts[0][0],Math.max(...F.pts.map(p=>p[1]))])[1];
+      const pill = this.labelPill(s.reveal,reference ? bottom + 80 : 540);
+      if (reference) pill.style.left = '1250px';
+      V.callouts = [pill];
+    }
   }
 
   /* ----- recall ----- */
@@ -3653,19 +3884,16 @@ class Component extends DCLogic {
         opacity: st.morph ? 0 : 1, transition: 'opacity 140ms ease-out'
       }
     }];
-    V.showCounter = true;
-    V.counters = [Object.assign(this.counter(0, 'Sides'), { min:3, max:8, value: String(st.n), minus: this.bumpN(-1), plus: this.bumpN(1), nudge: '1' })];
+    V.showCounter = false;
     V.checkStyle = { display: 'none' };
     V.checkLabel = '';
-    V.targets = [{
-      text: 'Next', click: this.advance, nudge: '', buttonTone: 'primary',
-      style: Object.assign({ position: 'absolute', right: '10px', bottom: '14px', zIndex: 8 }, this.bigBtn(200))
-    }];
+    V.targets = [];
   }
 
   /* ----- multi select ----- */
   viewMulti(V, s) {
     const st = this.state, S = this.sets()[s.set];
+    const discovery = s.sc === 'S10';
     const n = S.length;
     const w = n >= 6 ? 236 : (n === 5 ? 272 : 300), gap = n >= 6 ? 26 : 38;
     const total = n * w + (n - 1) * gap;
@@ -3679,29 +3907,33 @@ class Component extends DCLogic {
       else if (sel && !s.check) state = 'ok';
       else if (sel && s.check) state = st.checked ? 'ok' : 'sel';
       const coach = st.hlKind === 'coach' && sel && s.correct.indexOf(i) < 0;
-      return this.buildCard({
-        key: it[0], x: x0 + i * (w + gap), y: y, w: w, h: w, vb: F.vb, d: this.figD(it[0]),
+      const tileSize = discovery ? 275 : w;
+      // Five existing options, arranged 3 + 2 with the second row centred.
+      const tileX = discovery ? 250 + (i < 3 ? i * 305 : 152.5 + (i-3) * 305) : x0 + i * (w + gap);
+      const tileY = discovery ? 270 + (i < 3 ? 0 : 310) : y;
+      const card = this.buildCard({
+        key: it[0], x: tileX, y: tileY, w: tileSize, h: tileSize, vb: F.vb, d: this.figD(it[0]),
         extra: F.extra || '', stroke: it[1], sw: 20, fill: this.figFill(it[0], it[1], it[2]), state: state,
-        badge: String.fromCharCode(65 + i), click: this.tapCard(i),
+        badge: discovery ? '' : String.fromCharCode(65 + i), click: this.tapCard(i), tick: discovery && sel,
         nudge: !st.checked && i === s.correct.find(index => !st.sel.includes(index)),
         traceD: F.traceD || this.figD(it[0]), traceStyle: coach ? this.traceStyleFor(true, 1500) : { opacity: 0 },
         anim: st.wrong === i ? ((s.set === 'cfu1' ? (this._wrongTapToken % 2 ? 'wrongTapA' : 'wrongTapB') : 'wig') + ' 420ms ease-in-out both') : (coach ? 'pop 900ms ease-in-out infinite' : 'none')
       });
+      if (discovery) {
+        card.wrap.borderRadius = '28px';
+        // Keep selected checks inside the card, clear of adjacent figures.
+        Object.assign(card.markStyle, {right:'12px',top:'12px',width:'42px',height:'42px',fontSize:'26px'});
+      }
+      return card;
     });
     if (s.check) {
-      V.showCheck = true;
+      V.showCheck = !st.checked;
       V.checkDisabled = this.locked() || (!st.checked && !st.sel.length);
       if (V.checkDisabled) V.check = null;
       V.nudgeCheck = st.checked || done ? '1' : '';
-      V.checkLabel = st.checked ? 'Next' : 'Check';
+      V.checkLabel = 'Check';
       V.checkStyle = this.bigBtn(250);
       if (V.checkDisabled) Object.assign(V.checkStyle, {cursor:'default',transform:'none'});
-    } else if (done) {
-      V.showCheck = true;
-      V.nudgeCheck = '1';
-      V.checkLabel = 'Next';
-      V.checkStyle = this.bigBtn(230);
-      V.check = this.advance;
     }
   }
 

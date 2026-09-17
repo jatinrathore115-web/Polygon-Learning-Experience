@@ -1,22 +1,43 @@
-/* Shared CSS button: icy rim, warm glossy face, and readable white lettering. */
+/* Shared reference-blue button: icy rim, glossy face, and white lettering. */
 .game-action { position:relative; isolation:isolate; touch-action:manipulation; transition:scale 140ms ease; }
-.game-action:focus-visible { outline:3px solid #123a6b; outline-offset:5px; }
+.game-action:focus, .ice-button:focus { outline:none; }
+.game-action:focus-visible { outline:3px solid #31b9de; outline-offset:5px; }
+/* Colour-matched puzzle tiles and recessed sockets for the parts activity. */
+.label-tile { position:relative; isolation:isolate; text-align:center; }
+.label-tile:focus { outline:none; }
+.label-tile:focus-visible,.label-tile[aria-pressed="true"] { outline:3px solid currentColor; outline-offset:5px; }
+.label-tile::before { content:''; position:absolute; left:12px; right:12px; top:5px; height:16px; border-radius:16px; background:linear-gradient(#ffffff66,#ffffff00); pointer-events:none; }
+.label-tile::after { content:''; position:absolute; left:8px; top:50%; width:8px; height:20px; translate:0 -50%; background:radial-gradient(circle,currentColor 1.5px,transparent 2px) 0 0 / 4px 6px; opacity:.4; pointer-events:none; }
+.label-tile[aria-disabled="true"]::after { content:'✓'; background:none; width:16px; height:auto; font-size:18px; opacity:.8; }
+.label-tile:not([aria-disabled="true"]):hover { filter:brightness(1.04); }
+.label-tile:not([aria-disabled="true"]):active { cursor:grabbing!important; }
+@keyframes labelInvite { 0%,100% { scale:1; } 45% { scale:1.06; } }
+@media(prefers-reduced-motion:reduce) { .label-tile { animation:none!important; } }
+.label-socket:focus { outline:none; }
+.label-socket::before { content:'↓'; position:absolute; left:13px; top:50%; translate:0 -50%; font:900 25px Nunito,sans-serif; opacity:.65; pointer-events:none; }
+.label-socket[data-feedback="correct"]::before { content:'✓'; font-size:20px; }
+.label-socket[role="button"]:hover { outline:3px solid currentColor; outline-offset:3px; }
+.label-socket[role="button"]:focus-visible { outline:3px solid #31b9de; outline-offset:5px; }
+.label-socket[data-feedback="incorrect"] { box-shadow:0 0 0 4px #f15b6340,0 6px 0 #d6847833!important; }
+[data-interactive="true"] .label-socket:active { scale:1; }
 [data-interactive="true"] .game-action:active { scale:.98; }
 [data-interactive="true"] .game-handle { filter:drop-shadow(0 0 9px #22b8e6); }
 .ice-button {
-  --button-face:linear-gradient(180deg,#ffdb51 0%,#ffad2c 26%,#ff8128 48%,#ff682c 75%,#ff5050 100%);
+  --button-blue-face:linear-gradient(180deg,#88ecfb 0%,#50bbdc 26%,#3198c6 52%,#287eb8 100%);
+  --button-face:var(--button-blue-face);
   --button-rim:linear-gradient(180deg,#ffffff 0%,#d6f4ff 24%,#89d6ff 62%,#4ba5f4 100%);
-  --button-letter-edge:#873015;
+  --button-letter-edge:#205b80;
+  --button-feedback-glow:0 0 0 0 transparent;
   position:relative; isolation:isolate; box-sizing:border-box;
   border:6px solid transparent!important;
   border-radius:24% / 42%!important;
   background:var(--button-face) padding-box,var(--button-rim) border-box!important;
-  box-shadow:inset 0 3px 0 #ffffff66,inset 0 -3px 0 #dc442740,0 7px 0 #2362b4,0 10px 0 #123f7826,0 13px 16px #173d6b26!important;
+  box-shadow:inset 0 3px 0 #ffffff66,inset 0 -3px 0 #176e9e40,0 7px 0 #2362b4,0 10px 0 #123f7826,0 13px 16px #173d6b26,var(--button-feedback-glow)!important;
   color:#fff!important; -webkit-text-fill-color:#fff;
   font-family:Nunito,sans-serif!important; font-weight:900!important;
   line-height:1.1!important; text-align:center;
   -webkit-text-stroke:.07em var(--button-letter-edge); paint-order:stroke fill;
-  text-shadow:0 2px 0 var(--button-letter-edge),0 3px 3px #a7461733;
+  text-shadow:0 2px 0 var(--button-letter-edge),0 3px 3px #174f7333;
   white-space:nowrap; user-select:none; cursor:pointer; touch-action:manipulation;
   transition:translate 140ms ease,scale 140ms ease,filter 140ms ease,box-shadow 140ms ease;
 }
@@ -31,28 +52,49 @@
 }
 .ice-button:not([aria-disabled="true"]):not(:disabled):hover {
   filter:brightness(1.035); translate:0 -3px;
-  box-shadow:inset 0 3px 0 #ffffff88,inset 0 -3px 0 #dc442740,0 9px 0 #2362b4,0 15px 18px #173d6b30!important;
+  box-shadow:inset 0 3px 0 #ffffff88,inset 0 -3px 0 #176e9e40,0 9px 0 #2362b4,0 15px 18px #173d6b30,var(--button-feedback-glow)!important;
 }
 .ice-button:not([aria-disabled="true"]):not(:disabled):active {
   translate:0 5px; scale:.97;
-  box-shadow:inset 0 2px 3px #78252240,0 1px 0 #2362ad,0 3px 5px #173d6b25!important;
+  box-shadow:inset 0 2px 3px #174f7340,0 1px 0 #2362ad,0 3px 5px #173d6b25,var(--button-feedback-glow)!important;
 }
-.ice-button:focus-visible { outline:3px solid #123a6b; outline-offset:5px; }
-.ice-button[aria-pressed="true"],.ice-button[aria-current="true"] { outline:3px solid #13655b; outline-offset:3px; }
-.ice-button[data-feedback="correct"] { --button-face:linear-gradient(#55ae82,#23704c 40%,#185d43); }
-.ice-button[data-feedback="incorrect"] { --button-face:linear-gradient(#f06e55,#ac2f2b 40%,#92222b); }
+.ice-button:focus-visible { outline:3px solid #31b9de; outline-offset:5px; }
+.ice-button[aria-pressed="true"],.ice-button[aria-current="true"] { outline:3px solid #237cb5; outline-offset:3px; }
+.ice-button[data-feedback="correct"] {
+  --button-feedback-glow:0 0 0 4px #39cf72,0 0 20px 7px #39cf7266;
+  outline-color:#249b51;
+}
+.ice-button[data-feedback="incorrect"] {
+  --button-feedback-glow:0 0 0 4px #f15b63,0 0 20px 7px #f15b6366;
+  outline-color:#cf3643;
+}
 .ice-button[aria-disabled="true"],.ice-button:disabled {
   --button-letter-edge:#344d62;
-  --button-face:linear-gradient(#7b91a9,#51697e 40%,#405c76);
+  --button-face:linear-gradient(#96d6e9,#3e98c6 40%,#307aac);
   --button-rim:linear-gradient(#d7e6f5,#91aac6);
   opacity:1!important; cursor:default!important; filter:none!important; translate:none!important; scale:1!important;
-  box-shadow:inset 0 1px 0 #ffffff40,0 2px 0 #58728f!important;
+  box-shadow:inset 0 1px 0 #ffffff40,0 2px 0 #58728f,var(--button-feedback-glow)!important;
   text-shadow:0 1px 1px #22384c;
 }
-/* A settled answer keeps its success cue even though it no longer accepts input. */
-.ice-button[data-feedback="correct"][aria-disabled="true"] { --button-face:linear-gradient(#55ae82,#23704c 40%,#185d43); }
-.ice-button[data-feedback="incorrect"][aria-disabled="true"] { --button-face:linear-gradient(#f06e55,#ac2f2b 40%,#92222b); }
+/* Keep the reference face and feedback glow visible after an answer locks. */
+.ice-button:is([data-feedback="correct"],[data-feedback="incorrect"]):is([aria-disabled="true"],:disabled) {
+  --button-face:var(--button-blue-face);
+  --button-letter-edge:#205b80;
+  --button-rim:linear-gradient(180deg,#ffffff 0%,#d6f4ff 24%,#89d6ff 62%,#4ba5f4 100%);
+}
 @media(prefers-reduced-motion:reduce) {
   .game-action,.game-action::before,.game-action::after,.ice-button,.ice-button::before,.ice-button::after { animation:none!important; transition:none!important; }
   .ice-button:hover,.ice-button:active { translate:none!important; scale:1!important; }
+}
+/* Upcoming classification choices stay visible for context, but cannot compete for focus. */
+.ice-button[data-sequence-state] {
+  transition:filter 360ms ease,opacity 360ms ease,left 360ms ease,width 360ms ease,box-shadow 180ms ease;
+}
+.ice-button[data-sequence-state="pending"] {
+  filter:blur(2px)!important;
+  opacity:.42!important;
+  pointer-events:none!important;
+}
+@media(prefers-reduced-motion:reduce) {
+  .ice-button[data-sequence-state] { transition:none!important; }
 }

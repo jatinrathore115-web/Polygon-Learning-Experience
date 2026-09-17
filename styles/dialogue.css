@@ -78,6 +78,7 @@
   content: none;
 }
 .comic-dialogue.dialogue-box { --dialogue-height: 0px; }
+.dialogue-box .dialogue-text { padding:8px 12px; }
 
 /* The boundary lesson opens out into a centred teaching scene. */
 @keyframes boundaryTravel {
@@ -85,13 +86,37 @@
   45% { transform: translateY(-95px) rotate(-7deg); }
   85% { transform: translateY(-10px) rotate(3deg); }
 }
+/* A shallow flight arc lands the guide inside the teaching board. */
+@keyframes polygonPerchLanding {
+  0% { transform:translateY(0) rotate(0deg); }
+  45% { transform:translateY(-75px) rotate(-6deg); }
+  85% { transform:translateY(-8px) rotate(2deg); }
+  100% { transform:translateY(0) rotate(0deg); }
+}
+@keyframes polygonLanding {
+  0% { transform: translate(430px,-230px) rotate(-12deg); opacity:0; }
+  16% { opacity:1; }
+  66% { transform: translate(35px,-72px) rotate(-5deg); }
+  88% { transform: translate(0,6px) rotate(2deg); }
+  100% { transform: translate(0,0) rotate(0deg); opacity:1; }
+}
+@keyframes polygonFigureArrive {
+  from { opacity:0; transform:translateY(18px); }
+  to { opacity:1; transform:translateX(0); }
+}
+@keyframes polygonFillIn {
+  from { opacity:0; }
+  to { opacity:1; }
+}
 @keyframes boundaryEmphasis {
   0% { opacity: .35; }
   35%, 65% { opacity: 1; }
   100% { opacity: .65; }
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-lesson="boundary"] *, [data-lesson="boundary"] *::before {
+  [data-lesson="boundary"] *, [data-lesson="boundary"] *::before,
+  [data-lesson="parts-reference"] *, [data-lesson="parts-reference"] *::before,
+  [data-lesson="polygon-intro"] *, [data-lesson="polygon-intro"] *::before {
     animation: none !important;
     transition: none !important;
   }

@@ -9,7 +9,7 @@
       root.innerHTML = `<link rel="stylesheet" href="${new URL('styles/buttons.css', document.baseURI).href}"><style>
         :host{position:fixed;top:12px;left:12px;z-index:10000;font:14px system-ui,sans-serif;color:#123a6b}
         *{box-sizing:border-box}button,input{font:inherit}button{cursor:pointer}
-        button:focus-visible,input:focus-visible{outline:3px solid #124e57;outline-offset:3px}
+        button:focus-visible,input:focus-visible{outline:3px solid #31b9de;outline-offset:3px}
         #toggle{border:2px solid #fff4cb;border-radius:999px;padding:10px 16px;color:#67400e;background:linear-gradient(180deg,#ffe99d 0%,#ffc252 100%);box-shadow:inset 0 2px 0 #fff8d9,0 3px 0 #b77622,0 5px 10px #123a6b26;font-weight:750;min-height:44px;transition:filter .15s,transform .15s}
         #toggle:hover{filter:brightness(1.04)}#toggle:active{transform:translateY(2px)}
         #step-navigation{position:fixed;top:12px;right:12px;display:flex;gap:10px}

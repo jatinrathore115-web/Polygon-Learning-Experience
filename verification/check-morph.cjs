@@ -53,4 +53,10 @@ assert.equal(frames.size, 0); assert.equal(g.state.morph, null); assert.equal(do
 reduced = false; g.morphTo(shape(5), shape(6), 520, () => done++);
 g.gen = (g.gen || 0) + 1; frame(now + 520); assert.equal(done, 1);
 console.log('PASS: atomic start, interrupted morph continuity, stale-frame cancellation, all 36 exact endpoints, reduced motion, and navigation safety.');
+const box={x:925,y:230,w:650,h:650}, remapped=g.figureInViewBox('triangle','quad');
+g.fig('triangle').pts.forEach((p,i)=>{
+  const before=g.mapPt(box,g.fig('triangle').vb,p),after=g.mapPt(box,g.fig('quad').vb,remapped[i]);
+  assert(Math.hypot(before[0]-after[0],before[1]-after[1])<1e-6,'Changing SVG coordinates must not jump or resize the starting triangle');
+});
+console.log('PASS: triangle-to-quadrilateral transition preserves the source position and scale.');
 

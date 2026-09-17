@@ -53,10 +53,16 @@
         const position = wordStarts ? Math.max(0, spokenCount - 1) : Math.min(total - 0.001, Math.max(0, audio.currentTime / duration * total));
         const audibleCount = wordStarts ? spokenCount : Math.min(total, Math.floor(position) + 1);
         while (spoken < audibleCount) {
-          if (game.boundaryScene && game.boundaryScene()) game.keyword(words[spoken]);
+          if (game.boundaryScene && game.boundaryScene()) game.keyword(words[spoken], {
+            wordStartMs: (wordStarts ? wordStarts[spoken] : duration * spoken / total) * 1000,
+            mediaTimeMs: audio.currentTime * 1000, durationMs: duration * 1000
+          });
           else if (game.guide && game.guide.onWord) game.guide.onWord(words[spoken], game.step());
           spoken += 1;
         }
+        // Scrub the paused CSS pulse from the media clock, including rate changes and pauses.
+        if (game.boundaryScene && game.boundaryScene() && game.syncBoundaryPulse)
+          game.syncBoundaryPulse(audio.currentTime * 1000);
         let page = 0, offset = 0;
         while (page < pages.length - 1 && position >= offset + counts[page]) offset += counts[page++];
         const count = wordStarts ? Math.max(0, Math.min(counts[page], spokenCount - offset)) : Math.min(counts[page], Math.floor(position - offset) + 1);

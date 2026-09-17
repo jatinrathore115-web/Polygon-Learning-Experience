@@ -1,21 +1,33 @@
-/* Render the supplied PNG continuously so its gradients have no slice seams.
-   Compensate for transparent margins to retain the existing visible board bounds. */
+/* Keep the supplied artwork continuous, with one shared rim on every aspect ratio.
+   Crop to its inner face (42,82)-(1638,808), excluding both baked-in borders. */
 .story-board {
   overflow:hidden;
   box-sizing:border-box;
   border:0;
-  border-radius:34px;
-  background:transparent;
+  border-radius:88px;
+  background:#c9effb;
   filter:drop-shadow(0 8px 12px rgba(8,38,92,.18));
   pointer-events:none;
 }
 .story-board::before {
   content:'';
   position:absolute;
-  top:-9%;
-  right:-1.23%;
-  bottom:-15.74%;
-  left:-1.72%;
+  top:-11.2948%;
+  right:-2.8822%;
+  bottom:-17.3554%;
+  left:-2.6316%;
   background:url('../assets/instructiion%20board.png') center / 100% 100% no-repeat;
+  pointer-events:none;
+}
+/* One circular curve clips all four corners, independent of the stretched PNG.
+   A continuous icy rim finishes the clipped edge without changing board bounds. */
+.story-board::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  box-sizing:border-box;
+  border:3px solid #3bbff0;
+  border-radius:inherit;
+  box-shadow:inset 0 0 0 5px rgba(240,253,255,.85),inset 0 0 12px rgba(107,215,255,.5);
   pointer-events:none;
 }

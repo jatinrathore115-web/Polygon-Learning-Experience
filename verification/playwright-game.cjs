@@ -32,7 +32,7 @@ const server=http.createServer((req,res)=>{
   await open.press('Enter');
   await page.waitForFunction(()=>window.__reviewFeedback?.wrong==='open');
   assert(await page.evaluate(()=>__reviewFeedback.locked),'Feedback must gate a second answer');
-  // An incorrect open/closed answer explains the evidence and auto-advances.
+  // An incorrect answer reveals the correct choice, explains it, then advances.
   await ready(5);
   console.log('PASS wrong answer, keyboard activation, recovery and correct advance');
   for(const [k,answer]of [[5,'Open'],[6,'Closed'],[7,'Open'],[8,'Closed']]){
@@ -56,7 +56,6 @@ const server=http.createServer((req,res)=>{
   await page.locator('.story-surface > .game-action').first().click();
   await ready(18);
   for(const i of [2,4])await page.locator('.story-surface > .game-action').nth(i).click();
-  await ready(18);await page.getByRole('button',{name:'Next',exact:true}).click();
   await ready(22);
   await page.getByText('Drag a label, or tap a label then a ?.',{exact:true}).waitFor();
   for(const name of ['Left question-mark target','Lower-right question-mark target','Upper-right question-mark target'])
@@ -85,17 +84,13 @@ const server=http.createServer((req,res)=>{
   await page.getByRole('button',{name:'Check',exact:true}).click();
   await ready(35);
   for(const i of [0,2,3])await page.locator('.story-surface > .game-action').nth(i).click();
-  await ready(35);await page.getByRole('button',{name:'Next',exact:true}).click();
   await ready(40);
   console.log('PASS before/after counting, quadrilateral selection and polygon naming sequence');
   }else await jump(40);
-  for(let i=0;i<4;i++)await page.getByRole('button',{name:'Increase number of sides'}).click();
-  assert(await page.evaluate(()=>__poly.state.n===8),'Recall reaches octagon');
-  await page.getByRole('button',{name:'Next',exact:true}).click();
+  await page.waitForFunction(()=>__poly.state.k===40&&__poly.state.n===8,null,{timeout:60000});
   await ready(41);
   for(const i of [0,2])await page.locator('.story-surface > .game-action').nth(i).click();
-  await page.getByRole('button',{name:'Check',exact:true}).click();await ready(41);
-  await page.getByRole('button',{name:'Next',exact:true}).click();await ready(42);
+  await page.getByRole('button',{name:'Check',exact:true}).click();await ready(42);
   for(const [i,zone]of [0,1,0,0,1].entries()){
     const card=page.locator('.story-surface > .game-action').filter({has:page.locator('svg')}).first();
     if(i===0)await card.dragTo(page.getByRole('button',{name:'POLYGONS',exact:true}));
@@ -105,8 +100,7 @@ const server=http.createServer((req,res)=>{
   await ready(43);
   await page.locator('.story-surface > .game-action').nth(3).click();await ready(44);
   for(const i of [0,1,3])await page.locator('.story-surface > .game-action').nth(i).click();
-  await page.getByRole('button',{name:'Check',exact:true}).click();await ready(44);
-  await page.getByRole('button',{name:'Next',exact:true}).click();await ready(45);
+  await page.getByRole('button',{name:'Check',exact:true}).click();await ready(45);
   for(const [i,zone]of [0,1,0,1].entries()){
     await page.locator('.story-surface > .game-action').filter({has:page.locator('svg')}).first().click();
     await page.getByRole('button',{name:zone?'HEPTAGON':'HEXAGON',exact:true}).click();

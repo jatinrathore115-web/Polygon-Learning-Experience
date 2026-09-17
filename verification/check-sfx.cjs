@@ -2,7 +2,7 @@ const fs=require('fs'),vm=require('vm'),assert=require('assert');const html=fs.r
 
 let starts=[],contexts=[];
 const param=()=>({value:0,setValueAtTime(){},exponentialRampToValueAtTime(){},setTargetAtTime(){},cancelScheduledValues(){}});
-const node=()=>({gain:param(),frequency:param(),Q:param(),threshold:param(),knee:param(),ratio:param(),attack:param(),release:param(),connect(){},disconnect(){},start(t){starts.push(t)},stop(){}});
+const node=()=>({gain:param(),frequency:param(),playbackRate:param(),Q:param(),threshold:param(),knee:param(),ratio:param(),attack:param(),release:param(),connect(){},disconnect(){},start(t){starts.push(t)},stop(){}});
 class AudioContext {
  constructor(){this.state='suspended';this.currentTime=0;this.sampleRate=100;this.destination={};contexts.push(this);}
  createGain(){return node()} createDynamicsCompressor(){return node()} createOscillator(){return node()}
@@ -14,6 +14,7 @@ class AudioContext {
 ctx.window.AudioContext=AudioContext;
 (async()=>{
  const g=new ctx.Game();g.state.muted=false;
+ g._drawingBuffer={duration:2.4};g._drawingLoad=Promise.resolve();
  g.sfx('party');assert.equal(starts.length,0,'No scheduling on suspended clock');
  contexts[0].finish();await new Promise(setImmediate);
  assert.equal(starts.length,5);assert(starts.every(t=>t>=12));assert.equal(g._sfxOutput.gain.value,2);

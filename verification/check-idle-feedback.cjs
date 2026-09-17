@@ -62,16 +62,16 @@ g.counterHints(recall); assert.equal(recall.counters[0].minusNudge, '1');
 g.state.k = g.steps().findIndex(s => s.set === 'cfu1');
 g.state.checked = true; g.state.sel = [0,2];
 const complete = {}; g.viewMulti(complete, g.step());
-assert.equal(complete.nudgeCheck, '1'); assert.equal(complete.checkLabel, 'Next');
-jobs=[]; g.armNudge(); jobs.shift().fn(); assert(g.state.nudge, 'Completed activities can hint Next');
+assert.equal(complete.showCheck, false, 'Completed activities hide their action button');
 g.state.checked = false; g.state.sel = []; g.state.ok = null;
 const empty = g.renderVals(); assert.equal(empty.checkDisabled, true); assert.equal(empty.check, null);
 const attempts = g.state.attempts; g.check(); assert.equal(g.state.attempts, attempts);
 g.state.sel = [0,2]; let advanced = 0;
 g.advance = () => advanced++; g.feedback = (text, then) => then();
-g.react = g.confetti = () => {}; g.check();
-assert.equal(g.state.checked, true); assert.equal(advanced, 0, 'Success waits for Next');
-g.check(); assert.equal(advanced, 1);
+g.react = g.confetti = () => {}; jobs=[]; g.check();
+assert.equal(g.state.checked, true); assert.equal(advanced, 0, 'Allow a short reading pause after success speech');
+const advanceJob=jobs.find(j=>j.fn===g.advance);assert.equal(advanceJob.ms,420);
+advanceJob.fn();assert.equal(advanced,1);
 ctx.document.documentElement = {clientWidth:390,clientHeight:844};
 const mobile = g.renderVals(); assert.equal(mobile.viewportStyle.overflow, 'auto');
 assert(mobile.scalerStyle.zoom >= 0.55);
@@ -94,4 +94,4 @@ const hit = g.counterHitStyle(); assert(parseFloat(hit.width) * mobile.scalerSty
   assert.equal(gaps.length, 0, 'lines with no recording, which would be read by the synthetic voice:\n  ' + gaps.join('\n  '));
 }
 assert(/Closed boundary/.test(g.describeCard({key:'c1a',badge:'A'})));
-console.log('PASS: hints, replay feedback, counter direction, empty Check gate, deliberate Next, mobile reading scale/touch targets, and option descriptions.');
+console.log('PASS: hints, replay feedback, counter direction, empty Check gate, automatic completion, mobile reading scale/touch targets, and option descriptions.');
