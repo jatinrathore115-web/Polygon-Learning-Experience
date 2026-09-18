@@ -1,5 +1,11 @@
 /* Shared reference-blue button: icy rim, glossy face, and white lettering. */
-.game-action { position:relative; isolation:isolate; touch-action:manipulation; transition:scale 140ms ease; }
+/* Every card and button carries its own border colour inline. When one is
+   momentarily missing -- a style diff can drop the colour while leaving the
+   width and style behind -- CSS falls back to currentColor, which is black,
+   and a shape ends up framed in a hard dark box. This is the floor under that:
+   an ice-blue rim that any inline colour still overrides, so the worst case is
+   the theme colour rather than black. */
+.game-action { position:relative; isolation:isolate; touch-action:manipulation; transition:scale 140ms ease; border-color:#7fc4de; }
 .game-action:focus, .ice-button:focus { outline:none; }
 .game-action:focus-visible { outline:3px solid #31b9de; outline-offset:5px; }
 /* Colour-matched puzzle tiles and recessed sockets for the parts activity. */
@@ -7,15 +13,19 @@
 .label-tile:focus { outline:none; }
 .label-tile:focus-visible,.label-tile[aria-pressed="true"] { outline:3px solid currentColor; outline-offset:5px; }
 .label-tile::before { content:''; position:absolute; left:12px; right:12px; top:5px; height:16px; border-radius:16px; background:linear-gradient(#ffffff66,#ffffff00); pointer-events:none; }
-.label-tile::after { content:''; position:absolute; left:8px; top:50%; width:8px; height:20px; translate:0 -50%; background:radial-gradient(circle,currentColor 1.5px,transparent 2px) 0 0 / 4px 6px; opacity:.4; pointer-events:none; }
-.label-tile[aria-disabled="true"]::after { content:'✓'; background:none; width:16px; height:auto; font-size:18px; opacity:.8; }
+/* Nothing down the tile's left edge -- no grip dots and no tick. A word that
+   has been used is already dimmed, flattened and no longer draggable, and it
+   is also sitting in the socket it was dropped into, which is the clearest
+   report of all. The word itself stays the only thing on the tile. */
 .label-tile:not([aria-disabled="true"]):hover { filter:brightness(1.04); }
 .label-tile:not([aria-disabled="true"]):active { cursor:grabbing!important; }
 @keyframes labelInvite { 0%,100% { scale:1; } 45% { scale:1.06; } }
 @media(prefers-reduced-motion:reduce) { .label-tile { animation:none!important; } }
 .label-socket:focus { outline:none; }
-.label-socket::before { content:'↓'; position:absolute; left:13px; top:50%; translate:0 -50%; font:900 25px Nunito,sans-serif; opacity:.65; pointer-events:none; }
-.label-socket[data-feedback="correct"]::before { content:'✓'; font-size:20px; }
+/* Nothing inside a socket but its own text: no arrow while it waits, and no
+   tick once it is filled. An empty socket shows a question mark and a filled
+   one shows the word that answered it, which is the result itself rather than
+   an icon reporting that there was one. */
 .label-socket[role="button"]:hover { outline:3px solid currentColor; outline-offset:3px; }
 .label-socket[role="button"]:focus-visible { outline:3px solid #31b9de; outline-offset:5px; }
 .label-socket[data-feedback="incorrect"] { box-shadow:0 0 0 4px #f15b6340,0 6px 0 #d6847833!important; }

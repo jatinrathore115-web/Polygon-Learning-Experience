@@ -48,7 +48,13 @@ const server=http.createServer((req,res)=>{
     await page.getByRole('button',{name:'Open',exact:true}).click();
     assert(await page.evaluate(()=>__poly.state.wrong==='open'&&__poly.state.k===4&&!__poly.state.interactive));
     assert((await page.getByRole('button',{name:'Open',exact:true}).innerText()).startsWith('×'));
-    assert((await page.getByRole('button',{name:'Closed',exact:true}).innerText()).startsWith('✓'),'Reveal the correct answer');
+    /* The right answer is revealed by the button turning green -- face, rim
+       and shadow all change -- rather than by a tick printed in front of the
+       word, which ate into the room the word had to sit in. */
+    assert(await page.evaluate(()=>{const right=__poly.ocBtn('closed'),plain=__poly.ocBtn('open');
+      return right.borderColor==='#57ac83'&&right.background==='#e9f8ef'&&right.borderColor!==plain.borderColor;}),
+      'Reveal the correct answer by turning the button green');
+    assert(!/[✓✔]/.test(await page.getByRole('button',{name:'Closed',exact:true}).innerText()),'and without a tick');
     await page.waitForFunction(()=>__poly.state.tracing);
     const traceAppearance=()=>page.locator('.story-surface [data-trace]').first().evaluate(e=>{
       const c=getComputedStyle(e);return {stroke:c.stroke,width:c.strokeWidth,animation:c.animationName,duration:c.animationDuration,filter:c.filter};
@@ -60,7 +66,8 @@ const server=http.createServer((req,res)=>{
     await page.waitForFunction(()=>__poly.state.k===5);
     await show(4);
     await page.getByRole('button',{name:'Closed',exact:true}).press('Enter');
-    assert((await page.getByRole('button',{name:'Closed',exact:true}).innerText()).startsWith('✓'));
+    assert(await page.evaluate(()=>__poly.ocBtn('closed').borderColor==='#57ac83'),'A correct answer is confirmed by the button turning green');
+    assert(!/[✓✔]/.test(await page.getByRole('button',{name:'Closed',exact:true}).innerText()),'and carries no tick');
     assert(await page.evaluate(()=>{
       const marks=__poly.ocMarks('leaf');return !marks.pathStyle&&!marks.hl.length&&!__poly.state.fx.some(f=>f.kind==='conf');
     }));

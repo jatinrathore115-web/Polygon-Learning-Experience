@@ -55,7 +55,18 @@ const server=http.createServer((req,res)=>{
       assert.equal(await page.getByRole('button',{name,exact:true}).evaluate(e=>getComputedStyle(e).borderTopColor),color,'Choice uses its teaching colour');
       assert.equal(await page.locator('[data-label-target="'+name.toLowerCase()+'"]').evaluate(e=>getComputedStyle(e).borderTopColor),color,'Socket matches its tile');
     }
-    assert.equal(await side.evaluate(e=>getComputedStyle(e).borderTopStyle),'dashed','Empty sockets must look different from answer buttons');
+    /* An empty socket still has to read as somewhere to drop rather than a
+       button to press, but not by being drawn with a broken line -- three
+       dashed rims around the figure made the shape look like a diagram. The
+       distinction is depth instead: the socket is sunk into the board and the
+       label tile stands off it. */
+    assert.equal(await side.evaluate(e=>getComputedStyle(e).borderTopStyle),'solid','Sockets are not drawn with broken lines');
+    const depth=await page.evaluate(()=>({
+      socket:getComputedStyle(document.querySelector('[data-label-target="side"]')).boxShadow,
+      tile:getComputedStyle([...document.querySelectorAll('[data-label-chip]')].find(e=>e.textContent.trim()==='Side')).boxShadow
+    }));
+    assert(/inset/.test(depth.socket),'Empty socket is recessed: '+depth.socket);
+    assert(!/^inset/.test(depth.tile.trim()),'Label tile stands off the board: '+depth.tile);
     const stationary=await side.boundingBox();await side.hover();await page.waitForTimeout(200);
     assert.deepEqual(await side.boundingBox(),stationary,'Hover must not detach sockets from their pointers');
     await page.evaluate(()=>__poly.armNudge());

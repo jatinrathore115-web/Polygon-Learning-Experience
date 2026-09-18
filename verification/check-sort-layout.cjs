@@ -99,9 +99,10 @@ for(const sc of ['C2','C5']){
    v.cards.forEach((c,i)=>{
      const zone=s.answer[i];
      assert.equal(c.wrap.pointerEvents,'none',sc+': placed tile still swallows taps meant for its column');
-     /* the tick belongs to the tile that just landed, and to no other: a ✓
-        parked in NOT POLYGONS would read as "this one IS a polygon" */
-     assert.equal(c.mark,i===g.state.tick?'✓':'',sc+': the tick is on the wrong tile');
+     /* No badge is stamped on a tile at all. A tick parked in NOT POLYGONS
+        used to read as "this one IS a polygon", and the column a tile has
+        landed in already says everything the badge was saying. */
+     assert.equal(c.mark,'',sc+': tiles carry no badge');
      assert(c.wrap.borderColor,sc+': placed tile has no column tint');
      seen[zone]=seen[zone]||c.wrap.borderColor;
      assert.equal(c.wrap.borderColor,seen[zone],sc+': tiles in one column disagree on colour');

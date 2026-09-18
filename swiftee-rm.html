@@ -4514,5 +4514,59 @@ class Component extends DCLogic {
 }
 
 </script>
-</body>
+<script>
+(function () {
+  function stubVoice() {
+    window.PolygonRecordedVoice = { find: function () { return null; }, play: function () {} };
+  }
+  stubVoice();
+  var restub = setInterval(stubVoice, 100);
+  setTimeout(function () { clearInterval(restub); }, 20000);
+  window.SpeechSynthesisUtterance = function (text) { this.text = text; };
+  try {
+    Object.defineProperty(window, 'speechSynthesis', { configurable: true, value: {
+      cancel: function () {}, speak: function (u) {
+        setTimeout(function () { if (u.onstart) u.onstart(); }, 5);
+        setTimeout(function () { if (u.onend) u.onend({ elapsedTime: 1.1 }); }, 1100); } } });
+  } catch (e) {}
+
+  var report = { reducedMotion: null, frames: {}, clips: [] }, done = false;
+  function canvas() { return document.querySelector('canvas[aria-label]'); }
+  function game() { return window.__poly; }
+  function finish() {
+    if (done) return; done = true;
+    report.reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    console.log('SWIFTEE_RM ' + btoa(unescape(encodeURIComponent(JSON.stringify(report)))));
+  }
+  window.onerror = function (msg, src, line) { report.pageError = msg + ' @' + line; finish(); };
+  setTimeout(finish, 60000);
+
+  /* Record every frame index each clip is ever drawn at. */
+  setInterval(function () {
+    var c = canvas(); if (!c || !c.dataset.clip) return;
+    var k = c.dataset.clip;
+    (report.frames[k] = report.frames[k] || {})[c.dataset.frame] = 1;
+    if (report.clips[report.clips.length - 1] !== k) report.clips.push(k);
+  }, 20);
+
+  var tries = 0;
+  (function poll() {
+    if (done) return;
+    var g = game();
+    if (g && g.state.ready && canvas()) {
+      g.guide.sprite.preload(Object.keys(window.SWIFTEE.clips));
+      setTimeout(function () {
+        var k = g.steps().findIndex(function (x) { return x.sc === 'C3'; });
+        g.setState({ k: k }, function () {
+          g.runStep(k, false);
+          setTimeout(function () { g.tapCard(0)(); setTimeout(finish, 6000); }, 5000);
+        });
+      }, 4000);
+      return;
+    }
+    if (++tries > 600) { report.stalled = 'never booted'; finish(); return; }
+    setTimeout(poll, 25);
+  })();
+})();
+</script></body>
 </html>

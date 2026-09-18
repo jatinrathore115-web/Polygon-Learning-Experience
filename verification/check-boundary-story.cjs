@@ -33,6 +33,7 @@ const server = http.createServer((req,res) => {
         if(g.boundaryScene()) boundaryEvents.push({phase:g.step().ph,word:w,focus:g.state.boundaryFocus,
           lit:g.renderVals().cards.map(c=>c.traceStyle.opacity===1),
           pulse:g.renderVals().cards.map(c=>c.wrap.animation.includes('boundaryCardPulse')),
+          figCue:g.renderVals().cards.map(c=>((c.gStyle&&c.gStyle.animation)||'').includes('figureCue')),
           chips:g.renderVals().cards.map(c=>c.chip),
           pulseMs:g.state.boundaryPulseMs,remainingMs:timing ? timing.durationMs-timing.wordStartMs : null,
           screen:g.state.k+1,travel:g.state.boundaryTravel,guide:g.guideViewportStyle(),dialogue:g.dialogueLayout(),
@@ -63,10 +64,24 @@ const server = http.createServer((req,res) => {
        background, with this band sitting empty. */
     assert(events[0].dialogue.y+events[0].dialogue.h<540,
       'The bubble stays in the upper band: bubble ends at y='+(events[0].dialogue.y+events[0].dialogue.h));
-    assert(events.some(e=>e.phase==='bound'&&e.focus==='all'&&e.pulse.every(Boolean)));
+    /* Every narration cue on this run animates the figure, never the card the
+       figure sits in: the sentence is about boundaries, so the boundary is
+       what should answer. The card is reserved for showing selection. */
+    assert(events.some(e=>e.phase==='bound'&&e.focus==='all'&&e.figCue.every(Boolean)),
+      'All four boundaries answer "the boundaries are different too"');
+    assert(events.filter(e=>['open','closed','bound'].includes(e.phase)).every(e=>!e.pulse.some(Boolean)),
+      'and the cards stay still while they do');
+    /* "Some are straight and some are curved" names groups of boundaries as it
+       is spoken, and the figures in the group being named are what answer. The
+       card around them stays completely still: a frame that pulses competes
+       with the shape the sentence is actually pointing at. */
     for (const phase of ['sc']) {
-      assert(events.some(e=>e.phase===phase&&e.focus==='straight'&&String(e.pulse)==='true,true,false,false'));
-      assert(events.some(e=>e.phase===phase&&e.focus==='curved'&&String(e.pulse)==='false,false,true,true'));
+      assert(events.some(e=>e.phase===phase&&e.focus==='straight'&&String(e.figCue)==='true,true,false,false'),
+        'The two straight boundaries answer the word "straight"');
+      assert(events.some(e=>e.phase===phase&&e.focus==='curved'&&String(e.figCue)==='false,false,true,true'),
+        'The two curved boundaries answer the word "curved"');
+      assert(events.filter(e=>e.phase===phase).every(e=>!e.pulse.some(Boolean)),
+        'and the cards themselves never pulse on this screen');
     }
     assert(events.some(e=>e.phase==='classify'&&e.focus==='straight'&&String(e.pulse)==='true,false,false,false'));
     assert(events.filter(e=>e.phase==='classify').every(e=>!e.pulse.slice(1).some(Boolean)),'Upcoming figures remain out of focus');
@@ -103,7 +118,18 @@ const server = http.createServer((req,res) => {
            Her feet meet the rim — neither hovering above it nor sunk into the
            figure area — and the bubble sits clear of both her and the panel. */
         bubbleAbove:bubble.bottom<=board.top+6,
-        birdOnRim:Math.abs(bird.bottom-board.top)<=board.height*0.06,
+        /* Measured from her PAINTED feet, not her cell. The sprite carries
+           transparent padding below the feet, so a cell resting on the rim
+           leaves her visibly hovering above it — which is exactly how she
+           ended up floating. Feet may touch the rim or overlap it slightly,
+           never hang in the air above it. */
+        birdOnRim:(()=>{const c=document.querySelector('.swiftee-wrap canvas'),cr=c.getBoundingClientRect();
+          const px=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
+          let bm=-1;for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++)if(px[(y*c.width+x)*4+3]>32&&y>bm)bm=y;
+          if(bm<0)return true;
+          const feet=cr.top+(bm+1)*(cr.height/c.height), scale=window.__poly.state.scale||1;
+          const gap=(board.top-feet)/scale;   // positive = floating above the rim
+          return gap<=2&&gap>=-26;})(),
         birdAbove:bird.top<board.top,
         bubbleClear:bubble.right<bird.left,
         birdRight:bird.left>innerWidth*.6,birdFits:bird.bottom<=innerHeight+1};
@@ -114,7 +140,9 @@ const server = http.createServer((req,res) => {
       return document.querySelector('.story-board').getBoundingClientRect().top>nav.bottom+10;
     }),'Navigation has clear space above the board');
     assert.equal(await page.evaluate(()=>__poly.renderVals().cards.length),4);
-    assert.equal(await page.getByRole('button',{name:/^Figure \d: /}).count(),8);
+    /* Only the figure being asked about offers answers -- two buttons, not a row
+       of eight sitting under figures nobody is being asked about yet. */
+    assert.equal(await page.getByRole('button',{name:/^Figure \d: /}).count(),2);
     assert.equal(await page.getByRole('button',{name:'Select',exact:true}).count(),0);
     await page.getByRole('button',{name:'Figure 1: Curved',exact:true}).click();
     assert(await page.evaluate(()=>__poly.state.ddWrong[0]));
@@ -132,10 +160,19 @@ const server = http.createServer((req,res) => {
     await page.screenshot({path:path.join(out,'reference-options-success.png')});
     for(const viewport of [{width:1024,height:768},{width:390,height:844},{width:1440,height:810}]) {
       await page.setViewportSize(viewport); await page.waitForTimeout(500);
+      /* The answered figure keeps its one result and the figure in hand offers
+         two choices -- three buttons, each big enough to hit and none of them
+         touching its neighbour, at every width. */
       assert(await page.evaluate(()=>{
         const buttons=[...document.querySelectorAll('.story-surface > [role="button"]')].map(e=>e.getBoundingClientRect());
-        return buttons.length===7&&buttons.every(b=>b.height>=44&&b.width>=44)&&buttons.every((b,i)=>i===0||b.left>buttons[i-1].right);
-      }),'One settled answer and six separate choices at '+viewport.width);
+        return buttons.length===3&&buttons.every(b=>b.height>=44&&b.width>=44)&&buttons.every((b,i)=>i===0||b.left>buttons[i-1].right);
+      }),'One settled answer and two separate choices at '+viewport.width);
+      /* And the answer row never sits on the figures it is asking about. */
+      assert(await page.evaluate(()=>{
+        const cards=[...document.querySelectorAll('.story-surface svg')].map(s=>s.closest('div').getBoundingClientRect());
+        const buttons=[...document.querySelectorAll('.story-surface > [role="button"]')].map(e=>e.getBoundingClientRect());
+        return Math.min(...buttons.map(b=>b.top))>Math.max(...cards.map(c=>c.bottom));
+      }),'Answer row clears the figures at '+viewport.width);
     }
     await page.emulateMedia({reducedMotion:'reduce'});
     assert(await page.locator('.story-board').evaluate(e=>getComputedStyle(e).transitionDuration==='0s'));

@@ -52,15 +52,21 @@
   transform: rotate(-22deg);
   pointer-events: none;
 }
-/* The fill covers the body border; only the two free edges are stroked. */
+/* The tail is one silhouette with the bubble, not a shape parked under it.
+   Sized 60x60 against a 0 0 60 60 viewBox so one unit is one CSS pixel, and
+   offset 10px so the mouth's centreline lands on the body border's centreline
+   and the fill covers that border across the mouth. The old offset was 4px,
+   which left the border painted straight across the tail and cut the two
+   apart. The same 10px works for the sideways tail on the boundary screens,
+   which is this shape rotated a quarter turn. */
 .dialogue-tail {
   position: absolute;
   left: var(--dialogue-tail-x, calc(70% - 35px));
-  top: var(--dialogue-tail-top, calc(100% - 4px));
+  top: var(--dialogue-tail-top, calc(100% - 10px));
   transform: var(--dialogue-tail-transform, none);
   transform-origin: center;
   width: 60px;
-  height: auto;
+  height: 60px;
   overflow: visible;
   pointer-events: none;
   z-index: 1;
@@ -69,10 +75,12 @@
 .dialogue-tail-stroke {
   fill: none;
   stroke: var(--dialogue-edge);
-  stroke-width: 4px;
+  /* Four units = four CSS pixels = the body's border, and it scales with the
+     stage exactly as that border does. A non-scaling stroke here made the
+     tail's outline visibly heavier than the bubble's at most screen sizes. */
+  stroke-width: 4;
   stroke-linecap: round;
   stroke-linejoin: round;
-  vector-effect: non-scaling-stroke;
 }
 .comic-dialogue::after {
   content: none;

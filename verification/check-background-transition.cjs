@@ -60,7 +60,9 @@ const server = http.createServer((req,res) => {
     await page.waitForTimeout(900);
     assert.equal(await opacity(),1);
     assert.deepEqual(await page.locator('.story-board').boundingBox(),before,'Board stays steady');
-    assert.equal(await page.getByRole('button',{name:/Figure [1-4]: (Straight|Curved)/}).count(),8);
+    /* Only the figure being asked about offers answers, so the row is two
+       buttons rather than eight competing for the same tap. */
+    assert.equal(await page.getByRole('button',{name:/Figure [1-4]: (Straight|Curved)/}).count(),2);
     assert(await page.locator('.boundary-background').evaluate(e=>e.naturalWidth>0&&getComputedStyle(e).pointerEvents==='none'));
     await page.screenshot({path:path.join(out,'screen-14.png')});
     await page.getByRole('button',{name:'Figure 1: Straight',exact:true}).click();

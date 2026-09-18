@@ -21,17 +21,24 @@
     leaf: poly([[500, 0], [633, 389], [988, 376], [880, 516], [748, 653], [890, 790], [532, 766],
       [532, 955], [468, 955], [468, 766], [110, 790], [252, 653], [120, 516], [12, 376], [367, 389]], 24),
 
-    /* p6 — rounded pot/vase, curved, OPEN across the top lip */
+    /* p6 — open curved figure: a wide cup, open across the top. The boundary
+       runs most of the way round but never arrives back where it started,
+       which is what makes it open, and the opening is wide enough to read as
+       a gap at card size rather than a hairline.
+       It is an ellipse, not a circle — the reference is about 1.23x wider than
+       it is tall — swept 261 degrees so a 99-degree gap sits centred on top.
+       The viewBox is square and 1020 wide: square so the figure centres in its
+       card the same way the others do, and 1020 so k() — and with it the stroke
+       and gap-dot scale — is exactly what it always was. */
     pot: {
-      curved: true, closed: false, vb: '-10 210 1020 780',
-      d: 'M110 232 C120 280 130 315 132 348 C70 400 28 490 28 600 C28 780 210 958 460 958' +
-         ' C710 958 952 780 952 600 C952 490 908 400 838 348 C840 315 830 280 838 230',
-      extra: 'M110 232 L177 241 M808 243 L838 230',
-      // One continuous trace includes both lip segments without crossing the opening.
-      traceD: 'M177 241 L110 232 C120 280 130 315 132 348 C70 400 28 490 28 600 C28 780 210 958 460 958 C710 958 952 780 952 600 C952 490 908 400 838 348 C840 315 830 280 838 230 L808 243',
-      gap: { x: 492, y: 246, w: 320, h: 120 }
+      curved: true, closed: false, vb: '0 0 1020 1020',
+      d: 'M858.8 200.4 C904.7 243.8 937.7 295.1 955.4 350.6 C973.1 406 974.9 463.9 960.8 520' +
+         ' C946.7 576.1 917 628.8 874 674.1 C831 719.4 775.9 756.1 712.8 781.3 C649.7 806.5' +
+         ' 580.3 819.6 510 819.6 C439.7 819.6 370.3 806.5 307.2 781.3 C244.1 756.1 189 719.4' +
+         ' 146 674.1 C103 628.8 73.3 576.1 59.2 520 C45.1 463.9 46.9 406 64.6 350.6 C82.3 295.1' +
+         ' 115.3 243.8 161.2 200.4',
+      gap: { x: 510, y: 200, w: 698, h: 110 }
     },
-
     /* p7 — small straight-edged star figure. Open in the source art; p7 adds the closing lip. */
     starOpen: {
       straightOpen: true, closed: false, vb: '60 140 800 700',

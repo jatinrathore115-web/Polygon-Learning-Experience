@@ -26,12 +26,32 @@ const server=http.createServer((req,res)=>{
     });
     const enabled=()=>page.locator('[data-sequence-state="active"][aria-disabled="false"]');
     await start();await page.waitForTimeout(1100);
+    /* One figure is asked about at a time, so only that figure offers answers.
+       The figures still waiting show no buttons at all: a second row of choices
+       under a figure nobody is being asked about is just something else to tap
+       by mistake. */
     assert.equal(await enabled().count(),2);
-    assert.equal(await page.locator('[data-sequence-state="pending"]').count(),6);
-    assert(await page.locator('[data-sequence-state="pending"]').evaluateAll(es=>es.every(e=>e.tabIndex===-1&&getComputedStyle(e).filter.includes('blur'))));
+    assert.equal(await page.locator('[data-sequence-state="pending"]').count(),0,'Waiting figures offer no buttons');
+    assert.equal(await page.getByRole('button',{name:/^Figure [234]:/}).count(),0,'Only the figure in hand can be answered');
+    /* Nothing is blurred. These are boundaries the learner is being asked to
+       compare, and a blurred boundary cannot be compared -- the waiting ones
+       stay fully drawn and simply wait in blue. */
     const filters=await page.locator('.story-surface svg').evaluateAll(es=>es.map(e=>getComputedStyle(e.parentElement).filter));
-    assert.deepEqual(filters,['none','blur(3px)','blur(3px)','blur(3px)']);
-    await page.evaluate(()=>{__poly.ddPick(2,'Curved')();document.querySelector('[aria-label="Figure 4: Curved"]').click();});
+    assert.deepEqual(filters,['none','none','none','none'],'No figure is blurred');
+    const strokes=await page.locator('.story-surface svg').evaluateAll(es=>es.map(e=>e.querySelector('path').getAttribute('stroke')));
+    assert(strokes.slice(1).every(s=>s==='#7fb2d9'),'Figures awaiting their turn wait in blue: '+strokes);
+    assert(strokes[0]!=='#7fb2d9','The figure in hand keeps its own colour');
+    /* The answer row clears the figures rather than sitting on them. */
+    const gap=await page.evaluate(()=>{
+      const cards=[...document.querySelectorAll('.story-surface svg')].map(s=>s.closest('div').getBoundingClientRect());
+      const btn=[...document.querySelectorAll('.story-surface [role="button"]')].filter(e=>/Straight|Curved/.test(e.textContent)).map(e=>e.getBoundingClientRect());
+      return Math.min(...btn.map(b=>b.top))-Math.max(...cards.map(c=>c.bottom));
+    });
+    assert(gap>8,'Answer buttons clear the figures above them, gap '+gap.toFixed(0)+'px');
+    /* Straight is offered first, then Curved, rather than both at once. */
+    const delays=await enabled().evaluateAll(es=>es.map(e=>getComputedStyle(e).animationDelay));
+    assert.deepEqual(delays,['0s','0.17s'],'The two choices arrive one after the other');
+    await page.evaluate(()=>{__poly.ddPick(2,'Curved')();});
     assert(await page.evaluate(()=>__poly.state.dd.every(v=>v===null)),'Future cards reject direct activation');
     await page.screenshot({path:path.join(out,'first-figure.png')});
     const truth=['Straight','Straight','Curved','Curved'];
@@ -40,7 +60,12 @@ const server=http.createServer((req,res)=>{
       await choice.focus();await page.keyboard.press('Enter');
       assert.equal(await page.locator('[data-sequence-state="complete"]').count(),i+1);
       assert.equal(await page.getByRole('button',{name:new RegExp('^Figure '+(i+1)+':')}).count(),1,'Replace both choices with one result');
-      assert((await choice.innerText()).startsWith('✓'));
+      /* The earned answer is confirmed by the button itself -- green face,
+         green rim, green ink -- not by a tick printed in front of the word. */
+      assert(await page.evaluate(i=>{const t=__poly.renderVals().targets.find(x=>x.label.indexOf('Figure '+(i+1)+': ')===0);
+        return !!t&&t.style.background==='#daf6e5'&&t.style.border.indexOf('#55bc88')>=0;},i),
+        'The settled answer reads as correct');
+      assert(!/[✓✔]/.test(await choice.innerText()),'and carries no tick');
       if(i<3){
         await page.waitForFunction(i=>__poly.state.ddActive===i+1&&!__poly.locked(),i);
         assert.equal(await enabled().count(),2);
@@ -57,6 +82,6 @@ const server=http.createServer((req,res)=>{
     await page.emulateMedia({reducedMotion:'reduce'});await start();
     assert.equal(await enabled().first().evaluate(e=>getComputedStyle(e).transitionDuration),'0s');
     assert.deepEqual(errors,[]);
-    console.log('PASS: sequential guards, blur, one checked result, keyboard handoff, all four figures, re-entry cancellation and reduced motion.');
+    console.log('PASS: sequential guards, waiting figures in blue and unblurred, staggered choices clear of the figures, one checked result, keyboard handoff, all four figures, re-entry cancellation and reduced motion.');
   }finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});

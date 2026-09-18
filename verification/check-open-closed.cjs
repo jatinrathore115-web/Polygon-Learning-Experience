@@ -1,12 +1,12 @@
 /* The open-or-closed screens, checked as geometry rather than by eye.
      node verification/check-open-closed.cjs
-   Two things have to be true once one of these questions is answered. When the
+   One thing has to be true once one of these questions is answered. When the
    sign says there is a gap in the boundary, the gap itself has to be marked on
-   the shape — the learner cannot be asked to take the sentence on trust. And a
-   boundary that is closed has to be shown closing: a light running the whole
-   way round and arriving back where it started is the thing that makes it
-   closed, so a correct "Closed" earns that lap rather than only a button
-   outline. Both are numbers here, so a later change cannot quietly drop them. */
+   the shape --- the learner cannot be asked to take the sentence on trust. A
+   closed boundary is the other half of that contract: nothing is drawn on it,
+   because there is nothing to point at, and recolouring an outline the learner
+   has just read correctly only obscures the thing the question was about. Both
+   are numbers here, so a later change cannot quietly drop or reverse them. */
 const fs = require('fs'), vm = require('vm'), assert = require('assert');
 const html = fs.readFileSync('index.html', 'utf8');
 const ctx = {
@@ -66,63 +66,71 @@ questions.filter(o => o.s.ans === 'open').forEach(o => {
   assert(ends, o.s.fig + ' has no loose ends to mark');
   /* Wrong answer: the sign reads "There is a gap in its boundary." */
   const revealed = answered(o.k, { ocReveal: 'open', wrong: 'closed' });
-  const span = spanOf(revealed.card);
-  check(!!span, o.s.fig + ': the missing span is drawn when the sign says there is a gap');
-  const n = span ? span.d.match(/-?\d*\.?\d+/g).map(Number) : [];
-  check(span && near(n[0], ends[0][0]) && near(n[1], ends[0][1]) && near(n[2], ends[1][0]) && near(n[3], ends[1][1]),
-    o.s.fig + ': and it runs between the two places the boundary actually stops');
-  check(span && /dash/i.test(JSON.stringify(span.style)),
-    o.s.fig + ': dashed, so it can never be mistaken for boundary');
-  const caps = revealed.card.dots.filter(d => d.fill === '#ffffff');
-  check(caps.length === 2
-        && ends.every(e => caps.some(c => near(c.x, e[0]) && near(c.y, e[1]))),
-    o.s.fig + ': both loose ends are capped');
-  check(revealed.card.dots.filter(d => d.fill !== '#ffffff').length === 2,
-    o.s.fig + ': and each cap has a halo drawing the eye to it');
+  const dots = revealed.card.dots;
+  check(dots.length >= 5, o.s.fig + ': a dotted line marks the missing span — ' + dots.length + ' dots');
+  /* Every dot sits on the straight run between the two places the boundary
+     stops, so the dotted line traces the gap and not some other path. */
+  const dx = ends[1][0] - ends[0][0], dy = ends[1][1] - ends[0][1];
+  const len = Math.hypot(dx, dy);
+  const offLine = dots.filter(d =>
+    Math.abs((d.x - ends[0][0]) * dy - (d.y - ends[0][1]) * dx) / len > 2);
+  check(offLine.length === 0,
+    o.s.fig + ': and every dot lies on the run between the two places the boundary stops');
+  /* Strictly between the ends: the loose ends stay bare so the opening itself
+     is still the clearest thing on the shape. */
+  const atEnd = dots.filter(d => ends.some(e => near(d.x, e[0], 6) && near(d.y, e[1], 6)));
+  check(atEnd.length === 0, o.s.fig + ': with both loose ends left bare');
+  /* They arrive one after another, so the gap is drawn rather than appearing. */
+  /* The delay is the second time in the shorthand, after the easing; matching
+     the first one just re-reads the duration for every dot. */
+  const delays = dots.map(d => parseFloat((/ease-out\s+(\d+)ms/.exec(d.style.animation || '') || [0, 0])[1]));
+  check(/gapDotReveal/.test(dots[0].style.animation || '')
+        && delays.every((v, i) => i === 0 || v > delays[i - 1]),
+    o.s.fig + ': revealed in order along the gap, not all at once');
   /* Right answer: the same marks, so being right still shows why. */
   const correct = answered(o.k, { ok: 'open' });
-  check(!!spanOf(correct.card) && correct.card.dots.length === 4,
+  check(correct.card.dots.length === dots.length,
     o.s.fig + ': answering "Open" correctly shows the same gap');
   check(!sweepOf(correct.card), o.s.fig + ': and never the closed-boundary lap');
 });
 
-/* ---- a closed boundary is shown closing ---- */
+/* ---- a closed boundary is left unmarked ---- */
+/* There is no gap to point at, so nothing is drawn on top of a boundary the
+   learner has just read correctly. The answer is confirmed off the shape —
+   the tick on the button, the chime, Swiftee's reaction and her spoken line —
+   and the figure stays exactly the figure the question asked about. A future
+   change that paints the outline green on a correct answer fails here. */
 questions.filter(o => o.s.ans === 'closed').forEach(o => {
   const correct = answered(o.k, { ok: 'closed' });
-  const sweep = sweepOf(correct.card);
-  check(!!sweep, o.s.fig + ': a correct "Closed" runs a light round the boundary');
-  check(sweep && sweep.d === g.figD(o.s.fig),
-    o.s.fig + ': the light follows the whole outline, not a piece of it');
-  check(sweep && /^\d+ \d+$/.test(sweep.style.strokeDasharray || '')
-        && sweep.style.strokeDashoffset === 100,
-    o.s.fig + ': as one bright segment travelling a full lap');
-  check(!!correct.card.pathStyle && /sealGlow/.test(correct.card.pathStyle.animation || ''),
-    o.s.fig + ': and the outline itself glows while it runs');
+  check(correct.card.hl.length === 0,
+    o.s.fig + ': a correct "Closed" leaves the shape unmarked — ' + correct.card.hl.length + ' highlight(s)');
+  check(!correct.card.pathStyle || !correct.card.pathStyle.animation,
+    o.s.fig + ': and the outline itself neither glows nor pulses');
   check(correct.card.dots.length === 0, o.s.fig + ': with no gap marks, because there is no gap');
+  /* The outline keeps the colour it was drawn in, so being right does not
+     recolour the boundary the question was about. */
+  check(correct.card.stroke === answered(o.k).card.stroke,
+    o.s.fig + ': drawn in the same colour it was asked in');
 
-  /* Wrong answer on a closed figure already gets the blue trace, which runs the
-     same lap for the same reason, so nothing is stacked on top of it. */
+  /* Wrong answer on a closed figure gets the blue trace, which runs the whole
+     way round and is the thing that shows the boundary closing. */
   const revealed = answered(o.k, { ocReveal: 'closed', wrong: 'open', tracing: true, traceMs: 1800 });
-  check(!sweepOf(revealed.card), o.s.fig + ': a revealed answer leaves that lap to the trace');
   check(revealed.card.traceStyle && revealed.card.traceStyle.opacity !== 0,
-    o.s.fig + ': and the trace is the thing that runs');
+    o.s.fig + ': a revealed answer is shown closing by the trace');
+  check(revealed.card.hl.length === 0,
+    o.s.fig + ': and nothing is stacked on top of it');
 });
-
-/* ---- the light must not be left parked on the shape ---- */
-const sealKeyframe = html.match(/@keyframes sealSweep \{([^}]*\}[^}]*)*?\s*\}/);
-check(/100% \{[^}]*opacity: 0/.test(html.match(/@keyframes sealSweep \{[\s\S]*?\n/)[0]),
-  'the lap ends invisible rather than parking a bright segment on the boundary');
 
 /* ---- reduced motion ---- */
 ctx.window.matchMedia = (q) => ({ matches: /reduce/.test(q) });
 const stillGap = answered(questions.find(o => o.s.ans === 'open').k, { ocReveal: 'open' });
-check(!!spanOf(stillGap.card) && stillGap.card.dots.length === 4,
+check(stillGap.card.dots.length >= 5,
   'prefers-reduced-motion: the gap is still marked, it simply does not move');
-check(!stillGap.card.dots.some(d => (d.style || {}).animation),
+check(!stillGap.card.dots.some(d => { const a = (d.style || {}).animation; return a && a !== 'none'; }),
   'and none of its marks animate');
 const stillSeal = answered(questions.find(o => o.s.ans === 'closed').k, { ok: 'closed' });
 check(!(stillSeal.card.pathStyle || {}).animation && !sweepOf(stillSeal.card),
-  'the closed boundary neither pulses nor runs its light');
+  'and a closed boundary stays unmarked here too');
 delete ctx.window.matchMedia;
 
 if (fail.length) { console.error('\n' + fail.length + ' check(s) failed'); process.exit(1); }
