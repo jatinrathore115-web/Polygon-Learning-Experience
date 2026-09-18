@@ -55,7 +55,7 @@ const server=http.createServer((req,res)=>{
   await ready(15);
   await page.locator('.story-surface > .game-action').first().click();
   await ready(18);
-  for(const i of [2,4])await page.locator('.story-surface > .game-action').nth(i).click();
+  for(const i of [1,2])await page.locator('.story-surface > .game-action').nth(i).click(); // pentagon, triangle
   await ready(22);
   await page.getByText('Drag a label, or tap a label then a ?.',{exact:true}).waitFor();
   for(const name of ['Left question-mark target','Lower-right question-mark target','Upper-right question-mark target'])

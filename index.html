@@ -64,6 +64,15 @@
          by a light running the whole way round and arriving back where it
          started, which is the thing that makes it closed. --- */
   @keyframes gapDotReveal { from { opacity:0; transform:scale(.4); } to { opacity:1; transform:scale(1); } }
+  /* --- open / closed answers. A gap is shown as the two loose ends of the
+         boundary and the span missing between them; a closed boundary is shown
+         by a light running the whole way round and arriving back where it
+         started, which is the thing that makes it closed. --- */
+  @keyframes gapEnd { 0%,100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+  @keyframes gapHalo { 0% { transform: scale(0.55); opacity: 0.6; } 100% { transform: scale(1.55); opacity: 0; } }
+  @keyframes gapSpan { 0%,100% { opacity: 0.68; } 50% { opacity: 1; } }
+  @keyframes sealSweep { 0% { stroke-dashoffset: 100; opacity: 0; } 5% { opacity: 1; } 94% { opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 0; } }
+  @keyframes sealGlow { 0%,100% { filter: drop-shadow(0 0 4px rgba(47,158,94,0.3)); } 50% { filter: drop-shadow(0 0 17px rgba(47,158,94,0.85)); } }
   @media (prefers-reduced-motion:reduce) { circle[data-dot="gap"] { animation:none!important; opacity:1!important; transform:none!important; } }
   @keyframes answerSuccess { 0% { transform:scale(.97); } 45% { transform:scale(1.035); } 100% { transform:scale(1); } }
   @keyframes answerRetry { 0%,100% { transform:translateX(0); } 25% { transform:translateX(-5px); } 60% { transform:translateX(4px); } }
@@ -327,6 +336,25 @@ const STAGE = { w: 1980, h: 1980 * 9 / 16 };
 /* Reserve the left rock for the guide; all activity layouts share the right surface. */
 const BOARD = { x: 378, y: 102, w: 1594, h: 886 };
 const OPENING_BOARD = { x:816, y:116, w:992, h:834 };
+/* The naming and recall screens share one figure band and one label gap, so the
+   name always sits clear of the shape and inside the board however much of its
+   box a given polygon happens to fill. */
+const NAME_FIGURE = { y: 128, h: 660 };
+const NAME_LABEL_GAP = 48;
+/* Screens 10-16, the comparison run. One composition for all seven: Swiftee and
+   her bubble across the top, the row of figures in the panel beneath them. */
+const BOUNDARY = {
+  /* Measured off the reference frame and converted to stage units. Swiftee
+     stands on the panel's top rim, feet just over the edge, with her bubble
+     beside her; the panel and its row of figures sit below them both. */
+  dialogue: { x: 361, y: 11, w: 1039, h: 190 },
+  guide:    { x: 1438, y: 12, w: 252, h: 252 },
+  boardW: 1846, boardY: 257, boardH: 770,
+  card: { size: 362, gap: 46 },
+  safeY: 330
+};
+/* The answer row lives in this band at the foot of the opening card. */
+const OPENING_ANSWER_BAND = 168;
 const LAYER = {
   board:   BOARD,
   sign:    { x: 22, y: 236, w: 344, h: 272 }
@@ -602,6 +630,13 @@ class SwifteeGuide {
         this.wordCues.add(w); this.react([[gesture, .55]], 2);
       }
     }
+    /* The comparison screens: the wing goes out on the word that names what she
+       is pointing at, so the gesture and the sentence land together. */
+    if (step.sc === 'S16' && !this.wordCues.has(w)) {
+      const gesture = step.ph === 'both' ? (w === 'both' ? 'waving' : w === 'sides' ? 'proud' : null)
+        : step.ph === 'name' ? (w === 'number' ? 'curious' : w === 'name' ? 'proud' : null) : null;
+      if (gesture) { this.wordCues.add(w); this.react([[gesture, 0.55]], 2); }
+    }
     let cue = /^(whoa|woah|wow)$/.test(w) ? 'surprise' : null;
     if (step.sc === 'S8' && w === 'polygon') cue = 'surprise';
     if (!step.q && /^(triangle|quadrilateral|pentagon|hexagon|heptagon|octagon)$/.test(w)) cue = 'proud';
@@ -770,10 +805,12 @@ class Component extends DCLogic {
   }
   // Schedule from the resumed audio clock, never from a suspended clock.
   unlockAudio = (event) => {
-    // A normal game gesture can recover blocked narration without another button.
+    /* A normal game gesture recovers blocked narration without a button. The
+       pending retry is the signal, not a message on screen: the lesson no
+       longer stops to ask for a tap, so there is no voiceError to wait for. */
     const gesture = event && event.isTrusted && (event.type === 'pointerup' || event.type === 'touchend'
       || (event.type === 'keydown' && !event.repeat && (event.key === 'Enter' || event.key === ' ')));
-    if (gesture && this.state.voiceError && this._voiceRetry && Date.now() - (this._lastVoiceGesture || 0) > 350) {
+    if (gesture && this._voiceRetry && Date.now() - (this._lastVoiceGesture || 0) > 350) {
       this._lastVoiceGesture = Date.now();
       this.retryVoice();
     }
@@ -874,20 +911,33 @@ class Component extends DCLogic {
   }
 
   /* ---------- narration + voice over ---------- */
+  /* How long a silent line stays up: a measured duration if the recording gave
+     us one, otherwise read aloud at roughly a young learner's pace, with a
+     floor so even three words are not gone before they land. */
+  readingTime(text, durationMs) {
+    if (Number.isFinite(durationMs) && durationMs > 400) return durationMs;
+    const words = String(text || '').split(/\s+/).filter(Boolean).length;
+    return Math.max(1900, 900 + words * 320);
+  }
   // Speech completion, never an estimated duration, controls the input gate.
   speak(text, cb, durationMs) {
     this.prepareNarratorReveal(text, durationMs);
     const generation = this.gen || 0, id = this.spkId = (this.spkId || 0) + 1;
     const current = () => id === this.spkId && generation === (this.gen || 0);
     let finished = false, started = false, failed = false;
+    /* A voice the browser will not start must not stop the lesson. The line
+       stays on screen, is given time to be read, and the lesson carries on;
+       audio is still retried silently on the learner's next touch, so sound
+       returns for the following lines without ever asking for a tap. */
     const fail = () => {
       if (!current() || finished) return;
-      failed = true;
+      failed = true; finished = true;
       this.guide.onInstructionPause();
       this._voiceRetry = () => this.speak(text, cb, durationMs);
-      this.prepareNarratorReveal('Tap anywhere to continue.');
-      this.setState({ wordReveal: 'complete', storyDialogue: true,
-        voiceError: 'Tap anywhere to continue.', interactive: false });
+      this.prepareNarratorReveal(text, durationMs);
+      this.setState({ wordReveal: 'complete', storyDialogue: true, voiceError: '' });
+      this.later(() => { if (current()) this.setState({ wordReveal: 'complete' }, cb); },
+        this.readingTime(text, durationMs));
     };
     const recording = window.PolygonRecordedVoice && window.PolygonRecordedVoice.find(text);
     if (recording) return window.PolygonRecordedVoice.play(this, text, recording, current, cb, fail);
@@ -1187,9 +1237,9 @@ class Component extends DCLogic {
     const C = this.P.C;
     return {
       cmp: [['starClosed', C.blue], ['zig', C.green], ['pot', C.orange], ['crescent', C.purple]],
-      p19: [['p19a', C.blue], ['p19b', C.green], ['p19c', C.orange], ['p19d', C.pink], ['p19e', C.purple]],
+      p19: [['p19a', C.blue], ['p19c', C.orange], ['p19e', C.purple], ['p19d', C.pink]],
       q36: [['q36a', C.pink, '#fbd9e4'], ['q36b', IK, '#ffffff'], ['q36c', C.orange, '#fbc98f'], ['q36d', C.gold, '#f9d47c']],
-      cfu1: [['c1a', C.purple], ['c1b', C.green], ['c1c', C.orange], ['c1d', C.blue], ['pot', C.pink]],
+      cfu1: [['c1a', C.purple], ['c1b', C.green], ['c1c', C.orange], ['c1d', C.blue]],
       cfu2: [['c2a', C.purple], ['c2b', C.green], ['c2c', C.orange], ['c2d', C.blue], ['c2e', C.pink]],
       /* B was palette blue, a few degrees off the card borders and the ice
          behind them, so the rectangle sank into the furniture. Pink is the
@@ -1230,7 +1280,7 @@ class Component extends DCLogic {
         fb: { ok: 'Yes! It is closed and made of straight lines.', one: 'Not quite. Look for a figure with no gaps and no curves.' } },
       { sc: 'S8', label: '08 · Polygon', narr: 'We call this a polygon.', fig: 'starClosed', reveal: 'POLYGON', auto: true },
       { sc: 'S9', label: '09 · Definition', narr: 'A closed figure made of only straight line segments is called a polygon.', fig: 'pentagon', build: true, reveal: 'Polygon', auto: true },
-      { sc: 'S10', label: '10 · Which are polygons', narr: 'Which of these figures are polygons?', set: 'p19', q: 'multi', correct: [2, 4] },
+      { sc: 'S10', label: '10 · Which are polygons', narr: 'Which of these figures are polygons?', set: 'p19', q: 'multi', correct: [1, 2] },
       { sc: 'S11', ph: 'sides', label: '11 · Sides', narr: 'These line segments are the sides of the polygon.', fig: 'pentagon', auto: true },
       { sc: 'S11', ph: 'vertex', label: '11 · Vertex', narr: 'The point where two sides meet is called a vertex.', fig: 'pentagon', auto: true },
       { sc: 'S11', ph: 'angle', label: '11 · Angle', narr: 'When two sides meet, they also form an angle.', fig: 'pentagon', auto: true },
@@ -1249,14 +1299,16 @@ class Component extends DCLogic {
       { sc: 'S17', ph: 'quad', label: '17 · Quadrilateral', narr: 'A polygon with 4 sides is called a quadrilateral.', fig: 'quad', count: 4, reveal: 'Quadrilateral', morphFrom: 'triangle', auto: true },
       { sc: 'S18', label: '18 · Quadrilaterals', narr: 'Select all the quadrilaterals.', set: 'q36', q: 'multi', correct: [0, 2, 3],
         fb: { ok: 'That’s right! Quadrilaterals are polygons with 4 sides.' } },
-      { sc: 'S19', label: '19 · Pentagon', narr: 'A polygon with 5 sides is called a pentagon.', fig: 'pentagon', count: 5, reveal: 'Pentagon', auto: true },
-      { sc: 'S20', label: '20 · Hexagon', narr: 'A polygon with 6 sides is called a hexagon.', fig: 'hexagon', count: 6, reveal: 'Hexagon', auto: true },
-      { sc: 'S21', label: '21 · Heptagon', narr: 'A polygon with 7 sides is called a heptagon.', fig: 'heptagon', count: 7, reveal: 'Heptagon', auto: true },
-      { sc: 'S22', label: '22 · Octagon', narr: 'A polygon with 8 sides is called an octagon.', fig: 'octagon', count: 8, reveal: 'Octagon', auto: true },
+      { sc: 'S19', label: '19 · Pentagon', narr: 'A polygon with 5 sides is called a pentagon.', fig: 'pentagon', count: 5, reveal: 'Pentagon', morphFrom: 'quad', auto: true },
+      { sc: 'S20', label: '20 · Hexagon', narr: 'A polygon with 6 sides is called a hexagon.', fig: 'hexagon', count: 6, reveal: 'Hexagon', morphFrom: 'pentagon', auto: true },
+      { sc: 'S21', label: '21 · Heptagon', narr: 'A polygon with 7 sides is called a heptagon.', fig: 'heptagon', count: 7, reveal: 'Heptagon', morphFrom: 'hexagon', auto: true },
+      { sc: 'S22', label: '22 · Octagon', narr: 'A polygon with 8 sides is called an octagon.', fig: 'octagon', count: 8, reveal: 'Octagon', morphFrom: 'heptagon', auto: true },
       { sc: 'S23', label: '23 · Recall', narr: "Let's recall the different types of polygons we learnt about.", q: 'recall' },
       {
         sc: 'C1', label: 'CFU 1', narr: 'Which of these are polygons?',
-        set: 'cfu1', q: 'multi', check: true, correct: [0, 2],
+        /* No Check button: selecting both polygons is the answer, and the
+           screen moves on by itself, exactly as screens 19 and 36 do. */
+        set: 'cfu1', q: 'multi', correct: [0, 2],
         fb: { ok: 'Yes! Closed, with only straight sides.', one: 'Is it closed? Does it have only straight sides?', two: 'A polygon is closed, with only straight sides. Try again.' }
       },
       {
@@ -1326,7 +1378,9 @@ class Component extends DCLogic {
     if (s.sc !== 'C2' && s.sc !== 'C5') reset.sortAt = {};
     if (s.sc === 'S13') reset.cnt = [0, 4];
     if (s.q === 'deform') reset.dragged = false;
-    if (s.q === 'count2') reset.cnt = [5, 4];
+    /* Before is already known and stated on screen; After starts empty so the
+       learner counts it up themselves. */
+    if (s.q === 'count2') reset.cnt = [5, 0];
     if (s.q === 'recall') { reset.n = 4; reset.recallNameN = 4; }
     /* The comparison lesson and its follow-up share one persistent teaching scene. */
     const continuingComparison = ['S6','S7'].includes(this._lastSc) && ['S6','S7'].includes(s.sc);
@@ -1385,7 +1439,7 @@ class Component extends DCLogic {
         }
         if (s.ph === 'closer') { this.setState({ zoomed: true }); this.later(go, 300); return; }
         if (s.ph === 'trace') { this.runTrace(1700); this.later(go, 500); return; }
-        if (s.ph === 'quad' && s.morphFrom) {
+        if (s.morphFrom) {
           this.morphTo(this.figureInViewBox(s.morphFrom,s.fig),this.fig(s.fig).pts,1100,() => goCounted(s.count,false));
           return;
         }
@@ -1415,6 +1469,14 @@ class Component extends DCLogic {
     if (parts) {
       const reduced = this.reducedMotion();
       const moving = !continuingParts && !reduced;
+      /* Arriving at the comparison she hops from the corner to stand between
+         the two pentagons, rather than appearing there already placed. */
+      const compare = this.compareFocus(), wasCompare = !!this._compareAt;
+      this._compareAt = compare;
+      if (compare && !wasCompare && !reduced && continuingParts) {
+        this.setState({ compareHop: true });
+        this.later(() => this.setState({ compareHop: false }), 940);
+      } else if (!compare && this.state.compareHop) this.setState({ compareHop: false });
       this._guideGreeted = true; this._polygonAt = false; this._boundaryAt = false;
       this.setState({guideHidden:false,guideFlying:false,boundaryTravel:moving,storyDialogue:!moving});
       if (moving) this.guide.onScreenEnter(true);
@@ -1432,8 +1494,10 @@ class Component extends DCLogic {
       const fromPerch = !first && !!this._boundaryAt;
       this._guideGreeted = true;
       this._boundaryAt = false;
-      // The second explanation keeps the perch; a new entry brings Swiftee in.
-      const fly = !fromPolygon && !reduced;
+      /* The second explanation keeps the perch; a new entry brings Swiftee in.
+         Arriving from the teaching scene she is already standing on the left,
+         so she walks across rather than flying off and back. */
+      const fly = !fromPolygon && !continuingParts && !reduced;
       this.setState({ guideHidden: false, guideFlying: false, boundaryTravel: false,
         polygonTravel: fly, polygonFromPerch: fromPerch, storyDialogue: reduced || fromPolygon });
       if (fly) this.guide.onScreenEnter(true);
@@ -1995,7 +2059,10 @@ class Component extends DCLogic {
       if (this.locked() || this.state.ok) return;
       this.clearNudge();
       const c = this.state.cnt.slice();
-      const v = Math.max(this.step().q === 'count' ? 0 : 1, Math.min(10, c[i] + d));
+      /* Both counters start from nothing and count up, because the learner is
+         counting sides one at a time — starting at 1 asks them to accept a
+         side they have not counted yet. */
+      const v = Math.max(0, Math.min(10, c[i] + d));
       if (v === c[i]) return;
       c[i] = v; this.sfx('tick'); this.guide.onInteractionStart();
       this.setState({ cnt: c, wrong: null });
@@ -2460,7 +2527,7 @@ class Component extends DCLogic {
           position: 'absolute', left: p[0].toFixed(1) + 'px', top: p[1].toFixed(1) + 'px',
           translate: '-50% -50%',
           background: 'transparent', border: 'none', borderRadius: 0,
-          font: '900 32px Nunito, sans-serif', color: '#1546a0',
+          font: '900 32px Nunito, sans-serif', color: o.numColor || '#1546a0',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           boxShadow: 'none', zIndex: 5,
           animation: 'pop 300ms ease-out both', pointerEvents: 'none'
@@ -2558,21 +2625,48 @@ class Component extends DCLogic {
       const ends = this.gapEnds(name);
       if (!ends) return out;
       /* Individual dots reveal the missing span in order, then stay still.
-         Leave both endpoints bare so the original opening stays easy to read. */
-      const dx = ends[1][0] - ends[0][0], dy = ends[1][1] - ends[0][1];
-      const count = Math.max(5, Math.min(12, Math.round(Math.hypot(dx,dy) / (32 * kk))));
-      for (let i = 0; i < count; i++) {
-        const t = (i + 1) / (count + 1);
-        out.dots.push({dot:'gap',x:ends[0][0]+dx*t,y:ends[0][1]+dy*t,
-          r:6.5*kk,fill:SHAPE_VIOLET,stroke:'none',sw:0,
-          style:{opacity:1,transformBox:'fill-box',transformOrigin:'center',
-            filter:'drop-shadow(0 0 3px rgba(255,255,255,.9))',
-            animation:reduced ? 'none' : 'gapDotReveal 160ms ease-out '+(i*90)+'ms both'}
-        });
-      }
+         The span between them is dashed, so it can never be mistaken for
+         boundary, and each loose end is capped and haloed: the two places the
+         line stops are what "open" actually means. */
+      const dashOn = Math.round(18 * kk), dashOff = Math.round(16 * kk);
+      out.hl.push({
+        d: 'M' + ends[0][0] + ' ' + ends[0][1] + ' L' + ends[1][0] + ' ' + ends[1][1],
+        color: SHAPE_VIOLET, w: +(9 * kk).toFixed(2),
+        style: Object.assign({
+          strokeDasharray: dashOn + ' ' + dashOff, strokeLinecap: 'round', opacity: 0.85
+        }, reduced ? {} : { animation: 'gapSpan 1.6s ease-in-out infinite' })
+      });
+      /* Halos first so the caps sit on top of them. */
+      ends.forEach((e, i) => out.dots.push({
+        dot: 'halo', x: e[0], y: e[1], r: +(22 * kk).toFixed(2),
+        fill: 'rgba(124,77,214,0.38)', stroke: 'none', sw: 0,
+        style: Object.assign({ transformBox: 'fill-box', transformOrigin: 'center' },
+          reduced ? { opacity: 0.35 } : { animation: 'gapHalo 1.5s ease-out ' + (i * 260) + 'ms infinite' })
+      }));
+      ends.forEach((e, i) => out.dots.push({
+        dot: 'cap', x: e[0], y: e[1], r: +(10 * kk).toFixed(2),
+        fill: '#ffffff', stroke: SHAPE_VIOLET, sw: +(5 * kk).toFixed(2),
+        style: Object.assign({ transformBox: 'fill-box', transformOrigin: 'center' },
+          reduced ? {} : { animation: 'gapEnd 1.5s ease-in-out ' + (i * 260) + 'ms infinite' })
+      }));
       return out;
     }
 
+    /* Closed: one bright segment runs the whole way round and arrives back
+       where it started, and the outline glows while it travels. Answering
+       "Closed" correctly used to show nothing at all.
+
+       A revealed answer is already being traced in blue, which runs the same
+       lap for the same reason, so the seal stays out of its way rather than
+       two lights chasing each other round the same outline. */
+    if (st.tracing) return out;
+    out.hl.push({
+      d: this.figD(name), color: GRN, w: +(13 * kk).toFixed(2),
+      style: Object.assign({
+        strokeDasharray: '18 82', strokeDashoffset: 100, strokeLinecap: 'round'
+      }, reduced ? { opacity: 0.9 } : { animation: 'sealSweep 1500ms linear 2' })
+    });
+    if (!reduced) out.pathStyle = { animation: 'sealGlow 1500ms ease-in-out 2' };
     return out;
   }
 
@@ -2719,8 +2813,12 @@ class Component extends DCLogic {
     const boardPanel = this.state.k < 9 ? OPENING_BOARD : panel;
     V.boardStyle = Object.assign(this.boardStyle(), stageBox(boardPanel, 30));
     if (V.showChoice) {
-      V.choiceRowStyle = { position:'absolute',left:(boardPanel.x + boardPanel.w / 2 - SAFE.x - SAFE.w / 2)+'px',top:(boardPanel.y + boardPanel.h - SAFE.y + 28)+'px',
-        width:'100%',display:'flex',justifyContent:'center',gap:'32px' };
+      /* Inside the card, in the band the figure has stepped aside for. */
+      const band = this.openingAnswerBand();
+      V.choiceRowStyle = { position:'absolute',left:(boardPanel.x + boardPanel.w / 2 - SAFE.x - SAFE.w / 2)+'px',
+        top:(boardPanel.y + boardPanel.h - (band ? band / 2 : -28) - SAFE.y)+'px',
+        width:'100%',display:'flex',justifyContent:'center',alignItems:'center',gap:'32px',
+        translate: band ? '0 -50%' : '0 0' };
       if (card) {
         card.accessibleLabel = 'Trace the shape outline. Then choose Open or Closed.';
         card.selected = undefined;
@@ -2934,12 +3032,43 @@ class Component extends DCLogic {
     // Keep the same teaching composition from the open/closed introduction onward.
     return !!(this.P && this.state.ready && ['S6','S7'].includes(this.step().sc));
   }
+  /* The left-lane composition: Swiftee and her bubble hold the left, the figure
+     or the choice grid takes the right. Screens 17–19 introduce the polygon and
+     screen 36 asks the same kind of question about quadrilaterals, so it is laid
+     out the same way — the learner meets one grammar, not two. */
   polygonIntroScene() {
-    return !!(this.P && this.state.ready && ['S8','S9','S10'].includes(this.step().sc));
+    return !!(this.P && this.state.ready && ['S8','S9','S10','S18','C1'].includes(this.step().sc));
   }
   learningReferenceScene(k = this.state.k) {
-    // Screens 20–32 and 34–35 share Screen 22's teaching composition.
-    return !!(this.P && this.state.ready && ((k >= 19 && k <= 31) || k === 33 || k === 34));
+    /* Screens 20–35 and 37–40 share Screen 22's teaching composition: Swiftee
+       on the left, the figure on the right. Screen 36 is the quadrilateral
+       grid, which has its own left-lane layout; the naming screens either side
+       of it must not shrink into a different composition just because the
+       grid sits between them. Screen 41 recalls those same names, so it keeps
+       the same stage rather than shrinking the board out from under her. The
+       completion screen joins them: it used to keep the old right-shifted
+       board, which left Swiftee in a narrow strip outside the panel with her
+       bubble clipped by the edge of the screen. */
+    return !!(this.P && this.state.ready && ((k >= 19 && k <= 34) || (k >= 36 && k <= 40) || k === 46));
+  }
+  /* Screens 32 and 33: the line is about BOTH pentagons, so Swiftee leaves the
+     corner and stands between them. The figures move out to the edges to open
+     a centre lane for her and her bubble, and she can then gesture left and
+     right at the two things she is actually comparing. */
+  compareFocus(k = this.state.k) {
+    if (!this.P || !this.state.ready) return false;
+    const s = this.steps()[k];
+    return !!s && s.sc === 'S16' && (s.ph === 'both' || s.ph === 'name');
+  }
+  compareLayout() {
+    return {
+      /* The pair opens out to the board's edges and the bubble takes the middle,
+         centred on 990 with matching 140px gutters either side. They used to be
+         10px apart, which read as the bubble resting on the Before card. */
+      guide: {x:840,y:646,w:300,h:300},
+      dialogue: {x:730,y:398,w:520,h:200},
+      cards: {size:440, y:246, leftX:150, rightX:1390}
+    };
   }
   learningFigureBox() {
     return {x:900,y:190,w:700,h:700};
@@ -2951,13 +3080,33 @@ class Component extends DCLogic {
     return source.pts.map(p=>p.map((v,axis)=>b[axis]+((v-a[axis])*sa+(1-a[axis+2]*sa)/2-(1-b[axis+2]*sb)/2)/sb));
   }
   polygonIntroLayout() {
-    // The board itself is centred on both axes; all teaching content stays inside it.
-    const w = BOARD.w + 64, h = 760;
+    /* The board itself is centred on both axes; all teaching content stays
+       inside it, split into two lanes that never swap:
+
+         left   Swiftee and her bubble — the voice
+         right  the figure or the grid — the work
+
+       She holds the left everywhere else in the lesson, so keeping her there
+       through screens 17–19 means the learner never has to re-find who is
+       talking, and the figures land where their eye already is. */
+    /* Exactly the teaching board of screens 20–35. It used to be smaller here,
+       so the ice panel visibly shrank between screen 35 and screen 36 and again
+       between 16 and 17 — a size change in the furniture that meant nothing.
+       One board across the lesson, and the extra room goes to the figures. */
+    const h = 900, w = 1780;
+    const board = {x:(STAGE.w-w)/2,y:(STAGE.h-h)/2,w,h};
+    const stageMid = (board.x + w * 0.46 + (board.x + w)) / 2;   // centre of the right lane
     return {
-      board: {x:(STAGE.w-w)/2,y:(STAGE.h-h)/2,w,h},
-      guide: {x:1450,y:580,w:340,h:340},
-      dialogue: {x:950,y:325,w:760,h:225},
-      figure: {x:300,y:270,w:650,h:650}
+      board,
+      guide: {x:215,y:636,w:340,h:340},
+      dialogue: {x:196,y:352,w:648,h:232},
+      /* Sized to carry the same weight as the pentagon on screen 20, so the
+         figure does not shrink when the lesson moves between these screens.
+         Square, and low enough that the name pill above it never sits on the
+         figure's own outline. */
+      figure: {x:Math.round(stageMid - 360),y:225,w:720,h:720},
+      // Four options as a 2x2 block, centred on the same lane as the figure.
+      grid: {x:Math.round(stageMid - 370),y:187,tile:350,gap:40}
     };
   }
   bgStyle() {
@@ -2966,8 +3115,8 @@ class Component extends DCLogic {
         filter: this.boundaryScene() ? 'saturate(1.06) brightness(1.04)' : 'none', transition: this.reducedMotion() ? 'none' : 'filter 1000ms ease-in-out' });
   }
   boardStyle() {
-    const boundaryWidth = BOARD.w + 64;
-    const box = this.learningReferenceScene() ? {x:100,y:(STAGE.h-900)/2,w:1780,h:900} : this.polygonIntroScene() ? this.polygonIntroLayout().board : this.boundaryScene() ? {x:(STAGE.w-boundaryWidth)/2,y:112,w:boundaryWidth,h:698} : BOARD;
+    const boundaryWidth = BOUNDARY.boardW;
+    const box = this.learningReferenceScene() ? {x:100,y:(STAGE.h-900)/2,w:1780,h:900} : this.polygonIntroScene() ? this.polygonIntroLayout().board : this.boundaryScene() ? {x:(STAGE.w-boundaryWidth)/2,y:BOUNDARY.boardY,w:boundaryWidth,h:BOUNDARY.boardH} : BOARD;
     const travel = this.learningReferenceScene() || this.polygonIntroScene() || this.boundaryScene() || this.state.boundaryTravel;
     return Object.assign(stageBox(box, 30), {
       opacity: this.state.storyContent ? 1 : 0, transition: this.reducedMotion() ? 'none' :
@@ -2975,11 +3124,25 @@ class Component extends DCLogic {
       pointerEvents: 'none'
     });
   }
+  /* Below 700px the stage stops shrinking (the scale floors at 0.55) and starts
+     overflowing the viewport instead, so a scene that hands the bubble a fixed
+     width has to give that width back on a phone or it runs off the edge. The
+     lesson's default bubble already does this; the scene layouts must too. */
+  narrowDialogue(box) {
+    const viewportWidth = window.innerWidth || STAGE.w;
+    const viewportHeight = window.innerHeight || STAGE.h;
+    if (viewportWidth >= 700) return box;
+    const scale = Math.max(0.55, Math.min(viewportWidth / STAGE.w, viewportHeight / STAGE.h));
+    const room = viewportWidth / scale - box.x - 22;
+    return room >= box.w ? box : Object.assign({}, box, { w: Math.max(280, room) });
+  }
   dialogueLayout() {
+    if (this.compareFocus()) return this.narrowDialogue(this.compareLayout().dialogue);
     if (this.learningReferenceScene()) return {x:140,y:450,w:500,h:200};
-    if (this.P && this.state.ready && this.step().sc === 'S10') return {x:1170,y:285,w:550,h:220};
-    if (this.polygonIntroScene()) return this.polygonIntroLayout().dialogue;
-    if (this.boundaryScene()) return {x:510,y:810,w:1000,h:190};
+    /* S10 used to put the bubble on the right on its own; screens 17, 18 and
+       19 now share the one left-lane composition, so it needs no exception. */
+    if (this.polygonIntroScene()) return this.narrowDialogue(this.polygonIntroLayout().dialogue);
+    if (this.boundaryScene()) return BOUNDARY.dialogue;
     const step = this.state.ready ? this.step() : null;
     const roomy = step && (step.sc === 'S1' || step.q === 'oc');
     // Grow upward from a fixed anchor; leave air between the tail and the crest.
@@ -2997,11 +3160,15 @@ class Component extends DCLogic {
     const box = this.dialogueLayout();
     const text = this.state.narrPage === undefined ? this.state.narr : this.state.narrPage;
     const boundary = this.boundaryScene() || this.polygonIntroScene();
+    /* Point the tail at wherever Swiftee actually stands, rather than at a
+       percentage that has to be re-guessed every time the lane moves. */
+    const polygonGuide = this.polygonIntroScene() ? this.polygonIntroLayout().guide : null;
+    const compareGuide = this.compareFocus() ? this.compareLayout().guide : null;
     return {
       position: 'absolute', left: pc(box.x, STAGE.w),
       bottom: pc(STAGE.h - box.y - box.h, STAGE.h),
       zIndex: 40,
-      '--dialogue-tail-x': this.learningReferenceScene() ? (320-box.x)+'px' : this.polygonIntroScene() ? 'calc(82% - 30px)' : boundary ? 'calc(100% - 10px)' : (SWIFTEE_CENTRE - box.x - 3) + 'px',
+      '--dialogue-tail-x': compareGuide ? (compareGuide.x + compareGuide.w / 2 - box.x - 3) + 'px' : this.learningReferenceScene() ? (320-box.x)+'px' : polygonGuide ? (polygonGuide.x + polygonGuide.w / 2 - box.x - 3) + 'px' : boundary ? 'calc(100% - 10px)' : (SWIFTEE_CENTRE - box.x - 3) + 'px',
       '--dialogue-tail-top': this.polygonIntroScene() ? 'calc(100% - 4px)' : boundary ? 'calc(50% - 29px)' : 'calc(100% - 4px)',
       '--dialogue-tail-transform': this.polygonIntroScene() ? 'none' : boundary ? 'rotate(-90deg)' : 'none',
       width: box.w+'px', minWidth: '280px', maxWidth: box.w + 'px', height: 'auto',
@@ -3013,7 +3180,7 @@ class Component extends DCLogic {
       transition: this.reducedMotion() ? 'none' : 'opacity 220ms ease-out, transform 360ms cubic-bezier(.2,.9,.3,1.2)'
     };
   }
-  safeStyle() { return Object.assign(stageBox(this.polygonIntroScene() || this.learningReferenceScene() ? {x:0,y:0,w:STAGE.w,h:STAGE.h} : this.boundaryScene() ? Object.assign({},SAFE,{x:(STAGE.w-BOARD.w)/2+12,y:125}) : SAFE, 32), {
+  safeStyle() { return Object.assign(stageBox(this.polygonIntroScene() || this.learningReferenceScene() ? {x:0,y:0,w:STAGE.w,h:STAGE.h} : this.boundaryScene() ? Object.assign({},SAFE,{x:(STAGE.w-BOARD.w)/2+12,y:BOUNDARY.safeY}) : SAFE, 32), {
     pointerEvents: this.locked() || !this.state.storyContent ? 'none' : 'auto',
     opacity: this.state.storyContent ? 1 : 0, visibility: this.state.storyContent ? 'visible' : 'hidden',
     transition: this.reducedMotion() ? 'none' : this.polygonIntroScene() || this.learningReferenceScene() ? 'opacity 240ms ease-out' : 'opacity 240ms ease-out, left 900ms ease-in-out, top 900ms ease-in-out'
@@ -3023,7 +3190,8 @@ class Component extends DCLogic {
     const boundary = this.boundaryScene();
     const polygon = this.polygonIntroScene();
     const parts = this.learningReferenceScene();
-    return Object.assign(stageBox(parts ? {x:180,y:700,w:300,h:300} : polygon ? this.polygonIntroLayout().guide : boundary ? {x:1570,y:760,w:340,h:340} : GUIDE_BOX, boundary || polygon || parts ? 44 : 20), {
+    const compare = this.compareFocus();
+    return Object.assign(stageBox(compare ? this.compareLayout().guide : parts ? {x:180,y:700,w:300,h:300} : polygon ? this.polygonIntroLayout().guide : boundary ? BOUNDARY.guide : GUIDE_BOX, boundary || polygon || parts ? 44 : 20), {
       pointerEvents: 'none', overflow: 'visible', transition: this.reducedMotion() ? 'none' : 'left 900ms ease-in-out, top 900ms ease-in-out, width 900ms ease-in-out, height 900ms ease-in-out'
     });
   }
@@ -3032,6 +3200,11 @@ class Component extends DCLogic {
   guideStyle() {
     const st = this.state;
     const box = { position: 'absolute', inset: 0 };
+    /* The cell itself slides to the centre; this supplies the arc, so she hops
+       between the two pentagons instead of gliding there flat. */
+    if (st.compareHop && !this.reducedMotion()) return Object.assign(box, {
+      opacity: 1, animation: 'compareHop 900ms cubic-bezier(.3,.7,.35,1) both'
+    });
     if (st.polygonTravel && !this.reducedMotion()) return Object.assign(box,{
       opacity:1, animation:(st.polygonFromPerch ? 'polygonPerchLanding' : 'polygonLanding') + ' 1100ms cubic-bezier(.22,.7,.3,1) both'
     });
@@ -3084,6 +3257,16 @@ class Component extends DCLogic {
 
   /* ----- screen 1 ----- */
   /* Center the visible outline, including figures with asymmetric viewBox padding. */
+  /* Height reserved at the foot of the opening card for the answer buttons.
+     The figure centres on what is left, so Open and Closed live inside the same
+     frame as the thing they are about instead of floating on the background —
+     which is how every other screen in the lesson is put together. Screens with
+     no answer row keep the whole card, so nothing shifts for them. */
+  openingAnswerBand() {
+    if (!this.P || !this.state.ready) return 0;
+    const s = this.step();
+    return (s.q === 'oc' || (s.sc === 'S1' && s.ph === 'ask')) ? OPENING_ANSWER_BAND : 0;
+  }
   openingFigureBox(size, name) {
     const F = this.fig(name);
     const centre = F.pts ? [0,1].map(axis => {
@@ -3094,11 +3277,11 @@ class Component extends DCLogic {
     const box = {x:0,y:0,w:size,h:size};
     const mapped = this.mapPt(box,F.vb,centre);
     box.x = OPENING_BOARD.x + OPENING_BOARD.w / 2 - SAFE.x - mapped[0];
-    box.y = OPENING_BOARD.y + OPENING_BOARD.h / 2 - SAFE.y - mapped[1];
+    box.y = OPENING_BOARD.y + (OPENING_BOARD.h - this.openingAnswerBand()) / 2 - SAFE.y - mapped[1];
     return box;
   }
   ocBox() {
-    return this.openingFigureBox(720,this.step().fig || 'leaf');
+    return this.openingFigureBox(596,this.step().fig || 'leaf');
   }
   s1Box(ph) {
     if (ph === 'ask') return this.ocBox();
@@ -3225,7 +3408,9 @@ class Component extends DCLogic {
   /* ----- screen 6 + 7 ----- */
   cmpCards(V, s, tappable) {
     const st = this.state, S = this.sets()[s.set];
-    const w = 330, h = 330, gap = 42, total = S.length * w + (S.length - 1) * gap;
+    /* Larger figures on a wider panel, matching the reference row. */
+    const card = this.boundaryScene() ? BOUNDARY.card : { size: 330, gap: 42 };
+    const w = card.size, h = card.size, gap = card.gap, total = S.length * w + (S.length - 1) * gap;
     const x0 = (SAFE.w - total) / 2, y = 130;
     const openIdx = [1, 2], closedIdx = [0, 3], straightIdx = [0, 1], curvedIdx = [2, 3];
     const ph = st.phase;
@@ -3458,7 +3643,11 @@ class Component extends DCLogic {
   viewParts(V, s) {
     const st = this.state, ph = st.phase, F = this.fig('pentagon'), K = this.k('pentagon');
     const reference = this.learningReferenceScene();
-    const size = reference ? 800 : 750, x = reference ? 740 : (SAFE.w - size) / 2, y = reference ? 255 : 40;
+    /* The pentagon is the hero of these screens, so it is centred on the board
+       itself rather than being pushed to the bottom to clear a band for the
+       "Side" pill. Slightly smaller, and the pill sits closer to the edge it
+       names, which buys the headroom that band was taking. */
+    const size = reference ? 740 : 750, x = reference ? 786 : (SAFE.w - size) / 2, y = reference ? 196 : 40;
     const box = { x, y, w:size, h:size };
     const figureColor = reference ? '#3478d4' : this.polyColor('pentagon');
     const palette = {
@@ -3701,18 +3890,19 @@ class Component extends DCLogic {
          side highlight to sit on top of it. */
       d: this.figD('pentagon'), stroke: st.ok ? GRN : this.P.C.blue, sw: 18, fill: reference ? this.figFill('pentagon',this.P.C.blue) : '#fff1c9', hl: hl, nums: nums
     })];
-    V.showCounter = true;
-    const counter = this.counter(0, reference && s.ph === 'five' ? 'Sides' : '');
-    counter.accessibleLabel = 'Number of sides';
-    counter.min = 0;
-    if (s.ph === 'five') {
-      // The side markers and readout share one value, so they cannot drift.
-      counter.value = String(st.nums);
-      counter.fixed = true;
-      counter.minus = null; counter.plus = null; counter.nudge = '';
-      if (reference) counter.btn.display = 'none';
+    /* The counting screen carries no readout. Each side is numbered on the
+       polygon itself as it is counted, so a "Sides 5" panel beside it states
+       the same fact a second time and pulls the eye off the thing doing the
+       teaching. The question screen still needs its stepper. */
+    V.showCounter = s.ph !== 'five';
+    if (V.showCounter) {
+      const counter = this.counter(0, '');
+      counter.accessibleLabel = 'Number of sides';
+      counter.min = 0;
+      V.counters = [counter];
+    } else {
+      V.counters = [];
     }
-    V.counters = [counter];
     V.checkStyle = s.q === 'count' ? this.counterCheckStyle() : { display: 'none' };
     if (reference) {
       // Centre the stepper itself beneath the polygon; Check sits alongside it.
@@ -3779,16 +3969,25 @@ class Component extends DCLogic {
     const reference = this.learningReferenceScene();
     const st = this.state, F = this.fig('pentagon'), K = this.k('pentagon');
     const orig = F.pts, user = st.userPts || F.pts;
-    const size = reference ? 440 : 380, gapX = 110;
-    const y = reference ? 300 : 40;
-    // Keep the comparison pair balanced while reserving room for Check at the right.
-    const leftX = reference ? 750 : SAFE.w / 2 - gapX - size, rightX = reference ? 1290 : SAFE.w / 2 + gapX;
+    const compare = this.compareFocus();
+    const C = compare ? this.compareLayout().cards : null;
+    const size = compare ? C.size : reference ? 440 : 380, gapX = 110;
+    const y = compare ? C.y : reference ? 300 : 40;
+    /* While she is comparing them the two pentagons sit out at the edges, with
+       her between; otherwise keep the pair balanced with room for Check. */
+    const leftX = compare ? C.leftX : reference ? 750 : SAFE.w / 2 - gapX - size;
+    const rightX = compare ? C.rightX : reference ? 1290 : SAFE.w / 2 + gapX;
     const segsO = this.segs('pentagon'), segsU = this.segs('pentagon', user);
     const pad = 36, vb = F.vb.split(' ').map(Number);
     const shapeScale = Math.min((size - 2 * pad - 10) / vb[2], (size - 2 * pad - 10) / vb[3]);
+    /* Screen 31: the stepper and the After figure are the same fact shown two
+       ways. Whatever number the learner has dialled is the number of sides lit
+       and numbered on the shape, so "3" and three sides are never out of step. */
+    const counting = s.q === 'count2';
     const mk = (which) => {
       const pts = which ? user : orig, segs = which ? segsU : segsO;
-      const n = which ? (st.numsB || 0) : (st.nums || 0);
+      const dialled = Math.max(0, Math.min(st.cnt[1] || 0, segs.length));
+      const n = which ? (counting ? dialled : (st.numsB || 0)) : (st.nums || 0);
       const nums = [];
       // Use the edge's outward normal, not the centre of a potentially concave shape.
       const winding = Math.sign(pts.reduce((area, a, i) => {
@@ -3801,11 +4000,31 @@ class Component extends DCLogic {
           fs: 30 / shapeScale, t: String(label) });
       };
       for (let i = 0; i < Math.min(n, segs.length); i++) pin(i, i + 1);
-      const glow = st.phase === 'b' ? [{ d: this.dPath(pts, true), color: 'rgba(34,184,230,0.55)', w: 34 * K, style: { animation: reference ? 'glowPulse 1.4s ease-in-out 2' : 'glowPulse 1.4s ease-in-out infinite' } }] : [];
+      /* The sides the learner has counted so far, lit in the figure's own
+         colour. The newest one draws itself on rather than appearing, so a tap
+         on + reads as "and this one too" instead of a silent jump. */
+      const counted = which && counting && n > 0
+        ? this.segHl('pentagon', Array.from({ length: n }, (unused, i) => i), pts, '#f4972d', 26)
+            .map((seg, i) => Object.assign(seg, { style: Object.assign(
+              { filter: 'drop-shadow(0 0 10px rgba(244,151,45,.7))' },
+              i === n - 1 && !this.reducedMotion()
+                ? { strokeDasharray: 100, strokeDashoffset: 100, animation: 'dr 340ms ease-out both' }
+                : {}) }))
+        : [];
+      /* While she is comparing them, both outlines breathe — left first, then
+         right — so "both" is something the learner sees, not only hears. */
+      const glow = st.phase === 'b'
+        ? [{ d: this.dPath(pts, true), color: 'rgba(34,184,230,0.55)', w: 34 * K, style: { animation: reference ? 'glowPulse 1.4s ease-in-out 2' : 'glowPulse 1.4s ease-in-out infinite' } }]
+        : compare
+          ? [{ d: this.dPath(pts, true), color: which ? 'rgba(244,151,45,.5)' : 'rgba(34,184,230,.5)', w: 30 * K,
+              style: this.reducedMotion() ? { opacity: 0.3 }
+                : { animation: 'glowPulse 1.6s ease-in-out ' + (which ? 820 : 0) + 'ms 3' } }]
+          : [];
       const card = this.buildCard({
         key: which ? 'after' : 'before', x: which ? rightX : leftX, y: y, w: size, h: size,
         vb: F.vb, pad: pad, numberInset: 5, d: this.dPath(pts, true), stroke: which ? this.P.C.orange : this.P.C.blue, sw: 18,
-        fill: this.tint(which ? this.P.C.orange : this.P.C.blue), hl: glow, nums: nums,
+        fill: this.tint(which ? this.P.C.orange : this.P.C.blue), hl: counted.concat(glow), nums: nums,
+        numColor: which ? '#8a4a08' : '#1546a0',
         badge: reference ? '' : which ? 'After' : 'Before',
         chip: reference ? (which ? 'After' : 'Before') : '',
         chipBg: which ? '#fff0dc' : '#e8f4ff', chipBorder: which ? '#f6ba72' : '#9fd8f4', chipColor: which ? '#965113' : '#2c6ba8',
@@ -3840,7 +4059,14 @@ class Component extends DCLogic {
   /* ----- naming screens ----- */
   viewName(V, s) {
     const reference = this.learningReferenceScene();
-    const st = this.state, F = this.fig(s.fig), size = reference ? 650 : 440, K = this.k(s.fig);
+    /* The named shape is the whole point of these screens, so it takes as much
+       of the right lane as the name pill beneath it will allow. */
+    const st = this.state, F = this.fig(s.fig), size = reference ? 730 : 440, K = this.k(s.fig);
+    /* The figure's box stops short of the label band, so a wide shape cannot
+       grow down into its own name. An octagon fills far more of a square box
+       than a triangle does, and sizing both to the full height put the heptagon
+       and octagon labels on top of the shape and over the board's bottom edge. */
+    const nameBox = { x: 925, y: NAME_FIGURE.y, w: size, h: NAME_FIGURE.h };
     const pts = st.morph || F.pts;
     const segs = this.segs(s.fig, st.morph ? null : F.pts), c = this.centroid(F.pts);
     const nums = [];
@@ -3852,32 +4078,56 @@ class Component extends DCLogic {
     }
     const hl = !st.morph && st.nums > 0 ? this.segHl(s.fig, [st.nums - 1], null, ICE, 26) : [];
     V.cards = [this.buildCard({
-      key: s.fig, x: reference ? 925 : (SAFE.w - size) / 2, y: reference ? 230 : 40, w: size, h: size, plain: true, snap: reference,
+      key: s.fig, x: reference ? nameBox.x : (SAFE.w - size) / 2, y: reference ? nameBox.y : 40,
+      w: size, h: reference ? nameBox.h : size, plain: true, snap: reference,
       vb: F.vb, d: this.dPath(pts, true), stroke: this.polyColor(s.fig), sw: 18,
       fill: this.tint(this.polyColor(s.fig)), hl: hl, nums: nums
     })];
     if (st.reveal || st.nums >= (s.count || 99)) {
-      // Anchor the name below the silhouette and its side numbers, not the board edge.
-      const bottom = this.mapPt({x:925,y:230,w:size,h:size},F.vb,[F.pts[0][0],Math.max(...F.pts.map(p=>p[1]))])[1];
-      const pill = this.labelPill(s.reveal,reference ? bottom + 80 : 540);
-      if (reference) pill.style.left = '1250px';
+      /* Anchor the name below whatever actually reaches lowest — the silhouette
+         or the side number hanging under its bottom edge. Measuring the shape
+         alone left the label pressed against that number. */
+      const lowestInk = Math.max(...F.pts.map(p => p[1]),
+        ...nums.map(n => n.y + n.r));
+      const bottom = this.mapPt(nameBox,F.vb,[F.pts[0][0],lowestInk])[1];
+      const pill = this.labelPill(s.reveal,reference ? bottom + NAME_LABEL_GAP : 540);
+      if (reference) pill.style.left = (nameBox.x + size / 2) + 'px';
       V.callouts = [pill];
     }
   }
 
   /* ----- recall ----- */
   viewRecall(V, s) {
-    const st = this.state, size = 420;
+    const st = this.state;
+    /* The same stage and figure box as the naming screens it is recalling, so
+       the shape does not shrink and the board does not slide out from under
+       Swiftee when the lesson asks the learner to remember it. */
+    const reference = this.learningReferenceScene();
+    const size = reference ? 730 : 420;
+    const box = reference ? { x: 925, y: NAME_FIGURE.y, w: size, h: NAME_FIGURE.h }
+      : { x: (SAFE.w - size) / 2, y: 20, w: size, h: size };
     const names = { 3: 'Triangle', 4: 'Quadrilateral', 5: 'Pentagon', 6: 'Hexagon', 7: 'Heptagon', 8: 'Octagon' };
     const pts = st.morph || this.recallPoints(st.n);
+    /* The name follows the shape's own lowest point. Pinned to the box instead,
+       it landed on the triangle, the pentagon and the heptagon — the shapes
+       whose rotation puts a vertex at the bottom — and floated far below the
+       square. */
+    const recallVb = '200 200 600 600';
+    const lowest = Math.max(...pts.map(p => p[1]));
+    const inkBottom = this.mapPt(box, recallVb, [pts[0][0], lowest])[1];
     V.cards = [this.buildCard({
-      key: 'recall', x: (SAFE.w - size) / 2, y: 20, w: size, h: size, plain: true,
-      vb: '150 150 700 700', d: this.dPath(pts, true), stroke: this.sideColor(st.n), sw: 18,
+      key: 'recall', x: box.x, y: box.y, w: size, h: reference ? box.h : size, plain: true, snap: reference,
+      /* Cropped to the circumcircle the recall shapes are actually drawn in
+         (centre 500, radius 300). The old box carried 100 units of empty
+         padding on every side, which is why the shape came out noticeably
+         smaller than the very figures it is recalling. */
+      vb: recallVb, d: this.dPath(pts, true), stroke: this.sideColor(st.n), sw: 18,
       fill: this.tint(this.sideColor(st.n))
     })];
     V.callouts = [{
       text: names[st.recallNameN || st.n], style: {
-        position: 'absolute', left: '50%', top: '452px', translate: '-50% 0',
+        position: 'absolute', left: reference ? (box.x + size / 2) + 'px' : '50%',
+        top: reference ? (inkBottom + NAME_LABEL_GAP) + 'px' : '452px', translate: '-50% 0',
         padding: '10px 46px', borderRadius: '30px', background: '#fff8e2', border: '5px solid ' + GOLD,
         font: '800 46px "Baloo 2", Nunito, sans-serif', color: '#8a5a12', whiteSpace: 'nowrap',
         boxShadow: '0 8px 0 rgba(198,146,44,0.35)',
@@ -3893,7 +4143,10 @@ class Component extends DCLogic {
   /* ----- multi select ----- */
   viewMulti(V, s) {
     const st = this.state, S = this.sets()[s.set];
-    const discovery = s.sc === 'S10';
+    /* Four options as a 2 x 2 beside Swiftee — screen 19's composition, reused
+       for screen 36 because it asks the same kind of question. */
+    const discovery = s.sc === 'S10' || s.sc === 'S18' || s.sc === 'C1';
+    const grid = discovery ? this.polygonIntroLayout().grid : null;
     const n = S.length;
     const w = n >= 6 ? 236 : (n === 5 ? 272 : 300), gap = n >= 6 ? 26 : 38;
     const total = n * w + (n - 1) * gap;
@@ -3907,10 +4160,12 @@ class Component extends DCLogic {
       else if (sel && !s.check) state = 'ok';
       else if (sel && s.check) state = st.checked ? 'ok' : 'sel';
       const coach = st.hlKind === 'coach' && sel && s.correct.indexOf(i) < 0;
-      const tileSize = discovery ? 275 : w;
-      // Five existing options, arranged 3 + 2 with the second row centred.
-      const tileX = discovery ? 250 + (i < 3 ? i * 305 : 152.5 + (i-3) * 305) : x0 + i * (w + gap);
-      const tileY = discovery ? 270 + (i < 3 ? 0 : 310) : y;
+      const tileSize = discovery ? grid.tile : w;
+      /* Four options as a square block in the right lane, beside Swiftee. A
+         2 x 2 reads as one group at a glance; the 3 + 2 it replaced left a
+         short second row that looked like an afterthought. */
+      const tileX = discovery ? grid.x + (i % 2) * (grid.tile + grid.gap) : x0 + i * (w + gap);
+      const tileY = discovery ? grid.y + Math.floor(i / 2) * (grid.tile + grid.gap) : y;
       const card = this.buildCard({
         key: it[0], x: tileX, y: tileY, w: tileSize, h: tileSize, vb: F.vb, d: this.figD(it[0]),
         extra: F.extra || '', stroke: it[1], sw: 20, fill: this.figFill(it[0], it[1], it[2]), state: state,
@@ -4062,12 +4317,21 @@ class Component extends DCLogic {
   viewEnd(V, s) {
     const row = [['triangle', this.P.C.purple], ['quad', this.P.C.orange], ['pentagon', this.P.C.blue],
       ['hexagon', this.P.C.green], ['heptagon', this.P.C.pink], ['octagon', this.P.C.teal]];
-    const w = 226, gap = 24, total = row.length * w + (row.length - 1) * gap;
-    const x0 = (SAFE.w - total) / 2;
+    /* The completion screen shares the teaching composition: Swiftee on the
+       left, the six polygons in the right lane as two rows of three. A single
+       row of six had to shrink them to fit, and the old right-shifted board
+       left her crowded against the first card with her bubble off the screen. */
+    const reference = this.learningReferenceScene();
+    const lane = 1290, perRow = 3;
+    const w = reference ? 250 : 226, gap = reference ? 30 : 24;
+    const rowW = perRow * w + (perRow - 1) * gap;
+    const x0 = reference ? lane - rowW / 2 : (SAFE.w - row.length * w + gap - (row.length - 1) * gap) / 2;
     V.cards = row.map((it, i) => {
       const F = this.fig(it[0]);
+      const col = reference ? i % perRow : i, line = reference ? Math.floor(i / perRow) : 0;
       return this.buildCard({
-        key: 'end' + it[0], x: x0 + i * (w + gap), y: 120, w: w, h: w, vb: F.vb,
+        key: 'end' + it[0], x: x0 + col * (w + gap), y: (reference ? 140 : 120) + line * (w + 30),
+        w: w, h: w, vb: F.vb, snap: reference,
         d: this.figD(it[0]), stroke: it[1], sw: 22, fill: this.tint(it[1]),
         anim: 'pop 2600ms ease-in-out ' + (i * 160) + 'ms infinite'
       });
@@ -4075,7 +4339,7 @@ class Component extends DCLogic {
     V.callouts = [{
       text: 'Polygon: closed + only straight line segments',
       style: {
-        position: 'absolute', left: '50%', top: '470px', translate: '-50% 0',
+        position: 'absolute', left: reference ? lane + 'px' : '50%', top: reference ? '700px' : '470px', translate: '-50% 0',
         padding: '16px 54px', borderRadius: '34px', background: '#fff8e2', border: '5px solid ' + GOLD,
         font: '800 42px "Baloo 2", Nunito, sans-serif', color: '#8a5a12', whiteSpace: 'nowrap',
         boxShadow: '0 8px 0 rgba(198,146,44,0.35)', animation: 'pop 620ms ease-out both'
@@ -4084,7 +4348,7 @@ class Component extends DCLogic {
     V.targets = [{
       text: 'Play again', click: this.restart, nudge: '', buttonTone: 'primary',
       style: Object.assign({
-        position: 'absolute', left: '50%', top: '620px', translate: '-50% 0', zIndex: 8
+        position: 'absolute', left: reference ? lane + 'px' : '50%', top: reference ? '872px' : '620px', translate: '-50% 0', zIndex: 8
       }, this.bigBtn(300))
     }];
   }

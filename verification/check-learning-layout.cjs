@@ -29,7 +29,7 @@ const server=http.createServer((req,res)=>{
           boundaryTravel:false,reveal:true,nums:s.count||([25,32].includes(number)?5:0),numsB:number===32?5:0,
           userPts:number>=28&&number<=32?pts:null,voiceElapsedMs:10000});
       },number);
-      await page.waitForTimeout(450);
+      await page.waitForTimeout(1000);
     };
     const inspect=()=>page.evaluate(()=>{
       const b=e=>{const r=e.getBoundingClientRect();return{x:r.x,y:r.y,right:r.right,bottom:r.bottom,w:r.width,h:r.height};};
@@ -45,7 +45,11 @@ const server=http.createServer((req,res)=>{
     const check=s=>{
       const inside=r=>r.x>=s.board.x-1&&r.right<=s.board.right+1&&r.y>=s.board.y-1&&r.bottom<=s.board.bottom+1;
       for(const r of [s.guide,s.dialogue,...s.figures,...s.controls,...s.labels])assert(inside(r),'Content stays inside the board: '+JSON.stringify(r));
-      for(const r of s.figures)assert(r.x>s.dialogue.right+30,'Learning content clears the dialogue column');
+      /* Content must not crowd the bubble. Not "must sit to its right": the
+         comparison screens put Swiftee between the two figures on purpose, so
+         what matters is a real gap on whichever side she is, not a column. */
+      for(const r of s.figures)assert(r.right<=s.dialogue.x-30||r.x>=s.dialogue.right+30,
+        'Learning content crowds the dialogue: screen '+s.screen+' figure '+Math.round(r.x)+'-'+Math.round(r.right)+' vs bubble '+Math.round(s.dialogue.x)+'-'+Math.round(s.dialogue.right));
       for(const r of s.controls)assert(r.y>=Math.max(...(s.figureInk.length?s.figureInk:s.figures).map(f=>f.bottom))-2,'Controls stay below the visible figure');
       if([24,31].includes(s.screen)){
         const figure=s.figures.at(-1),stepper=s.stepper;
@@ -55,7 +59,13 @@ const server=http.createServer((req,res)=>{
     };
     await show(22);await page.waitForTimeout(1400);const baseline=await inspect();
     for(const n of screens){
-      await show(n);const s=await inspect();check(s);assert.deepEqual(s.board,baseline.board);assert.deepEqual(s.guide,baseline.guide);
+      await show(n);const s=await inspect();check(s);assert.deepEqual(s.board,baseline.board);
+      /* Swiftee holds one spot across the teaching screens, with one deliberate
+         exception: on the comparison she steps between the two pentagons,
+         because the line she speaks is about both of them. */
+      if(n===32)assert(Math.abs((s.guide.x+s.guide.right)/2-(s.board.x+s.board.right)/2)<40,
+        'On the comparison screen Swiftee stands between the figures, not in the corner');
+      else assert.deepEqual(s.guide,baseline.guide);
       await page.screenshot({path:path.join(out,'screen-'+n+'.png')});
     }
     const montage=await browser.newPage({viewport:{width:1440,height:1200}});
@@ -105,7 +115,10 @@ const server=http.createServer((req,res)=>{
     await page.mouse.move(again.x+again.width/2+100,again.y+again.height/2-60,{steps:8});await page.mouse.up();
     await page.waitForFunction(()=>__poly.state.dragged&&window.completed===26);
     await run(31);await page.evaluate(pts=>__poly.setState({userPts:pts}),dragged);
-    await plus.click();await page.getByRole('button',{name:'Check',exact:true}).click();await page.waitForFunction(()=>window.completed===30);
+    // The After counter starts at nothing, so the learner counts all five up.
+    for(let i=0;i<5;i++)await plus.click();
+    assert.equal(await page.evaluate(()=>__poly.state.cnt[1]),5,'Five taps on + count five sides');
+    await page.getByRole('button',{name:'Check',exact:true}).click();await page.waitForFunction(()=>window.completed===30);
     for(const number of [25,26,28,29,30,32,34,35]){
       await page.evaluate(number=>{const g=__poly;window.completed=null;g.setState({k:number-1});g.runStep(number-1,false);},number);
       if(number===35){

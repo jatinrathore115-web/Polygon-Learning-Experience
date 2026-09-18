@@ -93,12 +93,24 @@
   85% { transform:translateY(-8px) rotate(2deg); }
   100% { transform:translateY(0) rotate(0deg); }
 }
+/* She lands in the left lane, so she arrives from the left. Flying in from the
+   right would carry her straight across the figures she is about to ask about. */
 @keyframes polygonLanding {
-  0% { transform: translate(430px,-230px) rotate(-12deg); opacity:0; }
+  0% { transform: translate(-430px,-230px) rotate(12deg); opacity:0; }
   16% { opacity:1; }
-  66% { transform: translate(35px,-72px) rotate(-5deg); }
-  88% { transform: translate(0,6px) rotate(2deg); }
+  66% { transform: translate(-35px,-72px) rotate(5deg); }
+  88% { transform: translate(0,6px) rotate(-2deg); }
   100% { transform: translate(0,0) rotate(0deg); opacity:1; }
+}
+/* A hop across to stand between the two pentagons. The guide's cell slides
+   under her on its own transition, so this only carries the arc and the
+   squash on landing. */
+@keyframes compareHop {
+  0%   { transform: translateY(0) rotate(0deg); }
+  30%  { transform: translateY(-88px) rotate(-6deg); }
+  62%  { transform: translateY(-38px) rotate(3deg); }
+  86%  { transform: translateY(6px) scale(1.05, .94); }
+  100% { transform: translateY(0) rotate(0deg) scale(1); }
 }
 @keyframes polygonFigureArrive {
   from { opacity:0; transform:translateY(18px); }

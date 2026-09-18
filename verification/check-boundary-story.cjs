@@ -53,7 +53,16 @@ const server = http.createServer((req,res) => {
     const events=await page.evaluate(()=>boundaryEvents);
     assert(events.some(e=>e.phase==='open')&&events.some(e=>e.phase==='closed'));
     assert(events.every(e=>!e.travel),'Narration begins only after the flight settles');
-    assert(events.every(e=>e.guide.left===events[0].guide.left&&e.guide.top===events[0].guide.top&&e.dialogue.x===610&&e.dialogue.y===780),'Keep the bottom-right composition across Screens 10–14');
+    /* One composition holds across Screens 10-14 — asserted as "nothing moves",
+       not as fixed pixels, so retuning the scene does not read as a bug. */
+    assert(events.every(e=>e.guide.left===events[0].guide.left&&e.guide.top===events[0].guide.top
+      &&e.dialogue.x===events[0].dialogue.x&&e.dialogue.y===events[0].dialogue.y),
+      'Keep one composition across Screens 10-14');
+    /* She speaks from the panel's upper band, leaving the lower band to the
+       figures. Swiftee used to stand below the panel entirely, on the
+       background, with this band sitting empty. */
+    assert(events[0].dialogue.y+events[0].dialogue.h<540,
+      'The bubble stays in the upper band: bubble ends at y='+(events[0].dialogue.y+events[0].dialogue.h));
     assert(events.some(e=>e.phase==='bound'&&e.focus==='all'&&e.pulse.every(Boolean)));
     for (const phase of ['sc']) {
       assert(events.some(e=>e.phase===phase&&e.focus==='straight'&&String(e.pulse)==='true,true,false,false'));
@@ -89,8 +98,15 @@ const server = http.createServer((req,res) => {
       const bubble=document.querySelector('.dialogue-box').getBoundingClientRect();
       const bird=document.querySelector('.swiftee-wrap').getBoundingClientRect();
       return {centred:Math.abs((board.left+board.right)/2-innerWidth/2)<1,
-        bubbleBelow:bubble.top>board.bottom,bubbleClear:bubble.right<bird.left,
-        birdRight:bird.left>innerWidth*.75,birdFits:bird.bottom<=innerHeight+1};
+        /* The reference composition: Swiftee stands on the panel's top rim with
+           her bubble beside her, and the figures have the panel to themselves.
+           Her feet meet the rim — neither hovering above it nor sunk into the
+           figure area — and the bubble sits clear of both her and the panel. */
+        bubbleAbove:bubble.bottom<=board.top+6,
+        birdOnRim:Math.abs(bird.bottom-board.top)<=board.height*0.06,
+        birdAbove:bird.top<board.top,
+        bubbleClear:bubble.right<bird.left,
+        birdRight:bird.left>innerWidth*.6,birdFits:bird.bottom<=innerHeight+1};
     });
     assert(Object.values(layout).every(Boolean),JSON.stringify(layout));
     assert(await page.evaluate(()=>{
