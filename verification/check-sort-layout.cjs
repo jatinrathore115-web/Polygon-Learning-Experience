@@ -16,7 +16,7 @@ let checks=0;
 for(const sc of ['C2','C5']){
   const k=g.steps().findIndex(s=>s.sc===sc);g.state.k=k;
   const SORT=g.sortLayout();
-  const s=g.steps()[k],n=s.answer.length;
+  const s=g.steps()[k],n=s.maxPlacements||s.answer.length;
 
   /* columns live inside the safe area, side by side, evenly split */
   assert(SORT.zoneTop>=0&&SORT.zoneTop+SORT.zoneH<=SAFE.h,sc+': columns overflow the board');
@@ -95,9 +95,10 @@ for(const sc of ['C2','C5']){
   /* a settled tile belongs to its column: it wears that column's colour, is
      ticked as correct, and lets a tap pass through to the column under it */
   g.state.sortAt={};g.state.pickedFig=null;g.state.hoverK=null;g.state.sortHover=null;
-  s.answer.forEach((z,i)=>{g.state.sortAt[i]=z;});g.state.tick=1;
+  s.answer.slice(0,n).forEach((z,i)=>{g.state.sortAt[i]=z;});g.state.tick=1;
   {const v=g.renderVals(),seen={};
    v.cards.forEach((c,i)=>{
+     if(g.state.sortAt[i]===undefined)return;
      const zone=s.answer[i];
      assert.equal(c.wrap.pointerEvents,'none',sc+': placed tile still swallows taps meant for its column');
      /* No badge is stamped on a tile at all. A tick parked in NOT POLYGONS
@@ -141,7 +142,7 @@ for(const sc of ['C2','C5']){
      sides, and every tile re-centres inside its narrower column — the boxes and
      their contents move as one because both read the same geometry. */
   {
-    g.state.sortAt={};s.answer.forEach((z,i)=>{g.state.sortAt[i]=z;});
+    g.state.sortAt={};s.answer.slice(0,n).forEach((z,i)=>{g.state.sortAt[i]=z;});
     g.state.pickedFig=null;g.state.sortHover=null;g.state.tick=null;
     g.state.united=false;
     const apart={band:g.sortBandX(),w:g.sortZoneW(),gap:g.sortGap(),

@@ -14,7 +14,11 @@ const server=http.createServer((req,res)=>{
   page.on('pageerror',e=>errors.push(e.message));
   await page.addInitScript(()=>{const play=HTMLMediaElement.prototype.play;HTMLMediaElement.prototype.play=function(){this.playbackRate=5;return play.call(this);};});
   await page.goto('http://127.0.0.1:9376/?intro=0');await page.waitForFunction(()=>window.__poly?.state.ready);await page.mouse.click(700,80);
-  await page.evaluate(()=>{__poly._guideGreeted=true;__poly.advance=()=>{window.finished=true;};});
+  // Exercise interaction gates without relying on the host's speech service.
+  await page.evaluate(()=>{
+   __poly._guideGreeted=true;__poly.advance=()=>{window.finished=true;};
+   __poly.speak=function(text,cb){this.prepareNarratorReveal(text);this.storyVoiceStart();this.setState({wordReveal:'complete'});this.later(cb,100);};
+  });
   const ready=()=>page.waitForFunction(()=>!__poly.locked()&&!__poly.state.speaking&&__poly.state.storyControls&&__poly.state.storyContent);
   const go=async k=>{await page.evaluate(k=>{window.finished=false;__poly.setState({k,sortAt:{}});__poly.runStep(k,false);},k);await ready();await page.waitForTimeout(1200);};
   const sample=()=>page.evaluate(()=>{
@@ -31,9 +35,19 @@ const server=http.createServer((req,res)=>{
   await go(42);let ref=await sample();await go(45);compare(await sample(),ref);
   await page.screenshot({path:path.join(out,'initial.png')});
   const cards=page.locator('.story-surface svg').locator('..');
-  const drag=async(i,name)=>{const a=await cards.nth(i).boundingBox(),b=await page.getByRole('button',{name,exact:true}).boundingBox();await page.mouse.move(a.x+a.width/2,a.y+a.height/2);await page.mouse.down();await page.mouse.move(b.x+b.width/2,b.y+b.height/2,{steps:14});await page.mouse.up();};
+  const drag=async(i,name,inspect)=>{const a=await cards.nth(i).boundingBox(),b=await page.getByRole('button',{name,exact:true}).boundingBox();await page.mouse.move(a.x+a.width/2,a.y+a.height/2);await page.mouse.down();await page.mouse.move(b.x+b.width/2,b.y+b.height/2,{steps:14});if(inspect){await page.waitForTimeout(100);await inspect();}await page.mouse.up();};
   await drag(0,'HEPTAGON');await page.waitForFunction(()=>__poly.state.attempts>0);await ready();assert(await page.evaluate(()=>__poly.state.sortAt[0]===undefined));
-  for(const i of [0,1,2,3]){await drag(i,i%2?'HEPTAGON':'HEXAGON');await page.waitForFunction(i=>__poly.state.sortAt[i]!==undefined,i);await page.waitForTimeout(600);}
+  for(const i of [0,2]){await drag(i,'HEXAGON');await page.waitForFunction(i=>__poly.state.sortAt[i]!==undefined,i);await page.waitForTimeout(600);}
+  const before=await page.evaluate(()=>JSON.stringify(__poly.sortPlaces(__poly.state.sortAt)));
+  await drag(1,'HEXAGON',async()=>{
+   assert.equal(await page.evaluate(()=>__poly.renderVals().callouts.length),0,'No third preview slot in a full area');
+   assert.equal(await page.evaluate(()=>__poly.renderVals().zoneAStyle.animation),'none');
+  });
+  await page.waitForFunction(()=>__poly.state.wrong===1&&__poly.state.draggingFigure===null);
+  assert.equal(await page.evaluate(()=>JSON.stringify(__poly.sortPlaces(__poly.state.sortAt))),before);
+  assert(await page.evaluate(()=>__poly.renderVals().cards[1].wrap.animation.startsWith('wrongTap')));
+  await page.waitForTimeout(650);
+  for(const i of [1,3]){await drag(i,'HEPTAGON');await page.waitForFunction(i=>__poly.state.sortAt[i]!==undefined,i);await page.waitForTimeout(600);}
   await page.waitForFunction(()=>window.finished);await page.screenshot({path:path.join(out,'completed.png')});
   await page.emulateMedia({reducedMotion:'reduce'});await page.setViewportSize({width:1024,height:768});
   await go(42);ref=await sample();await go(45);compare(await sample(),ref);

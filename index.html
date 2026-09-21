@@ -1284,7 +1284,7 @@ class Component extends DCLogic {
       p19: [['p19a', C.blue], ['p19c', C.orange], ['p19e', C.purple], ['p19d', C.pink]],
       q36: [['q36a', C.pink, '#fbd9e4'], ['q36b', IK, '#ffffff'], ['q36c', C.orange, '#fbc98f'], ['q36d', C.gold, '#f9d47c']],
       cfu1: [['c1a', C.purple], ['c1b', C.green], ['c1c', C.orange], ['c1d', C.blue]],
-      cfu2: [['c2a', C.purple], ['c2b', C.green], ['c2c', C.orange], ['c2d', C.blue], ['c2e', C.pink]],
+      cfu2: [['c2a', C.purple], ['c2b', C.green], ['c2d', C.blue], ['c2e', C.pink]],
       /* B was palette blue, a few degrees off the card borders and the ice
          behind them, so the rectangle sank into the furniture. Pink is the
          hue furthest from that chrome and the furthest from its three
@@ -1358,7 +1358,7 @@ class Component extends DCLogic {
       {
         sc: 'C2', label: 'CFU 2', narr: 'Classify the figures as a polygon or not a polygon.', set: 'cfu2', q: 'sort',
         zones: ['POLYGONS', 'NOT POLYGONS'],
-        answer: [0, 1, 0, 0, 1],
+        answer: [0, 1, 0, 1], maxPlacements: 2,
         fb: { ok: 'Great job! You sorted the figures correctly.', one: 'Wrong group. Check for gaps or curved sides.', two: 'Polygons are closed, with only straight sides. Try again.' }
       },
       {
@@ -1780,7 +1780,8 @@ class Component extends DCLogic {
 
   // Keyboard activation uses the same click handlers and answer guards as pointer input.
   activateKey = (event) => {
-    if (event.target !== event.currentTarget || this.locked() || event.repeat) return;
+    const limitFeedback = this.sortLimitReached() && event.currentTarget.classList.contains('sort-limit-card');
+    if (event.target !== event.currentTarget || (this.locked() && !limitFeedback) || event.repeat) return;
     if (event.key === 'Escape' && this.step().sc === 'S12' && this.state.chip) {
       event.preventDefault();
       const chip = this.state.chip;
@@ -1981,6 +1982,10 @@ class Component extends DCLogic {
   /* ---------- tap one ---------- */
   tapCard(i) {
     return () => {
+      if (this.sortLimitReached()) {
+        if (Date.now() >= (this._sortClickUntil || 0)) this.rejectSortLimit(i);
+        return;
+      }
       if (this.locked()) return;
       this.clearNudge();
       const s = this.step();
@@ -2297,6 +2302,11 @@ class Component extends DCLogic {
   }
   dragFigure(index) {
     return (event) => {
+      if (event.button === 0 && this.sortLimitReached()) {
+        this._sortClickUntil = Date.now() + 400;
+        this.rejectSortLimit(index);
+        return;
+      }
       if (this.locked() || event.button !== 0 || this.state.sortAt[index] !== undefined) return;
       if (this._sortDragCleanup) this._sortDragCleanup();
       const id = event.pointerId, generation = this.gen, origin = { x:event.clientX, y:event.clientY };
@@ -2348,7 +2358,7 @@ class Component extends DCLogic {
         if (frame !== null) cancelAnimationFrame(frame);
         latest = e; paint();
         const zone = findTarget(e);
-        const correct = zone >= 0 && this.step().answer[index] === zone;
+        const correct = zone >= 0 && !this.sortZoneFull(zone) && this.step().answer[index] === zone;
         window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',up); window.removeEventListener('pointercancel',cancel);
         this._sortClickUntil=Date.now()+400;
         const finish = () => {
@@ -2440,6 +2450,21 @@ class Component extends DCLogic {
      width, apart) and finished (narrower, together, centred). Every tile
      position runs through here, so the boxes and their contents move as one. */
   sortGap() { return this.state.united ? SORT.uniteGap : SORT.zoneGap; }
+  sortLimitReached() {
+    if (!this.P || !this.state.ready) return false;
+    const limit = this.step().maxPlacements;
+    return !!limit && Object.keys(this.state.sortAt).length >= limit;
+  }
+  rejectSortLimit(index) {
+    if (this.state.sortAt[index] !== undefined) return;
+    this.clearNudge();
+    const token = this._sortRejectToken = (this._sortRejectToken || 0) + 1;
+    this.setState({pickedFig:null,sortHover:null,wrong:index});
+    this.later(() => { if (this._sortRejectToken === token) this.setState({wrong:null}); }, 450);
+  }
+  sortZoneFull(zone) {
+    return this.sortLimitReached() || (this.step().sc === 'C5' && Object.values(this.state.sortAt).filter(at => at === zone).length >= 2);
+  }
   sortLayout() {
     return ['C2','C5'].includes(this.step().sc) ? Object.assign({}, SORT, {
       trayW:230, trayGap:30, trayY:0, zoneTop:284, zoneH:340
@@ -2468,22 +2493,35 @@ class Component extends DCLogic {
   }
   dropInto(zone) {
     return () => {
+      if (this.sortLimitReached()) {
+        if (this.state.pickedFig != null) this.rejectSortLimit(this.state.pickedFig);
+        return;
+      }
       if (this.locked()) return;
       this.clearNudge();
       const i = this.state.pickedFig;
       if (i === null || i === undefined) return;
+      if (this.state.sortAt[i] !== undefined) return;
       const s = this.step();
+      if (this.sortZoneFull(zone)) {
+        this._sortRejectToken = (this._sortRejectToken || 0) + 1;
+        const token = this._sortRejectToken;
+        this.setState({pickedFig:null,sortHover:null,wrong:i,say:'This area already has its two figures.'});
+        this.sfx('no');
+        this.later(() => { if (this._sortRejectToken === token) this.setState({wrong:null}); }, 500);
+        return;
+      }
       const at = Object.assign({}, this.state.sortAt);
       const name = (s.zones[zone] || 'that column').toLowerCase();
       if (s.answer[i] === zone) {
         at[i] = zone;
-        const done = Object.keys(at).length === s.answer.length;
+        const done = Object.keys(at).length >= (s.maxPlacements || s.answer.length);
         this.setState({ sortAt: at, pickedFig: null, tick: i,
-          say: 'Correct. Placed in the ' + name + ' column. ' + Object.keys(at).length + ' of ' + s.answer.length + ' sorted.' });
+          say: 'Correct. Placed in the ' + name + ' column. ' + Object.keys(at).length + ' of ' + (s.maxPlacements || s.answer.length) + ' sorted.' });
         this.sfx('snap');
         this.later(() => { if (this.state.tick === i) this.setState({ tick: null }); }, 1500);
         if (done) this.react('happy'); else { this.burstHere(); this.guide.onCorrectProgress(); }
-        if (Object.keys(at).length === s.answer.length) {
+        if (done) {
           this.setState({ checked: true, united: true }); this.sfx('done'); this.confetti();
           this.feedback(s.fb.ok, () => this.later(this.advance, 500));
         }
@@ -2545,9 +2583,9 @@ class Component extends DCLogic {
     /* Hover lifts the card; pressing gives tactile feedback. */
     const hk = 'card:' + o.key;
     const clickable = !!o.click;
-    const quietFigure = o.plain && this.state.k < 9;
+    const quietFigure = o.stillCard || (o.plain && this.state.k < 9);
     const hov = clickable && !quietFigure && this.state.hoverK === hk;
-    const prs = clickable && this.state.pressK === hk;
+    const prs = clickable && !quietFigure && this.state.pressK === hk;
     const still = !o.anim || o.anim === 'none';
     if (hov && !o.plain && st !== 'bad') {
       wrap.borderColor = ICE;
@@ -2558,7 +2596,7 @@ class Component extends DCLogic {
       else if (hov) wrap.transform = 'translateY(-9px) scale(1.025)';
     }
     const idx = this._cardN = (this._cardN || 0) + 1;
-    if (this.state.storyContent && !this.reducedMotion()) {
+    if (this.state.storyContent && !o.stillCard && !this.reducedMotion()) {
       const entrance = 'storyArrive 320ms ease-out ' + (120 + Math.min(idx - 1, 5) * 80) + 'ms backwards';
       wrap.animation = wrap.animation && wrap.animation !== 'none' ? wrap.animation + ', ' + entrance : entrance;
     }
@@ -2836,7 +2874,10 @@ class Component extends DCLogic {
     };
     V.controlsState = V.storyControls ? 'ready' : 'waiting';
     V.counterClass = V.storyCounting ? '' : 'story-controls';
-    for (const item of V.cards) meta(item, item.click, 'game-action');
+    for (const item of V.cards) {
+      meta(item, item.click, 'game-action');
+      if (item.sortLimitBlocked) { item.actionClass += ' sort-limit-card'; item.actionTab = 0; }
+    }
     for (const item of V.targets) {
       // Label sockets become teaching annotations, not another row of buttons.
       if (item.labelKey) meta(item, item.click, 'game-action label-socket', 'action', 'label-socket');
@@ -3243,7 +3284,7 @@ class Component extends DCLogic {
     };
   }
   safeStyle() { return Object.assign(stageBox(this.polygonIntroScene() || this.learningReferenceScene() ? {x:0,y:0,w:STAGE.w,h:STAGE.h} : this.topLessonScene() ? Object.assign({},SAFE,{x:(STAGE.w-BOARD.w)/2+12,y:BOUNDARY.safeY}) : SAFE, 32), {
-    pointerEvents: this.locked() || !this.state.storyContent ? 'none' : 'auto',
+    pointerEvents: (this.locked() && !this.sortLimitReached()) || !this.state.storyContent ? 'none' : 'auto',
     opacity: this.state.storyContent ? 1 : 0, visibility: this.state.storyContent ? 'visible' : 'hidden',
     transition: this.reducedMotion() ? 'none' : this.polygonIntroScene() || this.learningReferenceScene() ? 'opacity 240ms ease-out' : 'opacity 240ms ease-out, left 900ms ease-in-out, top 900ms ease-in-out'
   }); }
@@ -4376,6 +4417,7 @@ class Component extends DCLogic {
   viewSort(V, s) {
     const SORT = this.sortLayout();
     const st = this.state, S = this.sets()[s.set];
+    const limited = this.sortLimitReached();
     /* One palette per column: its edge, its resting and hovered fill, the
        colour of its drop slot, and the tint a tile takes on once it belongs
        there. A settled tile wears its column's colour, because the group it
@@ -4391,7 +4433,7 @@ class Component extends DCLogic {
           boxShadow: '0 0 0 4px rgba(128,81,201,.16), 0 8px 0 rgba(128,81,201,.22)' } }
     ];
     const zoneW = this.sortZoneW();
-    const holding = st.pickedFig !== null && st.pickedFig !== undefined;
+    const holding = !limited && st.pickedFig !== null && st.pickedFig !== undefined;
     /* One hovered column, whether it came from a drag (sortHover) or from
        tap-then-hover (hoverK). Off-column and not-hovering are both -1. */
     const hoverZone = !holding ? -1
@@ -4406,7 +4448,8 @@ class Component extends DCLogic {
     };
     V.zoneAName = s.zones[0]; V.zoneBName = s.zones[1];
     const zoneStyle = (which) => {
-      const hot = hoverZone === which;
+      const full = this.sortZoneFull(which);
+      const hot = hoverZone === which && !full;
       return {
         width: zoneW + 'px', height: SORT.zoneH + 'px', borderRadius: '30px', boxSizing: 'border-box',
         padding: '16px 18px',
@@ -4417,7 +4460,7 @@ class Component extends DCLogic {
         /* A held breath at the end: the pair lifts a little and glows, once. */
         boxShadow: st.united ? '0 16px 34px rgba(31,109,180,0.20), 0 0 0 6px ' + ZONE[which].wash
           : (hot ? '0 12px 26px rgba(31,109,180,0.18)' : 'none'),
-        animation: holding && !hot ? 'zoneInvite 1.7s ease-in-out infinite' : 'none',
+        animation: holding && !hot && !full ? 'zoneInvite 1.7s ease-in-out infinite' : 'none',
         transition: 'width ' + SORT.uniteMs + 'ms cubic-bezier(.22,.9,.24,1), box-shadow 420ms ease-out, border-color 200ms ease-out, background 200ms ease-out, transform 200ms ease-out', textAlign: 'center'
       };
     };
@@ -4425,7 +4468,7 @@ class Component extends DCLogic {
     /* While a column is hovered, lay the row out as if the held figure were
        already in it: the tiles slide apart and an empty slot opens where it
        will land, so the drop is a confirmation rather than a surprise. */
-    const preview = hoverZone >= 0 ? Object.assign({}, st.sortAt, { [st.pickedFig]: hoverZone }) : null;
+    const preview = hoverZone >= 0 && !this.sortZoneFull(hoverZone) ? Object.assign({}, st.sortAt, { [st.pickedFig]: hoverZone }) : null;
     const places = this.sortPlaces(preview || st.sortAt);
     /* The tray closes its gaps and stays centred as figures leave it. */
     const queue = S.map((_, i) => i).filter((i) => st.sortAt[i] === undefined);
@@ -4438,23 +4481,25 @@ class Component extends DCLogic {
       const size = spot ? spot.w : SORT.trayW;
       const x = spot ? spot.x : trayX + queue.indexOf(i) * (SORT.trayW + SORT.trayGap);
       const y = spot ? spot.y : SORT.trayY;
-      return this.buildCard({
+      const card = this.buildCard({
         key: it[0], x: x, y: y, w: size, h: size, vb: F.vb, d: this.figD(it[0]),
         extra: F.extra || '', stroke: it[1], sw: 22, pad: 14, fill: this.figFill(it[0], it[1], it[2]),
-        state: at !== undefined ? 'ok' : (st.wrong === i ? 'bad' : (picked ? 'sel' : null)),
+        state: at !== undefined ? 'ok' : limited ? null : (st.wrong === i ? 'bad' : (picked ? 'sel' : null)),
         tint: at === undefined ? null : ZONE[at].tint, tick: st.tick === i,
         /* Tapping a tile that is already in a column used to hit the tile —
            which has no handler — so the column under it never heard the tap. */
-        through: at !== undefined,
+        through: at !== undefined, stillCard: limited,
         click: at === undefined ? this.tapCard(i) : null, down: at === undefined ? this.dragFigure(i) : null,
         opacity:st.draggingFigure === i ? 0.3 : 1,
-        nudge: at === undefined && st.pickedFig === null && i === S.findIndex((_, index) => st.sortAt[index] === undefined),
+        nudge: !limited && at === undefined && st.pickedFig === null && i === S.findIndex((_, index) => st.sortAt[index] === undefined),
         z: at === undefined ? 8 : 9,
         /* The ghost already flew this one home — show it there, don't re-run
            the slide. Its neighbours still animate as they make room. */
         snap: st.justPlaced === i,
-        anim: st.wrong === i ? 'wig 420ms ease-in-out both' : (picked ? 'pop 900ms ease-in-out infinite' : 'none')
+        anim: st.wrong === i ? ((limited || s.sc === 'C5' ? (this._sortRejectToken % 2 ? 'wrongTapA' : 'wrongTapB') : 'wig') + ' 420ms ease-in-out both') : (picked ? 'pop 900ms ease-in-out infinite' : 'none')
       });
+      if (limited && at === undefined) { card.sortLimitBlocked = true; card.wrap.cursor = 'default'; card.wrap.scale = '1'; }
+      return card;
     });
     const target = (zone) => ({
       text: '', click: this.dropInto(zone),
