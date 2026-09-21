@@ -15,6 +15,7 @@ const zoneW=g.sortZoneW();
 let checks=0;
 for(const sc of ['C2','C5']){
   const k=g.steps().findIndex(s=>s.sc===sc);g.state.k=k;
+  const SORT=g.sortLayout();
   const s=g.steps()[k],n=s.answer.length;
 
   /* columns live inside the safe area, side by side, evenly split */

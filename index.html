@@ -965,7 +965,7 @@ class Component extends DCLogic {
       this._voiceRetry = () => this.speak(text, cb, durationMs);
 
       this.prepareNarratorReveal(text, durationMs);
-      this.setState({ wordReveal: 'complete', storyDialogue: true, voiceError: '' });
+      this.setState({ wordReveal: 'complete', storyDialogue: true, storyContent: true, voiceError: '' });
       this.later(() => { if (current()) this.setState({ wordReveal: 'complete' }, cb); },
         this.readingTime(text, durationMs));
     };
@@ -1432,7 +1432,7 @@ class Component extends DCLogic {
     reset.storyControls = false;
     if (fresh) { reset.storyContent = false; reset.storyDialogue = false; }
     // Keep the existing board visible while it reshapes into the introduction layout.
-    if (['S8','S9','S10'].includes(s.sc)) {
+    if (['S8','S9','S10','C3','C4'].includes(s.sc)) {
       reset.storyContent = true; reset.storyDialogue = false; reset.narr = ''; reset.narrPage = '';
       reset.reveal = s.sc === 'S9';
     }
@@ -1554,7 +1554,7 @@ class Component extends DCLogic {
       }, fly ? 1100 : 0);
       return fly ? 1240 : (reduced ? 0 : 380);
     }
-    const boundary = this.boundaryScene();
+    const boundary = this.topLessonScene();
     const moving = !first && boundary !== !!this._boundaryAt;
     this._boundaryAt = boundary;
     if (moving) {
@@ -2369,8 +2369,9 @@ class Component extends DCLogic {
            releasing reads as one continuous motion, never a jump. */
         const rect = ghost.parentElement.getBoundingClientRect(), scale = rect.width / STAGE.w;
         const slot = correct ? this.sortPlaces(Object.assign({}, this.state.sortAt, { [index]: zone }))[index] : null;
-        const x = slot ? SAFE.x + slot.x + slot.w / 2 : (sourceRect.left + sourceRect.width / 2 - rect.left) / scale;
-        const y = slot ? SAFE.y + slot.y + slot.w / 2 : (sourceRect.top + sourceRect.height / 2 - rect.top) / scale;
+        const surface = this.safeStyle();
+        const x = slot ? parseFloat(surface.left) + slot.x + slot.w / 2 : (sourceRect.left + sourceRect.width / 2 - rect.left) / scale;
+        const y = slot ? parseFloat(surface.top) + slot.y + slot.w / 2 : (sourceRect.top + sourceRect.height / 2 - rect.top) / scale;
         const k = slot ? slot.w / 170 : sourceRect.width / scale / 170;
         settling = ghost.animate([{transform:ghost.style.transform},
           {transform:'translate3d('+x.toFixed(1)+'px,'+y.toFixed(1)+'px,0) translate(-50%,-50%) scale('+k.toFixed(3)+')'}],
@@ -2439,6 +2440,11 @@ class Component extends DCLogic {
      width, apart) and finished (narrower, together, centred). Every tile
      position runs through here, so the boxes and their contents move as one. */
   sortGap() { return this.state.united ? SORT.uniteGap : SORT.zoneGap; }
+  sortLayout() {
+    return ['C2','C5'].includes(this.step().sc) ? Object.assign({}, SORT, {
+      trayW:230, trayGap:30, trayY:0, zoneTop:284, zoneH:340
+    }) : SORT;
+  }
   sortZoneW() { return (SAFE.w - SORT.zoneGap) / 2 - (this.state.united ? SORT.unite : 0); }
   sortBandX() { const w = this.sortZoneW(); return (SAFE.w - (2 * w + this.sortGap())) / 2; }
   sortZoneX(zone) { return this.sortBandX() + (zone ? this.sortZoneW() + this.sortGap() : 0); }
@@ -2449,6 +2455,7 @@ class Component extends DCLogic {
      Pass a map with an extra entry to ask "where would this one land?" — the
      hover preview and the drag settle both do exactly that. */
   sortPlaces(at) {
+    const SORT = this.sortLayout();
     const out = {}, zw = this.sortZoneW(), head = this.sortHeadH();
     const y = SORT.zoneTop + head + (SORT.zoneH - head - SORT.tile) / 2;
     for (let zone = 0; zone < 2; zone++) {
@@ -2748,7 +2755,7 @@ class Component extends DCLogic {
       narrStyle: this.narrStyle(), narrRef: this.narrRef,
       bgStyle: this.bgStyle(), boardStyle: this.boardStyle(), signStyle: this.signStyle(),
       boundaryBackgroundStyle: this.boundaryBackgroundStyle(),
-      lessonScene: this.learningReferenceScene() ? 'parts-reference' : this.polygonIntroScene() ? 'polygon-intro' : this.boundaryScene() ? 'boundary' : 'standard',
+      lessonScene: this.learningReferenceScene() ? 'parts-reference' : this.polygonIntroScene() ? 'polygon-intro' : this.topLessonScene() ? 'boundary' : 'standard',
       safeStyle: this.safeStyle(),
       showGuide: GUIDE_VISIBLE, guideViewport: this.guideViewportStyle(), guideStyle: this.guideStyle(),
       guideRef: this.guideRef, guideHidden: st.guideHidden, guideCell: (window.SWIFTEE && window.SWIFTEE.cell) || 256,
@@ -3071,7 +3078,7 @@ class Component extends DCLogic {
     // A persistent layer lets entry, exit, and rapid navigation crossfade naturally.
     return Object.assign(stageBox({x:0,y:0,w:STAGE.w,h:STAGE.h},1), {
       display:'block',objectFit:'cover',pointerEvents:'none',userSelect:'none',
-      opacity:this.state.ready && this.state.k === 13 && this.state.boundaryBackgroundReady ? 1 : 0,
+      opacity:this.state.ready && (this.state.k === 13 || ['C2','C5'].includes(this.step().sc)) && this.state.boundaryBackgroundReady ? 1 : 0,
       transition:this.reducedMotion() ? 'none' : 'opacity 1200ms cubic-bezier(.4,0,.2,1)'
     });
   }
@@ -3079,12 +3086,16 @@ class Component extends DCLogic {
     // Keep the same teaching composition from the open/closed introduction onward.
     return !!(this.P && this.state.ready && ['S6','S7'].includes(this.step().sc));
   }
+  topLessonScene() {
+    // Reuse Screen 14's composition without changing sorting or narration rules.
+    return this.boundaryScene() || !!(this.P && this.state.ready && ['C2','C5'].includes(this.step().sc));
+  }
   /* The left-lane composition: Swiftee and her bubble hold the left, the figure
      or the choice grid takes the right. Screens 17–19 introduce the polygon and
      screen 36 asks the same kind of question about quadrilaterals, so it is laid
      out the same way — the learner meets one grammar, not two. */
   polygonIntroScene() {
-    return !!(this.P && this.state.ready && ['S8','S9','S10','S18','C1'].includes(this.step().sc));
+    return !!(this.P && this.state.ready && ['S8','S9','S10','S18','C1','C3','C4'].includes(this.step().sc));
   }
   learningReferenceScene(k = this.state.k) {
     /* Screens 20–35 and 37–40 share Screen 22's teaching composition: Swiftee
@@ -3159,12 +3170,12 @@ class Component extends DCLogic {
   bgStyle() {
     return Object.assign(stageBox({ x: 0, y: 0, w: STAGE.w, h: STAGE.h }, 0),
       { display: 'block', objectFit: 'cover', userSelect: 'none', pointerEvents: 'none',
-        filter: this.boundaryScene() ? 'saturate(1.06) brightness(1.04)' : 'none', transition: this.reducedMotion() ? 'none' : 'filter 1000ms ease-in-out' });
+        filter: this.topLessonScene() ? 'saturate(1.06) brightness(1.04)' : 'none', transition: this.reducedMotion() ? 'none' : 'filter 1000ms ease-in-out' });
   }
   boardStyle() {
     const boundaryWidth = BOUNDARY.boardW;
-    const box = this.learningReferenceScene() ? {x:100,y:(STAGE.h-900)/2,w:1780,h:900} : this.polygonIntroScene() ? this.polygonIntroLayout().board : this.boundaryScene() ? {x:(STAGE.w-boundaryWidth)/2,y:BOUNDARY.boardY,w:boundaryWidth,h:BOUNDARY.boardH} : BOARD;
-    const travel = this.learningReferenceScene() || this.polygonIntroScene() || this.boundaryScene() || this.state.boundaryTravel;
+    const box = this.learningReferenceScene() ? {x:100,y:(STAGE.h-900)/2,w:1780,h:900} : this.polygonIntroScene() ? this.polygonIntroLayout().board : this.topLessonScene() ? {x:(STAGE.w-boundaryWidth)/2,y:BOUNDARY.boardY,w:boundaryWidth,h:BOUNDARY.boardH} : BOARD;
+    const travel = this.learningReferenceScene() || this.polygonIntroScene() || this.topLessonScene() || this.state.boundaryTravel;
     return Object.assign(stageBox(box, 30), {
       opacity: this.state.storyContent ? 1 : 0, transition: this.reducedMotion() ? 'none' :
         (travel ? 'opacity 260ms ease-out, left 900ms ease-in-out, top 900ms ease-in-out, width 900ms ease-in-out, height 900ms ease-in-out' : 'opacity 260ms ease-out'),
@@ -3189,7 +3200,7 @@ class Component extends DCLogic {
     /* S10 used to put the bubble on the right on its own; screens 17, 18 and
        19 now share the one left-lane composition, so it needs no exception. */
     if (this.polygonIntroScene()) return this.narrowDialogue(this.polygonIntroLayout().dialogue);
-    if (this.boundaryScene()) return BOUNDARY.dialogue;
+    if (this.topLessonScene()) return BOUNDARY.dialogue;
     const step = this.state.ready ? this.step() : null;
     const roomy = step && (step.sc === 'S1' || step.q === 'oc');
     // Grow upward from a fixed anchor; leave air between the tail and the crest.
@@ -3206,7 +3217,7 @@ class Component extends DCLogic {
   signStyle() {
     const box = this.dialogueLayout();
     const text = this.state.narrPage === undefined ? this.state.narr : this.state.narrPage;
-    const boundary = this.boundaryScene() || this.polygonIntroScene();
+    const boundary = this.topLessonScene() || this.polygonIntroScene();
     /* Point the tail at wherever Swiftee actually stands, rather than at a
        percentage that has to be re-guessed every time the lane moves. */
     const polygonGuide = this.polygonIntroScene() ? this.polygonIntroLayout().guide : null;
@@ -3231,14 +3242,14 @@ class Component extends DCLogic {
       transition: this.reducedMotion() ? 'none' : 'opacity 220ms ease-out, transform 360ms cubic-bezier(.2,.9,.3,1.2)'
     };
   }
-  safeStyle() { return Object.assign(stageBox(this.polygonIntroScene() || this.learningReferenceScene() ? {x:0,y:0,w:STAGE.w,h:STAGE.h} : this.boundaryScene() ? Object.assign({},SAFE,{x:(STAGE.w-BOARD.w)/2+12,y:BOUNDARY.safeY}) : SAFE, 32), {
+  safeStyle() { return Object.assign(stageBox(this.polygonIntroScene() || this.learningReferenceScene() ? {x:0,y:0,w:STAGE.w,h:STAGE.h} : this.topLessonScene() ? Object.assign({},SAFE,{x:(STAGE.w-BOARD.w)/2+12,y:BOUNDARY.safeY}) : SAFE, 32), {
     pointerEvents: this.locked() || !this.state.storyContent ? 'none' : 'auto',
     opacity: this.state.storyContent ? 1 : 0, visibility: this.state.storyContent ? 'visible' : 'hidden',
     transition: this.reducedMotion() ? 'none' : this.polygonIntroScene() || this.learningReferenceScene() ? 'opacity 240ms ease-out' : 'opacity 240ms ease-out, left 900ms ease-in-out, top 900ms ease-in-out'
   }); }
   /* Swiftee's cell, scene-relative; the wrapper inside carries the only motion. */
   guideViewportStyle() {
-    const boundary = this.boundaryScene();
+    const boundary = this.topLessonScene();
     const polygon = this.polygonIntroScene();
     const parts = this.learningReferenceScene();
     const compare = this.compareFocus();
@@ -3626,18 +3637,23 @@ class Component extends DCLogic {
     const st = this.state;
     if (isCmp) { V.cards = this.cmpCards(V, s, true); return; }
     const S = this.sets()[s.set];
+    const grid = s.sc === 'C3' ? this.polygonIntroLayout().grid : null;
     const w = 320, gap = 46, total = S.length * w + (S.length - 1) * gap;
     const x0 = (SAFE.w - total) / 2, y = 150;
     V.cards = S.map((it, i) => {
       const F = this.fig(it[0]);
       let state = null;
       if (st.ok === i) state = 'ok'; else if (st.wrong === i) state = 'bad';
-      return this.buildCard({
-        key: it[0], x: x0 + i * (w + gap), y: y, w: w, h: w, vb: F.vb, d: this.figD(it[0]),
+      const card = this.buildCard({
+        key: it[0], x: grid ? grid.x+(i%2)*(grid.tile+grid.gap) : x0+i*(w+gap),
+        y: grid ? grid.y+Math.floor(i/2)*(grid.tile+grid.gap) : y,
+        w: grid ? grid.tile : w, h: grid ? grid.tile : w, vb: F.vb, d: this.figD(it[0]),
         extra: F.extra || '', stroke: it[1], sw: 20, fill: this.figFill(it[0], it[1], it[2]), state: state,
-        badge: String.fromCharCode(65 + i), click: this.tapCard(i), nudge: i === s.correct && st.ok === null,
+        badge: grid ? '' : String.fromCharCode(65 + i), click: this.tapCard(i), nudge: i === s.correct && st.ok === null,
         anim: st.wrong === i ? 'wig 420ms ease-in-out both' : 'none'
       });
+      if (grid) card.wrap.borderRadius = '28px';
+      return card;
     });
   }
 
@@ -4304,8 +4320,12 @@ class Component extends DCLogic {
     const st = this.state, S = this.sets()[s.set];
     /* Four options as a 2 x 2 beside Swiftee — screen 19's composition, reused
        for screen 36 because it asks the same kind of question. */
-    const discovery = s.sc === 'S10' || s.sc === 'S18' || s.sc === 'C1';
-    const grid = discovery ? this.polygonIntroLayout().grid : null;
+    const discovery = ['S10','S18','C1','C4'].includes(s.sc);
+    const baseGrid = discovery ? this.polygonIntroLayout().grid : null;
+    // Five options need a centred 3 + 2 grid, with a separate action band below.
+    const fiveOptions = s.sc === 'C4';
+    const laneCentre = baseGrid ? baseGrid.x + baseGrid.tile + baseGrid.gap/2 : 0;
+    const grid = fiveOptions ? {x:laneCentre-403,y:220,tile:250,gap:28} : baseGrid;
     const n = S.length;
     const w = n >= 6 ? 236 : (n === 5 ? 272 : 300), gap = n >= 6 ? 26 : 38;
     const total = n * w + (n - 1) * gap;
@@ -4323,12 +4343,12 @@ class Component extends DCLogic {
       /* Four options as a square block in the right lane, beside Swiftee. A
          2 x 2 reads as one group at a glance; the 3 + 2 it replaced left a
          short second row that looked like an afterthought. */
-      const tileX = discovery ? grid.x + (i % 2) * (grid.tile + grid.gap) : x0 + i * (w + gap);
-      const tileY = discovery ? grid.y + Math.floor(i / 2) * (grid.tile + grid.gap) : y;
+      const tileX = fiveOptions ? grid.x+(i<3 ? i : i-3+.5)*(grid.tile+grid.gap) : discovery ? grid.x + (i % 2) * (grid.tile + grid.gap) : x0 + i * (w + gap);
+      const tileY = fiveOptions ? grid.y+(i<3 ? 0 : grid.tile+42) : discovery ? grid.y + Math.floor(i / 2) * (grid.tile + grid.gap) : y;
       const card = this.buildCard({
         key: it[0], x: tileX, y: tileY, w: tileSize, h: tileSize, vb: F.vb, d: this.figD(it[0]),
         extra: F.extra || '', stroke: it[1], sw: 20, fill: this.figFill(it[0], it[1], it[2]), state: state,
-        badge: discovery ? '' : String.fromCharCode(65 + i), click: this.tapCard(i), tick: discovery && sel,
+        badge: discovery ? '' : String.fromCharCode(65 + i), click: this.tapCard(i), tick: discovery && sel && (!s.check || st.checked),
         nudge: !st.checked && i === s.correct.find(index => !st.sel.includes(index)),
         traceD: F.traceD || this.figD(it[0]), traceStyle: coach ? this.traceStyleFor(true, 1500) : { opacity: 0 },
         anim: st.wrong === i ? ((s.set === 'cfu1' ? (this._wrongTapToken % 2 ? 'wrongTapA' : 'wrongTapB') : 'wig') + ' 420ms ease-in-out both') : (coach ? 'pop 900ms ease-in-out infinite' : 'none')
@@ -4347,12 +4367,14 @@ class Component extends DCLogic {
       V.nudgeCheck = st.checked || done ? '1' : '';
       V.checkLabel = 'Check';
       V.checkStyle = this.bigBtn(250);
+      if (fiveOptions) V.checkRowStyle = {position:'absolute',left:(laneCentre-403)+'px',top:'828px',width:'806px',display:'flex',justifyContent:'center'};
       if (V.checkDisabled) Object.assign(V.checkStyle, {cursor:'default',transform:'none'});
     }
   }
 
   /* ----- sort ----- */
   viewSort(V, s) {
+    const SORT = this.sortLayout();
     const st = this.state, S = this.sets()[s.set];
     /* One palette per column: its edge, its resting and hovered fill, the
        colour of its drop slot, and the tint a tile takes on once it belongs
