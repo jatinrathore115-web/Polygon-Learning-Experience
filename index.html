@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="styles/cards.css">
 <link rel="stylesheet" href="styles/weather.css">
 <style>
-  html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:#103574; }
+  html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:#103574; -webkit-text-size-adjust:100%; text-size-adjust:100%; }
   .game-viewport { position:fixed; inset:0; width:100%; height:100%; height:100dvh; overflow:hidden; background:#103574; }
 </style>
 <script src="responsive-layout.js"></script>
@@ -61,7 +61,7 @@
     0% { transform:translate3d(0,0,0) rotate(0deg) rotateY(0deg); opacity:1; }
     10% { opacity:1; }
     75% { opacity:1; }
-    100% { transform:translate3d(var(--drift),calc(100vh + 100px),0) rotate(var(--spin)) rotateY(540deg); opacity:0; }
+    100% { transform:translate3d(var(--drift),calc(var(--canvas-height) + 100px),0) rotate(var(--spin)) rotateY(540deg); opacity:0; }
   }
   @media (prefers-reduced-motion:reduce) { .celebration-piece { animation:none !important; display:none; } }
   /* The shape settling once it has been drawn. This animates stroke, and it
@@ -123,7 +123,18 @@
   @keyframes chipDrop { 0% { opacity:0; transform:translateY(-12px) scale(.9); } 60% { opacity:1; transform:translateY(2px) scale(1.03); } 100% { opacity:1; transform:translateY(0) scale(1); } }
   /* The figure itself answers the narration -- the card it sits in stays put,
      so the eye goes to the boundary being talked about, not to the frame. */
-  @keyframes figureCue { 0%,100% { transform:scale(1); } 50% { transform:scale(1.055); } }
+  /* The figure answering the word being spoken about it. Scale alone was too
+     quiet to read across the room, so the swell carries a glow: a drop-shadow,
+     which follows the outline's own silhouette rather than boxing it, and
+     takes its colour from the figure through --cue-glow so each shape lights
+     in its own ink instead of a shared tint fighting three of them. Peak early,
+     hold briefly, settle back -- the shape ends exactly where it started. */
+  @keyframes figureCue {
+    0%   { transform:scale(1);     filter:drop-shadow(0 0 0 transparent); }
+    28%  { transform:scale(1.13);  filter:drop-shadow(0 0 13px var(--cue-glow,transparent)); }
+    52%  { transform:scale(1.085); filter:drop-shadow(0 0 22px var(--cue-glow,transparent)); }
+    100% { transform:scale(1);     filter:drop-shadow(0 0 0 transparent); }
+  }
   /* All four figures acknowledge together once the sorting is finished. */
   @keyframes figureCheer { 0%,100% { transform:scale(1) translateY(0); } 35% { transform:scale(1.1) translateY(-6px); } 70% { transform:scale(1.02) translateY(0); } }
   /* Each answer button arrives on its own beat rather than both at once. */
@@ -160,9 +171,9 @@
 </helmet>
 <div class="game-viewport" ref="{{ stageRef }}" onScroll="{{ layoutScroll }}" style="{{ viewportStyle }}">
  <div class="game-frame" style="{{ frameStyle }}">
-  <!-- One full-viewport scenic layer; the learning content fits independently. -->
-  <img class="lesson-background" sc-camel-src="{{ backgroundSrc }}" alt="" draggable="false" style="{{ bgStyle }}" />
   <div data-lesson="{{ lessonScene }}" data-layout="{{ responsiveLayout }}" style="{{ scalerStyle }}">
+    <!-- Scenery and learning content share the same 16:9 coordinate system. -->
+    <img class="lesson-background" sc-camel-src="{{ backgroundSrc }}" alt="" draggable="false" style="{{ bgStyle }}" />
 
     <!-- ============ decorative weather ============ z 5 -->
     <div class="scene-weather" aria-hidden="true">
@@ -226,7 +237,7 @@
             <div style="{{ p.style }}">{{ p.n }}</div>
           </sc-for>
           <div style="{{ c.badgeStyle }}">{{ c.badge }}</div>
-          <div style="{{ c.chipStyle }}">{{ c.chip }}</div>
+          <div class="{{ c.chipClass }}" style="{{ c.chipStyle }}">{{ c.chip }}</div>
         </div>
       </sc-for>
 
@@ -332,18 +343,19 @@
 
 
     <div ref="{{ ghostRef }}" style="position:absolute;left:0;top:0;pointer-events:none;opacity:0;z-index:60"></div>
-  </div>
- </div>
-</div>
+    <div class="canvas-navigation" ref="{{ navigationRef }}" style="position:absolute;inset:0;pointer-events:none;z-index:10000"></div>
 
 <sc-if value="{{ voiceError }}" hint-placeholder-val="{{ false }}">
-  <div role="status" style="position:fixed;left:0;right:0;bottom:max(24px,env(safe-area-inset-bottom));z-index:100;display:flex;justify-content:center;pointer-events:none">
+  <div role="status" style="position:absolute;left:0;right:0;bottom:24px;z-index:100;display:flex;justify-content:center;pointer-events:none">
     <button class="ice-button game-action" onClick="{{ retryVoice }}" style="pointer-events:auto;min-height:48px;padding:12px 24px;font-size:20px">{{ voiceError }}</button>
   </div>
 </sc-if>
 
-<div aria-hidden="true" style="position:fixed;inset:0;z-index:95;pointer-events:none;overflow:hidden">
+<div aria-hidden="true" style="position:absolute;inset:0;z-index:95;pointer-events:none;overflow:hidden">
   <sc-for list="{{ confettiFx }}" as="f" hint-placeholder-count="0"><div class="{{ f.className }}" style="{{ f.style }}"></div></sc-for>
+</div>
+  </div>
+ </div>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1320,&quot;height&quot;:720}}">
@@ -359,6 +371,13 @@ const SHAPE_YELLOW = '#f0a81b';
    would remove the very thing being compared -- but they are plainly not the
    one being asked about. */
 const WAIT_BLUE = '#7fb2d9';
+/* The rim every card falls back to. It is also each card's `color`, because a
+   border-color that is briefly missing resolves to currentColor -- and a card
+   whose colour is the default black both rests black and, worse, transitions
+   *from* black on the way to its real rim, which is the dark flash you see
+   when a screen arrives. Cards paint no text of their own, so owning `color`
+   costs nothing and closes that off at the source rather than per class. */
+const CARD_RIM = '#7fc4de';
 /* A shape name highlighted in the dialogue is still part of the sentence, so
    it is written like one: first letter capital, the rest lower. Setting it in
    capitals made it read as a label dropped into the line rather than a word
@@ -752,12 +771,13 @@ class SwifteeGuide {
 }
 
 class Component extends DCLogic {
+  navigationRef = React.createRef();
   state = {
     ready: false, k: 0, narr: '', speaking: false, voiceError: '', muted: false, scale: 1,
     ddCheer: false,
     boundaryBackgroundReady: false,
     sel: [], dd: [null, null, null, null], ddOpen: -1, ddWrong: [false, false, false, false],
-    cnt: [4, 4], attempts: 0, wrong: null, ok: null, ocReveal: null, ocWords: { open:false, closed:false }, nudge: null,
+    cnt: [4, 4], attempts: 0, wrong: null, ok: null, ocReveal: null, ocRetire: false, ocWords: { open:false, closed:false }, nudge: null,
     guideHidden: true, interactive: false,
     storyDialogue: false, storyContent: false, storyControls: false, guideFlying: false,
     narrTone: 'teach', narrTick: 0,
@@ -1493,7 +1513,7 @@ class Component extends DCLogic {
     const reset = {
       magicReveal: s.q === 'oc' && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches),
       narrPage: '', draggingLabel:null, labelHover:null, draggingFigure:null, sortHover:null,
-      sel: [], ddOpen: -1, wrong: null, ok: null, ocReveal: null, ocWords: { open:false, closed:false }, attempts: 0, nudge: null,
+      sel: [], ddOpen: -1, wrong: null, ok: null, ocReveal: null, ocRetire: false, ocWords: { open:false, closed:false }, attempts: 0, nudge: null,
       reveal: false, nums: 0, numsB: 0, sideWalkDone: false, hlKind: null, boundaryFocus: null, tracing: false, drawing: false, penAt: null,
       zoomed: s.ph === 'trace', showHand: false, checked: false, phase: s.ph || '',
       chip: null, labelPrompt: false, badPlace: null, pickedFig: null, justPlaced: null, tick: null, united: false, say: '', morph: null
@@ -2019,6 +2039,14 @@ class Component extends DCLogic {
       });
       this.react('wrong');
       this.showBoundaryFeedback(s.fb[s.ans]);
+      /* The wrong choice is shown as wrong first -- it shakes, and Swiftee
+         starts naming the right answer -- and only then does it clear away,
+         leaving the correct button alone in the centre. Retiring it on the tap
+         would erase what the learner just did before they had seen the result
+         of it; waiting until the sentence is under way lets the button leave
+         on the voice, which is what makes the two feel like one explanation. */
+      const generation = this.gen;
+      this.later(() => { if (generation === this.gen) this.setState({ ocRetire: true }); }, 1000);
     }
   };
   chooseOpen = () => this.choose('open');
@@ -2316,10 +2344,6 @@ class Component extends DCLogic {
       const id = event.pointerId, generation = this.gen, origin = { x:event.clientX, y:event.clientY };
       const ghost = this.ghostRef.current;
       const sourceRect = event.currentTarget.getBoundingClientRect();
-      const labelGhostStyle = this._responsiveFrame?.compact ? {
-        width:(sourceRect.width/this._responsiveFrame.scale)+'px',height:(sourceRect.height/this._responsiveFrame.scale)+'px',
-        fontSize:(parseFloat(getComputedStyle(event.currentTarget).fontSize)*sourceRect.width/event.currentTarget.offsetWidth/this._responsiveFrame.scale)+'px'
-      } : {};
       let active = false, frame = null, latest = event, hovered = null, settling = null;
       const findTarget = e => {
         const board = this.safeRef.current;
@@ -2357,7 +2381,7 @@ class Component extends DCLogic {
         if (!active) {
           active=true; this.clearNudge(); this.sfx('pick'); this.guide.onInteractionStart();
           this.setState({ chip:name, draggingLabel:name });
-          if (ghost) { ghost.className='label-tile'; ghost.textContent=name; Object.assign(ghost.style,this.labelTileStyle(name),labelGhostStyle,{opacity:'1'}); }
+          if (ghost) { ghost.className='label-tile'; ghost.textContent=name; Object.assign(ghost.style,this.labelTileStyle(name),{opacity:'1'}); }
         }
         if (frame === null) frame=requestAnimationFrame(paint);
       };
@@ -2410,7 +2434,7 @@ class Component extends DCLogic {
       const id = event.pointerId, generation = this.gen, origin = { x:event.clientX, y:event.clientY };
       const ghost = this.ghostRef.current;
       const sourceRect = event.currentTarget.getBoundingClientRect();
-      const ghostSize = this._responsiveFrame?.compact ? sourceRect.width/this._responsiveFrame.scale*.85 : 170;
+      const ghostSize = 170;
       const artwork = event.currentTarget.querySelector('svg').cloneNode(true);
       Object.assign(artwork.style,{width:'100%',height:'100%',transform:'none'});
       let active = false, frame = null, latest = event, hovered = null, settling = null;
@@ -2549,7 +2573,7 @@ class Component extends DCLogic {
   /* One source of truth for the column band, in both states: sorting (full
      width, apart) and finished (narrower, together, centred). Every tile
      position runs through here, so the boxes and their contents move as one. */
-  sortGap() { return this.state.united ? SORT.uniteGap : this._responsiveFrame?.compact ? 30 : SORT.zoneGap; }
+  sortGap() { return this.state.united ? SORT.uniteGap : SORT.zoneGap; }
   sortLimitReached() {
     if (!this.P || !this.state.ready) return false;
     const limit = this.step().maxPlacements;
@@ -2567,12 +2591,11 @@ class Component extends DCLogic {
     return this.sortLimitReached() || Object.values(this.state.sortAt).filter(at => at === zone).length >= required;
   }
   sortLayout() {
-    if(this._responsiveFrame?.compact)return Object.assign({},SORT,{trayW:230,trayGap:30,trayY:0,zoneTop:560,zoneH:480});
     return ['C2','C5'].includes(this.step().sc) ? Object.assign({}, SORT, {
       trayW:230, trayGap:30, trayY:0, zoneTop:284, zoneH:340
     }) : SORT;
   }
-  sortZoneW() { return this._responsiveFrame?.compact ? 450 : (SAFE.w - SORT.zoneGap) / 2 - (this.state.united ? SORT.unite : 0); }
+  sortZoneW() { return (SAFE.w - SORT.zoneGap) / 2 - (this.state.united ? SORT.unite : 0); }
   sortBandX() { const w = this.sortZoneW(); return (SAFE.w - (2 * w + this.sortGap())) / 2; }
   sortZoneX(zone) { return this.sortBandX() + (zone ? this.sortZoneW() + this.sortGap() : 0); }
   sortHeadH() { return SORT.head + ((this.step().zones || [])[2] ? SORT.headSub : 0); }
@@ -2686,6 +2709,7 @@ class Component extends DCLogic {
       transition: o.snap
         ? 'opacity 380ms, transform 260ms, border-color 200ms, background 200ms'
         : 'left 420ms cubic-bezier(.22,.9,.24,1), top 420ms cubic-bezier(.22,.9,.24,1), width 420ms, height 420ms, opacity 380ms, transform 260ms, border-color 200ms, background 200ms',
+      color: CARD_RIM,
       touchAction: o.down ? 'none' : 'manipulation', cursor: o.down ? 'grab' : (o.click ? 'pointer' : 'default'), opacity: o.opacity === undefined ? 1 : o.opacity,
       animation: o.anim || 'none', zIndex: o.z || 2
     }, base, o.tint || {});
@@ -2719,6 +2743,7 @@ class Component extends DCLogic {
        there the figure itself answers, so the eye goes to the shape rather
        than to the frame around it. */
     const gStyle = { animation: o.figAnim || 'none', transformOrigin: 'center', transformBox: 'fill-box' };
+    if (o.figGlow) gStyle['--cue-glow'] = o.figGlow;
     const svgTf = prs ? 'scale(0.955)' : (hov ? 'scale(1.07)' : 'scale(1)');
     return {
       key: o.key, vb: o.vb, d: o.d, extra: o.extra || '', fill: o.fill || 'none',
@@ -2767,13 +2792,18 @@ class Component extends DCLogic {
       /* The label sits below the figure it names, clear of the outline. A
          dashed rim means the boundary has a gap; an unbroken rim means it
          does not, so the frame repeats the lesson the word is teaching. */
+      /* The label under a figure is the same blue pill the lesson uses for its
+         answer buttons, so it wears the button's own class rather than a
+         second look built to imitate it -- face, rim, gloss and lettering all
+         come from one place and cannot drift apart. Only position, size and
+         the arrival are set here; it is a label, so it does not take a cursor
+         or a pointer. */
+      chipClass: o.chip ? 'ice-button' : '',
       chip: o.chip || '', chipStyle: o.chip ? {
         position: 'absolute', left: '50%', translate: '-50% 0', top: 'calc(100% + 22px)',
-        padding: '9px 26px', borderRadius: '999px', background: o.chipBg || '#e8f6ff',
-        border: '3px ' + (o.chipDashed ? 'dashed' : 'solid') + ' ' + (o.chipBorder || '#9fd8f4'),
-        font: '900 25px Nunito, sans-serif', color: o.chipColor || '#2c6ba8',
-        whiteSpace: 'nowrap', textAlign: 'center', letterSpacing: '.01em',
-        boxShadow: 'inset 0 2px 0 rgba(255,255,255,.9), 0 4px 0 ' + (o.chipShadow || 'rgba(44,107,168,.22)'),
+        padding: '14px 34px',
+        fontSize: '27px', letterSpacing: '.01em',
+        cursor: 'default', pointerEvents: 'none',
         animation: this.reducedMotion() ? 'none' : 'chipDrop 380ms cubic-bezier(.22,1.2,.36,1) both'
       } : { display: 'none' },
       /* No badge stamped on a card, right or wrong. A cross marks the child
@@ -2885,7 +2915,7 @@ class Component extends DCLogic {
     this._responsiveFrame = frame;
     const scale = frame.scale;
     const scaler = {
-      position:'absolute',left:'50%',top:'50%',width:STAGE.w+'px',height:frame.stageHeight+'px',
+      position:'absolute',left:'50%',top:'50%',width:STAGE.w+'px',height:frame.stageHeight+'px','--canvas-height':STAGE.h+'px',
       transform:'translate(-50%, -50%) scale('+scale+')',transformOrigin:'center center',overflow:'hidden'
     };
     const viewportStyle = {background:'#103574',overflow:'hidden'};
@@ -2895,12 +2925,16 @@ class Component extends DCLogic {
       effectsEnabled: !this.locked(), activateKey: this.activateKey,
       storyControls: !!st.storyControls,
       storyCounting: !!(st.ready && this.P && this.step().sc === 'S13' && this.step().ph === 'five'),
-      layoutScroll: () => this.clearNudge(), frameStyle:{position:'relative',width:'100%',height:'100%',overflow:'hidden'}, responsiveLayout:frame.compact?'portrait':'landscape', viewportStyle, scalerStyle: scaler, narration: st.narr || '', narratorParts: this.narratorParts(), screenLabel: 'loading',
+      navigationRef:this.navigationRef,
+      layoutScroll: () => this.clearNudge(), frameStyle:{position:'relative',width:'100%',height:'100%',overflow:'hidden'}, responsiveLayout:'canvas', viewportStyle, scalerStyle: scaler, narration: st.narr || '', narratorParts: this.narratorParts(), screenLabel: 'loading',
       /* The gap closes with the retired option. Left at its full width it
          would still sit between the two flex items and push the surviving
          button half a gap off centre. */
       choiceRowStyle: { position:'absolute',left:0,bottom:'6px',width:'100%',display:'flex',justifyContent:'center',
-        gap: st.ok ? '0px' : '74px', transition: 'gap 340ms cubic-bezier(.3,.8,.3,1)' },
+        /* Computed here rather than read from the shared ocSettled below:
+           this object is built before that declaration runs. */
+        gap: (st.ok || (st.ocRetire ? st.ocReveal : null)) ? '0px' : '74px',
+        transition: 'gap 340ms cubic-bezier(.3,.8,.3,1)' },
       checkRowStyle: {position:'absolute',left:0,bottom:'6px',width:'100%',display:'flex',justifyContent:'center'},
       chipRowStyle: {position:'absolute',left:0,bottom:'10px',width:'100%',display:'flex',justifyContent:'center',gap:'44px'},
       cards: [], targets: [], callouts: [], leaders: [], drops: [], chips: [], counters: [],
@@ -2908,7 +2942,7 @@ class Component extends DCLogic {
       showChoice: false, showChips: false, showCounter: false, showCheck: false, showZones: false, showHand: false,
       zoneRowStyle: {}, liveMsg: this.state.say || '', checkFeedback: '',
       narrStyle: this.narrStyle(), narrRef: this.narrRef,
-      bgStyle: this.bgStyle(frame), boardStyle: this.boardStyle(), signStyle: this.signStyle(),
+      bgStyle: this.bgStyle(), boardStyle: this.boardStyle(), signStyle: this.signStyle(),
       backgroundSrc: st.ready && (st.k === 13 || ['C2','C5'].includes(this.step().sc)) && st.boundaryBackgroundReady ? 'assets/backgound%20%2002.png' : 'assets/image.png',
       lessonScene: this.learningReferenceScene() ? 'parts-reference' : this.polygonIntroScene() ? 'polygon-intro' : this.topLessonScene() ? 'boundary' : 'standard',
       safeStyle: this.safeStyle(),
@@ -2946,6 +2980,9 @@ class Component extends DCLogic {
     if (!st.ready || !this.P) return shellOnly;
 
     const s = this.step();
+    /* The answer the screen has settled on: immediately when the learner gets
+       it right, and once the reveal has been voiced when they did not. */
+    const ocSettled = st.ok || (st.ocRetire ? st.ocReveal : null);
     const V = Object.assign({}, shellOnly, {
       screenLabel: s.label,
       check: this.check, checkLabel: 'Check',
@@ -2958,8 +2995,9 @@ class Component extends DCLogic {
          because .ice-button pins its border with !important, which an inline
          style cannot beat -- the collapse has to be declared in the sheet at
          the same weight. Also hidden from assistive tech, since it is gone. */
-      openRetired: !!st.ok && st.ok !== 'open' ? 'true' : '',
-      closedRetired: !!st.ok && st.ok !== 'closed' ? 'true' : '',
+      openRetired: ocSettled && ocSettled !== 'open' ? 'true' : '',
+      closedRetired: ocSettled && ocSettled !== 'closed' ? 'true' : '',
+
       btnOpen: this.ocBtn('open'), btnClosed: this.ocBtn('closed')
     });
 
@@ -2982,7 +3020,6 @@ class Component extends DCLogic {
     else if (s.sc === 'END') this.viewEnd(V, s);
     this.fitActivityPanel(V, s);
     this.decorate(V);
-    window.PolygonResponsive.apply(this,V,s,frame);
     this.prepareControlBindings(V);
     return V;
   }
@@ -3045,7 +3082,8 @@ class Component extends DCLogic {
       V.choiceRowStyle = { position:'absolute',left:(boardPanel.x + boardPanel.w / 2 - SAFE.x - SAFE.w / 2)+'px',
         top:(boardPanel.y + boardPanel.h - (band ? band / 2 : -28) - SAFE.y)+'px',
         width:'100%',display:'flex',justifyContent:'center',alignItems:'center',
-        gap: this.state.ok ? '0px' : '32px', transition: 'gap 340ms cubic-bezier(.3,.8,.3,1)',
+        gap: (this.state.ok || (this.state.ocRetire ? this.state.ocReveal : null)) ? '0px' : '32px',
+        transition: 'gap 340ms cubic-bezier(.3,.8,.3,1)',
         translate: band ? '0 -50%' : '0 0' };
       if (card) {
         card.accessibleLabel = 'Trace the shape outline. Then choose Open or Closed.';
@@ -3354,8 +3392,8 @@ class Component extends DCLogic {
       grid: {x:Math.round(stageMid - 370),y:187,tile:350,gap:40}
     };
   }
-  bgStyle(frame) {
-    return Object.assign({position:'absolute',zIndex:0}, window.PolygonResponsive.background(frame.width,frame.height),
+  bgStyle() {
+    return Object.assign({position:'absolute',zIndex:0,left:0,top:0,width:'100%',height:'100%'},
       { display: 'block', objectFit: 'cover', userSelect: 'none', pointerEvents: 'none',
         filter: this.topLessonScene() ? 'saturate(1.06) brightness(1.04)' : 'none', transition: this.reducedMotion() ? 'none' : 'filter 1000ms ease-in-out' });
   }
@@ -3555,7 +3593,12 @@ class Component extends DCLogic {
        nothing so the row re-centres on the answer itself -- a success state of
        one button, rather than the answer sitting beside a dead one. A wrong
        attempt keeps both, because there the pair is the comparison being made. */
-    const retired = !!st.ok && st.ok !== kind;
+    /* Whichever option is not the answer clears away once the question is
+       resolved -- straight away when the learner is right, and on the voice
+       when they were wrong and the answer is being revealed to them. Either
+       way the screen settles on a single button: the correct one. */
+    const answer = st.ok || (st.ocRetire ? st.ocReveal : null);
+    const retired = !!answer && answer !== kind;
     const style = Object.assign(this.buttonSkin('primary', 28), {
       width: '244px', minWidth: '244px', height: '100px',
       font: '800 42px "Baloo 2", Nunito, sans-serif',
@@ -3791,8 +3834,15 @@ class Component extends DCLogic {
          it is spoken. The figures in the group being named are what should
          answer -- the card they sit in stays completely still, so nothing
          competes with the shape the narration is pointing at. */
+      /* Scrubbed against the audio, not free-running. When the line is playing
+         from a recording the cue is held paused and its negative delay is
+         driven frame by frame from the media clock, so the swell tracks the
+         word actually being said. Moving this cue from the card to the figure
+         is what dropped that sync; a timer alone drifts away from the voice. */
       const figureCue = ['open', 'closed', 'bound', 'sc'].includes(ph) && focused && !this.reducedMotion()
-        ? 'figureCue ' + (st.boundaryPulseMs || 600) + 'ms ease-in-out both' : null;
+        ? 'figureCue ' + (st.boundaryPulseMs || 600) + 'ms ease-in-out '
+          + (st.boundaryPulseStart == null ? 'both' : '-' + (st.boundaryPulseElapsed || 0) + 'ms both paused')
+        : null;
       /* One figure is answered at a time. The others wait in blue: still fully
          drawn, because the learner is comparing boundaries and hiding them
          would remove what is being compared, but clearly not the one in hand. */
@@ -3832,7 +3882,7 @@ class Component extends DCLogic {
         stroke: figStroke, sw: 18, fill: figFill, state: state, hl: hl,
         traceD: F.traceD || d,
         traceStyle: boundary ? { opacity: 0 } : (litBounds ? this.boundaryLitStyle() : (trace ? this.traceStyleFor(true, 1400) : { opacity: 0 })),
-        figAnim: figureCue,
+        figAnim: figureCue, figGlow: figureCue ? this.tint(figStroke, .8) : null,
         anim: figureCue ? 'none' : (focused && !this.reducedMotion() ? 'boundaryCardPulse '+(st.boundaryPulseMs || 600)+'ms ease-in-out '+(st.boundaryPulseStart == null ? 'both' : '-'+(st.boundaryPulseElapsed || 0)+'ms both paused') : (st.wrong === i ? 'wig 420ms ease-in-out both' : (pulse && !boundary ? 'pop 900ms ease-in-out infinite' : 'none'))),
         chip: chip, chipBg: chipBg, chipBorder: chipBorder, chipColor: chipColor,
         click: tappable ? this.tapCard(i) : null,
@@ -4366,10 +4416,8 @@ class Component extends DCLogic {
     }
   }
   counterHitStyle() {
-    const viewport = document.documentElement;
-    const fitted = Math.min(this.state.scale || 1, viewport.clientWidth / STAGE.w, viewport.clientHeight / STAGE.h) || 1;
-    // Expand touch targets only into the reserved spacing, never onto a neighbour.
-    const hit = Math.min(88, Math.max(60,44/fitted));
+    // The hit area shares the control's canvas scale and never overlaps a neighbour.
+    const hit = 60;
     return {position:'absolute',left:'50%',top:'50%',width:hit+'px',height:hit+'px',transform:'translate(-50%,-50%)'};
   }
   counterCheckStyle() {
@@ -4718,7 +4766,7 @@ class Component extends DCLogic {
     const places = this.sortPlaces(preview || st.sortAt);
     /* The tray closes its gaps and stays centred as figures leave it. */
     const queue = S.map((_, i) => i).filter((i) => st.sortAt[i] === undefined);
-    const trayColumns = this._responsiveFrame?.compact ? Math.min(2,queue.length) : queue.length;
+    const trayColumns = queue.length;
     const trayX = (SAFE.w - (trayColumns * SORT.trayW + (trayColumns - 1) * SORT.trayGap)) / 2;
     V.cards = S.map((it, i) => {
       const F = this.fig(it[0]);

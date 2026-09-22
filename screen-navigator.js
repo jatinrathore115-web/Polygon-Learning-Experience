@@ -7,26 +7,21 @@
       host.id = 'polygon-screen-navigator';
       const root = host.attachShadow({ mode: 'open' });
       root.innerHTML = `<link rel="stylesheet" href="${new URL('styles/buttons.css', document.baseURI).href}"><style>
-        :host{position:fixed;top:12px;left:12px;z-index:10000;font:14px system-ui,sans-serif;color:#123a6b}
+        :host{position:absolute;inset:0;z-index:10000;font:14px Nunito,sans-serif;color:#123a6b;pointer-events:none}
+        #toggle,#step-navigation,#panel{pointer-events:auto}
         *{box-sizing:border-box}button,input{font:inherit}button{cursor:pointer}
         button:focus-visible,input:focus-visible{outline:3px solid #31b9de;outline-offset:3px}
-        #toggle{border:2px solid #fff4cb;border-radius:999px;padding:10px 16px;color:#67400e;background:linear-gradient(180deg,#ffe99d 0%,#ffc252 100%);box-shadow:inset 0 2px 0 #fff8d9,0 3px 0 #b77622,0 5px 10px #123a6b26;font-weight:750;min-height:44px;transition:filter .15s,transform .15s}
+        #toggle{position:absolute;top:12px;left:12px;border:2px solid #fff4cb;border-radius:999px;padding:10px 16px;color:#67400e;background:linear-gradient(180deg,#ffe99d 0%,#ffc252 100%);box-shadow:inset 0 2px 0 #fff8d9,0 3px 0 #b77622,0 5px 10px #123a6b26;font-weight:750;min-height:44px;transition:filter .15s,transform .15s}
         #toggle:hover{filter:brightness(1.04)}#toggle:active{transform:translateY(2px)}
-        #step-navigation{position:fixed;top:12px;right:12px;display:flex;gap:10px}
+        #step-navigation{position:absolute;top:12px;right:12px;display:flex;gap:10px}
         #step-navigation button{min-width:80px;min-height:44px;padding:8px 12px;font-size:16px}
-        #panel{margin-top:10px;width:min(330px,calc(100vw - 24px));padding:14px;background:#f4fbff;border:2px solid #83d6f5;border-radius:18px;box-shadow:0 8px 28px #123a6b33}
+        #panel{position:absolute;top:76px;left:12px;width:330px;padding:14px;background:#f4fbff;border:2px solid #83d6f5;border-radius:18px;box-shadow:0 8px 28px #123a6b33}
         [hidden]{display:none!important}header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
         #close{font-size:16px;min-width:72px;height:44px;padding:0 10px;flex-shrink:0}
         input{width:100%;padding:10px;border:2px solid #a3d7ed;border-radius:10px;background:white;color:#123a6b;caret-color:#123a6b;user-select:text}
-        #list{display:grid;gap:6px;max-height:min(55vh,440px);overflow:auto;margin-top:10px;overscroll-behavior:contain}
+        #list{display:grid;gap:6px;max-height:440px;overflow:auto;margin-top:10px;overscroll-behavior:contain}
         #list button{text-align:center;padding:10px;min-height:44px;white-space:normal}
         #list{padding:5px 5px 9px}
-        @media(max-width:380px){
-          :host{left:8px;top:10px}
-          #toggle{padding:8px 10px;font-size:13px}
-          #step-navigation{right:8px;top:10px;gap:8px}
-          #step-navigation button{min-width:60px;padding:8px;font-size:14px}
-        }
         small{display:block;opacity:1;margin-top:4px;font-weight:650;line-height:1.35}#empty{padding:12px;text-align:center}
       </style>
       <button class="ice-button" id="toggle" aria-expanded="false" aria-controls="panel">Screens</button>
@@ -94,7 +89,7 @@
       $('next').onclick = () => navigate(game.state.k + 1);
       search.oninput = render;
       root.addEventListener('keydown', event => { if (event.key === 'Escape') close(); event.stopPropagation(); });
-      document.body.append(host);
+      game.navigationRef.current.append(host);
       sync();
       const timer = setInterval(sync, 300);
       return () => { disposed = true; clearInterval(timer); host.remove(); };

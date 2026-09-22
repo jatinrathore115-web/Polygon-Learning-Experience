@@ -57,7 +57,7 @@ index.html               the lesson: scene layers, guide controller, all 47 step
 polygon-data.js          figure geometry traced from the source PDF
 support.js               the Design Component runtime that boots the page
 screen-navigator.js      optional preview navigator (see note below)
-responsive-layout.js     viewport fitting and readable portrait activity layouts
+responsive-layout.js     uniform fitting of the shared 16:9 design canvas
 build-swiftee.cjs        regenerates assets/swiftee/ from the character pack
 styles/buttons.css       warm button effects, hover, press and focus states
 styles/dialogue.css      soft speech bubble, anchored to Swiftee
@@ -77,14 +77,17 @@ design/                  design review and standalone concept, not deployed
 
 ### Scene structure
 
-Landscape learning content fits a 1980×1113.75 (16:9) master stage. Portrait screens
-reflow the dialogue and activities, with vertical scrolling when needed for readable
-text. A single scenic image covers the entire viewport independently of the content;
-its 16:9 proportions stay intact, with only decorative edges cropped.
+All devices use the same 1980×1113.75 (16:9) design canvas. Scenery, Swiftee,
+dialogue, activities, navigation and feedback share its coordinates and one uniform
+scale: `min(viewportWidth / 1980, viewportHeight / 1113.75)`. The canvas is centred,
+with plain margins outside it when the viewport has another aspect ratio. Portrait
+screens keep the same composition; they do not rearrange or independently resize
+elements. Fonts load locally before the lesson starts, and mobile text autosizing is
+disabled so line breaks and relative text sizes remain consistent.
 
 | Layer | z | Position |
 |---|---|---|
-| Starry background (`assets/image.png`) | 0 | full viewport |
+| Starry background (`assets/image.png`) | 0 | full design canvas |
 | Swiftee guide | 20 | left rock; feet at stage (192, 824) |
 | Activity surface | 30 | right of the guide, stage (378, 122) |
 | Learning content | 32 | stage (390, 172), 1570 × 701 logical pixels |

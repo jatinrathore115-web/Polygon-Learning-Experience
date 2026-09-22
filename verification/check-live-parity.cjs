@@ -68,7 +68,8 @@ const server=http.createServer((req,res)=>{
     assert.equal(await page.evaluate(()=>__poly.state.k),initial.k,'Recovery resumes the same screen');
     assert(await page.evaluate(()=>__poly.state.revealedWords>0||__poly.state.wordReveal==='recorded'));
     const rect=await page.locator('.lesson-background').boundingBox();
-    assert(rect.x<=0&&rect.y<=0&&rect.x+rect.width>=1893&&rect.y+rect.height>=907,'Single background covers a non-16:9 viewport');
+    const canvas=await page.locator('[data-lesson]').boundingBox();
+    assert.deepEqual(rect,canvas,'Background and content use the same 16:9 canvas');
     assert(Math.abs(rect.width/rect.height-16/9)<.001,'Artwork is not stretched');
     // A transient failed download must offer recovery without invoking its completion callback.
     await page.route('**/*.mp3',route=>route.fulfill({status:503,body:'Temporary failure'}));
@@ -81,6 +82,6 @@ const server=http.createServer((req,res)=>{
     await page.waitForFunction(()=>testCompleted,{},{timeout:15000});
     assert.deepEqual(missing,[],'All requested assets exist with production-safe filename casing');
     assert.deepEqual(errors,[]);
-    console.log('PASS: delayed voice catalog and fonts, cold-origin autoplay block, no silent skips, single-gesture real MP3 recovery, transient download retry, exact asset paths and full-viewport 16:9 artwork.');
+    console.log('PASS: delayed voice catalog and fonts, cold-origin autoplay block, no silent skips, single-gesture real MP3 recovery, transient download retry, exact asset paths and shared 16:9 canvas.');
   }finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});

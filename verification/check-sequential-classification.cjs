@@ -60,10 +60,13 @@ const server=http.createServer((req,res)=>{
       await choice.focus();await page.keyboard.press('Enter');
       assert.equal(await page.locator('[data-sequence-state="complete"]').count(),i+1);
       assert.equal(await page.getByRole('button',{name:new RegExp('^Figure '+(i+1)+':')}).count(),1,'Replace both choices with one result');
-      /* The earned answer is confirmed by the button itself -- green face,
-         green rim, green ink -- not by a tick printed in front of the word. */
+      /* The earned answer is confirmed by the button itself, not by a tick
+         printed in front of the word. Asserted on the state the button
+         reports rather than the colours it happens to be painted in, so a
+         restyle of the button system cannot silently drop the confirmation
+         -- only actually failing to mark the answer correct can. */
       assert(await page.evaluate(i=>{const t=__poly.renderVals().targets.find(x=>x.label.indexOf('Figure '+(i+1)+': ')===0);
-        return !!t&&t.style.background==='#daf6e5'&&t.style.border.indexOf('#55bc88')>=0;},i),
+        return !!t&&t.feedback==='correct'&&t.sequenceState==='complete';},i),
         'The settled answer reads as correct');
       assert(!/[✓✔]/.test(await choice.innerText()),'and carries no tick');
       if(i<3){
