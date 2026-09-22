@@ -170,6 +170,16 @@
 </style>
 </helmet>
 <div class="game-viewport" ref="{{ stageRef }}" onScroll="{{ layoutScroll }}" style="{{ viewportStyle }}">
+  <!-- Fills whatever part of the screen is not 16:9. The lesson canvas is a
+       fixed 16:9 frame with the scenery painted inside it, so on any screen
+       that is not 16:9 the frame is letterboxed and the bare page colour
+       showed through as dark bars. The artwork is authored to exactly 16:9
+       (1672x941) with no bleed, and Swiftee stands on a rock drawn into it,
+       so the scenery cannot simply be scaled past the frame without lifting
+       her off that rock. This is the same view, blurred and set back: the
+       screen fills edge to edge, the lesson stays sharp and correctly aligned
+       on top of it, and nothing is cropped or hidden at any size. -->
+  <div aria-hidden="true" style="{{ backdropStyle }}"></div>
  <div class="game-frame" style="{{ frameStyle }}">
   <div data-lesson="{{ lessonScene }}" data-layout="{{ responsiveLayout }}" style="{{ scalerStyle }}">
     <!-- Scenery and learning content share the same 16:9 coordinate system. -->
@@ -345,11 +355,6 @@
     <div ref="{{ ghostRef }}" style="position:absolute;left:0;top:0;pointer-events:none;opacity:0;z-index:60"></div>
     <div class="canvas-navigation" ref="{{ navigationRef }}" style="position:absolute;inset:0;pointer-events:none;z-index:10000"></div>
 
-<sc-if value="{{ voiceError }}" hint-placeholder-val="{{ false }}">
-  <div role="status" style="position:absolute;left:0;right:0;bottom:24px;z-index:100;display:flex;justify-content:center;pointer-events:none">
-    <button class="ice-button game-action" onClick="{{ retryVoice }}" style="pointer-events:auto;min-height:48px;padding:12px 24px;font-size:20px">{{ voiceError }}</button>
-  </div>
-</sc-if>
 
 <div aria-hidden="true" style="position:absolute;inset:0;z-index:95;pointer-events:none;overflow:hidden">
   <sc-for list="{{ confettiFx }}" as="f" hint-placeholder-count="0"><div class="{{ f.className }}" style="{{ f.style }}"></div></sc-for>
@@ -1049,7 +1054,11 @@ class Component extends DCLogic {
       this._voiceRetry = () => this.speak(text, cb, durationMs);
 
       this.prepareNarratorReveal(text, durationMs);
-      this.setState({ wordReveal: 'complete', storyDialogue: true, storyContent: true, voiceError: 'Tap to play audio' });
+      /* No prompt on screen. The lesson does not stop to ask for a tap: the
+         line stays up, is given time to be read, and the retry above fires on
+         the learner's next touch anywhere, so sound returns on its own without
+         a button sitting over the teaching. */
+      this.setState({ wordReveal: 'complete', storyDialogue: true, storyContent: true, voiceError: '' });
     };
     const recording = window.PolygonRecordedVoice && window.PolygonRecordedVoice.find(text);
     if (recording) return window.PolygonRecordedVoice.play(this, text, recording, current, cb, fail);
@@ -2916,9 +2925,22 @@ class Component extends DCLogic {
     const scale = frame.scale;
     const scaler = {
       position:'absolute',left:'50%',top:'50%',width:STAGE.w+'px',height:frame.stageHeight+'px','--canvas-height':STAGE.h+'px',
-      transform:'translate(-50%, -50%) scale('+scale+')',transformOrigin:'center center',overflow:'hidden'
+      transform:'translate(-50%, -50%) scale('+scale+')',transformOrigin:'center center',overflow:'hidden',
+      /* Gives the 16:9 frame an edge against the backdrop, so on a screen that
+         is a long way from 16:9 the join reads as the lesson sitting in front
+         of the scene rather than two pictures meeting. */
+      boxShadow:'0 0 90px rgba(4,18,44,.6)'
     };
     const viewportStyle = {background:'#103574',overflow:'hidden'};
+    /* Scaled up a touch so the blur's own soft edge never reaches the screen
+       edge, and dimmed so the sharp lesson in front stays what the eye settles
+       on rather than competing with its own reflection. */
+    const backdropStyle = {
+      position:'absolute', inset:0, zIndex:0, pointerEvents:'none',
+      background:'#103574 url(assets/image.png) center / cover no-repeat',
+      filter:'blur(44px) brightness(.52) saturate(.92)',
+      transform:'scale(1.12)', transformOrigin:'center center'
+    };
     const shellOnly = {
       voiceError: st.voiceError, retryVoice: this.retryVoice,
 
@@ -2926,6 +2948,7 @@ class Component extends DCLogic {
       storyControls: !!st.storyControls,
       storyCounting: !!(st.ready && this.P && this.step().sc === 'S13' && this.step().ph === 'five'),
       navigationRef:this.navigationRef,
+      backdropStyle,
       layoutScroll: () => this.clearNudge(), frameStyle:{position:'relative',width:'100%',height:'100%',overflow:'hidden'}, responsiveLayout:'canvas', viewportStyle, scalerStyle: scaler, narration: st.narr || '', narratorParts: this.narratorParts(), screenLabel: 'loading',
       /* The gap closes with the retired option. Left at its full width it
          would still sit between the two flex items and push the surviving
