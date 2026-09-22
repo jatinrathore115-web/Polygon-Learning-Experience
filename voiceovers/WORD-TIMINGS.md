@@ -4,4 +4,6 @@ Timings were generated locally with whisper.cpp b4938, the base.en model, DTW al
 
 To regenerate, place whisper-cli.exe in `%TEMP%/polygon-align/bin/Release/` and ggml-base.en.bin in `%TEMP%/polygon-align/`, run `node verification/extract-word-timings.cjs`, then `node verification/import-word-timings.cjs`. No audio is uploaded. Review any transcript mismatch before importing.
 
-The current lesson uses 72 matching recordings. N016, F003 and F023 use speech synthesis because the supplied recordings contain older instructions. Speech synthesis word-boundary events drive their reveal where the browser provides them; browsers without these events retain the default visual timing.
+The current lesson uses 72 matching recordings. N016, F003 and F023 use speech synthesis because the supplied recordings contain older instructions. Speech synthesis word-boundary events drive their reveal where the browser provides them; browsers without these events use estimated reading-paced timing, which cannot guarantee exact synchronization.
+
+No wall-clock watchdog reveals a playing sentence early. Recorded cues show each word immediately, including in reduced-motion mode; playback pauses and stalls hold the visible prefix. Completion and explicit audio failure leave the full instruction readable. `verification/check-word-animation.cjs` checks all 75 alignments and all 47 screen instructions; `verification/check-word-browser.cjs` checks rendered timing, a long pause, completion, portrait and reduced motion.

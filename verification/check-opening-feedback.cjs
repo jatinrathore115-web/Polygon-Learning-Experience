@@ -47,7 +47,7 @@ const server=http.createServer((req,res)=>{
     });
     await page.getByRole('button',{name:'Open',exact:true}).click();
     assert(await page.evaluate(()=>__poly.state.wrong==='open'&&__poly.state.k===4&&!__poly.state.interactive));
-    assert((await page.getByRole('button',{name:'Open',exact:true}).innerText()).startsWith('×'));
+    assert.equal(await page.getByRole('button',{name:'Open',exact:true}).innerText(),'Open','Incorrect feedback keeps the label free of icons');
     /* The right answer is revealed by the button turning green -- face, rim
        and shadow all change -- rather than by a tick printed in front of the
        word, which ate into the room the word had to sit in. */

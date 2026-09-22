@@ -42,6 +42,7 @@ index.html               the lesson: scene layers, guide controller, all 47 step
 polygon-data.js          figure geometry traced from the source PDF
 support.js               the Design Component runtime that boots the page
 screen-navigator.js      optional preview navigator (see note below)
+responsive-layout.js     viewport fitting and readable portrait activity layouts
 build-swiftee.cjs        regenerates assets/swiftee/ from the character pack
 styles/buttons.css       warm button effects, hover, press and focus states
 styles/dialogue.css      soft speech bubble, anchored to Swiftee

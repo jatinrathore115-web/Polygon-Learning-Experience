@@ -24,7 +24,7 @@ g=game(4);g.narrate(g.step().narr,{});g.advance({type:'click'});assert(!g._advan
 // Audio from a discarded screen cannot release the next screen's lock.
 g=game(4);g.narrate(g.step().narr,{});const discarded=spoken.at(-1);g.gen=(g.gen||0)+1;discarded.onend();assert(g.locked());
 // Across all screens, only the brown-panel line is spoken, even with labels revealed.
-const coverage=[];for(let k=0;k<47;k++){const h=game(k);h.state.drawn=true;h.state.reveal=true;spoken=[];h.narrate(h.step().narr,{});drain(h);assert.equal(spoken.map(u=>u.text).join(' '),h.state.narr);coverage.push({step:k+1,narration:h.state.narr});}
+const coverage=[];for(let k=0;k<47;k++){const h=game(k);h.state.drawn=true;h.state.reveal=true;spoken=[];h.narrate(h.step().narr,{});drain(h);assert.equal(spoken.map(u=>u.text).join(' '),h.state.narr+([6,7,8].includes(k)?' Is it open or closed?':''));coverage.push({step:k+1,narration:h.state.narr});}
 fs.writeFileSync('verification/output/voice-coverage.json',JSON.stringify(coverage,null,2));console.log('PASS: narrator-only speech on 47 screens, strict audio-end gate, errors/retry, stale events, silent labels/counters/options and drag lock.');
 
 for(const row of JSON.parse(fs.readFileSync('voiceovers/narrator-lines.json','utf8'))){

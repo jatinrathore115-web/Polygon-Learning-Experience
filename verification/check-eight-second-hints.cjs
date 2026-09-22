@@ -54,8 +54,9 @@ const server = http.createServer((req, res) => {
     for (const [screen, patch, selector] of [
       [23, { chip: 'Vertex' }, '[data-label-target="vertex"]'],
       [43, { pickedFig: 1 }, '[data-nudge="1"]'],
-      [45, { sel: [0, 1, 3] }, '[data-nudge="1"]'],
-      [19, { sel: [1] }, '[data-nudge="1"]']
+      [45, { sel: [0, 1] }, '[data-nudge="1"]'],
+      [19, { sel: [1] }, '[data-nudge="1"]'],
+      [41, { n: 8, recallNameN: 8 }, '[aria-label="Decrease number of sides"]']
     ]) {
       await setup(screen, patch); await page.clock.fastForward(8000);
       assert(await shown() && await aligned(), `Screen ${screen}: next-step hint`);
@@ -66,7 +67,7 @@ const server = http.createServer((req, res) => {
     assert(!await shown(), 'Hint ends after two gentle taps');
     await page.clock.fastForward(7999); assert(!await shown(), 'Repeat leaves eight seconds of quiet');
     await page.clock.fastForward(1); assert(await shown(), 'Hint repeats if still idle');
-    await setup(43, { sortAt: { 0: 0, 1: 1 } }); await page.clock.fastForward(8000);
+    await setup(43, { sortAt: { 0: 0, 1: 1, 2: 0, 3: 1 } }); await page.clock.fastForward(8000);
     assert(!await shown(), 'Selection cap prevents more hints');
     await setup(19, { speaking: true }); await page.clock.fastForward(8000);
     assert(!await shown(), 'No hint during narration');

@@ -16,11 +16,17 @@
         #step-navigation button{min-width:80px;min-height:44px;padding:8px 12px;font-size:16px}
         #panel{margin-top:10px;width:min(330px,calc(100vw - 24px));padding:14px;background:#f4fbff;border:2px solid #83d6f5;border-radius:18px;box-shadow:0 8px 28px #123a6b33}
         [hidden]{display:none!important}header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-        #close{font-size:28px;width:44px;height:44px;padding:0;flex-shrink:0}
+        #close{font-size:16px;min-width:72px;height:44px;padding:0 10px;flex-shrink:0}
         input{width:100%;padding:10px;border:2px solid #a3d7ed;border-radius:10px;background:white;color:#123a6b;caret-color:#123a6b;user-select:text}
         #list{display:grid;gap:6px;max-height:min(55vh,440px);overflow:auto;margin-top:10px;overscroll-behavior:contain}
         #list button{text-align:center;padding:10px;min-height:44px;white-space:normal}
         #list{padding:5px 5px 9px}
+        @media(max-width:380px){
+          :host{left:8px;top:10px}
+          #toggle{padding:8px 10px;font-size:13px}
+          #step-navigation{right:8px;top:10px;gap:8px}
+          #step-navigation button{min-width:60px;padding:8px;font-size:14px}
+        }
         small{display:block;opacity:1;margin-top:4px;font-weight:650;line-height:1.35}#empty{padding:12px;text-align:center}
       </style>
       <button class="ice-button" id="toggle" aria-expanded="false" aria-controls="panel">Screens</button>
@@ -29,7 +35,7 @@
         <button class="ice-button" id="next" type="button" disabled>Next</button>
       </nav>
       <section id="panel" aria-label="Lesson screen navigator" hidden>
-        <header><strong>Jump to a screen</strong><button class="ice-button" id="close" aria-label="Close screen navigator">×</button></header>
+        <header><strong>Jump to a screen</strong><button class="ice-button" id="close" aria-label="Close screen navigator">Close</button></header>
         <input id="search" type="search" placeholder="Search name or step number" aria-label="Search screens">
         <nav id="list" aria-label="Lesson screens"></nav><div id="empty" hidden>No matching screens</div>
       </section>`;

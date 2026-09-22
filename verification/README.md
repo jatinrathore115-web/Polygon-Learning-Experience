@@ -16,9 +16,11 @@ blocks external services to verify that runtime scripts, fonts, images and audio
 - `check-interactions.cjs`: all 47 screens, input and keyboard behavior.
 - `check-story-scene.cjs`: browser boot, flight, narration reveal, all screens, dialogue fit, tablet and reduced motion.
 - `check-board-layout.cjs`: scene bounds and staged visibility.
+- `check-scene-aspect.cjs`: all 47 screens at seven viewport sizes; one scenic background, portrait text and control layout, drag/drop, counters and rotation. Short portrait screens may scroll vertically to keep controls readable.
 - `check-teaching-motion.cjs`: side, vertex and angle teaching sequence.
 - `check-recorded-voice.cjs` and `check-voice-gate.cjs`: recording lookup, timings and narration gates.
 - Other `check-*.cjs` scripts cover individual lesson features.
+- `check-answer-feedback.cjs`: icon-free feedback, synchronized happy/sympathetic expressions and one SFX per answer across 15 screens; original artwork, green/red glows, reaction cleanup, repeated taps, portrait and reduced motion. `check-guide-sync.cjs` and `check-sfx.cjs` cover reaction priorities and audio lifecycle.
 
 `output/` holds generated screenshots, preview HTML and JSON reports. Older previews are historical snapshots, not game entrypoints. New outputs are ignored by Git. Generators recreate this directory when needed.
 

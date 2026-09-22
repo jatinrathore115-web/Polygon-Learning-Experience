@@ -19,8 +19,8 @@ for(const row of ctx.window.POLYGON_RECORDINGS){
 const g=game(4);g.narrate(g.step().narr,{});assert.equal(spoken.length,0);assert(g.locked());const a=media.at(-1);assert.equal(g.state.wordReveal,'waiting');
 a.onplaying();assert.equal(g.state.revealedWords,0);a.currentTime=3;a.ontimeupdate();assert(g.state.revealedWords>1);assert(g.locked());
 a.onended();assert(!g.locked());assert.equal(g.state.wordReveal,'complete');
-g.state.k=g.steps().findIndex(s=>s.sc==='S9');g.narrate(rows.find(r=>r.id==='N018').text,{});const b=media.at(-1);b.onplaying();const first=g.state.narrPage;b.currentTime=5.5;b.ontimeupdate();assert.notEqual(g.state.narrPage,first);assert(g.locked());
-const old=b.onended;g.narrate('Look! A point.',{});old();assert(g.locked());assert(b.paused);media.at(-1).onerror();assert(g.state.voiceError);assert(g.locked());g.retryVoice();assert.equal(g.state.wordReveal,'waiting');
+g.state.k=g.steps().findIndex(s=>s.sc==='S9');g.narrate(rows.find(r=>r.id==='N018').text,{});const b=media.at(-1);b.onplaying();const first=g.state.narrPage;b.currentTime=5.5;b.ontimeupdate();assert.equal(g.state.narrPage,first,'A fitting sentence remains on one page');assert(g.state.revealedWords>5,'The later words continue revealing');assert(g.locked());
+const old=b.onended;g.narrate('Look! A point.',{});old();assert(g.locked());assert(b.paused);media.at(-1).onerror();assert.equal(g.state.wordReveal,'complete','Failed audio leaves the instruction readable');assert(g._voiceRetry);assert(g.locked());g.retryVoice();assert.equal(g.state.wordReveal,'waiting');
 console.log('PASS: 72 matching recordings, 3 safe wording fallbacks, audio-clock words/pages, continuous long lines, end gate, cancellation, failure and retry.');
 
 const entry=ctx.window.PolygonRecordedVoice.find('Look! A point.');entry.words=[{word:'Look!',start:.4},{word:'A',start:.9},{word:'point.',start:1.8}];

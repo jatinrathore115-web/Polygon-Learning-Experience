@@ -5,6 +5,7 @@ const fs=require('fs'),vm=require('vm'),assert=require('assert');
 const html=fs.readFileSync('index.html','utf8');
 const ctx={window:{},document:{documentElement:{clientWidth:1920,clientHeight:1080}},React:{createRef:()=>({current:null})},DCLogic:class{setState(s,cb){Object.assign(this.state,typeof s==='function'?s(this.state):s);if(cb)cb();}},setTimeout,clearTimeout};
 vm.createContext(ctx);vm.runInContext(fs.readFileSync('polygon-data.js','utf8'),ctx);
+vm.runInContext(fs.readFileSync('responsive-layout.js','utf8'),ctx);
 vm.runInContext(html.match(/<script[^>]*data-dc-script[^>]*>([\s\S]*?)<\/script>/)[1]+'\nglobalThis.Game=Component;globalThis.SAFE=SAFE;globalThis.SORT=SORT;',ctx);
 const {SAFE,SORT}=ctx;
 const g=new ctx.Game();g.P=ctx.window.POLY;g.svgRefs={};g.state.ready=true;g.state.interactive=true;
@@ -81,8 +82,11 @@ for(const sc of ['C2','C5']){
     g.state.sortAt={};g.state.pickedFig=1;g.state.sortHover=hover;g.state.hoverK=null;
     const v=g.renderVals();
     assert.equal(v.callouts.length,0,sc+': extra text or slot drawn with no column hovered');
-    assert(!v.zoneAStyle.border.includes('solid')&&!v.zoneBStyle.border.includes('solid'),sc+': column lit with no hover');
-    assert(v.zoneAStyle.animation.startsWith('zoneInvite'),sc+': waiting column does not invite');
+    for(const zone of [v.zoneAStyle,v.zoneBStyle]) {
+      assert(zone.border.includes('solid'),sc+': solid category borders');
+      assert.equal(zone.boxShadow,'none',sc+': no container shadow');
+      assert.equal(zone.animation,'none',sc+': no animated outer ring');
+    }
     checks++;
   }
   /* tap a figure, then hover a column: same slot preview as the drag path */

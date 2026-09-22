@@ -99,7 +99,7 @@ const server=http.createServer((req,res)=>{
   }
   await ready(43);
   await page.locator('.story-surface > .game-action').nth(3).click();await ready(44);
-  for(const i of [0,1,3])await page.locator('.story-surface > .game-action').nth(i).click();
+  for(const i of [0,1])await page.locator('.story-surface > .game-action').nth(i).click();
   await page.getByRole('button',{name:'Check',exact:true}).click();await ready(45);
   for(const [i,zone]of [0,1,0,1].entries()){
     await page.locator('.story-surface > .game-action').filter({has:page.locator('svg')}).first().click();

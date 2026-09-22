@@ -72,6 +72,7 @@
   z-index: 1;
 }
 .dialogue-tail-fill { fill: var(--dialogue-paper); }
+[data-layout="portrait"] .dialogue-tail { width:var(--responsive-tail-size); height:var(--responsive-tail-size); }
 .dialogue-tail-stroke {
   fill: none;
   stroke: var(--dialogue-edge);

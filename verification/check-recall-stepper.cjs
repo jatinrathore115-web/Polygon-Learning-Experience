@@ -26,12 +26,14 @@ const server=http.createServer((req,res)=>{
       assert.equal(await page.getByRole('status',{name:n+' sides',exact:true}).innerText(),String(n));
       assert(await page.getByText(names[n],{exact:true}).isVisible());
       const layout=await page.evaluate(name=>{
-        const rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom};};
+        const rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width};};
         const label=[...document.querySelectorAll('.story-surface div')].find(e=>e.textContent.trim()===name);
         return {board:rect(document.querySelector('.story-board')), label:rect(label),
           counter:rect(document.querySelector('[role="group"][aria-label="Number of sides"]'))};
       },names[n]);
-      assert(layout.label.bottom<layout.counter.y,'Name stays clear of controls');
+      const scale=layout.board.width/1780;
+      assert(layout.counter.y-layout.label.bottom>=24*scale-.5,'Name and its shadow have room above controls');
+      assert(layout.board.bottom-layout.counter.bottom>=24*scale-.5,'Controls have room above board edge');
       assert(layout.counter.bottom<layout.board.bottom && layout.counter.x>layout.board.x && layout.counter.right<layout.board.right,'Controls stay inside board');
     };
     await verify(3);await minus.click();

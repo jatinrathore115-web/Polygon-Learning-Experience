@@ -11,7 +11,7 @@ const server=http.createServer((req,res)=>{const file=path.resolve(root,'.'+deco
   await page.addInitScript(()=>{const play=HTMLMediaElement.prototype.play;HTMLMediaElement.prototype.play=function(){this.playbackRate=5;return play.call(this);};});
   await page.goto('http://127.0.0.1:9374/?intro=0');await page.waitForFunction(()=>window.__poly?.state.ready);await page.mouse.click(700,80);
   await page.evaluate(()=>{
-   __poly._guideGreeted=true;__poly.advance=()=>{window.finished=true;};
+   __poly._guideGreeted=true;__poly.advance=()=>{window.finished=true;};window.sounds=[];__poly.sfx=name=>sounds.push(name);
    // Keep narration gates asynchronous without depending on host speech services.
    __poly.speak=function(text,cb){this.prepareNarratorReveal(text);this.storyVoiceStart();this.setState({wordReveal:'complete'});this.later(cb,text===this.step().fb?.ok?1400:100);};
   });
@@ -33,36 +33,40 @@ const server=http.createServer((req,res)=>{const file=path.resolve(root,'.'+deco
    const target=await page.getByRole('button',{name:zone,exact:true}).boundingBox();assert(target);
    await page.mouse.move(from.x+from.width/2,from.y+from.height/2);await page.mouse.down();await page.mouse.move(target.x+target.width/2,target.y+target.height/2,{steps:14});await page.mouse.up();
   };
-  // Wrong group returns the circle; a retry must remain possible.
-  await drag(1,'NOT POLYGONS');await page.waitForFunction(()=>__poly.state.sortAt[1]===1);await page.waitForTimeout(600);
-  await drag(0,'NOT POLYGONS');await page.waitForFunction(()=>__poly.state.attempts>0);await page.waitForFunction(()=>!__poly.locked()&&!__poly.state.speaking);assert(await page.evaluate(()=>__poly.state.sortAt[0]===undefined));
-  await drag(0,'POLYGONS');await page.waitForFunction(()=>__poly.state.sortAt[0]===0);await page.waitForTimeout(450);
-  assert(await page.evaluate(()=>__poly.locked()),'Check the cap during completion narration');
-  const remaining=page.locator('.story-surface svg').nth(2).locator('..');
-  const original=await remaining.evaluate(e=>({left:e.style.left,top:e.style.top}));
-  const from=await remaining.boundingBox();
-  await page.mouse.move(from.x+from.width/2,from.y+from.height/2);await page.mouse.down();
-  assert(await page.evaluate(()=>__poly.state.wrong===2&&__poly.state.draggingFigure===null&&__poly.state.pickedFig===null));
-  assert(await remaining.evaluate(e=>getComputedStyle(e).animationName.includes('wrongTap')));
-  await page.mouse.move(700,550,{steps:8});await page.mouse.up();
-  assert.equal(await page.evaluate(()=>__poly.renderVals().callouts.length),0);
-  assert.equal(await page.evaluate(()=>Object.keys(__poly.state.sortAt).length),2);
-  assert.deepEqual(await remaining.evaluate(e=>({left:e.style.left,top:e.style.top})),original);
-  await remaining.focus();await page.keyboard.press('Enter');
-  assert.equal(await page.evaluate(()=>__poly.state.wrong),2);
+  // A wrong drop returns home with a short wiggle, original face and incorrect SFX.
+  await drag(1,'POLYGON');await page.waitForFunction(()=>__poly.state.wrong===1);
+  assert(await page.evaluate(()=>{
+   const g=__poly,c=g.renderVals().cards[1],base=g.cardStyleFor(null);
+   return g.state.sortAt[1]===undefined&&!g.locked()&&c.wrap.background===base.background&&c.wrap.borderColor===base.borderColor&&sounds.includes('no');
+  }));
+  assert.match(await page.locator('.story-surface svg').nth(1).locator('..').evaluate(e=>getComputedStyle(e).animationName),/wrongTap/);
+  await page.waitForTimeout(500);
+  await drag(0,'POLYGON');await page.waitForFunction(()=>__poly.state.sortAt[0]===0);await page.waitForTimeout(600);
+  await drag(2,'POLYGON');await page.waitForFunction(()=>__poly.state.sortAt[2]===0);await page.waitForTimeout(600);
+  assert(await page.evaluate(()=>__poly.sortZoneFull(0)&&!__poly.sortZoneFull(1)&&!__poly.locked()&&!__poly.state.checked),'Two polygons fill only their own category');
+  // A third item cannot enter that full category or add a preview slot.
+  await drag(1,'POLYGON');await page.waitForFunction(()=>__poly.state.wrong===1);
+  assert(await page.evaluate(()=>Object.keys(__poly.state.sortAt).length===2&&__poly.renderVals().callouts.length===0));
+  await page.waitForTimeout(600);
+  // Placed shapes are immutable even when another category is still empty.
+  assert(await page.locator('.story-surface svg').nth(0).locator('..').evaluate(e=>getComputedStyle(e).pointerEvents==='none'));
+  await page.evaluate(()=>{__poly.dragFigure(0)({button:0});});
+  assert(await page.evaluate(()=>__poly.state.draggingFigure===null&&__poly.state.sortAt[0]===0));
+  await drag(1,'NON-POLYGON');await page.waitForFunction(()=>__poly.state.sortAt[1]===1);await page.waitForTimeout(600);
+  assert(await page.evaluate(()=>!__poly.state.checked&&!__poly.sortLimitReached()),'Three shapes do not finish the activity');
+  await drag(3,'NON-POLYGON');await page.waitForFunction(()=>__poly.state.sortAt[3]===1);
+  assert(await page.evaluate(()=>__poly.state.checked&&__poly.sortLimitReached()&&sounds.filter(n=>n==='ok').length===4));
   await page.waitForFunction(()=>window.finished);checkBounds(await sample());await page.screenshot({path:path.join(out,'completed.png')});
   await page.emulateMedia({reducedMotion:'reduce'});await page.setViewportSize({width:1024,height:768});await go(42);checkBounds(await sample());
   assert.equal(await page.locator('.story-board').evaluate(e=>getComputedStyle(e).transitionDuration),'0s');
-  const first=page.locator('.story-surface .game-action').filter({has:page.locator('svg')}).first();
-  await first.focus();await page.keyboard.press('Enter');
-  await page.getByRole('button',{name:'POLYGONS',exact:true}).focus();await page.keyboard.press('Space');
-  await page.waitForFunction(()=>__poly.state.sortAt[0]===0);
-  const second=page.locator('.story-surface svg').nth(2).locator('..');
-  await second.focus();await page.keyboard.press('Enter');await page.getByRole('button',{name:'POLYGONS',exact:true}).focus();await page.keyboard.press('Space');
-  await page.waitForFunction(()=>__poly.sortLimitReached());
-  const blocked=page.locator('.story-surface svg').nth(1).locator('..');
-  await blocked.focus();await page.keyboard.press('Space');
-  assert(await page.evaluate(()=>__poly.state.wrong===1&&Object.keys(__poly.state.sortAt).length===2));
+  // Keyboard sorting follows the same capacity and correctness rules, in another order.
+  for(const [index,zone] of [[1,'NON-POLYGON'],[3,'NON-POLYGON'],[0,'POLYGON'],[2,'POLYGON']]) {
+   const card=page.locator('.story-surface svg').nth(index).locator('..');
+   await card.focus();await page.keyboard.press('Enter');
+   await page.getByRole('button',{name:zone,exact:true}).focus();await page.keyboard.press('Space');
+   await page.waitForFunction(index=>__poly.state.sortAt[index]!==undefined,index);
+  }
+  assert(await page.evaluate(()=>__poly.state.checked&&Object.keys(__poly.state.sortAt).length===4));
   // Confirm the already implemented 17–19 composition and exact reference set.
   await page.evaluate(()=>{const g=__poly;g._stopRecordedVoice?.();g.timers.forEach(clearTimeout);g.later=()=>0;});
   for(const k of [16,17,18]){

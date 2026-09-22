@@ -34,12 +34,12 @@ guide.reset(); guide.onWrongAttempt(); assert(queued('confused'));
 const wrong = guide.reaction; guide.onHint(); guide.onInteractionStart();
 assert.strictEqual(guide.reaction, wrong, 'A hint or drag cannot replace mistake feedback');
 guide.onInstructionStart(); finishReaction(); assert(queued('talking'));
-guide.onInstructionComplete(false); guide.onWrongAttempt(); assert(queued('puzzleing'));
-guide.onCorrectAnswer(); assert(queued('relieved'), 'Recovery after a mistake gets relief');
+guide.onInstructionComplete(false); guide.onWrongAttempt(); assert(queued('confused'));
+guide.onCorrectAnswer(); assert(queued('happy'), 'Recovery after a mistake gets the same happy reward');
 guide.reset(); guide.onCorrectAnswer(); assert(queued('happy'));
-guide.reset(); guide.onCorrectProgress(); finishReaction(); guide.onCorrectProgress(); finishReaction(); guide.onCorrectProgress(); assert(queued('proud'));
+guide.reset(); guide.onCorrectProgress(); finishReaction(); guide.onCorrectProgress(); finishReaction(); guide.onCorrectProgress(); assert(queued('happy'));
 
-const staleEnd = sprite.queue.at(-1).onEnd;
+const staleEnd = (sprite.queue.at(-1) || sprite.seg).onEnd;
 guide.reset(); staleEnd(); assert.equal(sprite.seg.state, 'blinking', 'Navigation cancels old expressions');
 game.narrate('Old instruction', {}); const old = utterances.at(-1);
 game.narrate('New instruction', {}); old.onstart(); assert(!guide.voiceActive);

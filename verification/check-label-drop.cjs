@@ -7,12 +7,16 @@ g.dragLabel('Side')(event(700,639));events.pointermove(event(290,330));events.po
 placed=undefined;g.state.placed={};g.dragLabel('Angle')(event(700,639));events.pointermove(event(330,330));events.pointerup(event(330,330));assert.equal(animation.options.duration,300);animation.onfinish();assert.equal(placed,'side');
 const v={};g.viewLabels(v,{});assert.equal(v.cards[0].dots.length,1);assert(v.cards[0].arcs[1].d.includes(' A'));assert.equal(v.cards[0].arcs[1].fill,'none');console.log('PASS: tolerant drops, delayed placement after snap, return animation, neutral vertex and circular angle cues.');
 let sounds=0;g.sfx=()=>sounds++;g.armStage2=()=>{};g.state.placed={side:'Side'};g._labelClickUntil=0;g.pickChip('Side')();assert.equal(sounds,0);g._labelClickUntil=Infinity;g.pickChip('Angle')();assert.equal(sounds,0);g._labelClickUntil=0;g.pickChip('Angle')();assert.equal(sounds,1);
-/* No leader lines: they crossed the figure on their way out to the sockets and
-   turned a clean shape into a diagram of itself. Each socket still has to land
-   at a real, finite position of its own, which is what the lines used to be
-   checked for here. */
+/* Screen 23's short, non-interactive arrows connect each socket to its feature. */
 const layout={};g.viewLabels(layout,{});
-assert.equal(layout.leaders.length,0,'No leader lines are drawn across the figure');
+assert.equal(layout.leaders.length,3,'Each socket has one arrow');
+for(const line of layout.leaders){
+ assert.equal(line.style.background,g.labelTheme(line.labelKey).color);
+ assert.equal(line.style.pointerEvents,'none','Arrows cannot intercept label drops');
+ assert(parseFloat(line.style.width)>0&&parseFloat(line.style.width)<150,'Arrows remain short');
+ const angle=parseFloat(line.style.transform.slice(7));
+ assert(line.labelKey==='side'?Math.abs(angle)===180:line.labelKey==='vertex'?angle>0&&angle<30:angle<0&&angle>-30,'Arrow points from socket towards its feature');
+}
 assert.equal(layout.targets.length,3,'Three sockets remain');
 for(const target of layout.targets){const t=target.style;
   assert(Number.isFinite(parseFloat(t.left))&&Number.isFinite(parseFloat(t.top)),'Socket is placed at a real position');

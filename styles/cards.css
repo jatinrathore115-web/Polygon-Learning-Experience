@@ -1,5 +1,6 @@
 /* Keep the supplied artwork continuous, with one shared rim on every aspect ratio.
    Crop to its inner face (42,82)-(1638,808), excluding both baked-in borders. */
+[data-layout="portrait"] .zone-title { font-size:var(--compact-label-size,30px)!important; letter-spacing:0!important; }
 .story-board {
   overflow:hidden;
   box-sizing:border-box;

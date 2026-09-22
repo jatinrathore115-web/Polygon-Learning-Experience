@@ -24,7 +24,7 @@ const server=http.createServer((req,res)=>{const file=path.resolve(root,'.'+deco
    assert.equal(s.cards.length,n);
    for(const c of s.cards)assert(c.x>s.dialogue.right+20&&c.right<s.board.right-20&&c.y>s.board.y+20&&c.bottom<s.board.bottom-20,'Cards stay in the right lane with breathing room');
    for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){const a=s.cards[i],b=s.cards[j];assert(a.right<b.x||b.right<a.x||a.bottom<b.y||b.bottom<a.y);}
-   if(n===4)assert.deepEqual(s.cards,ref.cards);
+   if(n===4&&!s.check)assert.deepEqual(s.cards,ref.cards);
    if(s.check){assert(s.check.y>Math.max(...s.cards.map(c=>c.bottom))+20);assert(s.check.bottom<s.board.bottom-20);}
   };
   await go(41);let ref=await sample();await page.screenshot({path:path.join(out,'screen-42.png')});
@@ -32,16 +32,36 @@ const server=http.createServer((req,res)=>{const file=path.resolve(root,'.'+deco
   const cards=page.locator('.story-surface .game-action').filter({has:page.locator('svg')});
   await cards.nth(0).click();await page.waitForFunction(()=>__poly.state.attempts>0);await ready();assert(await page.evaluate(()=>__poly.state.ok===null));
   await cards.nth(3).focus();await page.keyboard.press('Enter');await page.waitForFunction(()=>window.finished===43);
-  await go(44);validate(await sample(),ref,5);await page.screenshot({path:path.join(out,'screen-45.png')});
+  await go(44);validate(await sample(),ref,4);await page.screenshot({path:path.join(out,'screen-45.png')});
   const check=page.getByRole('button',{name:'Check',exact:true});
+  const appearance=()=>cards.evaluateAll(es=>es.map(e=>({
+   background:getComputedStyle(e).backgroundColor,shadow:getComputedStyle(e).boxShadow,
+   artwork:[...e.querySelectorAll('svg path')].map(p=>[p.getAttribute('d'),p.getAttribute('fill'),p.getAttribute('stroke')])
+  })));
+  const original=await appearance();
   assert.equal(await page.locator('.story-surface .ice-button').getAttribute('aria-disabled'),'true');
-  await cards.nth(2).click();await check.click();await page.waitForFunction(()=>__poly.state.attempts>0);await ready();
+  await cards.nth(2).click();await page.mouse.move(20,780);await page.waitForTimeout(300);
+  let selected=await appearance();
+  assert.equal(selected[2].background,original[2].background,'Incorrect selection preserves the card face');
+  assert(!selected[2].shadow.includes('35, 170, 92'),'An incorrect selection does not receive success feedback');
+  await check.click();await page.waitForFunction(()=>__poly.state.attempts>0);await ready();
   assert(await page.evaluate(()=>!__poly.state.checked));await cards.nth(2).click();
-  for(const i of [0,1,3])await cards.nth(i).click();await check.click();await page.waitForFunction(()=>window.finished===44);
+  for(const i of [0,1])await cards.nth(i).click();
+  await page.mouse.move(20,780);await page.waitForTimeout(300);selected=await appearance();
+  for(let i=0;i<4;i++){
+   assert.equal(selected[i].background,original[i].background,'Selection never tints the card face');
+   assert.deepEqual(selected[i].artwork,original[i].artwork,'Selection preserves shape geometry and colors');
+   assert.equal(selected[i].shadow.includes('35, 170, 92'),[0,1].includes(i),'Only correct selections have a green underglow');
+  }
+  await cards.nth(0).click();await page.mouse.move(20,780);await page.waitForTimeout(300);
+  assert(!(await appearance())[0].shadow.includes('35, 170, 92'),'Deselecting removes the success glow');
+  await cards.nth(0).click();await page.mouse.move(20,780);await page.waitForTimeout(300);
+  await page.screenshot({path:path.join(out,'screen-45-selected.png')});
+  await check.click();await page.waitForFunction(()=>window.finished===44);
   assert(await page.evaluate(()=>__poly.state.checked));
   await page.emulateMedia({reducedMotion:'reduce'});await page.setViewportSize({width:1024,height:768});
   await go(41);ref=await sample();
-  for(const [k,n]of [[43,4],[44,5]]){await go(k);validate(await sample(),ref,n);assert.equal(await page.locator('.story-board').evaluate(e=>getComputedStyle(e).transitionDuration),'0s');}
+  for(const [k,n]of [[43,4],[44,4]]){await go(k);validate(await sample(),ref,n);assert.equal(await page.locator('.story-board').evaluate(e=>getComputedStyle(e).transitionDuration),'0s');}
   assert.deepEqual(errors,[]);console.log(JSON.stringify({screens:[42,44,45],sharedComposition:true,allOptions:true,wrongRetry:true,keyboard:true,checkSubmission:true,completion:true,tablet:true,reducedMotion:true,errors}));
  }finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});

@@ -31,7 +31,8 @@
    an icon reporting that there was one. */
 .label-socket[role="button"]:hover { outline:3px solid currentColor; outline-offset:3px; }
 .label-socket[role="button"]:focus-visible { outline:3px solid #31b9de; outline-offset:5px; }
-.label-socket[data-feedback="incorrect"] { box-shadow:0 0 0 4px #f15b6340,0 6px 0 #d6847833!important; }
+.label-socket[data-feedback="incorrect"] { box-shadow:0 12px 18px -7px rgba(215,67,78,.38),0 18px 26px -12px rgba(215,67,78,.20)!important; }
+.label-socket[data-feedback="correct"] { box-shadow:0 12px 18px -7px rgba(35,170,92,.42),0 18px 26px -12px rgba(35,170,92,.22)!important; }
 [data-interactive="true"] .label-socket:active { scale:1; }
 [data-interactive="true"] .game-action:active { scale:.98; }
 [data-interactive="true"] .game-handle { filter:drop-shadow(0 0 9px #22b8e6); }
@@ -78,8 +79,8 @@
 }
 .ice-button[data-feedback="correct"][aria-pressed="true"]:not(:focus-visible) { outline:none; }
 .ice-button[data-feedback="incorrect"] {
-  --button-feedback-glow:0 0 0 4px #f15b63,0 0 20px 7px #f15b6366;
-  outline-color:#cf3643;
+  --button-feedback-glow:0 12px 18px -7px rgba(215,67,78,.38),0 18px 26px -12px rgba(215,67,78,.20);
+  animation:answerRetry 340ms ease-in-out both!important;
 }
 .ice-button[aria-disabled="true"],.ice-button:disabled {
   --button-letter-edge:#344d62;
@@ -107,7 +108,7 @@
   --button-rim:linear-gradient(180deg,#ffffff 0%,#fffef5 70%,#e4e9ed 100%);
   --concept-button-rest-shadow:inset 0 2px 1px #fff9,inset 0 -5px 0 #f69b0b,0 5px 0 #c2cbd3,0 8px 12px #23496a29;
   border-radius:999px!important;
-  font-size:32px!important;
+  font-size:var(--choice-font-size,32px)!important;
   color:#17304c!important; -webkit-text-fill-color:#17304c;
   -webkit-text-stroke:0; text-shadow:none!important;
   box-shadow:var(--concept-button-rest-shadow),var(--button-feedback-glow)!important;
@@ -140,6 +141,13 @@
   --button-rim:linear-gradient(180deg,#ffffff 0%,#fffef5 70%,#e4e9ed 100%);
 }
 .ice-button.concept-choice[data-feedback="correct"][aria-disabled="true"] {
+  box-shadow:var(--concept-button-rest-shadow),var(--button-feedback-glow)!important;
+}
+/* A spoken cue reveals the final yellow face even while narration locks input.
+   Availability must not introduce a washed-out intermediate appearance. */
+.ice-button.concept-choice[data-oc-choice="true"][aria-disabled="true"]:not([data-retired="true"]) {
+  --button-face:var(--concept-button-face);
+  --button-rim:linear-gradient(180deg,#ffffff 0%,#fffef5 70%,#e4e9ed 100%);
   box-shadow:var(--concept-button-rest-shadow),var(--button-feedback-glow)!important;
 }
 @media(prefers-reduced-motion:reduce) {

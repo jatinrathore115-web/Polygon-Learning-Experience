@@ -9,6 +9,11 @@
 <link rel="preload" href="assets/instructiion%20board.png" as="image">
 <link rel="preload" href="assets/backgound%20%2002.png" as="image">
 <link rel="stylesheet" href="styles/fonts.css">
+<style>
+  html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:#103574; }
+  .game-viewport { position:fixed; inset:0; width:100%; height:100%; height:100dvh; overflow:hidden; background:#103574; }
+</style>
+<script src="responsive-layout.js"></script>
 <!-- Swiftee's sheet table, generated from the character pack's manifest by
      build-swiftee.cjs. It loads here, not from the helmet below, because the
      lesson script reads it while it is being evaluated. -->
@@ -29,7 +34,7 @@
 <link rel="stylesheet" href="styles/cards.css" />
 <link rel="stylesheet" href="styles/weather.css" />
 <style>
-  html, body { margin: 0; padding: 0; height: 100%; background: #8b7edc; overflow: hidden; }
+  html, body { margin: 0; padding: 0; height: 100%; background: #103574; overflow: hidden; }
   a { color: #2f6fd0; } a:hover { color: #1546a0; }
   /* The lesson has no text-entry fields: suppress selection and browsing carets. */
   * { -webkit-tap-highlight-color: transparent; caret-color: transparent; -webkit-user-select: none; user-select: none; }
@@ -68,7 +73,7 @@
          sentence about it cannot be taken on trust: dots arrive one by one
          along the span the boundary is missing. A closed boundary gets no
          mark at all --- there is nothing to point at, and the answer is
-         confirmed by the tick, the chime and Swiftee instead. --- */
+         confirmed by the button glow, the chime and Swiftee instead. --- */
   @keyframes gapDotReveal { from { opacity:0; transform:scale(.4); } to { opacity:1; transform:scale(1); } }
   @media (prefers-reduced-motion:reduce) { circle[data-dot="gap"] { animation:none!important; opacity:1!important; transform:none!important; } }
   @keyframes answerSuccess { 0% { transform:scale(.97); } 45% { transform:scale(1.035); } 100% { transform:scale(1); } }
@@ -127,12 +132,20 @@
          while she speaks — and it is transform only. --- */
   .swiftee-wrap { transform-origin: 50% 88%; transition: transform 760ms cubic-bezier(.2,.8,.25,1.04), opacity 280ms ease-out; will-change: transform; }
   .swiftee-wrap[data-hidden="true"] { transition: none; }
+  .swiftee-wrap { container-type:inline-size; }
+  .swiftee-swirl { position:absolute; inset:5%; width:90%; height:90%; fill:none; stroke:#fff6a6; stroke-width:2.5; stroke-linecap:round; opacity:0; pointer-events:none; }
+  .swiftee-oops { position:absolute; top:90%; left:0; width:100%; text-align:center; font:900 18cqw/1.15 Nunito,sans-serif; color:#fffbea; -webkit-text-stroke:1px #174b52; paint-order:stroke fill; text-shadow:0 2px 2px #174b52; visibility:hidden; pointer-events:none; }
+  .swiftee-wrap[data-answer="correct"] .swiftee-swirl { animation:swifteeReward 850ms ease-out both; }
+  .swiftee-wrap[data-answer="incorrect"] .swiftee-oops { visibility:visible; }
+  @keyframes swifteeReward { 0% { opacity:0; transform:rotate(-40deg) scale(.92); } 20% { opacity:.95; } 75% { opacity:.75; } 100% { opacity:0; transform:rotate(100deg) scale(1.04); } }
+  @media(prefers-reduced-motion:reduce) { .swiftee-wrap[data-answer="correct"] .swiftee-swirl { animation:none; } }
   /* --- ambient + interaction juice --- */
   @keyframes ripple { 0% { transform: scale(0.18); opacity: 0.9; } 100% { transform: scale(2.5); opacity: 0; } }
   @keyframes instructionPanelIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
   .instruction-panel { position:absolute; inset:0; z-index:40; pointer-events:none; animation:instructionPanelIn 420ms ease-in both; }
   @keyframes textIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes textInB { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes wordCue { from { opacity:0; } to { opacity:1; } }
 
   @media (prefers-reduced-motion:reduce) {
     .idle-hand,.idle-ring { animation:none !important; transform:none !important; opacity:1 !important; }
@@ -140,7 +153,7 @@
     .swiftee-wrap { transition:none !important; }
     .drop-zone { animation:none !important; }
     .ice-board { transition:none !important; }
-    .narrator-text span { animation:none !important; opacity:1 !important; transform:none !important; }
+    .narrator-text span { transform:none !important; }
     .game-action,.game-action::before,.game-action::after,.game-action *,.game-handle { animation:none !important; transition:none !important; }
   }
 </style>
@@ -149,12 +162,12 @@
 <script src="voiceovers/recordings.js"></script>
 <script src="voiceovers/recorded-player.js"></script>
 </helmet>
-<div ref="{{ stageRef }}" onScroll="{{ layoutScroll }}" style="{{ viewportStyle }}">
-  <div data-lesson="{{ lessonScene }}" style="{{ scalerStyle }}">
+<div class="game-viewport" ref="{{ stageRef }}" onScroll="{{ layoutScroll }}" style="{{ viewportStyle }}">
+ <div class="game-frame" style="{{ frameStyle }}">
+  <div data-lesson="{{ lessonScene }}" data-layout="{{ responsiveLayout }}" style="{{ scalerStyle }}">
 
     <!-- ============ frozen background ============ z 0 -->
-    <img src="assets/image.png" alt="" style="{{ bgStyle }}" />
-    <img class="boundary-background" src="assets/backgound%20%2002.png" alt="" draggable="false" style="{{ boundaryBackgroundStyle }}" />
+    <img class="lesson-background" src="{{ backgroundSrc }}" alt="" draggable="false" style="{{ bgStyle }}" />
     <div class="scene-weather" aria-hidden="true">
       <div class="scene-snow"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <div class="scene-sparkles"><i></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -165,6 +178,8 @@
       <div style="{{ guideViewport }}">
         <div class="swiftee-wrap" data-hidden="{{ guideHidden }}" style="{{ guideStyle }}">
           <canvas ref="{{ guideRef }}" width="{{ guideCell }}" height="{{ guideCell }}" role="img" aria-label="Swiftee, your guide" style="{{ guideCanvasStyle }}"></canvas>
+          <svg class="swiftee-swirl" viewBox="0 0 100 100" aria-hidden="true"><path d="M16 69 A39 32 0 0 1 29 22 M84 31 A39 32 0 0 1 71 78"/></svg>
+          <span class="swiftee-oops" aria-hidden="true">Oh no!</span>
         </div>
       </div>
     </sc-if>
@@ -179,10 +194,10 @@
       <sc-if value="{{ showZones }}" hint-placeholder-val="{{ false }}">
         <div style="{{ zoneRowStyle }}">
           <div class="drop-zone" ref="{{ zoneARef }}" style="{{ zoneAStyle }}">
-            <div style="font:900 30px Nunito,sans-serif;color:#11645e;letter-spacing:0.06em">{{ zoneAName }}</div>
+            <div class="zone-title" style="font:900 30px Nunito,sans-serif;color:#11645e;letter-spacing:0.06em">{{ zoneAName }}</div>
           </div>
           <div class="drop-zone" ref="{{ zoneBRef }}" style="{{ zoneBStyle }}">
-            <div style="font:900 30px Nunito,sans-serif;color:#5f3289;letter-spacing:0.06em">{{ zoneBName }}</div>
+            <div class="zone-title" style="font:900 30px Nunito,sans-serif;color:#5f3289;letter-spacing:0.06em">{{ zoneBName }}</div>
           </div>
         </div>
       </sc-if>
@@ -217,7 +232,6 @@
           </sc-for>
           <div style="{{ c.badgeStyle }}">{{ c.badge }}</div>
           <div style="{{ c.chipStyle }}">{{ c.chip }}</div>
-          <div style="{{ c.markStyle }}">{{ c.mark }}</div>
         </div>
       </sc-for>
 
@@ -230,7 +244,7 @@
       </sc-for>
 
       <sc-for list="{{ leaders }}" as="l" hint-placeholder-count="0">
-        <div style="{{ l.style }}"><span aria-hidden="true" style="{{ l.arrowStyle }}"></span></div>
+        <div aria-hidden="true" data-label-arrow="{{ l.labelKey }}" style="{{ l.style }}"><span style="{{ l.arrowStyle }}"></span></div>
       </sc-for>
 
       <sc-for list="{{ drops }}" as="d" hint-placeholder-count="0">
@@ -324,6 +338,7 @@
 
     <div ref="{{ ghostRef }}" style="position:absolute;left:0;top:0;pointer-events:none;opacity:0;z-index:60"></div>
   </div>
+ </div>
 </div>
 
 <div aria-hidden="true" style="position:fixed;inset:0;z-index:95;pointer-events:none;overflow:hidden">
@@ -426,6 +441,7 @@ const BOUND_DRAW = 1150;
 const NARR = { w: 284, w2: 284 };
 /* Consistent readable type; longer narration pages inside the dialogue bubble. */
 const CORRECT_GLOW = '0 12px 18px -7px rgba(35,170,92,.42), 0 18px 26px -12px rgba(35,170,92,.22)';
+const INCORRECT_GLOW = '0 12px 18px -7px rgba(215,67,78,.38), 0 18px 26px -12px rgba(215,67,78,.20)';
 const NARR_TYPE = { size: 46, lineHeight: 1.2, pad: 8, inset: 24, color: '#174b52', accent: '#7b249c', outline: 0 };
 // Saturated dark inks distinguish learning concepts from the teal sentence.
 const CONCEPT_THEME = {
@@ -563,7 +579,7 @@ class SwifteeGuide {
   mount() {
     if (!this.on) return;
     const s = this.d.states;
-    this.sprite.preload(['blinking', 'flapping', s.talking.start, s.talking.loop, s.talking.stop, s.waving.start, s.waving.loop, s.waving.stop]);
+    this.sprite.preload(['blinking', 'flapping', s.happy.loop, s.confused.loop, s.talking.start, s.talking.loop, s.talking.stop, s.waving.start, s.waving.loop, s.waving.stop]);
     this._preload = setTimeout(() => this.sprite.preload(Object.keys(this.d.clips)), 2500);
     this.sprite.set(this.build(GUIDE_REST.WATCH, Infinity));
     this.sprite.start();
@@ -639,6 +655,7 @@ class SwifteeGuide {
   /* runStep clears the lesson's timers; drop ours and land back on watching. */
   reset() {
     this.clearIdle(); this.dozing = false; this.reaction = null;
+    this.feedbackElement()?.removeAttribute('data-answer');
     this.misses = 0; this.progress = 0; this.voiceActive = false; this.wordCues.clear();
     this.resting = GUIDE_REST.WATCH;
     if (this.on) this.sprite.set(this.build(GUIDE_REST.WATCH, Infinity));
@@ -666,14 +683,33 @@ class SwifteeGuide {
   onInteractionStart() { this.wake(); this.clearIdle(); this.react([['curious', .35]], 1); }
   onCorrectProgress() {
     this.wake(); this.progress += 1;
-    this.react([[this.progress % 3 === 0 ? 'proud' : 'happy', .45]], 2); this.armIdle();
+    this.answerPose(true); this.armIdle();
   }
   onWrongAttempt() {
     this.wake(); this.clearIdle(); this.misses += 1;
-    this.react([[this.misses >= 2 ? 'puzzleing' : 'confused', .55]], 3);
+    this.answerPose(false);
   }
   onCorrectAnswer() {
-    this.wake(); this.clearIdle(); this.react([[this.misses > 0 ? 'relieved' : 'happy', .7]], 3);
+    this.wake(); this.clearIdle(); this.answerPose(true);
+  }
+  feedbackElement() { return this.host.guideRef?.current?.parentElement; }
+  answerPose(correct) {
+    if (!this.on) return;
+    const token = this.reaction = {priority:3};
+    const name = correct ? 'happy' : 'confused', el = this.feedbackElement();
+    if (el) {
+      el.removeAttribute('data-answer');
+      void el.offsetWidth; // Restart one brief reaction on a fresh answer.
+      el.setAttribute('data-answer', correct ? 'correct' : 'incorrect');
+    }
+    // Go straight to the expression; a previous talking/idle exit must not delay feedback.
+    this.sprite.set([{clip:this.d.states[name].loop, frames:18, state:name, part:'loop', still:this.reduced,
+      onEnd:() => {
+        if (this.reaction !== token) return;
+        this.reaction = null;
+        el?.removeAttribute('data-answer');
+        this.settle(this.resting);
+      }}]);
   }
   onSurprise() { this.wake(); this.react([['surprised', .45]], 2); }
   onWord(word, step) {
@@ -783,8 +819,10 @@ class Component extends DCLogic {
       if (!w || !h) return;
       if (this._hintLayout && (this._hintLayout.w !== w || this._hintLayout.h !== h)) this.clearNudge();
       this._hintLayout = { w, h };
-      const sc = Math.min(w / STAGE.w, h / STAGE.h);
-      if (Math.abs(sc - this.state.scale) > 0.0005) this.setState({ scale: sc });
+      const sc = window.PolygonResponsive.frame(w,h).scale;
+      if (Math.abs(sc - this.state.scale) > 0.0005 || this._viewWidth !== w || this._viewHeight !== h) {
+        this._viewWidth=w; this._viewHeight=h; this.setState({ scale: sc });
+      }
     };
     this.fit();
     requestAnimationFrame(this.fit);
@@ -956,7 +994,7 @@ class Component extends DCLogic {
     this.unlockAudio();
     if (kind === 'tap') this.tone(520, 0.08, 'triangle', 0.05);
     else if (kind === 'ok') { this.tone(660, 0.12, 'sine', 0.06); this.tone(880, 0.16, 'sine', 0.05, 0.1); this.tone(1180, 0.2, 'sine', 0.04, 0.2); }
-    else if (kind === 'no') { this.tone(300, 0.12, 'triangle', 0.05); this.tone(232, 0.18, 'triangle', 0.045, 0.1); }
+    else if (kind === 'no') { this.tone(440, 0.10, 'sine', 0.04); this.tone(350, 0.16, 'sine', 0.035, 0.09); }
     else if (kind === 'trace') this.tone(1320, 0.5, 'sine', 0.022);
     else if (kind === 'done') { this.tone(784, 0.1, 'sine', 0.05); this.tone(1046, 0.22, 'sine', 0.045, 0.09); }
     else if (kind === 'tick') this.tone(880, 0.05, 'square', 0.03);
@@ -1005,7 +1043,7 @@ class Component extends DCLogic {
     try {
       const u = new SpeechSynthesisUtterance(text);
       u.rate = 0.92; u.pitch = 1.2; u.volume = 1;
-      u.onstart = () => { if (current()) { started = true; failed = false; this.storyVoiceStart(); this.setState({ voiceError: '', wordReveal: 'playing' }); } };
+      u.onstart = () => { if (current()) { started = true; failed = false; this.storyVoiceStart(); this.setState({ voiceError: '', wordReveal: 'playing', wordPaused:false }); } };
       u.onend = (event) => {
         if (!current() || finished || failed) return;
         finished = true; this._voiceRetry = null;
@@ -1017,8 +1055,8 @@ class Component extends DCLogic {
         this.setState({ wordReveal: 'complete' }, cb);
       };
       u.onerror = fail;
-      u.onpause = () => { if (current() && !finished) this.guide.onInstructionPause(); };
-      u.onresume = () => { if (current() && !finished && !failed) this.guide.onInstructionStart(); };
+      u.onpause = () => { if (current() && !finished) { this.guide.onInstructionPause(); this.setState({wordPaused:true}); } };
+      u.onresume = () => { if (current() && !finished && !failed) { this.guide.onInstructionStart(); this.setState({wordPaused:false}); } };
       u.onboundary = (event) => {
         if (!current() || finished || failed) return;
         if (event.name === 'word' && Number.isFinite(event.charIndex)) {
@@ -1338,7 +1376,7 @@ class Component extends DCLogic {
          hue furthest from that chrome and the furthest from its three
          neighbours here, so all four figures read apart at a glance. */
       cfu3: [['c3a', C.green], ['c3b', C.pink], ['c3c', C.purple], ['c3d', C.orange]],
-      cfu4: [['c4a', C.green], ['c4b', C.purple], ['c4d', C.pink], ['c4e', C.orange], ['c4f', C.blue]],
+      cfu4: [['c4a', C.green], ['c4b', C.purple], ['c4d', C.pink], ['c4f', C.blue]],
       cfu5: [['c5a', C.purple], ['c5b', C.green], ['c5c', C.orange], ['c5d', C.blue]]
     };
   }
@@ -1405,8 +1443,8 @@ class Component extends DCLogic {
       },
       {
         sc: 'C2', label: 'CFU 2', narr: 'Classify the figures as a polygon or not a polygon.', set: 'cfu2', q: 'sort',
-        zones: ['POLYGONS', 'NOT POLYGONS'],
-        answer: [0, 1, 0, 1], maxPlacements: 2,
+        zones: ['POLYGON', 'NON-POLYGON'],
+        answer: [0, 1, 0, 1], maxPlacements: 4,
         fb: { ok: 'Great job! You sorted the figures correctly.', one: 'Wrong group. Check for gaps or curved sides.', two: 'Polygons are closed, with only straight sides. Try again.' }
       },
       {
@@ -1415,7 +1453,7 @@ class Component extends DCLogic {
       },
       {
         sc: 'C4', label: 'CFU 4', narr: 'Which of these are pentagons?',
-        set: 'cfu4', q: 'multi', check: true, correct: [0, 1, 3],
+        set: 'cfu4', q: 'multi', check: true, correct: [0, 1],
         fb: { ok: 'Exactly! A pentagon always has 5 sides.', one: 'Count the sides of each figure carefully.', two: 'Look for every figure with exactly 5 sides.' }
       },
       {
@@ -1439,6 +1477,7 @@ class Component extends DCLogic {
     this.setState({ k: k }, () => { this.runStep(k, false); });
   };
   runStep(k, restoring) {
+    if(this.stageRef?.current)this.stageRef.current.scrollTop=0;
     this.cancelMorph();
     if (this._vertexDragCleanup) this._vertexDragCleanup();
     this._vertexDragging = false;
@@ -1756,19 +1795,22 @@ class Component extends DCLogic {
       }, 520 + i * 620);
     }
   }
-  /* Kept as the single call site the screens already use; it now just raises
-     the matching guide event so no screen picks an animation itself. */
+  /* Completed answers keep their existing progression gate; intermediate
+     answers use the same feedback without locking the next choice. */
   react(kind) {
     const bad = kind === 'wrong';
-    this.setState({ narrTone: bad ? 'no' : 'ok' });
-    if (bad) {
-      this.guide.onWrongAttempt();
-    } else {
+    this.answerFeedback(!bad);
+    if (!bad) {
       /* success plays out uninterrupted */
       this.setState({ interactive: false });
-      this.guide.onCorrectAnswer();
-      this.burstHere();
     }
+  }
+  answerFeedback(correct, progress = false) {
+    this.setState({narrTone:correct ? 'ok' : 'no'});
+    if (!correct) this.guide.onWrongAttempt();
+    else if (progress) this.guide.onCorrectProgress();
+    else this.guide.onCorrectAnswer();
+    this.sfx(correct ? 'ok' : 'no');
   }
 
   /* ---------- particle FX ---------- */
@@ -1812,10 +1854,15 @@ class Component extends DCLogic {
     this.fxAdd(items, 1000);
   }
   burstHere(opt) {
+    if (this.reducedMotion()) return;
     const p = this._lastPt || { x: SAFE.w / 2, y: 300 };
-    this.burst(p.x, p.y, opt);
+    this.burst(p.x, p.y, opt || {n:6,d:12});
   }
   confetti() {
+    // The brief guide swirl celebrates answers; reserve the shower for the finale.
+    if (this.step().sc !== 'END') return;
+    this.sfx('party');
+    if (this.reducedMotion()) return;
     const cols = ['#ffd85e', '#7fe0a6', '#7fd3f7', '#ffa8d3', '#c2a0f0', '#ff9d5c'];
     const items = [];
     for (let i = 0; i < 46; i++) {
@@ -1825,7 +1872,6 @@ class Component extends DCLogic {
         dx: Math.random() * 160 - 80 });
     }
     this.fxAdd(items, 3100);
-    this.sfx('party');
   }
 
   // Keyboard activation uses the same click handlers and answer guards as pointer input.
@@ -1963,10 +2009,10 @@ class Component extends DCLogic {
     /* ocReveal: the answer is already on screen and an advance is queued, so
        further taps must not re-evaluate a resolved question. */
     const s = this.step(); if (this.state.ok || this.state.ocReveal || this.locked() || !this.state.ocWords[val]) return;
-    this.clearNudge(); this.sfx('tap');
+    this.clearNudge();
     if (val === s.ans) {
       this.setState({ ok:val,wrong:null,interactive:false,narrTone:'ok' });
-      this.guide.onCorrectAnswer(); this.sfx('ok');
+      this.answerFeedback(true);
       if (!this.reducedMotion()) this.burst(OPENING_BOARD.x+OPENING_BOARD.w/2-SAFE.x,
         OPENING_BOARD.y+OPENING_BOARD.h-SAFE.y+60,{n:7,d:12,cols:['#ffffff','#8ee9ff','#b9b4ff']});
       this.showBoundaryFeedback(val === 'closed' ? 'Yes! It is closed.' : 'Yes! It is open.');
@@ -1976,7 +2022,7 @@ class Component extends DCLogic {
         wrong: val, ocReveal: s.ans, interactive: false,
         attempts: this.state.attempts + 1
       });
-      this.sfx('no'); this.react('wrong');
+      this.react('wrong');
       this.showBoundaryFeedback(s.fb[s.ans]);
     }
   };
@@ -1991,7 +2037,7 @@ class Component extends DCLogic {
       if (this.locked()) return;
       const s = this.step(), truth = ['Straight', 'Straight', 'Curved', 'Curved'];
       if (s.ph !== 'classify' || i !== (this.state.ddActive || 0) || this.state.dd[i] === truth[i]) return;
-      this.clearNudge(); this.sfx('tap');
+      this.clearNudge();
       const moveKeyboardFocus = !!(ev && ev.currentTarget && ev.currentTarget === document.activeElement);
       const dd = this.state.dd.slice(), bad = this.state.ddWrong.slice();
       this.setState({ ddOpen: -1 });
@@ -2000,7 +2046,7 @@ class Component extends DCLogic {
         const complete = dd.every((v, j) => v === truth[j]);
         /* The last correct answer is confirmed by the whole row answering back
            together, so the reward is for the sorting, not just the final tap. */
-        this.setState({ dd: dd, ddWrong: bad, interactive: false, ddCheer: complete }); this.react('happy'); this.sfx('ok');
+        this.setState({ dd: dd, ddWrong: bad, interactive: false, ddCheer: complete }); this.react('happy');
         if (complete) this.confetti();
         else if (!this.reducedMotion()) this.burst(227+i*372,484,{n:7,d:12,cols:['#ffffff','#8ee9ff','#94e4bb']});
         const generation = this.gen;
@@ -2020,7 +2066,7 @@ class Component extends DCLogic {
         }, complete ? 1500 : 650);
       } else {
         dd[i] = val; bad[i] = true;
-        this.setState({ dd: dd, ddWrong: bad, wrong: i }); this.sfx('no'); this.react('wrong');
+        this.setState({ dd: dd, ddWrong: bad, wrong: i }); this.react('wrong');
         this.setState({ hlKind: null });
         this.feedback(val === 'Curved'
           ? "Look! This boundary isn't curved. It is made of straight lines."
@@ -2042,29 +2088,27 @@ class Component extends DCLogic {
       const s = this.step();
       if (s.q === 'straight') {
         if (this.state.checked || this.state.sel.includes(i)) return;
-        this.sfx('tap');
         if (s.correct.includes(i)) {
           const sel = this.state.sel.concat(i), finished = s.correct.every(index => sel.includes(index));
           this.setState({ sel, wrong: null, checked: finished });
           if (finished) {
             this.react('happy'); this.confetti();
             this.feedback((s.fb && s.fb.ok) || 'Yes! It is closed and made of straight lines.', () => this.later(this.advance, 400));
-          } else { this.sfx('ok'); this.burstHere(); this.guide.onCorrectProgress(); this.armNudge(); }
+          } else { this.answerFeedback(true, true); this.burstHere(); this.armNudge(); }
         } else {
-          this.setState({ wrong: i }); this.sfx('no'); this.react('wrong');
+          this.setState({ wrong: i }); this.react('wrong');
           this.feedback((s.fb && s.fb.one) || 'Not quite. Look for a figure with no gaps and no curves.', () => { this.setState({ wrong: null }); this.restoreQuestion(); });
         }
         return;
       }
       if (s.q === 'tap1') {
         if (this.state.ok !== null) return;
-        this.sfx('tap');
         if (i === s.correct) {
           this.setState({ ok: i, wrong: null }); this.react('happy'); this.confetti();
           this.feedback((s.fb && s.fb.ok) || 'Yes! It is closed and made of straight lines.', () => this.later(this.advance, 300));
         } else {
           const a = this.state.attempts + 1;
-          this.setState({ wrong: i, attempts: a }); this.sfx('no'); this.react('wrong');
+          this.setState({ wrong: i, attempts: a }); this.react('wrong');
           const msg = a >= 2 && s.fb && s.fb.two ? s.fb.two : (s.fb && s.fb.one) || 'Not quite. Try again.';
           this.feedback(msg, () => { this.setState({ wrong: null }); this.restoreQuestion(); });
         }
@@ -2072,32 +2116,41 @@ class Component extends DCLogic {
       }
       if (s.q === 'multi') {
         if (this.state.checked) return;
-        this.sfx('tap');
         const sel = this.state.sel.slice();
         const at = sel.indexOf(i);
         if (s.check) {
           if (s.set === 'cfu1' && !s.correct.includes(i)) {
             const token = this._wrongTapToken = (this._wrongTapToken || 0) + 1, generation = this.gen;
-            this.setState({ wrong: i }); this.sfx('no');
+            this.setState({ wrong: i }); this.answerFeedback(false);
             this.later(() => {
               if (generation === this.gen && token === this._wrongTapToken) this.setState({ wrong: null });
             }, 650);
             return;
           }
-          if (at >= 0) sel.splice(at, 1); else sel.push(i);
+          if (at >= 0) { sel.splice(at, 1); this.sfx('tap'); } else sel.push(i);
           this.setState({ sel: sel, wrong: null });
+          if (at < 0) {
+            const correct = s.correct.includes(i);
+            this.answerFeedback(correct, correct);
+            if (!correct) {
+              const token = this._wrongTapToken = (this._wrongTapToken || 0) + 1;
+              this.setState({wrong:i});
+              this.later(() => { if (token === this._wrongTapToken) this.setState({wrong:null}); }, 650);
+            }
+          }
         } else {
           if (s.correct.indexOf(i) >= 0) {
-            if (at < 0) sel.push(i);
+            if (at >= 0) return;
+            sel.push(i);
             const finished = s.correct.every((c) => sel.indexOf(c) >= 0);
-            this.setState({ sel: sel, wrong: null }); this.sfx('ok');
-            if (finished) this.react('happy'); else { this.burstHere(); this.guide.onCorrectProgress(); }
+            this.setState({ sel: sel, wrong: null });
+            if (finished) this.react('happy'); else { this.burstHere(); this.answerFeedback(true, true); }
             if (finished) {
               this.setState({ checked: true });
               this.feedback((s.fb && s.fb.ok) || 'That is right! These are the ones.', () => this.later(this.advance, 420));
             }
           } else {
-            this.setState({ wrong: i, attempts: this.state.attempts + 1 }); this.sfx('no'); this.react('wrong');
+            this.setState({ wrong: i, attempts: this.state.attempts + 1 }); this.react('wrong');
             this.feedback('A polygon is closed, with only straight sides.',
               () => { this.setState({ wrong: null }); this.restoreQuestion(); });
           }
@@ -2124,13 +2177,12 @@ class Component extends DCLogic {
       if (this.state.checked) { this.advance(); return; }
       if (!this.state.sel.length) return;
       const sel = this.state.sel.slice().sort().join(','), truth = s.correct.slice().sort().join(',');
-      this.sfx('tap');
       if (sel === truth) {
-        this.setState({ checked: true, ok: 1 }); this.sfx('ok'); this.react('happy'); this.confetti();
+        this.setState({ checked: true, ok: 1 }); this.react('happy'); this.confetti();
         this.feedback(s.fb.ok, () => this.later(this.advance, 420));
       } else {
         const a = this.state.attempts + 1;
-        this.setState({ attempts: a, wrong: 'set' }); this.sfx('no'); this.react('wrong');
+        this.setState({ attempts: a, wrong: 'set' }); this.react('wrong');
         if (a >= 2) this.coach();
         this.feedback(a >= 2 ? s.fb.two : s.fb.one, () => { this.setState({ wrong: null }); this.restoreQuestion(); });
       }
@@ -2144,24 +2196,23 @@ class Component extends DCLogic {
   }
   checkCount() {
     const s = this.step();
-    this.sfx('tap');
     if (s.q === 'count') {
       if (this.state.cnt[0] === 0) return;
       if (this.state.cnt[0] === 5) {
-        this.setState({ ok: 1 }); this.sfx('ok'); this.react('happy');
+        this.setState({ ok: 1 }); this.react('happy');
         this.later(this.advance, 700);
       } else {
-        this.setState({ wrong: 0, attempts: this.state.attempts + 1 }); this.sfx('no'); this.react('wrong');
+        this.setState({ wrong: 0, attempts: this.state.attempts + 1 }); this.react('wrong');
         this.feedback(s.fb.one, () => { this.setState({ wrong: null }); this.restoreQuestion(); });
       }
     } else {
       const a = this.state.cnt[0] === 5, b = this.state.cnt[1] === 5;
       if (a && b) {
-        this.setState({ ok: 1 }); this.sfx('ok'); this.react('happy');
+        this.setState({ ok: 1 }); this.react('happy');
         this.later(this.advance, 800);
       } else {
         this.setState({ wrong: a ? 1 : (b ? 0 : 2), attempts: this.state.attempts + 1 });
-        this.sfx('no'); this.react('wrong');
+        this.react('wrong');
         this.feedback(s.fb.one, () => { this.setState({ wrong: null }); this.restoreQuestion(); });
       }
     }
@@ -2247,7 +2298,7 @@ class Component extends DCLogic {
         this.setState({ showHand: false });
         const moved = pts.some((p, j) => Math.hypot(p[0] - base[j][0], p[1] - base[j][1]) > 26);
         if (moved && !this.state.dragged) {
-          this.setState({ dragged: true }); this.sfx('done'); this.react('happy');
+          this.setState({ dragged: true }); this.react('happy');
           this.later(this.advance, 700);
         }
       };
@@ -2270,6 +2321,10 @@ class Component extends DCLogic {
       const id = event.pointerId, generation = this.gen, origin = { x:event.clientX, y:event.clientY };
       const ghost = this.ghostRef.current;
       const sourceRect = event.currentTarget.getBoundingClientRect();
+      const labelGhostStyle = this._responsiveFrame?.compact ? {
+        width:(sourceRect.width/this._responsiveFrame.scale)+'px',height:(sourceRect.height/this._responsiveFrame.scale)+'px',
+        fontSize:(parseFloat(getComputedStyle(event.currentTarget).fontSize)*sourceRect.width/event.currentTarget.offsetWidth/this._responsiveFrame.scale)+'px'
+      } : {};
       let active = false, frame = null, latest = event, hovered = null, settling = null;
       const findTarget = e => {
         const board = this.safeRef.current;
@@ -2285,7 +2340,7 @@ class Component extends DCLogic {
         if (!active || !ghost) return;
         const rect = ghost.parentElement.getBoundingClientRect(), scale = rect.width / STAGE.w;
         const x = Math.max(100,Math.min(STAGE.w-100,(latest.clientX-rect.left)/scale));
-        const y = Math.max(44,Math.min(STAGE.h-44,(latest.clientY-rect.top)/scale));
+        const y = Math.max(44,Math.min((this._responsiveFrame?.stageHeight || STAGE.h)-44,(latest.clientY-rect.top)/scale));
         ghost.style.transform = 'translate3d('+x+'px,'+y+'px,0) translate(-50%,-65%) scale(1.06)';
         const target = findTarget(latest), key = target && target.getAttribute('data-label-target');
         const next = key && !this.state.placed[key] ? key : null;
@@ -2307,7 +2362,7 @@ class Component extends DCLogic {
         if (!active) {
           active=true; this.clearNudge(); this.sfx('pick'); this.guide.onInteractionStart();
           this.setState({ chip:name, draggingLabel:name });
-          if (ghost) { ghost.className='label-tile'; ghost.textContent=name; Object.assign(ghost.style,this.labelTileStyle(name),{opacity:'1'}); }
+          if (ghost) { ghost.className='label-tile'; ghost.textContent=name; Object.assign(ghost.style,this.labelTileStyle(name),labelGhostStyle,{opacity:'1'}); }
         }
         if (frame === null) frame=requestAnimationFrame(paint);
       };
@@ -2360,6 +2415,7 @@ class Component extends DCLogic {
       const id = event.pointerId, generation = this.gen, origin = { x:event.clientX, y:event.clientY };
       const ghost = this.ghostRef.current;
       const sourceRect = event.currentTarget.getBoundingClientRect();
+      const ghostSize = this._responsiveFrame?.compact ? sourceRect.width/this._responsiveFrame.scale*.85 : 170;
       const artwork = event.currentTarget.querySelector('svg').cloneNode(true);
       Object.assign(artwork.style,{width:'100%',height:'100%',transform:'none'});
       let active = false, frame = null, latest = event, hovered = null, settling = null;
@@ -2372,7 +2428,7 @@ class Component extends DCLogic {
         if (!active || !ghost) return;
         const rect = ghost.parentElement.getBoundingClientRect(), scale = rect.width / STAGE.w;
         const x = Math.max(100,Math.min(STAGE.w-100,(latest.clientX-rect.left)/scale));
-        const y = Math.max(44,Math.min(STAGE.h-44,(latest.clientY-rect.top)/scale));
+        const y = Math.max(44,Math.min((this._responsiveFrame?.stageHeight || STAGE.h)-44,(latest.clientY-rect.top)/scale));
         ghost.style.transform = 'translate3d('+x+'px,'+y+'px,0) translate(-50%,-65%) scale(1.06)';
         const next = findTarget(latest);
         if (hovered !== next) { hovered = next; this.setState({ sortHover:next }); }
@@ -2395,7 +2451,7 @@ class Component extends DCLogic {
           this.setState({ pickedFig:index, draggingFigure:index });
           if (ghost) {
             ghost.replaceChildren(artwork);
-            Object.assign(ghost.style,{opacity:'1',width:'170px',height:'170px',padding:'14px',boxSizing:'border-box',borderRadius:'26px',background:'#fff',border:'4px solid #6bcfff',boxShadow:'0 16px 30px rgba(15,90,150,.25),0 0 24px rgba(34,184,230,.5)'});
+            Object.assign(ghost.style,{opacity:'1',width:ghostSize+'px',height:ghostSize+'px',padding:'14px',boxSizing:'border-box',borderRadius:'26px',background:'#fff',border:'4px solid #6bcfff',boxShadow:'0 16px 30px rgba(15,90,150,.25),0 0 24px rgba(34,184,230,.5)'});
           }
         }
         if (frame === null) frame=requestAnimationFrame(paint);
@@ -2427,10 +2483,11 @@ class Component extends DCLogic {
            releasing reads as one continuous motion, never a jump. */
         const rect = ghost.parentElement.getBoundingClientRect(), scale = rect.width / STAGE.w;
         const slot = correct ? this.sortPlaces(Object.assign({}, this.state.sortAt, { [index]: zone }))[index] : null;
-        const surface = this.safeStyle();
-        const x = slot ? parseFloat(surface.left) + slot.x + slot.w / 2 : (sourceRect.left + sourceRect.width / 2 - rect.left) / scale;
-        const y = slot ? parseFloat(surface.top) + slot.y + slot.w / 2 : (sourceRect.top + sourceRect.height / 2 - rect.top) / scale;
-        const k = slot ? slot.w / 170 : sourceRect.width / scale / 170;
+        const surface = this.safeRef.current, surfaceRect = surface.getBoundingClientRect();
+        const surfaceScale = surfaceRect.width / surface.offsetWidth;
+        const x = slot ? (surfaceRect.left + (slot.x + slot.w/2)*surfaceScale - rect.left)/scale : (sourceRect.left + sourceRect.width/2 - rect.left)/scale;
+        const y = slot ? (surfaceRect.top + (slot.y + slot.w/2)*surfaceScale - rect.top)/scale : (sourceRect.top + sourceRect.height/2 - rect.top)/scale;
+        const k = slot ? slot.w*surfaceScale/scale/ghostSize : sourceRect.width/scale/ghostSize;
         settling = ghost.animate([{transform:ghost.style.transform},
           {transform:'translate3d('+x.toFixed(1)+'px,'+y.toFixed(1)+'px,0) translate(-50%,-50%) scale('+k.toFixed(3)+')'}],
           {duration:correct ? 260 : 300,easing:'cubic-bezier(.22,.8,.3,1)',fill:'forwards'});
@@ -2478,14 +2535,14 @@ class Component extends DCLogic {
         const done = Object.keys(placed).length === 3;
         this.setState({ placed: placed, chip: null, labelPrompt:false, say:chip+' correctly placed.' }, () => {
           if (keyboard && !done) this.focusLabelControl('[data-label-chip][aria-disabled="false"]');
-        }); this.sfx('snap');
-        if (done) this.react('happy'); else { this.burstHere(); this.guide.onCorrectProgress(); }
+        });
+        if (done) this.react('happy'); else { this.burstHere(); this.answerFeedback(true, true); }
         if (done) {
-          this.sfx('done'); this.confetti();
+          this.confetti();
           this.feedback('Perfect! Side, vertex and angle — all labelled.', () => this.later(this.advance, 400));
         }
       } else {
-        this.setState({ badPlace: key, chip: null, say:'That label does not fit here. Choose a label and try again.' }); this.sfx('no'); this.react('wrong');
+        this.setState({ badPlace: key, chip: null, say:'That label does not fit here. Choose a label and try again.' }); this.react('wrong');
         this.later(() => this.setState({ badPlace: null }), 700);
         this.feedback('Not that one. A side is straight, a vertex is a corner.',
           () => { this.restoreQuestion(); if (keyboard) this.focusLabelControl('[data-label-chip="'+chip+'"]'); });
@@ -2497,7 +2554,7 @@ class Component extends DCLogic {
   /* One source of truth for the column band, in both states: sorting (full
      width, apart) and finished (narrower, together, centred). Every tile
      position runs through here, so the boxes and their contents move as one. */
-  sortGap() { return this.state.united ? SORT.uniteGap : SORT.zoneGap; }
+  sortGap() { return this.state.united ? SORT.uniteGap : this._responsiveFrame?.compact ? 30 : SORT.zoneGap; }
   sortLimitReached() {
     if (!this.P || !this.state.ready) return false;
     const limit = this.step().maxPlacements;
@@ -2511,14 +2568,16 @@ class Component extends DCLogic {
     this.later(() => { if (this._sortRejectToken === token) this.setState({wrong:null}); }, 450);
   }
   sortZoneFull(zone) {
-    return this.sortLimitReached() || (this.step().sc === 'C5' && Object.values(this.state.sortAt).filter(at => at === zone).length >= 2);
+    const required = (this.step().answer || []).filter(answer => answer === zone).length;
+    return this.sortLimitReached() || Object.values(this.state.sortAt).filter(at => at === zone).length >= required;
   }
   sortLayout() {
+    if(this._responsiveFrame?.compact)return Object.assign({},SORT,{trayW:230,trayGap:30,trayY:0,zoneTop:560,zoneH:480});
     return ['C2','C5'].includes(this.step().sc) ? Object.assign({}, SORT, {
       trayW:230, trayGap:30, trayY:0, zoneTop:284, zoneH:340
     }) : SORT;
   }
-  sortZoneW() { return (SAFE.w - SORT.zoneGap) / 2 - (this.state.united ? SORT.unite : 0); }
+  sortZoneW() { return this._responsiveFrame?.compact ? 450 : (SAFE.w - SORT.zoneGap) / 2 - (this.state.united ? SORT.unite : 0); }
   sortBandX() { const w = this.sortZoneW(); return (SAFE.w - (2 * w + this.sortGap())) / 2; }
   sortZoneX(zone) { return this.sortBandX() + (zone ? this.sortZoneW() + this.sortGap() : 0); }
   sortHeadH() { return SORT.head + ((this.step().zones || [])[2] ? SORT.headSub : 0); }
@@ -2555,8 +2614,9 @@ class Component extends DCLogic {
         this._sortRejectToken = (this._sortRejectToken || 0) + 1;
         const token = this._sortRejectToken;
         this.setState({pickedFig:null,sortHover:null,wrong:i,say:'This area already has its two figures.'});
-        this.sfx('no');
+        this.answerFeedback(false);
         this.later(() => { if (this._sortRejectToken === token) this.setState({wrong:null}); }, 500);
+        this.armNudge();
         return;
       }
       const at = Object.assign({}, this.state.sortAt);
@@ -2566,20 +2626,22 @@ class Component extends DCLogic {
         const done = Object.keys(at).length >= (s.maxPlacements || s.answer.length);
         this.setState({ sortAt: at, pickedFig: null, tick: i,
           say: 'Correct. Placed in the ' + name + ' column. ' + Object.keys(at).length + ' of ' + (s.maxPlacements || s.answer.length) + ' sorted.' });
-        this.sfx('snap');
+        // Reward sound is paired with the guide reaction below.
         this.later(() => { if (this.state.tick === i) this.setState({ tick: null }); }, 1500);
-        if (done) this.react('happy'); else { this.burstHere(); this.guide.onCorrectProgress(); }
+        if (done) this.react('happy'); else { if (s.sc !== 'C2') this.burstHere(); this.answerFeedback(true, true); }
         if (done) {
-          this.setState({ checked: true, united: true }); this.sfx('done'); this.confetti();
+          this.setState({ checked: true, united: true }); if (s.sc !== 'C2') this.confetti();
           this.feedback(s.fb.ok, () => this.later(this.advance, 500));
         }
       } else {
         const a = this.state.attempts + 1;
+        const token = this._sortRejectToken = (this._sortRejectToken || 0) + 1;
         this.setState({ pickedFig: null, wrong: i, attempts: a,
           say: 'Not the ' + name + ' column. The figure is back with the others.' });
-        this.sfx('no'); this.react('wrong');
-        this.later(() => this.setState({ wrong: null }), 700);
-        this.feedback(a >= 2 ? s.fb.two : s.fb.one, () => this.restoreQuestion());
+        this.react('wrong');
+        this.later(() => { if (this._sortRejectToken === token) this.setState({ wrong: null }); }, s.sc === 'C2' ? 420 : 700);
+        if (s.sc === 'C2') this.armNudge();
+        else this.feedback(a >= 2 ? s.fb.two : s.fb.one, () => this.restoreQuestion());
       }
     };
   }
@@ -2590,7 +2652,10 @@ class Component extends DCLogic {
       const base = this.cardStyleFor(null);
       return Object.assign({}, base, {boxShadow:base.boxShadow + ', ' + CORRECT_GLOW});
     }
-    if (state === 'bad') return { borderWidth: '5px', borderStyle: 'solid', borderColor: '#da9279', background: '#fff8f3', boxShadow: '0 6px 0 rgba(190,125,97,.14)' };
+    if (state === 'bad') {
+      const base = this.cardStyleFor(null);
+      return Object.assign({}, base, {boxShadow:base.boxShadow + ', ' + INCORRECT_GLOW});
+    }
     if (state === 'sel') return { borderWidth: '5px', borderStyle: 'solid', borderColor: '#edaa20', background: '#fff2bc', boxShadow: '0 0 0 4px rgba(255,204,65,.2), 0 8px 0 rgba(192,120,20,.28)' };
     /* An ice-blue rim, not the near-black teal this used to be: the card is a
        quiet frame for the figure, so it should sit in the same palette as the
@@ -2809,8 +2874,8 @@ class Component extends DCLogic {
 
     /* Closed: the shape itself is left alone. There is no gap to point at, so
        marking the outline would only colour over a boundary the learner has
-       just read correctly. The answer is confirmed everywhere else — the tick
-       on the button, the chime, Swiftee's reaction and her spoken line — and
+       just read correctly. The answer is confirmed by the button glow,
+       the chime, Swiftee's reaction and her spoken line — and
        the shape stays exactly the shape that was asked about. */
     return out;
   }
@@ -2820,26 +2885,22 @@ class Component extends DCLogic {
     const st = this.state;
     this._cardN = 0;
     // Fit from the first paint, before resize observers or mount timers run.
-    const viewport = document.documentElement;
-    const viewportScale = Math.min(
-      (viewport.clientWidth || window.innerWidth) / STAGE.w,
-      (viewport.clientHeight || window.innerHeight) / STAGE.h
-    );
-    const compact = viewport.clientWidth < 700;
-    const scale = compact ? Math.max(0.55, viewportScale) : Math.min(st.scale, viewportScale || st.scale);
+    const viewport = this.stageRef?.current || document.documentElement;
+    const frame = window.PolygonResponsive.frame(viewport.clientWidth || window.innerWidth, viewport.clientHeight || window.innerHeight);
+    this._responsiveFrame = frame;
+    const scale = frame.scale;
     const scaler = {
-      position: 'absolute', left: '50%', top: '50%', width: STAGE.w + 'px', height: STAGE.h + 'px',
-      transform: 'translate(-50%, -50%) scale(' + scale + ')', transformOrigin: 'center center'
+      position:'absolute',left:'50%',top:'50%',width:STAGE.w+'px',height:frame.stageHeight+'px',
+      transform:'translate(-50%, -50%) scale('+scale+')',transformOrigin:'center center',overflow:'hidden'
     };
-    if (compact) Object.assign(scaler, {position:'relative',left:0,top:0,transform:'none',zoom:scale});
-    const viewportStyle = {position:'fixed',inset:0,width:'100%',height:'100%',background:'#103574 url(assets/image.png) center / cover no-repeat',overflow:compact?'auto':'hidden'};
+    const viewportStyle = {background:'#103574',overflow:'hidden'};
     const shellOnly = {
       voiceError: st.voiceError, retryVoice: this.retryVoice,
 
       effectsEnabled: !this.locked(), activateKey: this.activateKey,
       storyControls: !!st.storyControls,
       storyCounting: !!(st.ready && this.P && this.step().sc === 'S13' && this.step().ph === 'five'),
-      layoutScroll: () => this.clearNudge(), viewportStyle, scalerStyle: scaler, narration: st.narr || '', narratorParts: this.narratorParts(), screenLabel: 'loading',
+      layoutScroll: () => this.clearNudge(), frameStyle:{position:'relative',width:'100%',height:'100%',overflow:'hidden'}, responsiveLayout:frame.compact?'portrait':'landscape', viewportStyle, scalerStyle: scaler, narration: st.narr || '', narratorParts: this.narratorParts(), screenLabel: 'loading',
       /* The gap closes with the retired option. Left at its full width it
          would still sit between the two flex items and push the surviving
          button half a gap off centre. */
@@ -2853,7 +2914,7 @@ class Component extends DCLogic {
       zoneRowStyle: {}, liveMsg: this.state.say || '', checkFeedback: '',
       narrStyle: this.narrStyle(), narrRef: this.narrRef,
       bgStyle: this.bgStyle(), boardStyle: this.boardStyle(), signStyle: this.signStyle(),
-      boundaryBackgroundStyle: this.boundaryBackgroundStyle(),
+      backgroundSrc: st.ready && (st.k === 13 || ['C2','C5'].includes(this.step().sc)) && st.boundaryBackgroundReady ? 'assets/backgound%20%2002.png' : 'assets/image.png',
       lessonScene: this.learningReferenceScene() ? 'parts-reference' : this.polygonIntroScene() ? 'polygon-intro' : this.topLessonScene() ? 'boundary' : 'standard',
       safeStyle: this.safeStyle(),
       showGuide: GUIDE_VISIBLE, guideViewport: this.guideViewportStyle(), guideStyle: this.guideStyle(),
@@ -2895,11 +2956,9 @@ class Component extends DCLogic {
       check: this.check, checkLabel: 'Check',
       checkStyle: this.bigBtn(260),
       chooseOpen: this.chooseOpen, chooseClosed: this.chooseClosed,
-      /* The chosen button already turns green on the right answer -- surface
-         colour, rim and shadow all change -- so a tick in front of the word
-         only shortens the room the word has to sit in. */
-      openText:(st.wrong==='open'?'× ':'')+'Open',
-      closedText:(st.wrong==='closed'?'× ':'')+'Closed',
+      /* Labels remain unchanged; glow and motion carry the answer feedback. */
+      openText:'Open',
+      closedText:'Closed',
       /* The option not taken, once the answer is right. Marked on the element
          because .ice-button pins its border with !important, which an inline
          style cannot beat -- the collapse has to be declared in the sheet at
@@ -2928,6 +2987,7 @@ class Component extends DCLogic {
     else if (s.sc === 'END') this.viewEnd(V, s);
     this.fitActivityPanel(V, s);
     this.decorate(V);
+    window.PolygonResponsive.apply(this,V,s,frame);
     this.prepareControlBindings(V);
     return V;
   }
@@ -3124,22 +3184,11 @@ class Component extends DCLogic {
     const known = durationMs || (this._voiceDurations && this._voiceDurations[text]);
     const count = (text.match(/\S+/g) || []).length;
     const interval = Number.isFinite(known) && known > 0 && count > 1
-      ? Math.max(0, (known - 220) / (count - 1)) : 110;
+      ? Math.max(0, (known - 220) / (count - 1)) : this.readingTime(text) / Math.max(1, count);
     this.setState(st => ({ narrPage: text, narrTick: st.narrTick + 1,
-      wordReveal: 'waiting', wordInterval: interval }));
-    /* Every word starts at opacity 0 and is only shown by the per-word reveal,
-       which rides on speech events. Those are not guaranteed: a line with no
-       recording, a missed onend, or Chrome's flaky onboundary all leave the
-       tail of the sentence invisible for good — and a half-shown instruction
-       reads as a different, often ambiguous question. Guarantee the whole
-       line is on the sign even if no speech event ever arrives. */
-    if (this._revealTimer) clearTimeout(this._revealTimer);
-    const generation = this.gen || 0;
-    const budget = Math.max(1400, count * (interval || 110) + 900);
-    this._revealTimer = this.later(() => {
-      if ((this.gen || 0) !== generation || this.state.narrPage !== text) return;
-      if (this.state.wordReveal !== 'complete') this.setState({ wordReveal: 'complete' });
-    }, budget);
+      wordReveal: 'waiting', revealedWords:0, wordPaused:false, wordInterval: interval }));
+    // Only playback completion or the explicit audio-error fallback reveals the
+    // whole line. A wall-clock timeout must never outrun speech or a paused MP3.
   }
   learningKeywords(text) {
     const present = [...new Set(String(text || '').split(/\s+/).map(conceptKey).filter(Boolean))];
@@ -3174,10 +3223,13 @@ class Component extends DCLogic {
       shape.lastIndex = 0;
       const position = word++;
       const recorded = this.state.wordReveal === 'recorded';
-      const visible = !recorded || position < this.state.revealedWords;
+      const visible = recorded && position < this.state.revealedWords;
       const active = highlighted && recorded && position === this.state.revealedWords - 1;
       const theme = conceptTheme(concept);
-      const delay = recorded ? 0 : Math.round(position * (this.state.wordInterval === undefined ? 110 : this.state.wordInterval));
+      const delay = Math.round(position * (this.state.wordInterval || 320));
+      // A real word cue reveals sharp text immediately. Estimated CSS timing
+      // is only a fallback for speech engines that emit no word boundaries.
+      const fallback = this.state.wordReveal === 'playing';
       return {
         key, text: token.replace(shape, shapeCase), concept: highlighted ? concept : undefined, active: active ? 'true' : undefined,
         style: {
@@ -3187,10 +3239,10 @@ class Component extends DCLogic {
           boxShadow: 'none',
           // Keep long words intact inside the narrow speech lane.
           fontSize: Math.min(NARR_TYPE.size, Math.floor(NARR_TYPE.size * (this.dialogueLayout().w - NARR_TYPE.inset * 2 - NARR_TYPE.pad) / this.narratorWidth(token))) + 'px',
-          opacity: this.state.wordReveal === 'complete' ? 1 : 0,
+          opacity: this.state.wordReveal === 'complete' || visible ? 1 : 0,
           transformOrigin: '50% 70%',
-          animation: this.state.wordReveal === 'complete' || !visible ? 'none' : (this.state.narrTick % 2 ? 'textIn' : 'textInB') + ' 220ms ease-in ' + delay + 'ms both',
-          animationPlayState: this.state.wordReveal === 'waiting' ? 'paused' : 'running'
+          animation: fallback ? (this.reducedMotion() ? 'wordCue 1ms steps(1,end) ' : (this.state.narrTick % 2 ? 'textIn' : 'textInB') + ' 220ms ease-in ') + delay + 'ms both' : 'none',
+          animationPlayState: this.state.wordReveal === 'waiting' || this.state.wordPaused ? 'paused' : 'running'
         }
       };
     });
@@ -3221,14 +3273,6 @@ class Component extends DCLogic {
       } catch (_) { /* Keep the original scenery if the replacement cannot decode. */ }
     };
     image.src = 'assets/backgound%20%2002.png';
-  }
-  boundaryBackgroundStyle() {
-    // A persistent layer lets entry, exit, and rapid navigation crossfade naturally.
-    return Object.assign(stageBox({x:0,y:0,w:STAGE.w,h:STAGE.h},1), {
-      display:'block',objectFit:'cover',pointerEvents:'none',userSelect:'none',
-      opacity:this.state.ready && (this.state.k === 13 || ['C2','C5'].includes(this.step().sc)) && this.state.boundaryBackgroundReady ? 1 : 0,
-      transition:this.reducedMotion() ? 'none' : 'opacity 1200ms cubic-bezier(.4,0,.2,1)'
-    });
   }
   boundaryScene() {
     // Keep the same teaching composition from the open/closed introduction onward.
@@ -3330,18 +3374,6 @@ class Component extends DCLogic {
       pointerEvents: 'none'
     });
   }
-  /* Below 700px the stage stops shrinking (the scale floors at 0.55) and starts
-     overflowing the viewport instead, so a scene that hands the bubble a fixed
-     width has to give that width back on a phone or it runs off the edge. The
-     lesson's default bubble already does this; the scene layouts must too. */
-  narrowDialogue(box) {
-    const viewportWidth = window.innerWidth || STAGE.w;
-    const viewportHeight = window.innerHeight || STAGE.h;
-    if (viewportWidth >= 700) return box;
-    const scale = Math.max(0.55, Math.min(viewportWidth / STAGE.w, viewportHeight / STAGE.h));
-    const room = viewportWidth / scale - box.x - 22;
-    return room >= box.w ? box : Object.assign({}, box, { w: Math.max(280, room) });
-  }
   dialogueLayout() {
     const connected = lane => {
       const guide = this.guideLayout();
@@ -3355,21 +3387,17 @@ class Component extends DCLogic {
         y: guide.y + guide.h * 0.11 - tailReach - gap - lane.h
       });
     };
-    if (this.compareFocus()) return connected(this.narrowDialogue(this.compareLayout().dialogue));
+    if (this.compareFocus()) return connected(this.compareLayout().dialogue);
     if (this.learningReferenceScene()) return connected({x:140,y:450,w:500,h:200});
     /* S10 used to put the bubble on the right on its own; screens 17, 18 and
        19 now share the one left-lane composition, so it needs no exception. */
-    if (this.polygonIntroScene()) return connected(this.narrowDialogue(this.polygonIntroLayout().dialogue));
+    if (this.polygonIntroScene()) return connected(this.polygonIntroLayout().dialogue);
     if (this.topLessonScene()) return connected(BOUNDARY.dialogue);
     const step = this.state.ready ? this.step() : null;
     const roomy = step && (step.sc === 'S1' || step.q === 'oc');
-    const viewportWidth = window.innerWidth || STAGE.w;
-    const viewportHeight = window.innerHeight || STAGE.h;
-    const scale = Math.max(0.55, Math.min(viewportWidth / STAGE.w, viewportHeight / STAGE.h));
     const x = roomy ? SWIFTEE_CENTRE - 86 : 8;
-    const availableWidth = viewportWidth < 700 ? viewportWidth / scale - x - 22 : STAGE.w;
-    // Compact legacy sidebars keep their width within the clear left lane.
-    return connected({ x, y:0, w:Math.min(roomy ? 620 : 360, availableWidth), h:210 });
+    // Dialogue and content scale together inside the same complete scene.
+    return connected({ x, y:0, w:roomy ? 620 : 360, h:210 });
   }
   fittedDialogue(text) {
     const lane = this.dialogueLayout();
@@ -4229,8 +4257,8 @@ class Component extends DCLogic {
           /* A quiet solid rim rather than a dashed one -- the target still
              reads as somewhere to drop, without ringing the figure in
              broken lines. */
-          border: '5px solid ' + (bad ? RED : theme.color),
-          background: done ? theme.light : (bad ? '#fff2ef' : 'linear-gradient(155deg,#ffffff,' + theme.light + 'bb)'),
+          border: '5px solid ' + theme.color,
+          background: 'linear-gradient(155deg,#ffffff,' + theme.light + 'bb)',
           color: theme.ink, font: '900 34px Nunito, sans-serif',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           cursor: done ? 'default' : 'pointer', transform:'none', transition:'background 200ms,border-color 200ms,box-shadow 150ms',
@@ -4246,12 +4274,22 @@ class Component extends DCLogic {
         }
       };
     });
-    /* No leader lines out to the targets. They were drawn to say which part of
-       the outline each target belonged to, but they crossed the figure on the
-       way and turned a clean shape into a diagram of itself. The targets sit
-       beside the feature they name, which is enough to read them by, and the
-       figure is left as the plain shape the screen is about. */
-    V.leaders = [];
+    // Short arrows point inward from each socket and stop outside the outline.
+    // The angle arrow approaches the outer corner, keeping its arc unobstructed.
+    V.leaders = spots.map(sp => {
+      const feature = sp.key === 'angle' ? this.mapPt(box, F.vb, angleVertex)
+        : sp.key === 'vertex' ? [anchors.vertex[0], anchors.vertex[1] + 10] : anchors.side;
+      const dx = sp.p[0] - feature[0], dy = sp.p[1] - feature[1];
+      const distance = Math.hypot(dx, dy), ux = dx / distance, uy = dy / distance;
+      const gap = sp.key === 'vertex' ? 24 : 14;
+      const socketEdge = Math.min(106 / Math.abs(ux), 38 / Math.abs(uy));
+      const tip = [feature[0] + ux * gap, feature[1] + uy * gap];
+      const line = this.leader(tip, sp.p, this.labelTheme(sp.key).color, true);
+      line.labelKey = sp.key;
+      Object.assign(line.style, {width:Math.max(0, distance-gap-socketEdge-12)+'px',height:'5px',marginTop:'-2.5px',pointerEvents:'none'});
+      Object.assign(line.arrowStyle, {width:'16px',height:'18px',top:'-6.5px',borderRadius:'3px'});
+      return line;
+    });
     V.showChips = true;
     if (reference) V.chipRowStyle = {position:'absolute',left:'916px',top:'900px',width:'688px',display:'flex',justifyContent:'center',gap:'44px'};
     const chipNames = ['Side', 'Vertex', 'Angle'];
@@ -4335,8 +4373,9 @@ class Component extends DCLogic {
   counterHitStyle() {
     const viewport = document.documentElement;
     const fitted = Math.min(this.state.scale || 1, viewport.clientWidth / STAGE.w, viewport.clientHeight / STAGE.h) || 1;
-    const scale = viewport.clientWidth < 700 ? Math.max(0.55, fitted) : fitted;
-    return {position:'absolute',left:'50%',top:'50%',width:Math.max(60,44/scale)+'px',height:Math.max(60,44/scale)+'px',transform:'translate(-50%,-50%)'};
+    // Expand touch targets only into the reserved spacing, never onto a neighbour.
+    const hit = Math.min(88, Math.max(60,44/fitted));
+    return {position:'absolute',left:'50%',top:'50%',width:hit+'px',height:hit+'px',transform:'translate(-50%,-50%)'};
   }
   counterCheckStyle() {
     return Object.assign(this.buttonSkin('primary',18), {
@@ -4349,8 +4388,8 @@ class Component extends DCLogic {
       caption, min:1, max:10,
       captionStyle:{display:caption?'block':'none',width:'116px',flexShrink:0,font:'800 23px Nunito,sans-serif',color:'#23577f',lineHeight:1.15,textAlign:'left'},
       wrap:{display:'flex',alignItems:'center',gap:'12px',padding:'10px',borderRadius:'22px',
-        background:bad?'#fff2ef':'#effbf6',border:'3px solid '+(bad?RED:'#a6d7cb'),
-        boxShadow:'inset 0 2px 0 #fff,0 3px 0 rgba(8,111,124,.14)' + (good ? ', ' + CORRECT_GLOW : ''),animation:bad?'wig 420ms ease-in-out both':'none'},
+        background:'#effbf6',border:'3px solid #a6d7cb',
+        boxShadow:'inset 0 2px 0 #fff,0 3px 0 rgba(8,111,124,.14)' + (good ? ', ' + CORRECT_GLOW : bad ? ', ' + INCORRECT_GLOW : ''),animation:bad?'wig 420ms ease-in-out both':'none'},
       btn:Object.assign(this.buttonSkin('secondary',16),{width:'76px',height:'76px',flexShrink:0,
         font:'800 38px "Baloo 2",Nunito,sans-serif',lineHeight:1}),
       box:{width:'80px',height:'76px',boxSizing:'border-box',flexShrink:0,borderRadius:'14px',background:'#fff',
@@ -4531,9 +4570,8 @@ class Component extends DCLogic {
   /* ----- recall ----- */
   viewRecall(V, s) {
     const st = this.state;
-    /* The same stage and figure box as the naming screens it is recalling, so
-       the shape does not shrink and the board does not slide out from under
-       Swiftee when the lesson asks the learner to remember it. */
+    /* Keep the naming screens' stage and figure centre, reserving a little
+       extra room below the outline for the restored name and stepper. */
     const reference = this.learningReferenceScene();
     const size = reference ? 730 : 420;
     const box = reference ? { x: 925, y: NAME_FIGURE.y, w: size, h: NAME_FIGURE.h - 60 }
@@ -4554,7 +4592,7 @@ class Component extends DCLogic {
     V.callouts = [{
       text: names[st.recallNameN || st.n], style: {
         position: 'absolute', left: reference ? (box.x + size / 2) + 'px' : '50%',
-        top: reference ? (box.y + box.h + NAME_LABEL_GAP) + 'px' : '452px', translate: '-50% 0',
+        top: reference ? (box.y + box.h + 24) + 'px' : '452px', translate: '-50% 0',
         padding: '10px 46px', borderRadius: '30px', background: '#fff8e2', border: '5px solid ' + GOLD,
         font: '800 46px "Baloo 2", Nunito, sans-serif', color: '#8a5a12', whiteSpace: 'nowrap',
         boxShadow: '0 8px 0 rgba(198,146,44,0.35)',
@@ -4566,7 +4604,7 @@ class Component extends DCLogic {
     Object.assign(counter, { accessibleLabel:'Number of sides', value:String(st.n), min:3, max:8,
       minus:this.bumpN(-1), plus:this.bumpN(1), limitFeedback:true });
     V.counters = [counter];
-    if (reference) V.counterRowStyle = {position:'absolute',left:(box.x + box.w/2)+'px',top:'888px',
+    if (reference) V.counterRowStyle = {position:'absolute',left:(box.x + box.w/2)+'px',top:'880px',
       width:'max-content',translate:'-50% 0',display:'flex',alignItems:'center'};
     V.checkStyle = { display: 'none' };
     V.checkLabel = '';
@@ -4580,10 +4618,10 @@ class Component extends DCLogic {
        for screen 36 because it asks the same kind of question. */
     const discovery = ['S10','S18','C1','C4'].includes(s.sc);
     const baseGrid = discovery ? this.polygonIntroLayout().grid : null;
-    // Five options need a centred 3 + 2 grid, with a separate action band below.
-    const fiveOptions = s.sc === 'C4';
+    // Screen 45 keeps a compact 2 x 2 grid above its separate Check button.
+    const pentagonChoice = s.sc === 'C4';
     const laneCentre = baseGrid ? baseGrid.x + baseGrid.tile + baseGrid.gap/2 : 0;
-    const grid = fiveOptions ? {x:laneCentre-403,y:220,tile:250,gap:28} : baseGrid;
+    const grid = pentagonChoice ? {x:laneCentre-264,y:220,tile:250,gap:28} : baseGrid;
     const n = S.length;
     const w = n >= 6 ? 236 : (n === 5 ? 272 : 300), gap = n >= 6 ? 26 : 38;
     const total = n * w + (n - 1) * gap;
@@ -4593,23 +4631,27 @@ class Component extends DCLogic {
       const F = this.fig(it[0]);
       const sel = st.sel.indexOf(i) >= 0;
       let state = null;
-      if (st.wrong === i) state = 'bad';
+      if (st.wrong === i || (st.wrong === 'set' && sel && !s.correct.includes(i))) state = 'bad';
       else if (sel && !s.check) state = 'ok';
-      else if (sel && s.check) state = st.checked ? 'ok' : 'sel';
-      const coach = st.hlKind === 'coach' && sel && s.correct.indexOf(i) < 0;
+      else if (sel && s.check) state = st.checked || (pentagonChoice && s.correct.includes(i)) ? 'ok' : 'sel';
+      // Screen 45 is a selection activity: preserve the artwork and reserve
+      // the green underglow for correct choices; never add a yellow trace.
+      const selectionTint = pentagonChoice && state === 'sel'
+        ? Object.assign({}, this.cardStyleFor(null), {borderColor:ICE}) : undefined;
+      const coach = !pentagonChoice && st.hlKind === 'coach' && sel && s.correct.indexOf(i) < 0;
       const tileSize = discovery ? grid.tile : w;
       /* Four options as a square block in the right lane, beside Swiftee. A
          2 x 2 reads as one group at a glance; the 3 + 2 it replaced left a
          short second row that looked like an afterthought. */
-      const tileX = fiveOptions ? grid.x+(i<3 ? i : i-3+.5)*(grid.tile+grid.gap) : discovery ? grid.x + (i % 2) * (grid.tile + grid.gap) : x0 + i * (w + gap);
-      const tileY = fiveOptions ? grid.y+(i<3 ? 0 : grid.tile+42) : discovery ? grid.y + Math.floor(i / 2) * (grid.tile + grid.gap) : y;
+      const tileX = pentagonChoice ? grid.x+(i%2)*(grid.tile+grid.gap) : discovery ? grid.x + (i % 2) * (grid.tile + grid.gap) : x0 + i * (w + gap);
+      const tileY = pentagonChoice ? grid.y+Math.floor(i/2)*(grid.tile+42) : discovery ? grid.y + Math.floor(i / 2) * (grid.tile + grid.gap) : y;
       const card = this.buildCard({
         key: it[0], x: tileX, y: tileY, w: tileSize, h: tileSize, vb: F.vb, d: this.figD(it[0]),
-        extra: F.extra || '', stroke: it[1], sw: 20, fill: this.figFill(it[0], it[1], it[2]), state: state,
+        extra: F.extra || '', stroke: it[1], sw: 20, fill: this.figFill(it[0], it[1], it[2]), state: state, tint: selectionTint,
         badge: discovery ? '' : String.fromCharCode(65 + i), click: this.tapCard(i), tick: discovery && sel && (!s.check || st.checked),
         nudge: !st.checked && i === s.correct.find(index => !st.sel.includes(index)),
         traceD: F.traceD || this.figD(it[0]), traceStyle: coach ? this.traceStyleFor(true, 1500) : { opacity: 0 },
-        anim: st.wrong === i ? ((s.set === 'cfu1' ? (this._wrongTapToken % 2 ? 'wrongTapA' : 'wrongTapB') : 'wig') + ' 420ms ease-in-out both') : (coach ? 'pop 900ms ease-in-out infinite' : 'none')
+        anim: state === 'bad' ? ((s.set === 'cfu1' ? (this._wrongTapToken % 2 ? 'wrongTapA' : 'wrongTapB') : 'wig') + ' 420ms ease-in-out both') : (coach ? 'pop 900ms ease-in-out infinite' : 'none')
       });
       if (discovery) {
         card.wrap.borderRadius = '28px';
@@ -4625,7 +4667,7 @@ class Component extends DCLogic {
       V.nudgeCheck = st.checked || done ? '1' : '';
       V.checkLabel = 'Check';
       V.checkStyle = this.bigBtn(250);
-      if (fiveOptions) V.checkRowStyle = {position:'absolute',left:(laneCentre-403)+'px',top:'828px',width:'806px',display:'flex',justifyContent:'center'};
+      if (pentagonChoice) V.checkRowStyle = {position:'absolute',left:grid.x+'px',top:'828px',width:'528px',display:'flex',justifyContent:'center'};
       if (V.checkDisabled) Object.assign(V.checkStyle, {cursor:'default',transform:'none'});
     }
   }
@@ -4662,14 +4704,14 @@ class Component extends DCLogic {
       return {
         width: zoneW + 'px', height: SORT.zoneH + 'px', borderRadius: '30px', boxSizing: 'border-box',
         padding: '16px 18px',
-        border: '5px ' + (hot || st.united ? 'solid ' : 'dashed ') + ZONE[which].edge,
+        border: '5px solid ' + ZONE[which].edge,
         background: hot ? ZONE[which].hot : ZONE[which].bg,
         cursor: holding ? 'pointer' : 'default',
         transform: hot ? 'scale(1.015)' : 'scale(1)',
-        /* A held breath at the end: the pair lifts a little and glows, once. */
-        boxShadow: st.united ? '0 16px 34px rgba(31,109,180,0.20), 0 0 0 6px ' + ZONE[which].wash
-          : (hot ? '0 12px 26px rgba(31,109,180,0.18)' : 'none'),
-        animation: holding && !hot && !full ? 'zoneInvite 1.7s ease-in-out infinite' : 'none',
+        /* Both sorting screens keep clean container edges in every state.
+           Success glow belongs to the correctly placed tiles. */
+        boxShadow: 'none',
+        animation: 'none',
         transition: 'width ' + SORT.uniteMs + 'ms cubic-bezier(.22,.9,.24,1), box-shadow 420ms ease-out, border-color 200ms ease-out, background 200ms ease-out, transform 200ms ease-out', textAlign: 'center'
       };
     };
@@ -4681,15 +4723,16 @@ class Component extends DCLogic {
     const places = this.sortPlaces(preview || st.sortAt);
     /* The tray closes its gaps and stays centred as figures leave it. */
     const queue = S.map((_, i) => i).filter((i) => st.sortAt[i] === undefined);
-    const trayX = (SAFE.w - (queue.length * SORT.trayW + (queue.length - 1) * SORT.trayGap)) / 2;
+    const trayColumns = this._responsiveFrame?.compact ? Math.min(2,queue.length) : queue.length;
+    const trayX = (SAFE.w - (trayColumns * SORT.trayW + (trayColumns - 1) * SORT.trayGap)) / 2;
     V.cards = S.map((it, i) => {
       const F = this.fig(it[0]);
       const at = st.sortAt[i];
       const picked = st.pickedFig === i;
       const spot = at === undefined ? null : places[i];
       const size = spot ? spot.w : SORT.trayW;
-      const x = spot ? spot.x : trayX + queue.indexOf(i) * (SORT.trayW + SORT.trayGap);
-      const y = spot ? spot.y : SORT.trayY;
+      const x = spot ? spot.x : trayX + (queue.indexOf(i) % trayColumns) * (SORT.trayW + SORT.trayGap);
+      const y = spot ? spot.y : SORT.trayY + Math.floor(queue.indexOf(i) / trayColumns) * (SORT.trayW + SORT.trayGap);
       const card = this.buildCard({
         key: it[0], x: x, y: y, w: size, h: size, vb: F.vb, d: this.figD(it[0]),
         extra: F.extra || '', stroke: it[1], sw: 22, pad: 14, fill: this.figFill(it[0], it[1], it[2]),
@@ -4705,7 +4748,7 @@ class Component extends DCLogic {
         /* The ghost already flew this one home — show it there, don't re-run
            the slide. Its neighbours still animate as they make room. */
         snap: st.justPlaced === i,
-        anim: st.wrong === i ? ((limited || s.sc === 'C5' ? (this._sortRejectToken % 2 ? 'wrongTapA' : 'wrongTapB') : 'wig') + ' 420ms ease-in-out both') : (picked ? 'pop 900ms ease-in-out infinite' : 'none')
+        anim: st.wrong === i ? ((limited || ['C2','C5'].includes(s.sc) ? (this._sortRejectToken % 2 ? 'wrongTapA' : 'wrongTapB') : 'wig') + ' 420ms ease-in-out both') : (picked && s.sc !== 'C2' ? 'pop 900ms ease-in-out infinite' : 'none')
       });
       if (limited && at === undefined) { card.sortLimitBlocked = true; card.wrap.cursor = 'default'; card.wrap.scale = '1'; }
       return card;

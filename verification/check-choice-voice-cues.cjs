@@ -36,7 +36,8 @@ const server = http.createServer((req, res) => {
     }, screen);
     const read = async () => page.locator('[data-oc-choice]').evaluateAll(elements => elements.map(e => {
       const css=getComputedStyle(e), r=e.getBoundingClientRect();
-      return { visible:css.visibility==='visible', opacity:css.opacity, filter:css.filter, animation:css.animationName, hidden:e.getAttribute('aria-hidden'),
+      return { visible:css.visibility==='visible', opacity:css.opacity, filter:css.filter, animation:css.animationName,
+        background:css.backgroundImage, shadow:css.boxShadow, hidden:e.getAttribute('aria-hidden'),
         disabled:e.getAttribute('aria-disabled'), tab:e.tabIndex, x:r.x, width:r.width };
     }));
     for (let screen=5; screen<=9; screen++) {
@@ -70,9 +71,11 @@ const server = http.createServer((req, res) => {
       assert.deepEqual((await read()).map(e=>e.visible), [true,true], 'Closed appears at its timestamp');
       assert((await read()).every(e=>e.opacity==='1' && e.filter==='none' && e.animation==='none'), 'Both choices are immediately opaque and unblurred');
       const after=await read();
+      assert(after.every(e=>e.background.includes('rgb(255, 241, 106)')), 'Final yellow face is visible during narration');
       assert(after.every(e=>+e.opacity>.99), 'Entrance finishes fully visible');
       assert(after.every((e,i)=>Math.abs(e.x-before[i].x)<1 && Math.abs(e.width-before[i].width)<1), 'No horizontal layout shift');
       await page.evaluate(() => testMedia.at(-1).onended());
+      assert.deepEqual((await read()).map(e=>[e.background,e.shadow]),after.map(e=>[e.background,e.shadow]),'Unlocking input does not change the revealed button design');
       assert((await read()).every(e=>e.disabled==='false' && e.tab===0 && e.hidden==='false'), 'Choices accessible after question');
       if (screen===5) {
         const out=path.join(__dirname,'output','choice-voice-cues'); fs.mkdirSync(out,{recursive:true});

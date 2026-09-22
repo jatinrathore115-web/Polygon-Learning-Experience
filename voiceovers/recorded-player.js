@@ -76,7 +76,7 @@
           game.prepareNarratorReveal(pages[page]);
           game.setState({ wordReveal: 'recorded', revealedWords: count });
         } else if (revealed !== count) {
-          revealed = count; game.setState({ revealedWords: count });
+          revealed = count; game.setState({ wordReveal:'recorded', revealedWords: count });
         }
       }
       function tick() { update(); if (!stopped && current() && !audio.paused) frame = requestAnimationFrame(tick); }
@@ -90,11 +90,12 @@
         cancelAnimationFrame(frame);
         if (game.guide && game.guide.onInstructionPause) game.guide.onInstructionPause();
       };
-      audio.onpause = audio.onwaiting = waiting;
+      audio.onpause = audio.onwaiting = audio.onstalled = waiting;
       audio.ontimeupdate = () => { if (!audio.paused) update(); };
       audio.onerror = () => { if (!stopped && current()) { stop(); fail(); } };
       audio.onended = () => {
         if (stopped || !current()) return;
+        update(); // Catch the last page/word if the browser throttled frame updates.
         stop();
         if (game.revealChoiceWords) game.revealChoiceWords(text);
         game.setState({ wordReveal: 'complete' }, done);
