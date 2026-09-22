@@ -92,24 +92,21 @@ for(const sc of ['C2','C5']){
    near(px(v.callouts[0].style.left),promised.x,0.51,sc+': tap-path slot off');}
   g.state.hoverK=null;checks++;
 
-  /* a settled tile belongs to its column: it wears that column's colour, is
-     ticked as correct, and lets a tap pass through to the column under it */
+  /* Settled tiles preserve their original surface and use only a success glow. */
   g.state.sortAt={};g.state.pickedFig=null;g.state.hoverK=null;g.state.sortHover=null;
   s.answer.slice(0,n).forEach((z,i)=>{g.state.sortAt[i]=z;});g.state.tick=1;
-  {const v=g.renderVals(),seen={};
+  {const v=g.renderVals(),base=g.cardStyleFor(null);
    v.cards.forEach((c,i)=>{
      if(g.state.sortAt[i]===undefined)return;
-     const zone=s.answer[i];
      assert.equal(c.wrap.pointerEvents,'none',sc+': placed tile still swallows taps meant for its column');
      /* No badge is stamped on a tile at all. A tick parked in NOT POLYGONS
         used to read as "this one IS a polygon", and the column a tile has
         landed in already says everything the badge was saying. */
      assert.equal(c.mark,'',sc+': tiles carry no badge');
-     assert(c.wrap.borderColor,sc+': placed tile has no column tint');
-     seen[zone]=seen[zone]||c.wrap.borderColor;
-     assert.equal(c.wrap.borderColor,seen[zone],sc+': tiles in one column disagree on colour');
+     assert.equal(c.wrap.borderColor,base.borderColor,sc+': placed tile preserves its rim');
+     assert.equal(c.wrap.background,base.background,sc+': placed tile preserves its surface');
+     assert(c.wrap.boxShadow.includes('0 12px 18px -7px'),sc+': success glow sits below the tile');
    });
-   assert(seen[0]!==seen[1],sc+': both columns tint their tiles the same');
    v.targets.forEach((t,zone)=>{
      assert.equal(t.nudge,'',sc+': idle hint points at the correct column, which gives the answer away');
      assert(t.label&&t.label.length,sc+': drop column has no accessible name');

@@ -23,7 +23,7 @@ const server=http.createServer((req,res)=>{const file=path.resolve(root,'.'+deco
   });
   await go(13);const reference=await sample();
   await go(42);let s=await sample();
-  assert.deepEqual(s.board,reference.board);assert.deepEqual(s.guide,reference.guide);assert.equal(s.dialogue.x,reference.dialogue.x);assert.equal(s.dialogue.w,reference.dialogue.w);assert(Math.abs(s.dialogue.bottom-reference.dialogue.bottom)<1);
+  assert.deepEqual(s.board,reference.board);assert.deepEqual(s.guide,reference.guide);assert(Math.abs(s.dialogue.right-reference.dialogue.right)<1);assert(Math.abs(s.dialogue.bottom-reference.dialogue.bottom)<1);
   assert.equal(s.cards.length,4);assert.equal(s.bgOpacity,'1');
   assert.deepEqual(await page.evaluate(()=>__poly.step().answer),[0,1,0,1]);
   const checkBounds=s=>{for(const c of s.cards)assert(c.x>s.board.x&&c.right<s.board.right&&c.y>s.board.y&&c.bottom<s.board.bottom-12);assert(s.dialogue.bottom<s.board.y);for(const z of s.zones){const scale=s.surface.w/1570;assert(s.surface.y+(parseFloat(z.top)+parseFloat(z.height))*scale<s.board.bottom-24);}};

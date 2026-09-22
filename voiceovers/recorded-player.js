@@ -53,6 +53,7 @@
         const position = wordStarts ? Math.max(0, spokenCount - 1) : Math.min(total - 0.001, Math.max(0, audio.currentTime / duration * total));
         const audibleCount = wordStarts ? spokenCount : Math.min(total, Math.floor(position) + 1);
         while (spoken < audibleCount) {
+          if (game.revealChoiceWords) game.revealChoiceWords(words[spoken]);
           if (game.boundaryScene && game.boundaryScene()) game.keyword(words[spoken], {
             wordStartMs: (wordStarts ? wordStarts[spoken] : duration * spoken / total) * 1000,
             mediaTimeMs: audio.currentTime * 1000, durationMs: duration * 1000
@@ -94,7 +95,9 @@
       audio.onerror = () => { if (!stopped && current()) { stop(); fail(); } };
       audio.onended = () => {
         if (stopped || !current()) return;
-        stop(); game.setState({ wordReveal: 'complete' }, done);
+        stop();
+        if (game.revealChoiceWords) game.revealChoiceWords(text);
+        game.setState({ wordReveal: 'complete' }, done);
       };
       // Reserve the first phrase before playback; nothing flashes while loading.
       game.prepareNarratorReveal(pages[0]);

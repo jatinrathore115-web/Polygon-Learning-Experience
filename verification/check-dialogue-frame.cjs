@@ -13,21 +13,44 @@ const server=http.createServer((req,res)=>{const p=path.resolve(root,'.'+decodeU
   for(const viewport of [{width:1440,height:810},{width:1024,height:768}]){
   await page.setViewportSize(viewport);
   for(let n=1;n<=47;n++){
-   await page.evaluate(n=>{const g=__poly,k=n-1;g.setState({k});g.runStep(k,false);g.prepareNarratorReveal(g.instructionPages(g.steps()[k].narr)[0]);g._voiceLocked=false;g.setState({wordReveal:'complete',storyContent:true,storyDialogue:true,storyControls:true,interactive:true,speaking:false,boundaryTravel:false,polygonTravel:false,reveal:true,voiceElapsedMs:10000});},n);
+   await page.evaluate(n=>{const g=__poly,k=n-1;g.setState({k});g.runStep(k,false);g.prepareNarratorReveal(g.instructionPages(g.steps()[k].narr)[0]);g._voiceLocked=false;g.setState({wordReveal:'complete',ocWords:{open:true,closed:true},storyContent:true,storyDialogue:true,storyControls:true,interactive:true,speaking:false,boundaryTravel:false,polygonTravel:false,reveal:true,voiceElapsedMs:10000});},n);
    await page.waitForTimeout(220);
+   assert(await page.evaluate(()=>[...document.querySelectorAll('button,[role="button"],.ice-button')].every(e=>getComputedStyle(e).textDecorationLine==='none'&&[...e.querySelectorAll('*')].every(child=>getComputedStyle(child).textDecorationLine==='none'))),'Clean button labels on Screen '+n);
+   if(n===5&&viewport.width===1440){
+    const button=page.locator('.story-surface .ice-button').filter({hasText:'Open'}).first();
+    await button.hover();assert.equal(await button.evaluate(e=>getComputedStyle(e).textDecorationLine),'none');
+    await page.mouse.down();assert.equal(await button.evaluate(e=>getComputedStyle(e).textDecorationLine),'none');
+    await page.mouse.move(15,150);await page.mouse.up();
+    assert(await button.evaluate(e=>{
+     const saved=[e.getAttribute('data-feedback'),e.getAttribute('aria-disabled')];
+     let clean=true;
+     for(const feedback of ['','correct','incorrect'])for(const disabled of ['false','true']){
+      e.setAttribute('data-feedback',feedback);e.setAttribute('aria-disabled',disabled);
+      clean=clean&&getComputedStyle(e).textDecorationLine==='none';
+     }
+     ['data-feedback','aria-disabled'].forEach((name,i)=>saved[i]===null?e.removeAttribute(name):e.setAttribute(name,saved[i]));return clean;
+    }),'Correct, incorrect and disabled labels stay undecorated');
+   }
    const result=await page.evaluate(n=>{
     const rect=e=>{const r=e.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height,right:r.right,bottom:r.bottom};};
     const d=document.querySelector('.dialogue-box'),dr=rect(d),surface=document.querySelector('.story-surface');
     const overlaps=[...surface.querySelectorAll('svg,[role="button"],[role="group"]')].filter(e=>{const r=rect(e),s=getComputedStyle(e);return s.display!=='none'&&r.w&&r.h&&r.x<dr.right&&r.right>dr.x&&r.y<dr.bottom&&r.bottom>dr.y;}).map(e=>({tag:e.tagName,box:rect(e)}));
     const count=n===24?rect(surface.querySelector('[role="group"]')):null;
     const check=n===24?rect([...surface.querySelectorAll('.ice-button')].find(e=>e.textContent.trim()==='Check')):null;
-    return{screen:n,dialogue:dr,text:d.innerText,board:rect(document.querySelector('.story-board')),overlaps,
+    const guide=rect(document.querySelector('.swiftee-wrap canvas'));
+    const tail=document.querySelector('.dialogue-tail');
+    const tip=new DOMPoint(12,54).matrixTransform(tail.getScreenCTM());
+    const scale=guide.w/__poly.guideLayout().w;
+    const speakerGap=(__poly.topLessonScene()?guide.x+guide.w*.16-tip.x:guide.y+guide.h*.11-tip.y)/scale;
+    return{screen:n,dialogue:dr,text:d.innerText,board:rect(document.querySelector('.story-board')),overlaps,speakerGap,
       count,check,figure:n===24?rect(surface.querySelector('svg path')):null,
+      metrics:(()=>{const t=d.querySelector('.dialogue-text'),p=d.querySelector('.narrator-text');return {client:t.clientWidth,scroll:t.scrollWidth,height:t.clientHeight,scrollHeight:t.scrollHeight,font:getComputedStyle(p).font,measured:__poly.narratorWidth(p.innerText),padding:getComputedStyle(d).padding};})(),
       overflow:(()=>{const t=d.querySelector('.dialogue-text');return t.scrollWidth>t.clientWidth+2||t.scrollHeight>t.clientHeight+2;})()};
    },n);
    assert.equal(result.overlaps.length,0,'Screen '+n+' dialogue clears learning content');
+   assert(result.speakerGap>=10&&result.speakerGap<=32,'Screen '+n+' tail stays close to Swiftee without touching: '+result.speakerGap);
    assert(!result.overflow,'Screen '+n+' dialogue text fits '+JSON.stringify(result));
-   assert(result.dialogue.y>=0&&result.dialogue.right<=viewport.width&&result.dialogue.bottom<=viewport.height,'Dialogue stays within the viewport');
+   assert(result.dialogue.y>=0&&result.dialogue.right<=viewport.width&&result.dialogue.bottom<=viewport.height,'Dialogue stays within the viewport: '+JSON.stringify(result));
    if(n===24){
     assert(Math.abs(result.count.x+result.count.w/2-result.figure.x-result.figure.w/2)<1,'Stepper is centred on the figure');
     assert(result.count.y>result.figure.bottom+20,'Stepper clears the visible polygon');
@@ -36,11 +59,15 @@ const server=http.createServer((req,res)=>{const p=path.resolve(root,'.'+decodeU
    }
    if(viewport.width===1440){results.push(result);await page.screenshot({path:path.join(out,'screen-'+n+'.png')});}
    // Later narration pages use the same layout and must remain readable too.
-   const pages=await page.evaluate(()=>__poly.instructionPages(__poly.step().narr));
-   for(const text of pages.slice(1)){
+   const pages=await page.evaluate(()=>[...__poly.instructionPages(__poly.step().narr).slice(1),...Object.values(__poly.step().fb||{}).flatMap(text=>__poly.instructionPages(text)),'Yes!']);
+   for(const text of pages){
     await page.evaluate(text=>{__poly.prepareNarratorReveal(text);__poly.setState({wordReveal:'complete'});},text);
     await page.waitForTimeout(20);
     assert(await page.evaluate(()=>{const e=document.querySelector('.dialogue-box'),r=e.getBoundingClientRect(),t=e.querySelector('.dialogue-text');return r.top>=0&&r.bottom<=innerHeight&&t.scrollHeight<=t.clientHeight+2&&t.scrollWidth<=t.clientWidth+2;}),'Later dialogue page fits on Screen '+n);
+    const width=await page.locator('.dialogue-box').evaluate(e=>e.getBoundingClientRect().width);
+    await page.evaluate(()=>__poly.setState({wordReveal:'recorded',revealedWords:1}));
+    assert.equal(await page.locator('.dialogue-box').evaluate(e=>e.getBoundingClientRect().width),width,'Width stays stable during narration');
+    if(text==='Yes!')assert(await page.evaluate(()=>parseFloat(__poly.signStyle().width)<__poly.dialogueLayout().w*.7),'Short text shrinks on Screen '+n);
    }
   }
   }

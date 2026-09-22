@@ -1,0 +1,75 @@
+Look! A point.
+Woah! It drew a shape.
+Let's look at this shape closely.
+There are no gaps in its boundary.
+Is it open or closed?
+No gaps in its boundary. This shape is closed.
+Yes! It is closed.
+Is this shape open or closed?
+There is a gap in its boundary. It is open.
+Yes! It is open.
+What about this one?
+And this?
+How about this one?
+These two shapes are open...
+...and these two shapes are closed.
+Look! The boundaries of the shapes are different too.
+Some are straight and some are curved.
+Which boundaries are straight and which are curved?
+Look! This boundary isn't curved. It is made of straight lines.
+Look closely. This boundary bends smoothly. It is curved.
+You got it! These boundaries are straight, while these are curved.
+Select all the shapes made using only straight lines.
+Look for shapes with only straight lines and no curves.
+Yes! Both shapes are made of straight lines.
+We call this a polygon.
+A closed figure made of only straight line segments is called a polygon.
+Which of these figures are polygons?
+That is right! These are the ones.
+A polygon is closed, with only straight sides.
+These line segments are the sides of the polygon.
+The point where two sides meet is called a vertex.
+When two sides meet, they also form an angle.
+Label the parts of the polygon.
+Perfect! Side, vertex and angle — all labelled.
+Not that one. A side is straight, a vertex is a corner.
+How many sides does this polygon have?
+Count each side carefully and try again.
+This polygon has 5 sides.
+Now let's change how it looks.
+Drag any vertex. Stretch it, squash it, or resize it.
+Whoa! It looks quite different now.
+Its appearance has completely changed.
+But not everything has changed.
+Let's count the sides again.
+Both polygons still have 5 sides.
+So the number of sides gives us a good way to name polygons.
+A polygon with 3 sides is called a triangle.
+A polygon with 4 sides is called a quadrilateral.
+Select all the quadrilaterals.
+A polygon with 5 sides is called a pentagon.
+A polygon with 6 sides is called a hexagon.
+A polygon with 7 sides is called a heptagon.
+A polygon with 8 sides is called an octagon.
+Let's recall the different types of polygons we learnt about.
+Which of these is a polygon?
+Yes! Closed, with only straight sides.
+Is it closed? Does it have only straight sides?
+A polygon is closed, with only straight sides. Try again.
+Classify the figures as a polygon or not a polygon.
+Great job! You sorted the figures correctly.
+Wrong group. Check for gaps or curved sides.
+Polygons are closed, with only straight sides. Try again.
+Find the odd one out. Which figure is NOT a polygon?
+You found it! That is not a polygon.
+Which figure breaks the rule for a polygon?
+Which of these is a pentagon?
+Exactly! A pentagon always has 5 sides.
+Count the sides of each figure carefully.
+Look for every figure with exactly 5 sides.
+Classify each figure as a hexagon or a heptagon.
+Well done! Hexagons have 6 sides and heptagons have 7 sides.
+Count the sides of the ones you placed wrong.
+6 sides make a hexagon, 7 make a heptagon.
+You did it! Now you know what makes a figure a polygon.
+Not quite. Try again.

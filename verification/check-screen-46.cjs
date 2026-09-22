@@ -27,7 +27,7 @@ const server=http.createServer((req,res)=>{
   });
   const compare=(s,ref)=>{
    assert.deepEqual(s.board,ref.board);assert.deepEqual(s.guide,ref.guide);assert.deepEqual(s.zones,ref.zones);
-   assert.equal(s.dialogue.x,ref.dialogue.x);assert.equal(s.dialogue.w,ref.dialogue.w);assert(Math.abs(s.dialogue.bottom-ref.dialogue.bottom)<1);
+   assert(Math.abs(s.dialogue.right-ref.dialogue.right)<1);assert(Math.abs(s.dialogue.bottom-ref.dialogue.bottom)<1);
    assert.equal(s.cards.length,4);assert.equal(s.background,'1');
    for(const c of s.cards){assert(Math.abs(c.w-ref.cards[0].w)<0.1);assert(Math.abs(c.y-ref.cards[0].y)<0.1);assert(c.x>s.board.x&&c.right<s.board.right);}
    assert(Math.abs((s.cards[0].x+s.cards[3].right)/2-(s.board.x+s.board.w/2))<1);

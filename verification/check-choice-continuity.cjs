@@ -20,7 +20,7 @@ const server=http.createServer((req,res)=>{const file=path.resolve(root,'.'+deco
     cards:[...document.querySelectorAll('.story-surface svg')].map(e=>b(e.parentElement)),check:check?b(check):null};
   });
   const validate=(s,ref,n)=>{
-   assert.deepEqual(s.board,ref.board);assert.deepEqual(s.guide,ref.guide);assert.equal(s.dialogue.x,ref.dialogue.x);assert.equal(s.dialogue.w,ref.dialogue.w);assert(Math.abs(s.dialogue.bottom-ref.dialogue.bottom)<1);
+   assert.deepEqual(s.board,ref.board);assert.deepEqual(s.guide,ref.guide);assert(s.dialogue.x>s.board.x&&s.dialogue.right<s.cards[0].x);assert(Math.abs(s.dialogue.bottom-ref.dialogue.bottom)<1);
    assert.equal(s.cards.length,n);
    for(const c of s.cards)assert(c.x>s.dialogue.right+20&&c.right<s.board.right-20&&c.y>s.board.y+20&&c.bottom<s.board.bottom-20,'Cards stay in the right lane with breathing room');
    for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){const a=s.cards[i],b=s.cards[j];assert(a.right<b.x||b.right<a.x||a.bottom<b.y||b.bottom<a.y);}

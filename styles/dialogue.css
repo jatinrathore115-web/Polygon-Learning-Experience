@@ -85,8 +85,8 @@
 .comic-dialogue::after {
   content: none;
 }
-.comic-dialogue.dialogue-box { --dialogue-height: 0px; }
-.dialogue-box .dialogue-text { padding:8px 12px; }
+.comic-dialogue.dialogue-box { --dialogue-height: 0px; padding:13px var(--dialogue-side-padding, 20px); }
+.dialogue-box .dialogue-text { padding:4px 0; }
 
 /* The boundary lesson opens out into a centred teaching scene. */
 @keyframes boundaryTravel {

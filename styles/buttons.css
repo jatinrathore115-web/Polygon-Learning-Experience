@@ -6,6 +6,9 @@
    an ice-blue rim that any inline colour still overrides, so the worst case is
    the theme colour rather than black. */
 .game-action { position:relative; isolation:isolate; touch-action:manipulation; transition:scale 140ms ease; border-color:#7fc4de; }
+/* Labels stay clean in every interaction and feedback state, including nested text. */
+:is(button,[role="button"],.ice-button),
+:is(button,[role="button"],.ice-button) * { text-decoration:none!important; }
 .game-action:focus, .ice-button:focus { outline:none; }
 .game-action:focus-visible { outline:3px solid #31b9de; outline-offset:5px; }
 /* Colour-matched puzzle tiles and recessed sockets for the parts activity. */
@@ -71,9 +74,9 @@
 .ice-button:focus-visible { outline:3px solid #31b9de; outline-offset:5px; }
 .ice-button[aria-pressed="true"],.ice-button[aria-current="true"] { outline:3px solid #237cb5; outline-offset:3px; }
 .ice-button[data-feedback="correct"] {
-  --button-feedback-glow:0 0 0 4px #39cf72,0 0 20px 7px #39cf7266;
-  outline-color:#249b51;
+  --button-feedback-glow:0 12px 18px -7px rgba(35,170,92,.42),0 18px 26px -12px rgba(35,170,92,.22);
 }
+.ice-button[data-feedback="correct"][aria-pressed="true"]:not(:focus-visible) { outline:none; }
 .ice-button[data-feedback="incorrect"] {
   --button-feedback-glow:0 0 0 4px #f15b63,0 0 20px 7px #f15b6366;
   outline-color:#cf3643;
@@ -96,15 +99,92 @@
   .game-action,.game-action::before,.game-action::after,.ice-button,.ice-button::before,.ice-button::after { animation:none!important; transition:none!important; }
   .ice-button:hover,.ice-button:active { translate:none!important; scale:1!important; }
 }
-/* Upcoming classification choices stay visible for context, but cannot compete for focus. */
+/* Yellow glass concept choices: navy lettering stays legible on every face.
+   The white rim and amber underside follow the supplied reference. */
+.ice-button.concept-choice {
+  --concept-button-face:linear-gradient(180deg,#fff16a 0%,#ffe52b 38%,#ffda13 68%,#ffbd0a 100%);
+  --button-face:var(--concept-button-face);
+  --button-rim:linear-gradient(180deg,#ffffff 0%,#fffef5 70%,#e4e9ed 100%);
+  --concept-button-rest-shadow:inset 0 2px 1px #fff9,inset 0 -5px 0 #f69b0b,0 5px 0 #c2cbd3,0 8px 12px #23496a29;
+  border-radius:999px!important;
+  font-size:32px!important;
+  color:#17304c!important; -webkit-text-fill-color:#17304c;
+  -webkit-text-stroke:0; text-shadow:none!important;
+  box-shadow:var(--concept-button-rest-shadow),var(--button-feedback-glow)!important;
+}
+.ice-button.concept-choice::before {
+  inset:4% 4% auto; width:auto; height:43%;
+  border-radius:999px 999px 45% 45%; transform:none;
+  background:linear-gradient(180deg,#fffbbf99,#fff8a61f);
+}
+.ice-button.concept-choice::after {
+  left:12%; top:11%; width:15%; max-width:none; height:12%;
+  border-radius:50%; background:#fffef0cc;
+}
+.ice-button.concept-choice:not([aria-disabled="true"]):hover {
+  filter:brightness(1.03); translate:0 -3px;
+  box-shadow:inset 0 2px 1px #fffc,inset 0 -5px 0 #f69b0b,0 7px 0 #c2cbd3,0 10px 16px #23496a33,var(--button-feedback-glow)!important;
+}
+.ice-button.concept-choice:not([aria-disabled="true"]):active {
+  translate:0 3px; scale:.98;
+  box-shadow:inset 0 3px 4px #bd7b0029,inset 0 -2px 0 #f69b0b,0 2px 0 #c2cbd3,var(--button-feedback-glow)!important;
+}
+.ice-button.concept-choice:focus-visible { outline:4px solid #17304c; outline-offset:6px; }
+.ice-button.concept-choice[aria-disabled="true"] {
+  --button-face:linear-gradient(#f4e6ad,#e0c98e);
+  --button-rim:linear-gradient(#fffdf2,#dce0dc);
+  box-shadow:inset 0 2px 0 #fff6,0 2px 0 #b1b9bd,var(--button-feedback-glow)!important;
+}
+.ice-button.concept-choice:is([data-feedback="correct"],[data-feedback="incorrect"]) {
+  --button-face:var(--concept-button-face);
+  --button-rim:linear-gradient(180deg,#ffffff 0%,#fffef5 70%,#e4e9ed 100%);
+}
+.ice-button.concept-choice[data-feedback="correct"][aria-disabled="true"] {
+  box-shadow:var(--concept-button-rest-shadow),var(--button-feedback-glow)!important;
+}
+@media(prefers-reduced-motion:reduce) {
+  .ice-button.concept-choice:hover,.ice-button.concept-choice:active { translate:none!important; scale:1!important; }
+}
 .ice-button[data-sequence-state] {
-  transition:filter 360ms ease,opacity 360ms ease,left 360ms ease,width 360ms ease,box-shadow 180ms ease;
+  transition:left 360ms ease,width 360ms ease,box-shadow 180ms ease;
 }
 .ice-button[data-sequence-state="pending"] {
-  filter:blur(2px)!important;
-  opacity:.42!important;
+  /* Unavailable choices remain legible; disabled styling carries their state. */
+  filter:none!important;
+  opacity:1!important;
   pointer-events:none!important;
 }
 @media(prefers-reduced-motion:reduce) {
   .ice-button[data-sequence-state] { transition:none!important; }
+}
+
+/* The answer the learner did not choose, once they have chosen correctly.
+   It collapses to nothing so the row closes up and the correct button is
+   carried to the centre -- a success state of one button, rather than the
+   answer sitting next to a dead one. Declared !important because .ice-button
+   pins its border and box-shadow the same way, and with box-sizing:border-box
+   that 6px border is what would otherwise hold the collapsed button open and
+   leave the answer a few pixels off centre. The transition lives on the
+   element's inline style, so it is present in both states and the collapse
+   reads as a glide rather than a jump. */
+.ice-button[data-retired="true"] {
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  border-width: 0 !important;
+  box-shadow: none !important;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+/* Reserve both slots while loading. Visibility switches at the VO cue without
+   fading or moving the lettering, so its first visible frame is fully crisp. */
+.ice-button.concept-choice[data-word-cued="false"] {
+  visibility:hidden!important; pointer-events:none!important;
+  animation:none!important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ice-button[data-retired="true"] { transition: none !important; }
 }
