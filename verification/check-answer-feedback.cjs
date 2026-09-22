@@ -32,6 +32,7 @@ const server=http.createServer((req,res)=>{
    const r=await page.evaluate(code=>{window.sounds=[];Function(code)();return{sound:[...sounds],pose:__poly.guide.sprite.seg.state,frames:__poly.guide.sprite.seg.frames,reaction:document.querySelector('.swiftee-wrap').dataset.answer};},code);
    await page.waitForTimeout(50);
    assert(!/[\u2713-\u2718\u2705\u274c\u00d7]/u.test(await page.locator('body').innerText()),'Learning feedback contains no tick or cross icons');
+   assert.equal(await page.locator('.swiftee-wrap > :not(canvas)').count(),0,'Swiftee reacts with an expression only, without a swirl or caption');
    return r;
   };
   const expect=(r,correct)=>{assert.deepEqual(r.sound,[correct?'ok':'no'],'Exactly one answer SFX');assert.equal(r.pose,correct?'happy':'confused','Expression changes immediately');assert.equal(r.reaction,correct?'correct':'incorrect');assert.equal(r.frames,18);};
@@ -51,7 +52,6 @@ const server=http.createServer((req,res)=>{
   ];
   for(const[k,right,wrong]of cases){
    await show(k);console.log('Checking screen',k+1);expect(await act(wrong),false);
-   assert.equal(await page.locator('.swiftee-oops').evaluate(e=>getComputedStyle(e).visibility),'visible');
    if(k===44)await page.screenshot({path:path.join(out,'incorrect.png')});
    await show(k);expect(await act(right),true);
    if(k===44)await page.screenshot({path:path.join(out,'correct.png')});
@@ -65,9 +65,9 @@ const server=http.createServer((req,res)=>{
   await page.waitForTimeout(1100);assert.equal(await page.locator('.swiftee-wrap').getAttribute('data-answer'),null,'Reaction cleans up');
   await show(18);expect(await act('__poly.tapCard(1)()'),true);assert.deepEqual((await act('__poly.tapCard(1)()')).sound,[],'Accepted answer cannot replay reward');
   await page.emulateMedia({reducedMotion:'reduce'});await show(44);expect(await act('__poly.tapCard(0)()'),true);
-  assert.equal(await page.locator('.swiftee-swirl').evaluate(e=>getComputedStyle(e).animationName),'none');assert(await page.evaluate(()=>__poly.guide.sprite.seg.still));
+  assert(await page.evaluate(()=>__poly.guide.sprite.seg.still));
   await page.setViewportSize({width:390,height:844});await show(44);expect(await act('__poly.tapCard(2)()'),false);
-  const caption=await page.locator('.swiftee-oops').boundingBox();assert(caption.x>=0&&caption.x+caption.width<=390&&caption.y>=0&&caption.y+caption.height<=844);
+  const guide=await page.locator('.swiftee-wrap').boundingBox();assert(guide.x>=0&&guide.x+guide.width<=390&&guide.y>=0&&guide.y+guide.height<=844);
   await page.screenshot({path:path.join(out,'portrait-incorrect.png')});assert.deepEqual(errors,[]);
   console.log('PASS: icon-free, immediate single-SFX feedback across 15 screens, preserved artwork, glow, cleanup, repeat taps, reduced motion and portrait.');
  }finally{await browser.close();await new Promise(r=>server.close(r));}

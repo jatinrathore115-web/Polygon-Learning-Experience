@@ -132,13 +132,6 @@
          while she speaks — and it is transform only. --- */
   .swiftee-wrap { transform-origin: 50% 88%; transition: transform 760ms cubic-bezier(.2,.8,.25,1.04), opacity 280ms ease-out; will-change: transform; }
   .swiftee-wrap[data-hidden="true"] { transition: none; }
-  .swiftee-wrap { container-type:inline-size; }
-  .swiftee-swirl { position:absolute; inset:5%; width:90%; height:90%; fill:none; stroke:#fff6a6; stroke-width:2.5; stroke-linecap:round; opacity:0; pointer-events:none; }
-  .swiftee-oops { position:absolute; top:90%; left:0; width:100%; text-align:center; font:900 18cqw/1.15 Nunito,sans-serif; color:#fffbea; -webkit-text-stroke:1px #174b52; paint-order:stroke fill; text-shadow:0 2px 2px #174b52; visibility:hidden; pointer-events:none; }
-  .swiftee-wrap[data-answer="correct"] .swiftee-swirl { animation:swifteeReward 850ms ease-out both; }
-  .swiftee-wrap[data-answer="incorrect"] .swiftee-oops { visibility:visible; }
-  @keyframes swifteeReward { 0% { opacity:0; transform:rotate(-40deg) scale(.92); } 20% { opacity:.95; } 75% { opacity:.75; } 100% { opacity:0; transform:rotate(100deg) scale(1.04); } }
-  @media(prefers-reduced-motion:reduce) { .swiftee-wrap[data-answer="correct"] .swiftee-swirl { animation:none; } }
   /* --- ambient + interaction juice --- */
   @keyframes ripple { 0% { transform: scale(0.18); opacity: 0.9; } 100% { transform: scale(2.5); opacity: 0; } }
   @keyframes instructionPanelIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
@@ -178,8 +171,6 @@
       <div style="{{ guideViewport }}">
         <div class="swiftee-wrap" data-hidden="{{ guideHidden }}" style="{{ guideStyle }}">
           <canvas ref="{{ guideRef }}" width="{{ guideCell }}" height="{{ guideCell }}" role="img" aria-label="Swiftee, your guide" style="{{ guideCanvasStyle }}"></canvas>
-          <svg class="swiftee-swirl" viewBox="0 0 100 100" aria-hidden="true"><path d="M16 69 A39 32 0 0 1 29 22 M84 31 A39 32 0 0 1 71 78"/></svg>
-          <span class="swiftee-oops" aria-hidden="true">Oh no!</span>
         </div>
       </div>
     </sc-if>
@@ -698,8 +689,6 @@ class SwifteeGuide {
     const token = this.reaction = {priority:3};
     const name = correct ? 'happy' : 'confused', el = this.feedbackElement();
     if (el) {
-      el.removeAttribute('data-answer');
-      void el.offsetWidth; // Restart one brief reaction on a fresh answer.
       el.setAttribute('data-answer', correct ? 'correct' : 'incorrect');
     }
     // Go straight to the expression; a previous talking/idle exit must not delay feedback.
@@ -1859,7 +1848,7 @@ class Component extends DCLogic {
     this.burst(p.x, p.y, opt || {n:6,d:12});
   }
   confetti() {
-    // The brief guide swirl celebrates answers; reserve the shower for the finale.
+    // Swiftee's expression celebrates answers; reserve the shower for the finale.
     if (this.step().sc !== 'END') return;
     this.sfx('party');
     if (this.reducedMotion()) return;
