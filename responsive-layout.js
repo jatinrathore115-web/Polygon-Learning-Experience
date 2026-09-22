@@ -5,6 +5,12 @@
   const W=1980,H=W*9/16;
   const num=(v,fallback=0)=>Number.isFinite(parseFloat(v))?parseFloat(v):fallback;
   const px=v=>v+'px';
+  // Cover the viewport with one undistorted 16:9 image. Content keeps its own
+  // fit/reflow calculation, so filling the background never crops an activity.
+  const background=(width,height)=>{
+    const w=Math.max(width,height*16/9),h=w*9/16;
+    return {left:px((width-w)/2),top:px((height-h)/2),width:px(w),height:px(h)};
+  };
   const frame=(width,height)=>{
     const compact=width<900&&height>width;
     const scale=compact?width/W:Math.min(width/W,height/H);
@@ -108,8 +114,7 @@
     V.frameStyle.height=px(contentHeight);
     Object.assign(V.viewportStyle,{overflowY:'auto',overflowX:'hidden',overscrollBehavior:'contain'});
     Object.assign(V.scalerStyle,{height:px(f.stageHeight),top:0,transform:'translateX(-50%) scale('+scale+')',transformOrigin:'top center'});
-    const scenicWidth=f.stageHeight*16/9;
-    Object.assign(V.bgStyle,{left:px((W-scenicWidth)/2),top:0,width:px(scenicWidth),height:px(f.stageHeight),objectFit:'contain',transition:'none'});
+    Object.assign(V.bgStyle,background(f.width,contentHeight),{transition:'none'});
     // Titles and button labels remain readable after the activity is fitted.
     // Font changes are confined to text: illustrations keep their own colours.
     const readable=style=>{
@@ -130,5 +135,5 @@
     });
     V.safeStyle['--compact-label-size']=px(16/physicalScale);
   }
-  window.PolygonResponsive={frame,apply};
+  window.PolygonResponsive={frame,background,apply};
 })();

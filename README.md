@@ -35,6 +35,21 @@ default settings — framework preset **Other**, no build command, no output dir
 
 > The lesson lives at `index.html`, so Vercel serves it at `/` with no routing config.
 
+Deploy the complete project, including `assets/`, `styles/`, `responsive-layout.js`,
+and the scripts and MP3s in `voiceovers/`. Required scripts and styles load before
+lesson startup. `vercel.json` revalidates files on new requests so a new release
+does not keep using stale scripts or voice cues. Other static hosts should apply
+the same `Cache-Control: public, max-age=0, must-revalidate` policy.
+
+A fresh browser may block automatic audio. The lesson keeps the current instruction
+and offers **Tap to play audio**; it resumes that instruction after a gesture instead
+of skipping ahead on an estimated timer. Failed downloads use the same retry path.
+All current lesson prompts and configured answer feedback have matching local audio.
+Three previously unrecorded questions use bundled WAVs generated with Microsoft Zira
+Desktop; their word cues come from synthesis events. The quadrilateral success response
+reuses the existing recorded encouragement. `voiceovers/build-fallback-audio.ps1`
+recreates the WAVs on Windows; `voiceovers/recordings.js` is the deployed catalog.
+
 ## Layout
 
 ```
@@ -62,12 +77,14 @@ design/                  design review and standalone concept, not deployed
 
 ### Scene structure
 
-Every layer is positioned as a percentage of one 1980×1080 master stage that is scaled by
-a single transform, so the composition holds from 1920×1080 down to 1024×576.
+Landscape learning content fits a 1980×1113.75 (16:9) master stage. Portrait screens
+reflow the dialogue and activities, with vertical scrolling when needed for readable
+text. A single scenic image covers the entire viewport independently of the content;
+its 16:9 proportions stay intact, with only decorative edges cropped.
 
 | Layer | z | Position |
 |---|---|---|
-| Starry background (`assets/image.png`) | 0 | full stage |
+| Starry background (`assets/image.png`) | 0 | full viewport |
 | Swiftee guide | 20 | left rock; feet at stage (192, 824) |
 | Activity surface | 30 | right of the guide, stage (378, 122) |
 | Learning content | 32 | stage (390, 172), 1570 × 701 logical pixels |

@@ -9,10 +9,12 @@ node_modules/
 .agents/
 .thumbnail
 
-# The lesson loads recordings.js, recorded-player.js and the 75 mp3s at
+# The lesson loads recordings.js, recorded-player.js and the MP3/WAV audio at
 # runtime, so voiceovers/ must ship — excluding the folder wholesale left the
 # live site with no recorded voice at all. Only the working files stay behind.
 voiceovers/*.cjs
+voiceovers/*.ps1
+voiceovers/fallback-recordings.json
 voiceovers/*.txt
 voiceovers/*.md
 voiceovers/narrator-lines.json

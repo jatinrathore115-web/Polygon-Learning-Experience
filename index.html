@@ -9,11 +9,22 @@
 <link rel="preload" href="assets/instructiion%20board.png" as="image">
 <link rel="preload" href="assets/backgound%20%2002.png" as="image">
 <link rel="stylesheet" href="styles/fonts.css">
+<link rel="preload" href="assets/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles/buttons.css">
+<link rel="stylesheet" href="styles/dialogue.css">
+<link rel="stylesheet" href="styles/cards.css">
+<link rel="stylesheet" href="styles/weather.css">
 <style>
   html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:#103574; }
   .game-viewport { position:fixed; inset:0; width:100%; height:100%; height:100dvh; overflow:hidden; background:#103574; }
 </style>
 <script src="responsive-layout.js"></script>
+<!-- Required lesson data and voice cues must be ready before the app mounts,
+     including on a cold cache or a slow production connection. -->
+<script src="polygon-data.js"></script>
+<script src="screen-navigator.js"></script>
+<script src="voiceovers/recordings.js"></script>
+<script src="voiceovers/recorded-player.js"></script>
 <!-- Swiftee's sheet table, generated from the character pack's manifest by
      build-swiftee.cjs. It loads here, not from the helmet below, because the
      lesson script reads it while it is being evaluated. -->
@@ -29,10 +40,6 @@
 <body>
 <x-dc>
 <helmet>
-<link rel="stylesheet" href="styles/buttons.css" />
-<link rel="stylesheet" href="styles/dialogue.css" />
-<link rel="stylesheet" href="styles/cards.css" />
-<link rel="stylesheet" href="styles/weather.css" />
 <style>
   html, body { margin: 0; padding: 0; height: 100%; background: #103574; overflow: hidden; }
   a { color: #2f6fd0; } a:hover { color: #1546a0; }
@@ -150,17 +157,14 @@
     .game-action,.game-action::before,.game-action::after,.game-action *,.game-handle { animation:none !important; transition:none !important; }
   }
 </style>
-<script src="polygon-data.js"></script>
-<script src="screen-navigator.js"></script>
-<script src="voiceovers/recordings.js"></script>
-<script src="voiceovers/recorded-player.js"></script>
 </helmet>
 <div class="game-viewport" ref="{{ stageRef }}" onScroll="{{ layoutScroll }}" style="{{ viewportStyle }}">
  <div class="game-frame" style="{{ frameStyle }}">
+  <!-- One full-viewport scenic layer; the learning content fits independently. -->
+  <img class="lesson-background" sc-camel-src="{{ backgroundSrc }}" alt="" draggable="false" style="{{ bgStyle }}" />
   <div data-lesson="{{ lessonScene }}" data-layout="{{ responsiveLayout }}" style="{{ scalerStyle }}">
 
-    <!-- ============ frozen background ============ z 0 -->
-    <img class="lesson-background" src="{{ backgroundSrc }}" alt="" draggable="false" style="{{ bgStyle }}" />
+    <!-- ============ decorative weather ============ z 5 -->
     <div class="scene-weather" aria-hidden="true">
       <div class="scene-snow"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <div class="scene-sparkles"><i></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -331,6 +335,12 @@
   </div>
  </div>
 </div>
+
+<sc-if value="{{ voiceError }}" hint-placeholder-val="{{ false }}">
+  <div role="status" style="position:fixed;left:0;right:0;bottom:max(24px,env(safe-area-inset-bottom));z-index:100;display:flex;justify-content:center;pointer-events:none">
+    <button class="ice-button game-action" onClick="{{ retryVoice }}" style="pointer-events:auto;min-height:48px;padding:12px 24px;font-size:20px">{{ voiceError }}</button>
+  </div>
+</sc-if>
 
 <div aria-hidden="true" style="position:fixed;inset:0;z-index:95;pointer-events:none;overflow:hidden">
   <sc-for list="{{ confettiFx }}" as="f" hint-placeholder-count="0"><div class="{{ f.className }}" style="{{ f.style }}"></div></sc-for>
@@ -797,7 +807,10 @@ class Component extends DCLogic {
         if (intro && intro.then) intro.then(begin, begin); else begin();
       });
     };
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(boot, boot);
+    if (document.fonts && document.fonts.load) Promise.all([
+      document.fonts.load('800 46px Nunito'), document.fonts.load('900 30px Nunito'),
+      document.fonts.load('800 30px "Baloo 2"')
+    ]).then(boot, boot);
     else boot();
     window.__poly = this;
     if (window.PolygonScreenNavigator) this._disposeNavigator = window.PolygonScreenNavigator.mount(this);
@@ -889,9 +902,7 @@ class Component extends DCLogic {
   }
   // Schedule from the resumed audio clock, never from a suspended clock.
   unlockAudio = (event) => {
-    /* A normal game gesture recovers blocked narration without a button. The
-       pending retry is the signal, not a message on screen: the lesson no
-       longer stops to ask for a tap, so there is no voiceError to wait for. */
+    // A trusted gesture resumes the same instruction after autoplay was blocked.
     const gesture = event && event.isTrusted && (event.type === 'pointerup' || event.type === 'touchend'
       || (event.type === 'keydown' && !event.repeat && (event.key === 'Enter' || event.key === ' ')));
     if (gesture && this._voiceRetry && Date.now() - (this._lastVoiceGesture || 0) > 350) {
@@ -996,9 +1007,8 @@ class Component extends DCLogic {
   }
 
   /* ---------- narration + voice over ---------- */
-  /* How long a silent line stays up: a measured duration if the recording gave
-     us one, otherwise read aloud at roughly a young learner's pace, with a
-     floor so even three words are not gone before they land. */
+  /* Estimate word timing only when a speech engine provides no boundaries.
+     This duration must never complete a blocked or failed recording. */
   readingTime(text, durationMs) {
     if (Number.isFinite(durationMs) && durationMs > 400) return durationMs;
     const words = String(text || '').split(/\s+/).filter(Boolean).length;
@@ -1010,10 +1020,8 @@ class Component extends DCLogic {
     const generation = this.gen || 0, id = this.spkId = (this.spkId || 0) + 1;
     const current = () => id === this.spkId && generation === (this.gen || 0);
     let finished = false, started = false, failed = false;
-    /* A voice the browser will not start must not stop the lesson. The line
-       stays on screen, is given time to be read, and the lesson carries on;
-       audio is still retried silently on the learner's next touch, so sound
-       returns for the following lines without ever asking for a tap. */
+    // A fresh browser origin may block autoplay. Keep this instruction pending:
+    // an estimated reading timer must never skip unheard teaching or word cues.
     const fail = () => {
       if (!current() || finished) return;
       failed = true; finished = true;
@@ -1021,10 +1029,7 @@ class Component extends DCLogic {
       this._voiceRetry = () => this.speak(text, cb, durationMs);
 
       this.prepareNarratorReveal(text, durationMs);
-      this.revealChoiceWords(text); // Silent fallback: show the choices with the readable instruction.
-      this.setState({ wordReveal: 'complete', storyDialogue: true, storyContent: true, voiceError: '' });
-      this.later(() => { if (current()) this.setState({ wordReveal: 'complete' }, cb); },
-        this.readingTime(text, durationMs));
+      this.setState({ wordReveal: 'complete', storyDialogue: true, storyContent: true, voiceError: 'Tap to play audio' });
     };
     const recording = window.PolygonRecordedVoice && window.PolygonRecordedVoice.find(text);
     if (recording) return window.PolygonRecordedVoice.play(this, text, recording, current, cb, fail);
@@ -1066,6 +1071,7 @@ class Component extends DCLogic {
     this.unlockAudio();
     const retry = this._voiceRetry;
     if (!retry) return;
+    this._voiceRetry = null; // Pointer-up and click can belong to the same gesture.
     this.spkId = (this.spkId || 0) + 1;
     try { window.speechSynthesis.cancel(); } catch (error) {}
     this.setState({ voiceError: '', muted: false });
@@ -1417,7 +1423,7 @@ class Component extends DCLogic {
       { sc: 'S17', ph: 'tri', label: '17 · Triangle', narr: 'A polygon with 3 sides is called a triangle.', fig: 'triangle', count: 3, reveal: 'Triangle', auto: true },
       { sc: 'S17', ph: 'quad', label: '17 · Quadrilateral', narr: 'A polygon with 4 sides is called a quadrilateral.', fig: 'quad', count: 4, reveal: 'Quadrilateral', morphFrom: 'triangle', auto: true },
       { sc: 'S18', label: '18 · Quadrilaterals', narr: 'Select all the quadrilaterals.', set: 'q36', q: 'multi', correct: [0, 2, 3],
-        fb: { ok: 'That’s right! Quadrilaterals are polygons with 4 sides.' } },
+        fb: { ok: 'That is right! These are the ones.' } },
       { sc: 'S19', label: '19 · Pentagon', narr: 'A polygon with 5 sides is called a pentagon.', fig: 'pentagon', count: 5, reveal: 'Pentagon', morphFrom: 'quad', auto: true },
       { sc: 'S20', label: '20 · Hexagon', narr: 'A polygon with 6 sides is called a hexagon.', fig: 'hexagon', count: 6, reveal: 'Hexagon', morphFrom: 'pentagon', auto: true },
       { sc: 'S21', label: '21 · Heptagon', narr: 'A polygon with 7 sides is called a heptagon.', fig: 'heptagon', count: 7, reveal: 'Heptagon', morphFrom: 'hexagon', auto: true },
@@ -2902,7 +2908,7 @@ class Component extends DCLogic {
       showChoice: false, showChips: false, showCounter: false, showCheck: false, showZones: false, showHand: false,
       zoneRowStyle: {}, liveMsg: this.state.say || '', checkFeedback: '',
       narrStyle: this.narrStyle(), narrRef: this.narrRef,
-      bgStyle: this.bgStyle(), boardStyle: this.boardStyle(), signStyle: this.signStyle(),
+      bgStyle: this.bgStyle(frame), boardStyle: this.boardStyle(), signStyle: this.signStyle(),
       backgroundSrc: st.ready && (st.k === 13 || ['C2','C5'].includes(this.step().sc)) && st.boundaryBackgroundReady ? 'assets/backgound%20%2002.png' : 'assets/image.png',
       lessonScene: this.learningReferenceScene() ? 'parts-reference' : this.polygonIntroScene() ? 'polygon-intro' : this.topLessonScene() ? 'boundary' : 'standard',
       safeStyle: this.safeStyle(),
@@ -3348,8 +3354,8 @@ class Component extends DCLogic {
       grid: {x:Math.round(stageMid - 370),y:187,tile:350,gap:40}
     };
   }
-  bgStyle() {
-    return Object.assign(stageBox({ x: 0, y: 0, w: STAGE.w, h: STAGE.h }, 0),
+  bgStyle(frame) {
+    return Object.assign({position:'absolute',zIndex:0}, window.PolygonResponsive.background(frame.width,frame.height),
       { display: 'block', objectFit: 'cover', userSelect: 'none', pointerEvents: 'none',
         filter: this.topLessonScene() ? 'saturate(1.06) brightness(1.04)' : 'none', transition: this.reducedMotion() ? 'none' : 'filter 1000ms ease-in-out' });
   }

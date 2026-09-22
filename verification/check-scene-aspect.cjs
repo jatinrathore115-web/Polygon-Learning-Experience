@@ -33,7 +33,7 @@ const server=http.createServer((req,res)=>{
             labels:[...document.querySelectorAll('.story-surface div')].filter(e=>!e.childElementCount&&e.textContent.trim()&&getComputedStyle(e).display!=='none'&&getComputedStyle(e).visibility!=='hidden'&&getComputedStyle(e).opacity!=='0').map(e=>({...rect(e),text:e.textContent})).filter(r=>r.w>0&&r.h>0),
             cards:[...document.querySelectorAll('.story-surface svg')].map(e=>rect(e.parentElement)),
             x:r.x,y:r.y,w:r.width,h:r.height,right:r.right,bottom:r.bottom,
-            backgrounds:[...stage.querySelectorAll(':scope > img')].map(e=>{const b=e.getBoundingClientRect();return {w:b.width,h:b.height,x:b.x,y:b.y};}),
+            backgrounds:[...document.querySelectorAll('.lesson-background')].map(e=>{const b=e.getBoundingClientRect();return {w:b.width,h:b.height,x:b.x,y:b.y,right:b.right,bottom:b.bottom};}),
             backdrop:getComputedStyle(stage.parentElement).backgroundImage,
             overflow:document.documentElement.scrollWidth>innerWidth||document.documentElement.scrollHeight>innerHeight};
         });
@@ -45,6 +45,7 @@ const server=http.createServer((req,res)=>{
         assert.equal(result.backgrounds.length,1,tag+': one scenic background');
         const bg=result.backgrounds[0];
         assert(Math.abs(bg.w/bg.h-16/9)<.001,tag+': background artwork stays 16:9');
+        assert(bg.x<=.5&&bg.y<=.5&&bg.right>=width-.5&&bg.bottom>=result.contentHeight-.5,tag+': background covers the entire frame without gaps');
         if(compact){
           assert(result.font>=17.9,tag+': readable dialogue');
           assert(result.dialogue.x>=0&&result.dialogue.right<=width,tag+': dialogue fits');

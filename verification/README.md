@@ -19,6 +19,7 @@ blocks external services to verify that runtime scripts, fonts, images and audio
 - `check-scene-aspect.cjs`: all 47 screens at seven viewport sizes; one scenic background, portrait text and control layout, drag/drop, counters and rotation. Short portrait screens may scroll vertically to keep controls readable.
 - `check-teaching-motion.cjs`: side, vertex and angle teaching sequence.
 - `check-recorded-voice.cjs` and `check-voice-gate.cjs`: recording lookup, timings and narration gates.
+- `check-live-parity.cjs`: case-sensitive asset paths, delayed scripts/fonts, simulated autoplay rejection on a fresh origin, real MP3 retry, transient audio download failure, and full-viewport background coverage.
 - Other `check-*.cjs` scripts cover individual lesson features.
 - `check-answer-feedback.cjs`: icon-free feedback, synchronized happy/sympathetic expressions and one SFX per answer across 15 screens; original artwork, green/red glows, reaction cleanup, repeated taps, portrait and reduced motion. `check-guide-sync.cjs` and `check-sfx.cjs` cover reaction priorities and audio lifecycle.
 

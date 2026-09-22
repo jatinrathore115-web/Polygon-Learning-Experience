@@ -42,4 +42,4 @@ for(const entry of ctx.window.POLYGON_RECORDINGS){
 }
 reduced=true;g.speak('Look! A point.',()=>{});const a=media.at(-1);a.onplaying();a.currentTime=.34;a.ontimeupdate();assert.equal(visible(),1,'Reduced motion preserves word timing');
 assert(!html.includes('.narrator-text span { animation:none !important; opacity:1 !important;'));
-console.log('PASS: all 47 TTS lines and 75 recording alignments ('+boundaries+' boundary checks), pauses, final pages, no early reveal, stale events, readable errors and reduced motion.');
+console.log('PASS: all 47 TTS lines and '+ctx.window.POLYGON_RECORDINGS.length+' recording alignments ('+boundaries+' boundary checks), pauses, final pages, no early reveal, stale events, readable errors and reduced motion.');

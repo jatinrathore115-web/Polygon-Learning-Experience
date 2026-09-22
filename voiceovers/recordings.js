@@ -1,4 +1,4 @@
-// Local MP3 catalogue with Whisper base.en DTW word timings (seconds).
+// Local narration: studio MP3s use Whisper DTW timings; portable fallback WAVs use synthesis word events (seconds).
 window.POLYGON_RECORDINGS = [
   {
     "text": "Look! A point.",
@@ -2832,5 +2832,93 @@ window.POLYGON_RECORDINGS = [
         "start": 1.78
       }
     ]
+  },
+  {
+    "duration": 2.3245,
+    "words": [
+      {
+        "word": "Which",
+        "start": 0.1492
+      },
+      {
+        "word": "of",
+        "start": 0.4642
+      },
+      {
+        "word": "these",
+        "start": 0.6218
+      },
+      {
+        "word": "are",
+        "start": 0.9518
+      },
+      {
+        "word": "polygons",
+        "start": 1.1092
+      }
+    ],
+    "source": "Microsoft Zira Desktop; generated locally with System.Speech",
+    "text": "Which of these are polygons?",
+    "src": "voiceovers/voice%20overs/77_Select_polygons.wav"
+  },
+  {
+    "duration": 2.5395,
+    "words": [
+      {
+        "word": "Which",
+        "start": 0.1492
+      },
+      {
+        "word": "figure",
+        "start": 0.4568
+      },
+      {
+        "word": "is",
+        "start": 1.0567
+      },
+      {
+        "word": "NOT",
+        "start": 1.2967
+      },
+      {
+        "word": "a",
+        "start": 1.6342
+      },
+      {
+        "word": "polygon",
+        "start": 1.7242
+      }
+    ],
+    "source": "Microsoft Zira Desktop; generated locally with System.Speech",
+    "text": "Which figure is NOT a polygon?",
+    "src": "voiceovers/voice%20overs/78_Not_a_polygon.wav"
+  },
+  {
+    "duration": 2.3095,
+    "words": [
+      {
+        "word": "Which",
+        "start": 0.1492
+      },
+      {
+        "word": "of",
+        "start": 0.4642
+      },
+      {
+        "word": "these",
+        "start": 0.6218
+      },
+      {
+        "word": "are",
+        "start": 0.9518
+      },
+      {
+        "word": "pentagons",
+        "start": 1.1092
+      }
+    ],
+    "source": "Microsoft Zira Desktop; generated locally with System.Speech",
+    "text": "Which of these are pentagons?",
+    "src": "voiceovers/voice%20overs/79_Select_pentagons.wav"
   }
 ];
