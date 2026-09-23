@@ -21,7 +21,14 @@ const server=http.createServer((req,res)=>{
   await page.goto('http://127.0.0.1:9351/?preview=1');
   await page.waitForFunction(()=>window.__poly?.state.ready);
   await page.mouse.click(700,200);
-  const ready=async(k)=>{await page.waitForFunction(k=>__poly.state.k===k&&!__poly.locked()&&__poly.state.storyControls,k,{timeout:60000});await page.locator('.story-surface[data-controls="ready"]').waitFor();};
+  // Exercise the explicit recovery path where the host has no speech engine.
+  // Local recordings still play through their real media clock.
+  const ready=async(k)=>{const deadline=Date.now()+90000;while(Date.now()<deadline){
+    if(await page.evaluate(k=>__poly.state.k===k&&!__poly.locked()&&__poly.state.storyControls,k))break;
+    const recovery=page.getByRole('button',{name:'Continue without audio',exact:true});
+    if(await recovery.isVisible())await recovery.click();
+    await page.waitForTimeout(200);
+  }await page.waitForFunction(k=>__poly.state.k===k&&!__poly.locked()&&__poly.state.storyControls,k,{timeout:1000});await page.locator('.story-surface[data-controls="ready"]').waitFor();};
   const jump=async(k)=>{await page.getByRole('button',{name:/^Screens/}).click();await page.getByRole('button',{name:new RegExp('^'+(k+1)+'\\. ')}).click();await ready(k);};
   const tailOnly=process.env.REVIEW_FROM==='40';
   if(!tailOnly){
@@ -73,7 +80,6 @@ const server=http.createServer((req,res)=>{
   console.log('PASS classification, polygon selection and label drag/drop');
   assert(await page.evaluate(()=>__poly.state.cnt[0]===0),'Count starts at zero');
   for(let i=0;i<5;i++)await page.getByRole('button',{name:'Increase number of sides'}).click();
-  await page.getByRole('button',{name:'Check',exact:true}).click();
   await ready(26);
   const handle=page.locator('.game-handle').first(),b=await handle.boundingBox();
   await page.mouse.move(b.x+b.width/2,b.y+b.height/2);await page.mouse.down();await page.mouse.move(b.x+b.width/2-65,b.y+b.height/2+35,{steps:12});await page.mouse.up();
@@ -92,26 +98,28 @@ const server=http.createServer((req,res)=>{
     await page.getByRole('button',{name:'Increase number of sides',exact:true}).click();
     await page.waitForFunction(n=>__poly.state.n===n&&!__poly.state.morph,n);
   }
-  await page.getByRole('button',{name:'Next',exact:true}).click();
+  await page.locator('.story-surface').getByRole('button',{name:'Next',exact:true}).click();
   await ready(41);
-  for(const i of [0,2])await page.locator('.story-surface > .game-action').nth(i).click();
+  await page.locator('.story-surface').getByRole('button',{name:'Next',exact:true}).click();
   await ready(42);
+  for(const i of [0,2])await page.locator('.story-surface > .game-action').nth(i).click();
+  await ready(43);
   for(const [i,zone]of [0,1,0,1].entries()){
     const card=page.locator('.story-surface > .game-action[role="button"]').filter({has:page.locator('svg')}).first();
-    if(i===0)await card.dragTo(page.getByRole('button',{name:'POLYGON',exact:true}));
-    else{await card.click();await page.getByRole('button',{name:zone?'NON-POLYGON':'POLYGON',exact:true}).click();}
+    if(i===0)await card.dragTo(page.getByRole('button',{name:'Polygon',exact:true}));
+    else{await card.click();await page.getByRole('button',{name:zone?'Not a polygon':'Polygon',exact:true}).click();}
     await page.waitForFunction(n=>Object.keys(__poly.state.sortAt).length===n,i+1);
   }
-  await ready(43);
-  await page.locator('.story-surface > .game-action').nth(3).click();await ready(44);
+  await ready(44);
+  await page.locator('.story-surface > .game-action').nth(3).click();await ready(45);
   for(const i of [0,1])await page.locator('.story-surface > .game-action').nth(i).click();
-  await page.getByRole('button',{name:'Check',exact:true}).click();await ready(45);
+  await ready(46);
   for(const [i,zone]of [0,1,0,1].entries()){
     await page.locator('.story-surface > .game-action[role="button"]').filter({has:page.locator('svg')}).first().click();
-    await page.getByRole('button',{name:zone?'HEPTAGON':'HEXAGON',exact:true}).click();
+    await page.getByRole('button',{name:zone?'Heptagon':'Hexagon',exact:true}).click();
     await page.waitForFunction(n=>Object.keys(__poly.state.sortAt).length===n,i+1);
   }
-  await ready(46);
+  await ready(47);
   await page.screenshot({path:path.join(out,'completed-playthrough.png')});
   await page.getByRole('button',{name:'Play again',exact:true}).click();
   await page.waitForFunction(()=>__poly.state.k===0);
@@ -127,7 +135,7 @@ const server=http.createServer((req,res)=>{
   await page.emulateMedia({reducedMotion:'reduce'});
   assert(await page.locator('.scene-snow').evaluate(e=>getComputedStyle(e).display==='none'),'Reduced motion stops snow');
   assert(!errors.length,errors.join('\n'));
-  fs.writeFileSync(path.join(out,tailOnly?'final-challenges.json':'playthrough.json'),JSON.stringify({screens:tailOnly?7:47,completed:true,restarted:true,externalNetworkBlocked:true,keyboard:true,dragDrop:true,errors},null,2));
-  console.log(tailOnly?'PASS final challenges and restart':'PASS Playwright complete 47-screen playthrough, wrong-answer recovery, keyboard, drag/drop, counting, deformation, sorting and restart');
+  fs.writeFileSync(path.join(out,tailOnly?'final-challenges.json':'playthrough.json'),JSON.stringify({screens:tailOnly?8:48,completed:true,restarted:true,externalNetworkBlocked:true,keyboard:true,dragDrop:true,errors},null,2));
+  console.log(tailOnly?'PASS final challenges and restart':'PASS Playwright complete 48-screen playthrough, wrong-answer recovery, keyboard, drag/drop, counting, deformation, sorting and restart');
  }catch(e){if(page){console.log('FAILED STATE',await page.evaluate(()=>({k:__poly.state.k,voiceError:__poly.state.voiceError,locked:__poly.locked(),ok:__poly.state.ok,ocReveal:__poly.state.ocReveal,controls:__poly.state.storyControls,text:document.body.innerText})));await page.screenshot({path:path.join(out,'failure.png')});}throw e;}finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;server.close();});

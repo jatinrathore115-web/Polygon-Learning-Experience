@@ -1,8 +1,13 @@
 ﻿/* Fast scene bounds check; check-story-scene.cjs covers the actual browser render. */
 const fs = require('fs'), vm = require('vm'), assert = require('assert');
 const src = fs.readFileSync('index.html', 'utf8');
-const ctx = { window: {}, DCLogic: class {}, setTimeout, clearTimeout };
+const ctx = { window: {}, React: { createRef: () => ({ current: null }) },
+  document: { documentElement: { clientWidth: 1920, clientHeight: 1080 } },
+  DCLogic: class {}, setTimeout, clearTimeout };
 vm.createContext(ctx);
+/* Layout now resolves against the shared design canvas, so the canvas module
+   has to be in the sandbox before the page script runs. */
+vm.runInContext(fs.readFileSync('responsive-layout.js', 'utf8'), ctx);
 vm.runInContext(src.match(/<script[^>]*data-dc-script[^>]*>([\s\S]*?)<\/script>/)[1]
   + '\nglobalThis.layout={STAGE,BOARD,SAFE,NARR,GUIDE_BOX,LAYER};globalThis.Game=Component;', ctx);
 const { STAGE, BOARD, SAFE, NARR, GUIDE_BOX, LAYER } = ctx.layout;
@@ -15,8 +20,16 @@ assert(NARR.w + 60 <= LAYER.sign.w, 'Text width and padding must fit beside the 
 assert(LAYER.sign.x + LAYER.sign.w < BOARD.x, 'Dialogue must clear the board');
 // The sprite cell contains transparent margins; the browser check measures visible pixels.
 assert(GUIDE_BOX.x + GUIDE_BOX.w / 2 < BOARD.x, 'Guide must remain perched left of the board');
-assert(src.includes('src="assets/image.png"') && fs.existsSync('assets/image.png'));
+/* The scene background is bound through backgroundSrc now, because the
+   boundary screens swap to a second painting -- so look for the binding and
+   for every file it can resolve to, rather than one literal src attribute. */
+assert(src.includes('sc-camel-src="{{ backgroundSrc }}"'),'the scene background is no longer bound to the view');
+for (const file of (src.match(/'assets\/[^']+\.png'/g)||[]).map(q=>decodeURIComponent(q.slice(1,-1))))
+  assert(fs.existsSync(file), 'missing background art: '+file);
+assert(fs.existsSync('assets/image.png'));
 const game = new ctx.Game();
+vm.runInContext(fs.readFileSync('polygon-data.js','utf8'),ctx);
+game.P=ctx.window.POLY;
 assert.equal(game.boardStyle().opacity, 0);
 assert.equal(game.signStyle().opacity, 0);
 game.state.storyContent = game.state.storyDialogue = true;

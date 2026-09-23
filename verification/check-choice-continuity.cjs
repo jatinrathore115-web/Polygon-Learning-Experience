@@ -33,35 +33,38 @@ const server=http.createServer((req,res)=>{const file=path.resolve(root,'.'+deco
   await cards.nth(0).click();await page.waitForFunction(()=>__poly.state.attempts>0);await ready();assert(await page.evaluate(()=>__poly.state.ok===null));
   await cards.nth(3).focus();await page.keyboard.press('Enter');await page.waitForFunction(()=>window.finished===43);
   await go(44);validate(await sample(),ref,4);await page.screenshot({path:path.join(out,'screen-45.png')});
-  const check=page.getByRole('button',{name:'Check',exact:true});
+  /* Screen 45 has no Check button. Picking the right figures IS the answer
+     and the screen moves on by itself, so everything below is taps. Two things
+     have to hold through all of it: a correct pick is unmistakably marked, and
+     feedback dresses the CARD and never the figure -- the artwork the learner
+     is being asked to read stays exactly as drawn. */
+  const green=s=>[...String(s).matchAll(/rgba?\(\s*(\d+),\s*(\d+),\s*(\d+)/g)]
+    .some(m=>+m[2]>140&&+m[2]-+m[1]>60&&+m[2]-+m[3]>40);
   const appearance=()=>cards.evaluateAll(es=>es.map(e=>({
    background:getComputedStyle(e).backgroundColor,shadow:getComputedStyle(e).boxShadow,
    artwork:[...e.querySelectorAll('svg path')].map(p=>[p.getAttribute('d'),p.getAttribute('fill'),p.getAttribute('stroke')])
   })));
   const original=await appearance();
-  assert.equal(await page.locator('.story-surface .ice-button').getAttribute('aria-disabled'),'true');
-  await cards.nth(2).click();await page.mouse.move(20,780);await page.waitForTimeout(300);
+  assert.equal(await page.locator('.story-surface .ice-button').count(),0,'Screen 45 must not offer a Check button');
+  await cards.nth(2).click();await page.waitForFunction(()=>__poly.state.attempts>0);await ready();
+  await page.mouse.move(20,780);await page.waitForTimeout(300);
   let selected=await appearance();
-  assert.equal(selected[2].background,original[2].background,'Incorrect selection preserves the card face');
-  assert(!selected[2].shadow.includes('35, 170, 92'),'An incorrect selection does not receive success feedback');
-  await check.click();await page.waitForFunction(()=>__poly.state.attempts>0);await ready();
-  assert(await page.evaluate(()=>!__poly.state.checked));await cards.nth(2).click();
-  for(const i of [0,1])await cards.nth(i).click();
-  await page.mouse.move(20,780);await page.waitForTimeout(300);selected=await appearance();
-  for(let i=0;i<4;i++){
-   assert.equal(selected[i].background,original[i].background,'Selection never tints the card face');
-   assert.deepEqual(selected[i].artwork,original[i].artwork,'Selection preserves shape geometry and colors');
-   assert.equal(selected[i].shadow.includes('35, 170, 92'),[0,1].includes(i),'Only correct selections have a green underglow');
-  }
-  await cards.nth(0).click();await page.mouse.move(20,780);await page.waitForTimeout(300);
-  assert(!(await appearance())[0].shadow.includes('35, 170, 92'),'Deselecting removes the success glow');
-  await cards.nth(0).click();await page.mouse.move(20,780);await page.waitForTimeout(300);
+  assert.deepEqual(selected[2].artwork,original[2].artwork,'A wrong tap leaves the figure untouched');
+  assert(!green(selected[2].shadow),'An incorrect tap is never marked correct');
+  assert(await page.evaluate(()=>!__poly.state.checked),'and does not settle the activity');
+  await cards.nth(0).click();await page.waitForTimeout(400);
+  selected=await appearance();
+  assert(green(selected[0].shadow),'A correct pick is plainly marked');
+  assert.deepEqual(selected[0].artwork,original[0].artwork,'Marking a card never redraws its figure');
   await page.screenshot({path:path.join(out,'screen-45-selected.png')});
-  await check.click();await page.waitForFunction(()=>window.finished===44);
-  assert(await page.evaluate(()=>__poly.state.checked));
+  await cards.nth(1).click();
+  await page.waitForFunction(()=>window.finished===44,null,{timeout:8000});
+  assert(await page.evaluate(()=>__poly.state.checked),'The last correct pick settles and advances on its own');
+  selected=await appearance();
+  for(let i=0;i<4;i++) assert.deepEqual(selected[i].artwork,original[i].artwork,'Every figure survives the activity unchanged');
   await page.emulateMedia({reducedMotion:'reduce'});await page.setViewportSize({width:1024,height:768});
   await go(41);ref=await sample();
   for(const [k,n]of [[43,4],[44,4]]){await go(k);validate(await sample(),ref,n);assert.equal(await page.locator('.story-board').evaluate(e=>getComputedStyle(e).transitionDuration),'0s');}
-  assert.deepEqual(errors,[]);console.log(JSON.stringify({screens:[42,44,45],sharedComposition:true,allOptions:true,wrongRetry:true,keyboard:true,checkSubmission:true,completion:true,tablet:true,reducedMotion:true,errors}));
+  assert.deepEqual(errors,[]);console.log(JSON.stringify({screens:[42,44,45],sharedComposition:true,allOptions:true,wrongRetry:true,keyboard:true,autoAdvance:true,artworkPreserved:true,completion:true,tablet:true,reducedMotion:true,errors}));
  }finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});

@@ -2,7 +2,7 @@ require('fs').mkdirSync('verification/output', { recursive: true });
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
 const html=fs.readFileSync('index.html','utf8');
 const ctx={window:{},document:{documentElement:{clientWidth:1920,clientHeight:1080}},React:{createRef:()=>({current:null})},DCLogic:class {setState(s){Object.assign(this.state,typeof s==='function'?s(this.state):s);}},setTimeout,clearTimeout};
-vm.createContext(ctx);vm.runInContext(fs.readFileSync('polygon-data.js','utf8'),ctx);vm.runInContext(fs.readFileSync('assets/swiftee/swiftee-sheets.js','utf8'),ctx);vm.runInContext(html.match(/<script[^>]*data-dc-script[^>]*>([\s\S]*?)<\/script>/)[1]+'\nglobalThis.Game=Component;',ctx);
+vm.createContext(ctx);vm.runInContext(fs.readFileSync('responsive-layout.js','utf8'),ctx);vm.runInContext(fs.readFileSync('polygon-data.js','utf8'),ctx);vm.runInContext(fs.readFileSync('assets/swiftee/swiftee-sheets.js','utf8'),ctx);vm.runInContext(html.match(/<script[^>]*data-dc-script[^>]*>([\s\S]*?)<\/script>/)[1]+'\nglobalThis.Game=Component;',ctx);
 const g=new ctx.Game();g.P=ctx.window.POLY;g.svgRefs={};g.state.ready=true;
 for(let k=0;k<g.steps().length;k++){g.state.k=k;g.state.phase=g.steps()[k].ph||'';for(const interactive of [false,true]){g.state.interactive=interactive;const v=g.renderVals();assert.equal(v.effectsEnabled,interactive);assert.equal(typeof v.activateKey,'function');}}
 /* Swiftee escorts the learner on every screen, and the sheet table generated
@@ -11,7 +11,10 @@ for(let k=0;k<g.steps().length;k++){g.state.k=k;g.state.phase=g.steps()[k].ph||'
 for(let k=0;k<g.steps().length;k++){g.state.k=k;assert.equal(g.renderVals().showGuide,true,'screen '+(k+1)+' does not render the guide');}
 assert(html.includes('<sc-if value="{{ showGuide }}"'),'the guide sprite is not gated behind showGuide');
 assert(html.includes('const GUIDE_VISIBLE = !!(window.SWIFTEE && window.SWIFTEE.clips)'),'GUIDE_VISIBLE no longer follows the generated sheet table');
-const bare={...ctx,window:{POLY:ctx.window.POLY}};vm.createContext(bare);
+/* Bare of the SPRITE TABLE, which is what this is proving the guide depends
+   on -- but still on the design canvas, because every screen is laid out
+   against it whether or not there is a bird to draw. */
+const bare={...ctx,window:{POLY:ctx.window.POLY,PolygonResponsive:ctx.window.PolygonResponsive}};vm.createContext(bare);
 vm.runInContext(html.match(/<script[^>]*data-dc-script[^>]*>([\s\S]*?)<\/script>/)[1]+'\nglobalThis.Game=Component;',bare);
 const gb=new bare.Game();gb.P=bare.window.POLY;gb.svgRefs={};gb.state.ready=true;
 assert.equal(gb.renderVals().showGuide,false,'the guide still renders with no sheet table loaded');
@@ -27,12 +30,21 @@ const contrast=(a,b)=>{const values=[luminance(a),luminance(b)].sort((a,b)=>b-a)
 assert.equal(contrast('#fff','#000'),21);assert.equal(contrast('#000000','#ffffff'),21);
 const buttons=fs.readFileSync('styles/buttons.css','utf8');
 const edge=buttons.match(/--button-letter-edge:(#[0-9a-f]{6})/)[1];
-assert(buttons.includes('-webkit-text-stroke:.07em var(--button-letter-edge)')&&buttons.includes('paint-order:stroke fill'));
+/* The label carries a stroke in its own edge colour, painted under the fill
+   so it holds the letters off the gradient rather than thickening them. The
+   exact weight is a design setting that has been tuned more than once -- what
+   must not regress is that the stroke is there at all, in em so it tracks the
+   type size, and that it sits behind the fill. */
+const strokeEm=buttons.match(/-webkit-text-stroke:(\.[0-9]+)em var\(--button-letter-edge\)/);
+assert(strokeEm,'button labels lost their letter stroke');
+assert(buttons.includes('paint-order:stroke fill'),'the stroke is painted over the fill instead of under it');
 for(const tone of ['primary','secondary']){
   const skin=g.buttonSkin(tone);
   // White lettering has a dark blue outline; that immediate background supplies contrast.
   assert(contrast(skin.color,edge)>=4.5,tone+' outlined lettering has sufficient contrast');
-  assert.equal(skin.WebkitTextStroke,'.07em '+edge,'Fallback preserves the same letter outline');
+  /* The JS fallback must track whatever weight the stylesheet settles on,
+     rather than pinning a number the design has already moved off twice. */
+  assert.equal(skin.WebkitTextStroke,strokeEm[1]+'em '+edge,'Fallback preserves the same letter outline as the stylesheet');
   assert.equal(skin.background,buttons.match(/--button-blue-face:([^;]+);/)[1],'Fallback matches the rendered blue palette');
 }
 for(const name of ['Side','Vertex','Angle']){const t=g.labelTheme(name);for(const color of t.gradient.match(/#[0-9a-f]{6}/gi))assert(contrast(t.ink,color)>=4.5,name+' tile text contrasts with its colour');}

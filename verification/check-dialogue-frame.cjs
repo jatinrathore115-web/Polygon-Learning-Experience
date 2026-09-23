@@ -12,7 +12,8 @@ const server=http.createServer((req,res)=>{const p=path.resolve(root,'.'+decodeU
   const results=[];
   for(const viewport of [{width:1440,height:810},{width:1024,height:768}]){
   await page.setViewportSize(viewport);
-  for(let n=1;n<=47;n++){
+  for(let n=1;n<=await page.evaluate(()=>__poly.steps().length);n++){
+   if(await page.evaluate(n=>__poly.steps()[n-1].sc==='SUMMARY',n))continue; // Static recap has no dialogue or tail.
    await page.evaluate(n=>{const g=__poly,k=n-1;g.setState({k});g.runStep(k,false);g.prepareNarratorReveal(g.instructionPages(g.steps()[k].narr)[0]);g._voiceLocked=false;g.setState({wordReveal:'complete',ocWords:{open:true,closed:true},storyContent:true,storyDialogue:true,storyControls:true,interactive:true,speaking:false,boundaryTravel:false,polygonTravel:false,reveal:true,voiceElapsedMs:10000});},n);
    await page.waitForTimeout(220);
    assert(await page.evaluate(()=>[...document.querySelectorAll('button,[role="button"],.ice-button')].every(e=>getComputedStyle(e).textDecorationLine==='none'&&[...e.querySelectorAll('*')].every(child=>getComputedStyle(child).textDecorationLine==='none'))),'Clean button labels on Screen '+n);
@@ -54,8 +55,7 @@ const server=http.createServer((req,res)=>{const p=path.resolve(root,'.'+decodeU
    if(n===24){
     assert(Math.abs(result.count.x+result.count.w/2-result.figure.x-result.figure.w/2)<1,'Stepper is centred on the figure');
     assert(result.count.y>result.figure.bottom+20,'Stepper clears the visible polygon');
-    assert(result.check.x>result.count.right+10,'Check sits beside the controls');
-    assert(Math.abs(result.count.y+result.count.h/2-result.check.y-result.check.h/2)<1,'Check aligns vertically even when disabled');
+    assert(!result.check.w,'Counting completes automatically without Check');
    }
    if(viewport.width===1440){results.push(result);await page.screenshot({path:path.join(out,'screen-'+n+'.png')});}
    // Later narration pages use the same layout and must remain readable too.

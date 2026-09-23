@@ -16,7 +16,7 @@ const server=http.createServer((req,res)=>{
     await page.goto('http://127.0.0.1:9365/index.html?intro=0');
     await page.waitForFunction(()=>window.__poly?.state.ready);
     await page.evaluate(()=>{
-      const g=__poly;g._stopRecordedVoice?.();g.timers.forEach(clearTimeout);g.narrate=()=>{};
+      const g=__poly;g._stopRecordedVoice?.();g.timers.forEach(clearTimeout);g.originalNarrate=g.narrate;g.narrate=()=>{};
       g._guideGreeted=true;g._boundaryAt=true;
     });
     const start=()=>page.evaluate(()=>{
@@ -54,11 +54,23 @@ const server=http.createServer((req,res)=>{
     await page.evaluate(()=>{__poly.ddPick(2,'Curved')();});
     assert(await page.evaluate(()=>__poly.state.dd.every(v=>v===null)),'Future cards reject direct activation');
     await page.screenshot({path:path.join(out,'first-figure.png')});
+    // Hold correction speech so the question cannot change before feedback ends.
+    await page.evaluate(()=>{
+      __poly.feedback=(text,done)=>{window.correctionDone=done;__poly.setState({narr:text,interactive:false});};
+      __poly.narrate=__poly.originalNarrate;
+      __poly.speak=(text,done)=>{__poly.prepareNarratorReveal(text);__poly.setState({wordReveal:'complete'},done);};
+    });
+    await page.getByRole('button',{name:'Figure 1: Curved',exact:true}).click();
+    assert(await page.evaluate(()=>!__poly.state.ddRetryQuestion&&__poly.state.narr.includes("isn't curved")));
+    await page.evaluate(()=>correctionDone());
+    await page.waitForFunction(()=>__poly.state.narr==='Is the boundary straight or curved?');
+    assert.equal((await page.locator('.dialogue-box').innerText()).replace(/\s+/g,' ').trim(),'Is the boundary straight or curved?');
+    assert(await page.evaluate(()=>__poly.state.ddActive===0&&__poly.state.dd[0]===null));
     const truth=['Straight','Straight','Curved','Curved'];
     for(let i=0;i<4;i++){
       const choice=page.getByRole('button',{name:'Figure '+(i+1)+': '+truth[i],exact:true});
       await choice.focus();await page.keyboard.press('Enter');
-      assert.equal(await page.locator('[data-sequence-state="complete"]').count(),i+1);
+      assert.equal(await page.locator('[data-sequence-state="complete"]').count(),1);
       assert.equal(await page.getByRole('button',{name:new RegExp('^Figure '+(i+1)+':')}).count(),1,'Replace both choices with one result');
       /* The earned answer is confirmed by the button itself, not by a tick
          printed in front of the word. Asserted on the state the button
@@ -71,17 +83,35 @@ const server=http.createServer((req,res)=>{
       assert(!/[✓✔]/.test(await choice.innerText()),'and carries no tick');
       if(i<3){
         await page.waitForFunction(i=>__poly.state.ddActive===i+1&&!__poly.locked(),i);
+        assert(await page.evaluate(i=>{
+          const v=__poly.renderVals(),t=v.targets.find(x=>x.label.startsWith('Figure '+(i+1)+': '));
+          return !t && !v.cards.some(c=>c.key===__poly.sets().cmp[i][0]+i);
+        },i),'Completed figure and its answer are removed entirely');
+        assert.equal(await page.locator('.story-surface svg').count(),3-i);
+        assert.equal(await page.locator('[data-sequence-state="complete"]').count(),0);
         assert.equal(await enabled().count(),2);
         assert.equal(await page.evaluate(()=>document.activeElement.getAttribute('aria-label')),'Figure '+(i+2)+': Straight');
+        if(i===1){
+          await page.getByRole('button',{name:'Figure 3: Straight',exact:true}).click();
+          await page.evaluate(()=>correctionDone());
+          await page.waitForFunction(()=>__poly.state.narr==='Is the boundary straight or curved?');
+          assert(await page.evaluate(()=>__poly.state.ddActive===2&&__poly.state.dd[0]==='Straight'&&__poly.state.dd[1]==='Straight'));
+        }
         if(i===0)await page.screenshot({path:path.join(out,'second-figure.png')});
       }
     }
     await page.waitForFunction(()=>__poly.state.k===14);
     assert.equal(await page.locator('[data-sequence-state="complete"]').count(),4);
+    assert(await page.locator('[data-sequence-state="complete"]').evaluateAll(es=>es.every(e=>{
+      const s=getComputedStyle(e);return s.opacity==='1'&&s.filter==='none'
+        &&s.getPropertyValue('--button-face').trim()===s.getPropertyValue('--concept-button-face').trim();
+    })),'Screen 15 answer labels use the full yellow face from the start');
+    assert(await page.evaluate(()=>__poly.renderVals().targets.every(t=>t.feedback===''&&!t.selected)),'All four completed answers are neutral');
     await page.screenshot({path:path.join(out,'completed.png')});
     await start();await page.getByRole('button',{name:'Figure 1: Straight',exact:true}).click();
     await start();await page.waitForTimeout(1100);
     assert(await page.evaluate(()=>__poly.state.ddActive===0&&__poly.state.dd.every(v=>v===null)),'Re-entry cancels pending focus handoff');
+    assert(await page.evaluate(()=>!__poly.state.ddRetryQuestion&&__poly.state.ddConfirmed===null),'Re-entry resets the retry prompt and confirmation');
     await page.emulateMedia({reducedMotion:'reduce'});await start();
     assert.equal(await enabled().first().evaluate(e=>getComputedStyle(e).transitionDuration),'0s');
     assert.deepEqual(errors,[]);

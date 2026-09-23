@@ -16,7 +16,7 @@ const ctx = {
   setTimeout, clearTimeout
 };
 vm.createContext(ctx);
-vm.runInContext(fs.readFileSync('polygon-data.js', 'utf8'), ctx);
+vm.runInContext(fs.readFileSync('responsive-layout.js','utf8'),ctx);vm.runInContext(fs.readFileSync('polygon-data.js', 'utf8'), ctx);
 vm.runInContext(fs.readFileSync('assets/swiftee/swiftee-sheets.js', 'utf8'), ctx);
 vm.runInContext(html.match(/<script[^>]*data-dc-script[^>]*>([\s\S]*?)<\/script>/)[1] + '\nglobalThis.Game=Component;', ctx);
 

@@ -73,6 +73,11 @@
       }
       let last = -1;
       function sync() {
+        if (disposed) return;
+        // The lesson renderer can replace this container between screens.
+        // Reattach the existing controls so their styling and handlers persist.
+        const container = game.navigationRef.current;
+        if (container && host.parentElement !== container) container.append(host);
         $('back').disabled = !game.state.ready || game.state.k === 0;
         $('next').disabled = !game.state.ready || game.state.k >= game.steps().length - 1;
         if (game.state.k === last) return;
@@ -89,10 +94,12 @@
       $('next').onclick = () => navigate(game.state.k + 1);
       search.oninput = render;
       root.addEventListener('keydown', event => { if (event.key === 'Escape') close(); event.stopPropagation(); });
-      game.navigationRef.current.append(host);
+      // The first render may not have created the navigation container yet.
       sync();
+      const observer = new MutationObserver(sync);
+      observer.observe(document.body, { childList:true, subtree:true });
       const timer = setInterval(sync, 300);
-      return () => { disposed = true; clearInterval(timer); host.remove(); };
+      return () => { disposed = true; observer.disconnect(); clearInterval(timer); host.remove(); };
     }
   };
 })();

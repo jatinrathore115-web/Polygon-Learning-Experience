@@ -107,9 +107,15 @@ for(const sc of ['C2','C5']){
         used to read as "this one IS a polygon", and the column a tile has
         landed in already says everything the badge was saying. */
      assert.equal(c.mark,'',sc+': tiles carry no badge');
-     assert.equal(c.wrap.borderColor,base.borderColor,sc+': placed tile preserves its rim');
-     assert.equal(c.wrap.background,base.background,sc+': placed tile preserves its surface');
-     assert(c.wrap.boxShadow.includes('0 12px 18px -7px'),sc+': success glow sits below the tile');
+     /* A tile that has landed in the right column now says so the way every
+        other correct answer in the lesson does: green rim, pale green face and
+        the success halo. The old treatment kept the neutral rim and put a soft
+        shadow underneath, which a child reading the board from a distance did
+        not register as an answer being right at all. */
+     const ok=g.cardStyleFor('ok');
+     assert.equal(c.wrap.borderColor,sc==='C2'?'#16834c':ok.borderColor,sc+': placed tile takes the success rim');
+     assert.equal(c.wrap.background,sc==='C2'?'#e1f7eb':ok.background,sc+': placed tile takes the success surface');
+     assert(c.wrap.boxShadow.includes('rgba(46,204,113'),sc+': and is ringed by the success halo');
    });
    v.targets.forEach((t,zone)=>{
      assert.equal(t.nudge,'',sc+': idle hint points at the correct column, which gives the answer away');
@@ -187,10 +193,17 @@ for(const sc of ['C2','C5']){
 {const page=fs.readFileSync('index.html','utf8');
  const lum=h=>{const c=h.replace('#','').match(/../g).map(x=>parseInt(x,16)/255).map(v=>v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4));return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2];};
  const ratio=(a,b)=>{const l1=lum(a),l2=lum(b);return (Math.max(l1,l2)+0.05)/(Math.min(l1,l2)+0.05);};
- const caption=/font:900 30px Nunito,sans-serif;color:(#[0-9a-f]{6})/gi;
- const found=[];let m;while((m=caption.exec(page)))found.push(m[1]);
- assert.equal(found.length,2,'expected two column headers, found '+found.length);
+ /* Read the header ink off the rendered style rather than scraping it out of
+    the markup. The colour used to be typed into the template beside a hard
+    -coded font, so a regex could find it; both columns now take the lesson's
+    one button-label style, and what renders is the thing worth testing. */
  g.state.k=g.steps().findIndex(x=>x.sc==='C5');g.state.pickedFig=null;g.state.sortHover=null;
+ const heads=g.renderVals();
+ const found=[heads.zoneATitleStyle&&heads.zoneATitleStyle.color,heads.zoneBTitleStyle&&heads.zoneBTitleStyle.color].filter(Boolean);
+ assert.equal(found.length,2,'expected two column headers, found '+found.length);
+ /* One label style for every button in the lesson, headers included. */
+ [heads.zoneATitleStyle,heads.zoneBTitleStyle].forEach((st,i)=>
+   assert(/^600 \d+px "Baloo 2"/.test(st.font),'column header '+i+' is off the shared label style: '+st.font));
  const rest=g.renderVals();g.state.pickedFig=0;
  [[0,'A'],[1,'B']].forEach(([zone,tag])=>{
    const cold=(zone?rest.zoneBStyle:rest.zoneAStyle).background;

@@ -31,8 +31,10 @@
    an icon reporting that there was one. */
 .label-socket[role="button"]:hover { outline:3px solid currentColor; outline-offset:3px; }
 .label-socket[role="button"]:focus-visible { outline:3px solid #31b9de; outline-offset:5px; }
-.label-socket[data-feedback="incorrect"] { box-shadow:0 12px 18px -7px rgba(215,67,78,.38),0 18px 26px -12px rgba(215,67,78,.20)!important; }
-.label-socket[data-feedback="correct"] { box-shadow:0 12px 18px -7px rgba(35,170,92,.42),0 18px 26px -12px rgba(35,170,92,.22)!important; }
+/* The drop sockets answer the same way the buttons do, so a learner who has
+   learnt what the green halo means on one screen reads it on the next. */
+.label-socket[data-feedback="incorrect"] { box-shadow:0 0 0 6px rgba(240,84,84,.5),0 0 26px 10px rgba(240,84,84,.55),0 12px 18px -7px rgba(198,54,62,.45)!important; animation:answerRetry 560ms ease-in-out both!important; }
+.label-socket[data-feedback="correct"] { box-shadow:0 0 0 6px rgba(46,204,113,.5),0 0 26px 10px rgba(46,204,113,.58),0 12px 18px -7px rgba(28,150,80,.5)!important; animation:answerSuccess 640ms cubic-bezier(.3,1.35,.4,1) both!important; }
 [data-interactive="true"] .label-socket:active { scale:1; }
 [data-interactive="true"] .game-action:active { scale:.98; }
 [data-interactive="true"] .game-handle { filter:drop-shadow(0 0 9px #22b8e6); }
@@ -48,12 +50,23 @@
   background:var(--button-face) padding-box,var(--button-rim) border-box!important;
   box-shadow:inset 0 3px 0 #ffffff66,inset 0 -3px 0 #176e9e40,0 7px 0 #2362b4,0 10px 0 #123f7826,0 13px 16px #173d6b26,var(--button-feedback-glow)!important;
   color:#fff!important; -webkit-text-fill-color:#fff;
-  font-family:Nunito,sans-serif!important; font-weight:900!important;
+  /* Semibold, not black. Two things were making the label feel heavy: the 900
+     weight and a .07em stroke around every glyph, which thickens the letters a
+     second time on top of the weight. Lighter on both counts keeps the label
+     legible against the gradient without it shouting. */
+  /* Baloo is the lesson's display face -- rounder and friendlier than Nunito
+     at button size, and it is what the button styles already asked for before
+     this rule overrode them. */
+  font-family:'Baloo 2',Nunito,sans-serif!important; font-weight:600!important;
   line-height:1.1!important; text-align:center;
-  -webkit-text-stroke:.07em var(--button-letter-edge); paint-order:stroke fill;
-  text-shadow:0 2px 0 var(--button-letter-edge),0 3px 3px #174f7333;
+  /* The label stays semibold; what makes it read is the edge holding it off a
+     gradient that runs from near-white to mid-blue, not extra weight. Thinning
+     this to .028 along with the weight drop took away both at once and left
+     the text looking faint. */
+  -webkit-text-stroke:.042em var(--button-letter-edge); paint-order:stroke fill;
+  text-shadow:0 1px 0 var(--button-letter-edge),0 2px 4px #174f7340;
   white-space:nowrap; user-select:none; cursor:pointer; touch-action:manipulation;
-  transition:translate 140ms ease,scale 140ms ease,filter 140ms ease,box-shadow 140ms ease;
+  transition:translate 180ms cubic-bezier(.22,.8,.25,1),scale 180ms cubic-bezier(.22,.8,.25,1),filter 180ms ease-out,box-shadow 180ms ease-out;
 }
 .ice-button::before {
   content:''; position:absolute; z-index:-1; inset:2px 8px auto; height:30%;
@@ -74,21 +87,33 @@
 }
 .ice-button:focus-visible { outline:3px solid #31b9de; outline-offset:5px; }
 .ice-button[aria-pressed="true"],.ice-button[aria-current="true"] { outline:3px solid #237cb5; outline-offset:3px; }
+/* Right and wrong have to be unmistakable at a glance, from across a room, to
+   a child who may not be reading the words. The old cue was a soft shadow cast
+   *under* the button, which is not where the eye looks and barely registered.
+   These are haloes around it instead: a tight coloured ring hugging the edge
+   plus a wide bloom, so the button itself looks lit up. Green for yes, red for
+   no, each paired with its own movement. */
 .ice-button[data-feedback="correct"] {
-  --button-feedback-glow:0 12px 18px -7px rgba(35,170,92,.42),0 18px 26px -12px rgba(35,170,92,.22);
+  --button-feedback-glow:0 0 0 7px rgba(46,204,113,.5),0 0 30px 12px rgba(46,204,113,.62),0 14px 22px -8px rgba(28,150,80,.55);
+  animation:answerSuccess 640ms cubic-bezier(.3,1.35,.4,1) both!important;
 }
 .ice-button[data-feedback="correct"][aria-pressed="true"]:not(:focus-visible) { outline:none; }
 .ice-button[data-feedback="incorrect"] {
-  --button-feedback-glow:0 12px 18px -7px rgba(215,67,78,.38),0 18px 26px -12px rgba(215,67,78,.20);
-  animation:answerRetry 340ms ease-in-out both!important;
+  --button-feedback-glow:0 0 0 7px rgba(240,84,84,.5),0 0 30px 12px rgba(240,84,84,.6),0 14px 22px -8px rgba(198,54,62,.5);
+  animation:answerRetry 560ms ease-in-out both!important;
 }
-.ice-button[aria-disabled="true"],.ice-button:disabled {
-  --button-letter-edge:#344d62;
-  --button-face:linear-gradient(#96d6e9,#3e98c6 40%,#307aac);
-  --button-rim:linear-gradient(#d7e6f5,#91aac6);
+/* A disabled button stays fully legible -- it is still part of the question.
+   A retired one is leaving, so it is excluded here: this rule pinned opacity
+   and scale with !important, which meant the option being cleared away could
+   never fade or shrink and instead had its width collapse at full opacity,
+   slicing the label off as it narrowed. */
+.ice-button[aria-disabled="true"]:not([data-retired="true"]),.ice-button:disabled:not([data-retired="true"]) {
+  --button-letter-edge:#205b80;
+  --button-face:var(--button-blue-face);
+  --button-rim:linear-gradient(180deg,#ffffff 0%,#d6f4ff 24%,#89d6ff 62%,#4ba5f4 100%);
   opacity:1!important; cursor:default!important; filter:none!important; translate:none!important; scale:1!important;
-  box-shadow:inset 0 1px 0 #ffffff40,0 2px 0 #58728f,var(--button-feedback-glow)!important;
-  text-shadow:0 1px 1px #22384c;
+  box-shadow:inset 0 3px 0 #ffffff66,inset 0 -3px 0 #176e9e40,0 7px 0 #2362b4,0 10px 0 #123f7826,0 13px 16px #173d6b26,var(--button-feedback-glow)!important;
+  text-shadow:0 1px 0 var(--button-letter-edge),0 2px 4px #174f7340;
 }
 /* Keep the reference face and feedback glow visible after an answer locks. */
 .ice-button:is([data-feedback="correct"],[data-feedback="incorrect"]):is([aria-disabled="true"],:disabled) {
@@ -100,16 +125,21 @@
   .game-action,.game-action::before,.game-action::after,.ice-button,.ice-button::before,.ice-button::after { animation:none!important; transition:none!important; }
   .ice-button:hover,.ice-button:active { translate:none!important; scale:1!important; }
 }
-/* Yellow glass concept choices: navy lettering stays legible on every face.
-   The white rim and amber underside follow the supplied reference. */
+/* Yellow glass concept choices. Warm brown lettering, not navy: it belongs to
+   the same family as the amber underside, and holds 6.5:1 against the darkest
+   part of the face and 9.3:1 against the lightest -- clear of the 4.5:1 bar for
+   normal text, let alone large. The white rim follows the supplied reference. */
 .ice-button.concept-choice {
   --concept-button-face:linear-gradient(180deg,#fff16a 0%,#ffe52b 38%,#ffda13 68%,#ffbd0a 100%);
   --button-face:var(--concept-button-face);
   --button-rim:linear-gradient(180deg,#ffffff 0%,#fffef5 70%,#e4e9ed 100%);
   --concept-button-rest-shadow:inset 0 2px 1px #fff9,inset 0 -5px 0 #f69b0b,0 5px 0 #c2cbd3,0 8px 12px #23496a29;
   border-radius:999px!important;
+  /* Screen 6 is the reference for every button label in the lesson, and this
+     is the size it renders at. Kept as a variable so a label that cannot fit
+     its button can step down without moving any of the others. */
   font-size:var(--choice-font-size,32px)!important;
-  color:#17304c!important; -webkit-text-fill-color:#17304c;
+  color:#5C3310!important; -webkit-text-fill-color:#5C3310;
   -webkit-text-stroke:0; text-shadow:none!important;
   box-shadow:var(--concept-button-rest-shadow),var(--button-feedback-glow)!important;
 }
@@ -155,6 +185,14 @@
 }
 .ice-button[data-sequence-state] {
   transition:left 360ms ease,width 360ms ease,box-shadow 180ms ease;
+}
+/* Recap labels stay solid yellow even though they are no longer interactive. */
+.ice-button.concept-choice[data-sequence-state="complete"][aria-disabled="true"] {
+  --button-face:var(--concept-button-face);
+  --button-rim:linear-gradient(180deg,#ffffff 0%,#fffef5 70%,#e4e9ed 100%);
+  box-shadow:var(--concept-button-rest-shadow),var(--button-feedback-glow)!important;
+  opacity:1!important;
+  filter:none!important;
 }
 .ice-button[data-sequence-state="pending"] {
   /* Unavailable choices remain legible; disabled styling carries their state. */

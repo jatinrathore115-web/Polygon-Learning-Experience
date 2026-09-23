@@ -36,10 +36,10 @@ const server=http.createServer((req,res)=>{
   await page.screenshot({path:path.join(out,'initial.png')});
   const cards=page.locator('.story-surface svg').locator('..');
   const drag=async(i,name,inspect)=>{const a=await cards.nth(i).boundingBox(),b=await page.getByRole('button',{name,exact:true}).boundingBox();await page.mouse.move(a.x+a.width/2,a.y+a.height/2);await page.mouse.down();await page.mouse.move(b.x+b.width/2,b.y+b.height/2,{steps:14});if(inspect){await page.waitForTimeout(100);await inspect();}await page.mouse.up();};
-  await drag(0,'HEPTAGON');await page.waitForFunction(()=>__poly.state.attempts>0);await ready();assert(await page.evaluate(()=>__poly.state.sortAt[0]===undefined));
-  for(const i of [0,2]){await drag(i,'HEXAGON');await page.waitForFunction(i=>__poly.state.sortAt[i]!==undefined,i);await page.waitForTimeout(600);}
+  await drag(0,'Heptagon');await page.waitForFunction(()=>__poly.state.attempts>0);await ready();assert(await page.evaluate(()=>__poly.state.sortAt[0]===undefined));
+  for(const i of [0,2]){await drag(i,'Hexagon');await page.waitForFunction(i=>__poly.state.sortAt[i]!==undefined,i);await page.waitForTimeout(600);}
   const before=await page.evaluate(()=>JSON.stringify(__poly.sortPlaces(__poly.state.sortAt)));
-  await drag(1,'HEXAGON',async()=>{
+  await drag(1,'Hexagon',async()=>{
    assert.equal(await page.evaluate(()=>__poly.renderVals().callouts.length),0,'No third preview slot in a full area');
    assert.equal(await page.evaluate(()=>__poly.renderVals().zoneAStyle.animation),'none');
   });
@@ -47,11 +47,11 @@ const server=http.createServer((req,res)=>{
   assert.equal(await page.evaluate(()=>JSON.stringify(__poly.sortPlaces(__poly.state.sortAt))),before);
   assert(await page.evaluate(()=>__poly.renderVals().cards[1].wrap.animation.startsWith('wrongTap')));
   await page.waitForTimeout(650);
-  for(const i of [1,3]){await drag(i,'HEPTAGON');await page.waitForFunction(i=>__poly.state.sortAt[i]!==undefined,i);await page.waitForTimeout(600);}
+  for(const i of [1,3]){await drag(i,'Heptagon');await page.waitForFunction(i=>__poly.state.sortAt[i]!==undefined,i);await page.waitForTimeout(600);}
   await page.waitForFunction(()=>window.finished);await page.screenshot({path:path.join(out,'completed.png')});
   await page.emulateMedia({reducedMotion:'reduce'});await page.setViewportSize({width:1024,height:768});
   await go(42);ref=await sample();await go(45);compare(await sample(),ref);
-  await cards.first().focus();await page.keyboard.press('Enter');await page.getByRole('button',{name:'HEXAGON',exact:true}).focus();await page.keyboard.press('Space');await page.waitForFunction(()=>__poly.state.sortAt[0]===0);
+  await cards.first().focus();await page.keyboard.press('Enter');await page.getByRole('button',{name:'Hexagon',exact:true}).focus();await page.keyboard.press('Space');await page.waitForFunction(()=>__poly.state.sortAt[0]===0);
   assert.deepEqual(errors,[]);console.log('PASS Screen 46 matches Screen 43; four centered figures, drag/drop, wrong retry, completion, tablet and keyboard verified.');
  }finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});

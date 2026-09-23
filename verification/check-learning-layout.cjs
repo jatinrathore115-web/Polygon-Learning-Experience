@@ -61,10 +61,13 @@ const server=http.createServer((req,res)=>{
     for(const n of screens){
       await show(n);const s=await inspect();check(s);assert.deepEqual(s.board,baseline.board);
       /* Swiftee holds one spot across the teaching screens, with one deliberate
-         exception: on the comparison she steps between the two pentagons,
-         because the line she speaks is about both of them. */
-      if(n===32)assert(Math.abs((s.guide.x+s.guide.right)/2-(s.board.x+s.board.right)/2)<40,
-        'On the comparison screen Swiftee stands between the figures, not in the corner');
+         exception: for the whole before-and-after comparison she steps between
+         the two pentagons, because every line there is about both of them. She
+         used to move only for screen 32, which meant she jumped to the middle
+         partway through a comparison that had already started. */
+      const comparing=[29,30,31,32].includes(n);
+      if(comparing)assert(Math.abs((s.guide.x+s.guide.right)/2-(s.board.x+s.board.right)/2)<40,
+        'Screen '+n+': on the comparison Swiftee stands between the figures, not in the corner');
       else assert.deepEqual(s.guide,baseline.guide);
       await page.screenshot({path:path.join(out,'screen-'+n+'.png')});
     }
@@ -91,13 +94,23 @@ const server=http.createServer((req,res)=>{
     await checkButton.click();
     await page.waitForFunction(()=>document.querySelector('.story-surface [data-feedback="incorrect"]'));
     assert.equal(await checkButton.getAttribute('aria-disabled'),'true','Lock Check during corrective narration');
-    assert(await checkButton.evaluate(e=>getComputedStyle(e).boxShadow.includes('241, 91, 99')),'Incorrect Check displays the red feedback halo');
+    /* A red halo, not one specific red. Pinned to an exact rgb triple this
+       broke the moment the feedback colour was retuned, while still not
+       catching the thing that matters -- whether a red cue is there at all. */
+    assert(await checkButton.evaluate(e => getComputedStyle(e).boxShadow.split('rgb').slice(1)
+      .map(part => part.slice(part.indexOf('(') + 1, part.indexOf(')')).split(',').map(Number))
+      .some(c => c[0] > 150 && c[0] - c[1] > 60 && c[0] - c[2] > 60)),
+      'Incorrect Check displays a red feedback halo');
     await page.waitForFunction(()=>!__poly.locked()&&!__poly.state.speaking&&__poly.state.wrong===null);
     assert.equal(await checkButton.getAttribute('data-feedback'),'','Retry clears stale feedback');
     for(let i=0;i<4;i++)await plus.click();
     await checkButton.click();
     await page.waitForFunction(()=>document.querySelector('.story-surface [data-feedback="correct"]'));
-    assert(await checkButton.evaluate(e=>getComputedStyle(e).boxShadow.includes('57, 207, 114')),'Correct Check displays the green feedback halo');
+    /* Likewise a green halo rather than one exact green. */
+    assert(await checkButton.evaluate(e => getComputedStyle(e).boxShadow.split('rgb').slice(1)
+      .map(part => part.slice(part.indexOf('(') + 1, part.indexOf(')')).split(',').map(Number))
+      .some(c => c[1] > 120 && c[1] - c[0] > 60 && c[1] - c[2] > 40)),
+      'Correct Check displays a green feedback halo');
     await page.waitForFunction(()=>window.completed===23);
     await run(27);
     const handle=page.locator('.game-handle').first();const r=await handle.boundingBox();assert(r);

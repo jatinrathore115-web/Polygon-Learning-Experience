@@ -211,7 +211,13 @@ const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!o
 check(r.paintedPixels > 2000, 'the sheets load and blit: ' + r.paintedPixels + ' opaque pixels drawn');
 check(r.cellStable, 'her cell never moves across ' + r.samples + ' samples: ' + JSON.stringify(r.cellBox));
 check(r.spriteStable, 'the sprite fills that cell unchanged: ' + JSON.stringify(r.spriteBox));
-check(has('screen-enter', 'flapping'), 'new screen: she flies in — ' + step('screen-enter').join(' → '));
+/* Travelling now plays a dedicated flight cycle rather than the generic flap:
+   the journey animations move her cell, so the bird inside it has to be beating
+   its wings for the whole crossing or she slides across the sky in one pose.
+   'flapping' is still accepted -- it is what she falls back to if the flight
+   sheet is ever missing from the atlas. */
+check(has('screen-enter', 'flying') || has('screen-enter', 'flapping'),
+  'new screen: she flies in — ' + step('screen-enter').join(' → '));
 check(has('screen-enter', 'talking'), 'instruction: she talks the line while it is on the sign');
 check(has('screen-enter', 'blinking'), 'instruction over: she settles to watching the learner');
 check(has('wrong-1', 'confused'), 'first wrong answer: confused, never punishing — ' + step('wrong-1').join(' → '));

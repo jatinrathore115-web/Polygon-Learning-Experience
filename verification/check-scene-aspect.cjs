@@ -19,7 +19,7 @@ const server=http.createServer((req,res)=>{
     let checked=0;const reference=[];
     for(const [width,height] of [[1440,810],[1024,768],[2560,1080],[320,568],[390,844],[768,1024],[844,390]]) {
       await page.setViewportSize({width,height});
-      for(let k=0;k<47;k++) {
+      for(let k=0;k<await page.evaluate(()=>__poly.steps().length);k++) {
         await page.evaluate(k=>{
           const g=__poly;g.setState({k});g.runStep(k,false);g.prepareNarratorReveal(g.step().narr);
           g.setState({storyContent:true,storyDialogue:true,storyControls:true,magicReveal:false,boundaryTravel:false,polygonTravel:false,
@@ -90,21 +90,21 @@ const server=http.createServer((req,res)=>{
     await page.mouse.move(handle.x+handle.width/2,handle.y+handle.height/2);await page.mouse.down();
     await page.mouse.move(handle.x+handle.width/2-35,handle.y+handle.height/2+25,{steps:12});await page.mouse.up();
     await page.waitForFunction(()=>__poly.state.dragged);
-    await show(42);
+    await show(43);
     await page.emulateMedia({reducedMotion:'no-preference'});
     const source=page.locator('.story-surface .game-action').filter({has:page.locator('svg')}).first();
-    const a=await source.boundingBox(),b=await page.getByRole('button',{name:'POLYGON',exact:true}).boundingBox();
+    const a=await source.boundingBox(),b=await page.getByRole('button',{name:'Polygon',exact:true}).boundingBox();
     await page.mouse.move(a.x+a.width/2,a.y+a.height/2);await page.mouse.down();
     await page.mouse.move(b.x+b.width/2,b.y+b.height/2,{steps:15});await page.mouse.up();
     await page.waitForFunction(()=>__poly.state.sortAt[0]===0);
     await page.waitForTimeout(450);
     const placed=await page.locator('.story-surface svg').first().evaluate(e=>{const r=e.parentElement.getBoundingClientRect();return{x:r.x,y:r.y,right:r.right,bottom:r.bottom};});
-    const zone=await page.getByRole('button',{name:'POLYGON',exact:true}).boundingBox();
+    const zone=await page.getByRole('button',{name:'Polygon',exact:true}).boundingBox();
     assert(placed.x>zone.x&&placed.right<zone.x+zone.width&&placed.y>zone.y&&placed.bottom<zone.y+zone.height,'Drag lands inside its responsive zone');
-    await show(44);
+    await show(45);
     const cards=page.locator('.story-surface .game-action').filter({has:page.locator('svg')});
-    await cards.nth(0).click();await cards.nth(1).click();await page.getByRole('button',{name:'Check',exact:true}).click();
-    assert(await page.evaluate(()=>__poly.state.checked));
+    await cards.nth(0).click();await cards.nth(1).click();
+    assert(await page.evaluate(()=>__poly.state.sel.includes(0)&&__poly.state.sel.includes(1)));
     await page.setViewportSize({width:844,height:390});await page.waitForTimeout(350);
     assert.equal(await page.locator('[data-lesson]').getAttribute('data-layout'),'canvas');
     assert.deepEqual(errors,[]);

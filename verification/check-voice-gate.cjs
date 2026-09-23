@@ -11,7 +11,7 @@ g.narrate('Old',{});const old=spoken.at(-1);g.narrate('New',{});old.onend();asse
 const synth=ctx.window.speechSynthesis;ctx.window.speechSynthesis=null;g.narrate('Unavailable',{});assert(g.locked()&&g._voiceRetry&&g.state.voiceError);for(const timer of timers.splice(0))timer();assert(g.locked());ctx.window.speechSynthesis=synth;
 // Labels, buttons and changing counters never enqueue speech.
 spoken=[];g=game(41);g.narrate(g.step().narr,{});drain(g);assert.equal(spoken.length,g.instructionPages(g.step().narr).length);assert.equal(spoken.map(u=>u.text).join(' '),g.step().narr);
-g=game(23);g.narrate(g.step().narr,{});drain(g);let count=spoken.length;g.bump(0,1)();assert(!g.locked());assert.equal(g.state.cnt[0],5);assert.equal(spoken.length,count);
+g=game(23);g.state.cnt=[0,0];g.narrate(g.step().narr,{});drain(g);let count=spoken.length;g.bump(0,1)();assert(!g.locked());assert.equal(g.state.cnt[0],1);assert.equal(spoken.length,count);
 // Actual drag handler is inert while narration is playing.
 g=game(26);g.narrate(g.step().narr,{});g.handleDown(0)({preventDefault(){},stopPropagation(){}});assert.equal(g.state.userPts,null);drain(g);assert(!g.locked());
 // Opening a dropdown does not speak its options or re-lock input.

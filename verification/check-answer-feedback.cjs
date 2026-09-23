@@ -42,13 +42,14 @@ const server=http.createServer((req,res)=>{
    [13,"__poly.ddPick(0,'Straight')()","__poly.ddPick(0,'Curved')()"],
    [15,"__poly.tapCard(0)()","__poly.tapCard(2)()"],
    [18,"__poly.tapCard(1)()","__poly.tapCard(0)()"],
-   [22,"__poly.state.chip='Side';__poly.hitTarget('side')()","__poly.state.chip='Vertex';__poly.hitTarget('side')()"],
    [23,"__poly.state.cnt=[5,0];__poly.checkCount()","__poly.state.cnt=[3,0];__poly.checkCount()"],
    [30,"__poly.state.cnt=[5,5];__poly.checkCount()","__poly.state.cnt=[3,5];__poly.checkCount()"],
-   [43,"__poly.tapCard(3)()","__poly.tapCard(0)()"],
-   [44,"__poly.tapCard(0)()","__poly.tapCard(2)()"],
-   [42,"__poly.state.pickedFig=0;__poly.dropInto(0)()","__poly.state.pickedFig=0;__poly.dropInto(1)()"],
-   [45,"__poly.state.pickedFig=0;__poly.dropInto(0)()","__poly.state.pickedFig=0;__poly.dropInto(1)()"]
+   [35,"__poly.tapCard(0)()","__poly.tapCard(1)()"],
+   [42,"__poly.tapCard(0)()","__poly.tapCard(1)()"],
+   [44,"__poly.tapCard(3)()","__poly.tapCard(0)()"],
+   [45,"__poly.tapCard(0)()","__poly.tapCard(2)()"],
+   [43,"__poly.state.pickedFig=0;__poly.dropInto(0)()","__poly.state.pickedFig=0;__poly.dropInto(1)()"],
+   [46,"__poly.state.pickedFig=0;__poly.dropInto(0)()","__poly.state.pickedFig=0;__poly.dropInto(1)()"]
   ];
   for(const[k,right,wrong]of cases){
    await show(k);console.log('Checking screen',k+1);expect(await act(wrong),false);
@@ -56,20 +57,32 @@ const server=http.createServer((req,res)=>{
    await show(k);expect(await act(right),true);
    if(k===44)await page.screenshot({path:path.join(out,'correct.png')});
   }
-  await show(44);
+  await show(22);
+  assert.deepEqual((await act("__poly.state.chip='Vertex';__poly.hitTarget('side')()")).sound,['no'],'Incorrect label gives only trial-and-error SFX');
+  assert.equal(await page.evaluate(()=>__poly.state.placed.side),undefined);
+  await show(45);
   const cards=page.locator('.story-surface .game-action').filter({has:page.locator('svg')});
   const face=()=>cards.first().evaluate(e=>({background:getComputedStyle(e).background,border:getComputedStyle(e).borderColor,shape:e.querySelector('svg').innerHTML}));
-  const before=await face();expect(await act('__poly.tapCard(0)()'),true);assert.deepEqual(await face(),before,'Correct feedback preserves artwork');
-  assert((await cards.first().evaluate(e=>getComputedStyle(e).boxShadow)).includes('35, 170, 92'));
-  expect(await act('__poly.tapCard(2)()'),false);assert((await cards.nth(2).evaluate(e=>getComputedStyle(e).boxShadow)).includes('215, 67, 78'));
+  /* Right and wrong are meant to be unmistakable from across a room: the card
+     takes a coloured rim and face AND a halo, rather than the older treatment
+     of an unchanged card with a soft shadow under it. The figure itself is
+     what must survive -- feedback dresses the card, never the artwork. */
+  const before=await face();expect(await act('__poly.tapCard(0)()'),true);
+  const after=await face();
+  assert.equal(after.shape,before.shape,'Correct feedback leaves the figure untouched');
+  assert.notEqual(after.border,before.border,'A correct card is plainly marked, not left as it was');
+  const glow=c=>cards.nth(c).evaluate(e=>getComputedStyle(e).boxShadow);
+  const chan=s=>(s.match(/rgba?\([0-9]+, [0-9]+, [0-9]+/g)||[]).map(m=>m.split(/[^0-9]+/).filter(Boolean).map(Number));
+  assert(chan(await glow(0)).some(c=>c[1]>140&&c[1]-c[0]>60&&c[1]-c[2]>40),'and is ringed in green');
+  expect(await act('__poly.tapCard(2)()'),false);
+  assert(chan(await glow(2)).some(c=>c[0]>170&&c[0]-c[1]>80&&c[0]-c[2]>80),'A wrong card is ringed in red');
   await page.waitForTimeout(1100);assert.equal(await page.locator('.swiftee-wrap').getAttribute('data-answer'),null,'Reaction cleans up');
   await show(18);expect(await act('__poly.tapCard(1)()'),true);assert.deepEqual((await act('__poly.tapCard(1)()')).sound,[],'Accepted answer cannot replay reward');
-  await page.emulateMedia({reducedMotion:'reduce'});await show(44);expect(await act('__poly.tapCard(0)()'),true);
+  await page.emulateMedia({reducedMotion:'reduce'});await show(45);expect(await act('__poly.tapCard(0)()'),true);
   assert(await page.evaluate(()=>__poly.guide.sprite.seg.still));
-  await page.setViewportSize({width:390,height:844});await show(44);expect(await act('__poly.tapCard(2)()'),false);
+  await page.setViewportSize({width:390,height:844});await show(45);expect(await act('__poly.tapCard(2)()'),false);
   const guide=await page.locator('.swiftee-wrap').boundingBox();assert(guide.x>=0&&guide.x+guide.width<=390&&guide.y>=0&&guide.y+guide.height<=844);
   await page.screenshot({path:path.join(out,'portrait-incorrect.png')});assert.deepEqual(errors,[]);
-  console.log('PASS: icon-free, immediate single-SFX feedback across 15 screens, preserved artwork, glow, cleanup, repeat taps, reduced motion and portrait.');
+  console.log(`PASS: icon-free, immediate single-SFX feedback across ${cases.length} screens plus label retry, preserved artwork, glow, cleanup, repeat taps, reduced motion and portrait.`);
  }finally{await browser.close();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1;});
-
