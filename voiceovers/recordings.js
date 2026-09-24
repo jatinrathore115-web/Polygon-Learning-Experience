@@ -2920,5 +2920,317 @@ window.POLYGON_RECORDINGS = [
     "source": "Microsoft Zira Desktop; generated locally with System.Speech",
     "text": "Which of these are pentagons?",
     "src": "voiceovers/voice%20overs/79_Select_pentagons.wav"
+  },
+  {
+    "text": "Tap the closed figure made with straight lines.",
+    "src": "voiceovers/voice%20overs/80_Tap_the_closed_figure_made_with_straight_lines.wav",
+    "duration": 3.3195,
+    "words": [
+      {
+        "word": "Tap",
+        "start": 0.1492
+      },
+      {
+        "word": "the",
+        "start": 0.6068
+      },
+      {
+        "word": "closed",
+        "start": 0.7567
+      },
+      {
+        "word": "figure",
+        "start": 1.4168
+      },
+      {
+        "word": "made",
+        "start": 1.9642
+      },
+      {
+        "word": "with",
+        "start": 2.3242
+      },
+      {
+        "word": "straight",
+        "start": 2.5418
+      },
+      {
+        "word": "lines",
+        "start": 3.1042
+      }
+    ],
+    "source": "Microsoft Zira Desktop; generated locally with System.Speech"
+  },
+  {
+    "text": "Great job! You identified all the polygons.",
+    "src": "voiceovers/voice%20overs/81_Great_job_You_identified_all_the_polygons.wav",
+    "duration": 4.3495,
+    "words": [
+      {
+        "word": "Great",
+        "start": 0.1492
+      },
+      {
+        "word": "job",
+        "start": 0.5692
+      },
+      {
+        "word": "You",
+        "start": 2.4067
+      },
+      {
+        "word": "identified",
+        "start": 2.6392
+      },
+      {
+        "word": "all",
+        "start": 3.7042
+      },
+      {
+        "word": "the",
+        "start": 4.0042
+      },
+      {
+        "word": "polygons",
+        "start": 4.1468
+      }
+    ],
+    "source": "Microsoft Zira Desktop; generated locally with System.Speech"
+  },
+  {
+    "text": "Correct! This polygon has five sides.",
+    "src": "voiceovers/voice%20overs/82_Correct_This_polygon_has_five_sides.wav",
+    "duration": 4.1345,
+    "words": [
+      {
+        "word": "Correct",
+        "start": 0.1395
+      },
+      {
+        "word": "This",
+        "start": 2.1031
+      },
+      {
+        "word": "polygon",
+        "start": 2.3836
+      },
+      {
+        "word": "has",
+        "start": 3.1691
+      },
+      {
+        "word": "five",
+        "start": 3.5128
+      },
+      {
+        "word": "sides",
+        "start": 3.9545
+      }
+    ],
+    "source": "Microsoft Zira Desktop; generated locally with System.Speech",
+    "timingNote": "word starts scaled by 0.9350 to fit the clip: System.Speech reports AudioPosition on its own timeline, which runs past the rendered wave on lines with a sentence break"
+  },
+  {
+    "text": "That's right! Quadrilaterals are polygons with four sides.",
+    "src": "voiceovers/voice%20overs/83_Thats_right_Quadrilaterals_are_polygons.wav",
+    "duration": 4.9745,
+    "words": [
+      {
+        "word": "That's",
+        "start": 0.1305
+      },
+      {
+        "word": "right",
+        "start": 0.5045
+      },
+      {
+        "word": "Quadrilaterals",
+        "start": 2.1182
+      },
+      {
+        "word": "are",
+        "start": 3.266
+      },
+      {
+        "word": "polygons",
+        "start": 3.4039
+      },
+      {
+        "word": "with",
+        "start": 4.2828
+      },
+      {
+        "word": "four",
+        "start": 4.4665
+      },
+      {
+        "word": "sides",
+        "start": 4.7945
+      }
+    ],
+    "source": "Microsoft Zira Desktop; generated locally with System.Speech",
+    "timingNote": "word starts scaled by 0.8746 to fit the clip: System.Speech reports AudioPosition on its own timeline, which runs past the rendered wave on lines with a sentence break"
+  },
+  {
+    "text": "Quadrilaterals are polygons with four sides.",
+    "src": "voiceovers/voice%20overs/84_Quadrilaterals_are_polygons_with_four_sides.wav",
+    "duration": 3.4595,
+    "words": [
+      {
+        "word": "Quadrilaterals",
+        "start": 0.1492
+      },
+      {
+        "word": "are",
+        "start": 1.4617
+      },
+      {
+        "word": "polygons",
+        "start": 1.6192
+      },
+      {
+        "word": "with",
+        "start": 2.6242
+      },
+      {
+        "word": "four",
+        "start": 2.8342
+      },
+      {
+        "word": "sides",
+        "start": 3.2092
+      }
+    ],
+    "source": "Microsoft Zira Desktop; generated locally with System.Speech"
+  },
+  {
+    "text": "Is this shape a quadrilateral?",
+    "src": "voiceovers/voice%20overs/85_Is_this_shape_a_quadrilateral.wav",
+    "duration": 2.5345,
+    "words": [
+      {
+        "word": "Is",
+        "start": 0.1492
+      },
+      {
+        "word": "this",
+        "start": 0.3892
+      },
+      {
+        "word": "shape",
+        "start": 0.6742
+      },
+      {
+        "word": "a",
+        "start": 1.1617
+      },
+      {
+        "word": "quadrilateral",
+        "start": 1.2442
+      }
+    ],
+    "source": "Microsoft Zira Desktop; generated locally with System.Speech"
+  },
+  {
+    "text": "A polygon is a closed figure made only of straight sides.",
+    "src": "voiceovers/voice%20overs/86_A_polygon_is_a_closed_figure.wav",
+    "duration": 4.1495,
+    "words": [
+      {
+        "word": "A",
+        "start": 0.1378
+      },
+      {
+        "word": "polygon",
+        "start": 0.3112
+      },
+      {
+        "word": "is",
+        "start": 1.1287
+      },
+      {
+        "word": "a",
+        "start": 1.3366
+      },
+      {
+        "word": "closed",
+        "start": 1.4127
+      },
+      {
+        "word": "figure",
+        "start": 2.0225
+      },
+      {
+        "word": "made",
+        "start": 2.5422
+      },
+      {
+        "word": "only",
+        "start": 2.8887
+      },
+      {
+        "word": "of",
+        "start": 3.3321
+      },
+      {
+        "word": "straight",
+        "start": 3.4707
+      },
+      {
+        "word": "sides",
+        "start": 3.9695
+      }
+    ],
+    "source": "Microsoft Zira Desktop; generated locally with System.Speech",
+    "timingNote": "word starts scaled by 0.9238 to fit the clip: System.Speech reports AudioPosition on its own timeline, which runs past the rendered wave on lines with a sentence break"
+  },
+  {
+    "text": "Not quite! A polygon is closed with only straight sides.",
+    "src": "voiceovers/voice%20overs/87_Not_quite_A_polygon_is_closed.wav",
+    "duration": 4.9695,
+    "words": [
+      {
+        "word": "Not",
+        "start": 0.1293
+      },
+      {
+        "word": "quite",
+        "start": 0.4478
+      },
+      {
+        "word": "A",
+        "start": 2.1311
+      },
+      {
+        "word": "polygon",
+        "start": 2.2937
+      },
+      {
+        "word": "is",
+        "start": 3.0606
+      },
+      {
+        "word": "closed",
+        "start": 3.262
+      },
+      {
+        "word": "with",
+        "start": 3.795
+      },
+      {
+        "word": "only",
+        "start": 3.977
+      },
+      {
+        "word": "straight",
+        "start": 4.328
+      },
+      {
+        "word": "sides",
+        "start": 4.7895
+      }
+    ],
+    "source": "Microsoft Zira Desktop; generated locally with System.Speech",
+    "timingNote": "word starts scaled by 0.8666 to fit the clip: System.Speech reports AudioPosition on its own timeline, which runs past the rendered wave on lines with a sentence break"
   }
 ];

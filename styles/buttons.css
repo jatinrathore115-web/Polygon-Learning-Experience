@@ -1,4 +1,28 @@
 /* Shared reference-blue button: icy rim, glossy face, and white lettering. */
+:root,:host {
+  --answer-correct-glow:0 0 0 6px rgba(46,204,113,.5),0 0 30px 12px rgba(46,204,113,.6),0 14px 22px -8px rgba(28,150,80,.5);
+  --answer-incorrect-glow:0 0 0 6px rgba(240,84,84,.5),0 0 30px 12px rgba(240,84,84,.58),0 14px 22px -8px rgba(198,54,62,.5);
+}
+.ice-button[data-feedback="correct"] { --button-feedback-glow:var(--answer-correct-glow)!important; }
+.ice-button[data-feedback="incorrect"] { --button-feedback-glow:var(--answer-incorrect-glow)!important; }
+.label-socket[data-feedback="correct"] { border-color:#2ecc71!important; }
+.label-socket[data-feedback="incorrect"] { border-color:#f05454!important; }
+/* Reference label treatment shared by choices, navigation, steppers and tiles.
+   The lesson canvas scales its 32px labels; compact navigation uses the same
+   type at half size to match its smaller controls. No strokes add false weight. */
+:is(.ice-button,.label-tile,.label-socket) {
+  font-family:'Baloo 2',Nunito,sans-serif!important;
+  font-weight:600!important;
+  font-size:var(--button-label-size,32px)!important;
+  font-style:normal!important;
+  line-height:1.1!important;
+  letter-spacing:normal!important;
+  text-transform:none!important;
+  text-align:center;
+  -webkit-text-stroke:0!important;
+  text-shadow:none!important;
+  display:inline-flex; align-items:center; justify-content:center;
+}
 /* Every card and button carries its own border colour inline. When one is
    momentarily missing -- a style diff can drop the colour while leaving the
    width and style behind -- CSS falls back to currentColor, which is black,
@@ -11,6 +35,11 @@
 :is(button,[role="button"],.ice-button) * { text-decoration:none!important; }
 .game-action:focus, .ice-button:focus { outline:none; }
 .game-action:focus-visible { outline:3px solid #31b9de; outline-offset:5px; }
+/* Keep focus styling when an answered card loses its game-action class.
+   Otherwise a still-focused, disabled card falls back to the browser's black ring. */
+.shape-card:focus { outline:none; }
+.shape-card:focus-visible:not([aria-disabled="true"]) { outline:3px solid #31b9de; outline-offset:5px; }
+.shape-card[aria-disabled="true"]:focus { outline:none; }
 /* Colour-matched puzzle tiles and recessed sockets for the parts activity. */
 .label-tile { position:relative; isolation:isolate; text-align:center; }
 .label-tile:focus { outline:none; }
@@ -33,8 +62,8 @@
 .label-socket[role="button"]:focus-visible { outline:3px solid #31b9de; outline-offset:5px; }
 /* The drop sockets answer the same way the buttons do, so a learner who has
    learnt what the green halo means on one screen reads it on the next. */
-.label-socket[data-feedback="incorrect"] { box-shadow:0 0 0 6px rgba(240,84,84,.5),0 0 26px 10px rgba(240,84,84,.55),0 12px 18px -7px rgba(198,54,62,.45)!important; animation:answerRetry 560ms ease-in-out both!important; }
-.label-socket[data-feedback="correct"] { box-shadow:0 0 0 6px rgba(46,204,113,.5),0 0 26px 10px rgba(46,204,113,.58),0 12px 18px -7px rgba(28,150,80,.5)!important; animation:answerSuccess 640ms cubic-bezier(.3,1.35,.4,1) both!important; }
+.label-socket[data-feedback="incorrect"] { box-shadow:var(--answer-incorrect-glow)!important; animation:answerRetry 560ms ease-in-out both!important; }
+.label-socket[data-feedback="correct"] { box-shadow:var(--answer-correct-glow)!important; animation:answerSuccess 640ms cubic-bezier(.3,1.35,.4,1) both!important; }
 [data-interactive="true"] .label-socket:active { scale:1; }
 [data-interactive="true"] .game-action:active { scale:.98; }
 [data-interactive="true"] .game-handle { filter:drop-shadow(0 0 9px #22b8e6); }
@@ -199,6 +228,26 @@
   filter:none!important;
   opacity:1!important;
   pointer-events:none!important;
+}
+/* Screen 14 completed answers match the neutral blue figures, at full opacity.
+   Screen 15 keeps its established yellow recap labels. */
+.ice-button.concept-choice.completed-answer[aria-disabled="true"] {
+  --button-face:linear-gradient(180deg,#f3f9fc 0%,#dcebf4 55%,#cbdfea 100%);
+  --button-rim:linear-gradient(#ffffff,#d5e5ef);
+  --button-feedback-glow:0 0 0 transparent;
+  color:#355a70!important;
+  -webkit-text-fill-color:#355a70;
+  box-shadow:inset 0 2px 1px #ffffff99,inset 0 -4px 0 #aac7da,0 5px 0 #c2cbd3,0 8px 12px #23496a18!important;
+}
+.ice-button.concept-choice.completed-answer::before {
+  background:linear-gradient(180deg,#ffffff66,#ffffff00);
+}
+.ice-button.concept-choice.preview-choice[aria-disabled="true"] {
+  --button-face:var(--concept-button-face);
+  --button-rim:linear-gradient(180deg,#ffffff 0%,#fffef5 70%,#e4e9ed 100%);
+  box-shadow:var(--concept-button-rest-shadow)!important;
+  opacity:1!important;
+  filter:none!important;
 }
 @media(prefers-reduced-motion:reduce) {
   .ice-button[data-sequence-state] { transition:none!important; }

@@ -1,0 +1,25 @@
+const fs=require('fs'),vm=require('vm');
+const fixture=fs.readFileSync('verification/check-voice-gate.cjs','utf8').split('let g=game(4);')[0];
+const context={require,console,setTimeout,clearTimeout};vm.createContext(context);
+vm.runInContext(fixture+`
+vm.runInContext(fs.readFileSync('responsive-layout.js','utf8'),ctx);
+const g=game(18);g.state.interactive=true;g.react=()=>{};g.clearNudge=()=>{};
+let finish,feedbackCount=0,restored=0;
+g.feedback=(text,done)=>{feedbackCount++;finish=done;};g.restoreQuestion=()=>restored++;
+const view=()=>{const v={};g.viewMulti(v,g.step());return v.cards;};
+const before=view()[0];
+g.tapCard(0)();assert.equal(g.state.wrong,0);assert(!g.state.rejectedOptions?.includes(0));
+finish();assert.equal(g.state.wrong,null);assert(g.state.rejectedOptions.includes(0));assert.equal(restored,1);
+const after=view()[0];assert(after.disabled);assert.equal(after.click,null);
+assert.equal(after.wrap.pointerEvents,'none');assert.equal(after.wrap.borderColor,before.wrap.borderColor);
+assert.equal(after.stroke,'#7fb2d9');assert.equal(after.d,before.d);
+assert.equal(after.wrap.opacity,1,'Rejected figure stays fully visible');
+g.tapCard(0)();assert.equal(feedbackCount,1,'A rejected answer cannot repeat feedback');
+g.tapCard(3)();finish();assert.deepEqual(Array.from(g.state.rejectedOptions),[0,3]);
+assert.equal(view()[3].stroke,'#7fb2d9');
+assert.equal(view()[3].fill,g.figFill(g.sets()[g.step().set][3][0],'#7fb2d9'));
+assert.equal(view()[1].disabled,undefined,'Correct choices remain available');
+g.burstHere=()=>{};g.answerFeedback=()=>{};g.tapCard(1)();assert(g.state.sel.includes(1));
+g.timers=[];g.enterScreen=()=>0;g.runStep(18,false);assert.equal(g.state.rejectedOptions.length,0,'Returning to screen starts a fresh attempt');
+console.log('PASS: feedback completion clears highlight, disables both rejected options, blocks repeat selection, preserves artwork/correct choices and resets on re-entry.');
+`,context);

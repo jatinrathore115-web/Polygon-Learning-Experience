@@ -7,7 +7,7 @@
       host.id = 'polygon-screen-navigator';
       const root = host.attachShadow({ mode: 'open' });
       root.innerHTML = `<link rel="stylesheet" href="${new URL('styles/buttons.css', document.baseURI).href}"><style>
-        :host{position:absolute;inset:0;z-index:10000;font:14px Nunito,sans-serif;color:#123a6b;pointer-events:none}
+        :host{--button-label-size:16px;position:absolute;inset:0;z-index:10000;font:14px Nunito,sans-serif;color:#123a6b;pointer-events:none}
         #toggle,#step-navigation,#panel{pointer-events:auto}
         *{box-sizing:border-box}button,input{font:inherit}button{cursor:pointer}
         button:focus-visible,input:focus-visible{outline:3px solid #31b9de;outline-offset:3px}
@@ -20,7 +20,7 @@
         #close{font-size:16px;min-width:72px;height:44px;padding:0 10px;flex-shrink:0}
         input{width:100%;padding:10px;border:2px solid #a3d7ed;border-radius:10px;background:white;color:#123a6b;caret-color:#123a6b;user-select:text}
         #list{display:grid;gap:6px;max-height:440px;overflow:auto;margin-top:10px;overscroll-behavior:contain}
-        #list button{text-align:center;padding:10px;min-height:44px;white-space:normal}
+        #list button{flex-direction:column;text-align:center;padding:10px;min-height:44px;white-space:normal}
         #list{padding:5px 5px 9px}
         small{display:block;opacity:1;margin-top:4px;font-weight:650;line-height:1.35}#empty{padding:12px;text-align:center}
       </style>
@@ -80,6 +80,7 @@
         if (container && host.parentElement !== container) container.append(host);
         $('back').disabled = !game.state.ready || game.state.k === 0;
         $('next').disabled = !game.state.ready || game.state.k >= game.steps().length - 1;
+        $('next').hidden = game.state.ready && game.step().q === 'recall';
         if (game.state.k === last) return;
         last = game.state.k;
         toggle.textContent = `Screens · ${last + 1}`;

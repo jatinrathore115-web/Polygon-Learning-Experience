@@ -26,6 +26,18 @@ const server=http.createServer((req,res)=>{
     });
     const enabled=()=>page.locator('[data-sequence-state="active"][aria-disabled="false"]');
     await start();await page.waitForTimeout(1100);
+    await page.evaluate(()=>__poly.setState({storyControls:false,interactive:false,speaking:true,boundaryFocus:'all',boundaryPulseMs:1000,boundaryPulseStart:0,boundaryPulseElapsed:400}));
+    await page.waitForTimeout(1100);
+    const introStyles=await page.locator('.story-surface svg').evaluateAll(es=>es.map(e=>{
+      const s=getComputedStyle(e.parentElement);
+      return {animation:s.animationName,border:s.borderColor,outline:s.outlineStyle};
+    }));
+    assert(introStyles.every(s=>['none','storyArrive'].includes(s.animation)&&s.border==='rgb(168, 207, 232)'&&s.outline==='none'),'Default narration state: '+JSON.stringify(introStyles));
+    assert.equal(await page.locator('.preview-choice').count(),2,'First pair is visible from the beginning');
+    assert(await page.locator('.preview-choice').evaluateAll(es=>es.every(e=>{
+      const s=getComputedStyle(e);return e.getAttribute('aria-disabled')==='true' && e.tabIndex===-1 && s.opacity==='1' && s.getPropertyValue('--button-face').trim()===s.getPropertyValue('--concept-button-face').trim();
+    })),'Initial choices stay solid yellow but wait for narration before accepting input');
+    await start();await page.waitForTimeout(1100);
     /* One figure is asked about at a time, so only that figure offers answers.
        The figures still waiting show no buttons at all: a second row of choices
        under a figure nobody is being asked about is just something else to tap
@@ -68,9 +80,22 @@ const server=http.createServer((req,res)=>{
     assert(await page.evaluate(()=>__poly.state.ddActive===0&&__poly.state.dd[0]===null));
     const truth=['Straight','Straight','Curved','Curved'];
     for(let i=0;i<4;i++){
+      await page.mouse.move(20,80);
+      await page.waitForTimeout(650);
+      const pairAlignment=await page.evaluate(i=>{
+        const card=document.querySelectorAll('.story-surface svg')[i].parentElement.getBoundingClientRect();
+        const buttons=[...document.querySelectorAll('[data-sequence-state="active"]')].map(e=>e.getBoundingClientRect());
+        const board=document.querySelector('.story-board').getBoundingClientRect();
+        return {offset:(buttons[0].left+buttons[1].right)/2-(card.left+card.right)/2,
+          inside:buttons.every(b=>b.left>board.left&&b.right<board.right),baseline:buttons[0].top-buttons[1].top};
+      },i);
+      assert(Math.abs(pairAlignment.offset)<.1,'Both buttons center on figure '+(i+1));
+      assert(Math.abs(pairAlignment.baseline)<.1&&pairAlignment.inside,'Pair shares a baseline and fits the board: '+JSON.stringify(pairAlignment));
       const choice=page.getByRole('button',{name:'Figure '+(i+1)+': '+truth[i],exact:true});
+      const originalBox=await choice.boundingBox();
+      const originalFigure=await page.locator('.story-surface svg').nth(i).boundingBox();
       await choice.focus();await page.keyboard.press('Enter');
-      assert.equal(await page.locator('[data-sequence-state="complete"]').count(),1);
+      assert.equal(await page.locator('[data-sequence-state="complete"]').count(),i+1);
       assert.equal(await page.getByRole('button',{name:new RegExp('^Figure '+(i+1)+':')}).count(),1,'Replace both choices with one result');
       /* The earned answer is confirmed by the button itself, not by a tick
          printed in front of the word. Asserted on the state the button
@@ -85,10 +110,19 @@ const server=http.createServer((req,res)=>{
         await page.waitForFunction(i=>__poly.state.ddActive===i+1&&!__poly.locked(),i);
         assert(await page.evaluate(i=>{
           const v=__poly.renderVals(),t=v.targets.find(x=>x.label.startsWith('Figure '+(i+1)+': '));
-          return !t && !v.cards.some(c=>c.key===__poly.sets().cmp[i][0]+i);
-        },i),'Completed figure and its answer are removed entirely');
-        assert.equal(await page.locator('.story-surface svg').count(),3-i);
-        assert.equal(await page.locator('[data-sequence-state="complete"]').count(),0);
+          const c=v.cards[i];
+          return !!t && !t.selected && t.feedback==='' && t.disabled && c.wrap.opacity===1 && c.wrap.transform==='none' && !c.wrap.boxShadow.includes('23,156,211');
+        },i),'Completed figure and answer remain visible in their default state');
+        const answerBox=await choice.boundingBox();
+        const cardBox=await page.locator('.story-surface svg').nth(i).evaluate(e=>{const r=e.parentElement.getBoundingClientRect();return {x:r.x,width:r.width};});
+        assert(Math.abs(answerBox.x+answerBox.width/2-cardBox.x-cardBox.width/2)<1,'Accepted answer is centered below its own card');
+        assert(Math.abs(answerBox.y-originalBox.y)<.1,'Answer baseline stays fixed');
+        assert(Math.abs(answerBox.width-originalBox.width)<.1,'Answer width stays fixed');
+        assert.equal(await page.locator('.story-surface svg').nth(i).locator('path').first().getAttribute('stroke'),'#7fb2d9','Completed figure returns to muted blue');
+        assert(await choice.evaluate(e=>{const s=getComputedStyle(e);return e.classList.contains('completed-answer')&&s.opacity==='1'&&s.color==='rgb(53, 90, 112)'&&s.getPropertyValue('--button-face').trim()!==s.getPropertyValue('--concept-button-face').trim();}),'Completed answer uses a readable neutral blue face');
+        assert.deepEqual(await page.locator('.story-surface svg').nth(i).boundingBox(),originalFigure,'The completed figure never moves or resizes');
+        assert.equal(await page.locator('.story-surface svg').count(),4);
+        assert.equal(await page.locator('[data-sequence-state="complete"]').count(),i+1);
         assert.equal(await enabled().count(),2);
         assert.equal(await page.evaluate(()=>document.activeElement.getAttribute('aria-label')),'Figure '+(i+2)+': Straight');
         if(i===1){

@@ -163,6 +163,11 @@
     52%  { transform:scale(1.085); filter:drop-shadow(0 0 22px var(--cue-glow,transparent)); }
     100% { transform:scale(1);     filter:drop-shadow(0 0 0 transparent); }
   }
+  /* Recap cues stay inside the figure viewport, with no halo outside the card. */
+  @keyframes recapFigureCue {
+    0%,100% { transform:scale(1); }
+    45% { transform:scale(1.04); }
+  }
   /* All four figures acknowledge together once the sorting is finished. */
   @keyframes figureCheer { 0%,100% { transform:scale(1); } 40% { transform:scale(1.04); } 75% { transform:scale(1.01); } }
   /* Each answer button arrives on its own beat rather than both at once. */
@@ -247,7 +252,7 @@
       </sc-if>
 
       <sc-for list="{{ cards }}" as="c" hint-placeholder-count="0">
-        <div class="{{ c.actionClass }}" role="{{ c.actionRole }}" tabIndex="{{ c.actionTab }}" onKeyDown="{{ activateKey }}" aria-label="{{ c.accessibleLabel }}" aria-pressed="{{ c.selected }}" data-nudge="{{ c.nudge }}" style="{{ c.wrap }}" onPointerDown="{{ c.down }}" onPointerEnter="{{ c.enter }}" onPointerLeave="{{ c.leave }}" onClick="{{ c.click }}">
+        <div class="shape-card {{ c.actionClass }}" role="{{ c.actionRole }}" tabIndex="{{ c.actionTab }}" onKeyDown="{{ activateKey }}" aria-label="{{ c.accessibleLabel }}" aria-disabled="{{ c.disabled }}" aria-pressed="{{ c.selected }}" data-nudge="{{ c.nudge }}" style="{{ c.wrap }}" onPointerDown="{{ c.down }}" onPointerEnter="{{ c.enter }}" onPointerLeave="{{ c.leave }}" onClick="{{ c.click }}">
           <div style="{{ c.glow }}"></div>
           <svg viewBox="{{ c.vb }}" style="{{ c.svgStyle }}" ref="{{ c.svgRef }}">
             <g style="{{ c.gStyle }}">
@@ -384,13 +389,6 @@
     <div class="canvas-navigation" ref="{{ navigationRef }}" style="position:absolute;inset:0;pointer-events:none;z-index:10000"></div>
 
 
-<sc-if value="{{ voiceError }}" hint-placeholder-val="{{ false }}">
-  <div data-voice-recovery="true" role="group" aria-label="Audio recovery" style="position:absolute;left:50%;bottom:18px;transform:translateX(-50%);z-index:110;display:flex;align-items:center;gap:24px;padding:14px 24px;border:2px solid #159fa5;border-radius:24px;background:#fffbea;box-shadow:0 5px 18px #123a6b33;font:800 26px Nunito,sans-serif;color:#174f58;white-space:nowrap">
-    <span role="status">Audio unavailable</span>
-    <button class="ice-button" onClick="{{ retryVoice }}" style="position:relative;width:190px;height:64px;font:800 26px Nunito,sans-serif">Retry audio</button>
-    <button class="ice-button" onClick="{{ continueWithoutVoice }}" style="position:relative;width:320px;height:64px;font:800 26px Nunito,sans-serif">Continue without audio</button>
-  </div>
-</sc-if>
 <div aria-hidden="true" style="position:absolute;inset:0;z-index:95;pointer-events:none;overflow:hidden">
   <sc-for list="{{ confettiFx }}" as="f" hint-placeholder-count="0"><div class="{{ f.className }}" style="{{ f.style }}"></div></sc-for>
 </div>
@@ -454,7 +452,17 @@ const CARD_RIM = '#7fc4de';
    it is written like one: first letter capital, the rest lower. Setting it in
    capitals made it read as a label dropped into the line rather than a word
    Swiftee is saying. Colour already carries the emphasis. */
-const shapeCase = (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+/* Normalise a shape name that was WRITTEN IN CAPITALS down to sentence case,
+   and leave every other spelling exactly as the line was authored. Rewriting
+   unconditionally title-cased the word wherever it fell, so ordinary prose came
+   out as "are Polygons with 4 sides" and "is called a Triangle" -- a capital in
+   the middle of a sentence on 33 of the lesson's 68 lines. The rule was only
+   ever meant to take SHOUTED names down to sentence case, not to promote
+   lower-case ones. */
+const shapeCase = (word) =>
+  word === word.toUpperCase() && /[A-Z]/.test(word)
+    ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    : word;
 /* The polygon pink. Screen 16 is where the learner picks the polygon out of
    the row, and it carries this colour into the screens that name it. */
 const POLY_PINK = '#e63289';
@@ -1070,7 +1078,9 @@ class Component extends DCLogic {
     } catch (error) {}
   }
   tone(f, dur, type, vol, delay) {
+    const token = this._sfxToken;
     this.withAudio(ac => {
+      if (token !== this._sfxToken) return;
       const t0 = ac.currentTime + (delay || 0);
       const o = ac.createOscillator(), g = ac.createGain();
       o.type = type || 'sine'; o.frequency.setValueAtTime(f, t0);
@@ -1078,7 +1088,9 @@ class Component extends DCLogic {
       g.gain.exponentialRampToValueAtTime(vol || 0.06, t0 + 0.01);
       g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
       o.connect(g); g.connect(this._sfxOutput);
-      o.onended = () => { o.disconnect(); g.disconnect(); };
+      const voices = this._sfxVoices || (this._sfxVoices = new Set());
+      const voice = {o,g,ac}; voices.add(voice);
+      o.onended = () => { voices.delete(voice); o.disconnect(); g.disconnect(); };
       o.start(t0); o.stop(t0 + dur + 0.05);
     });
   }
@@ -1130,7 +1142,21 @@ class Component extends DCLogic {
       sound.source.stop(now + 0.04);
     } catch (error) {}
   }
+  stopSfx() {
+    this._sfxToken = (this._sfxToken || 0) + 1;
+    for (const voice of this._sfxVoices || []) {
+      try {
+        const now = voice.ac.currentTime;
+        voice.g.gain.cancelScheduledValues(now);
+        voice.g.gain.setTargetAtTime(0.0001,now,.005);
+        voice.o.stop(now+.02);
+      } catch (error) {}
+    }
+    if (this._sfxVoices) this._sfxVoices.clear();
+  }
   sfx(kind) {
+    // One effect owns the channel; stale resume callbacks cannot replay an old answer.
+    this.stopSfx();
     this.unlockAudio();
     if (kind === 'tap') this.tone(520, 0.08, 'triangle', 0.05);
     else if (kind === 'ok') { this.tone(660, 0.12, 'sine', 0.06); this.tone(880, 0.16, 'sine', 0.05, 0.1); this.tone(1180, 0.2, 'sine', 0.04, 0.2); }
@@ -1184,9 +1210,19 @@ class Component extends DCLogic {
          all. Reveal them here for the same reason onend does: when the voice
          cannot tell them apart in time, the written words have to. */
       this.revealChoiceWords(text);
-      // Keep the line readable and gated until the learner retries or explicitly
-      // continues. Missing browser speech must not create an invisible dead end.
+      // Keep the line readable; the next trusted gesture retries pending audio.
       this.setState({ wordReveal: 'complete', storyDialogue: true, storyContent: true, voiceError: 'Audio unavailable' });
+      /* And then carry on by itself. Every browser refuses to play audio until
+         the page has been touched once, so on a cold load this is the ordinary
+         path, not a rare one -- and with nothing scheduled here the lesson sat
+         on its first line forever, waiting for a tap it never asked the
+         learner for. The line stays up for as long as it takes to read, then
+         the queue continues exactly as a finished clip would continue it, so
+         auto-advancing screens still advance. A tap before that still brings
+         the voice back immediately through _voiceRetry. */
+      this.later(() => {
+        if (current() && this._voiceContinue) this._voiceContinue();
+      }, this.readingTime(text, durationMs) + 700);
     };
     const recording = window.PolygonRecordedVoice && window.PolygonRecordedVoice.find(text);
     if (recording) return window.PolygonRecordedVoice.play(this, text, recording, current, cb, fail);
@@ -1317,7 +1353,8 @@ class Component extends DCLogic {
       const correcting = phase === 'classify' && Number.isInteger(this.state.wrong);
       const correctKind = this.state.wrong < 2 ? 'straight' : 'curved';
       const focus = correcting ? (word === 'boundary' || word === correctKind ? 'figure'+this.state.wrong : null) :
-        (phase === 'open' || phase === 'closed') && word === phase ? phase :
+        /* open / closed are not cued on the word any more -- those two lines
+           hold their pulse from the moment they start, set in narrate(). */
         phase === 'bound' && word === 'boundaries' ? 'all' :
         ['sc','classify','done'].includes(phase) && /^(straight|curved)$/.test(word) ? word : null;
       if (focus) {
@@ -1371,7 +1408,20 @@ class Component extends DCLogic {
        the spoken truth that replay and the recording lookup depend on. */
     const step = this.step();
     const shown = step.show && text === step.narr ? step.show : text;
-    this.setState((st) => ({ narr: text, narrShow: shown, speaking: true, interactive: false, boundaryFocus: null,
+    /* Screens 10 and 11 hold their pulse for the whole line rather than
+       flashing once on the cue word. "These two shapes are open..." says
+       "open" at the very end, so a pulse fired on the word arrived after the
+       sentence was over and was gone before the learner looked up. The two
+       figures the line is about now beat continuously from the moment it
+       starts, and stop the instant the next line does -- the reset below is
+       what stops them, because every new line clears boundaryFocus first. */
+    const holdFocus = text === step.narr && step.sc === 'S6'
+      && (step.ph === 'open' || step.ph === 'closed') ? step.ph : null;
+    this.setState((st) => ({ narr: text, narrShow: shown, speaking: true, interactive: false,
+      boundaryFocus: holdFocus,
+      /* No media scrubbing for a held pulse: it loops for as long as the line
+         lasts, so there is no single beat to align to the clock. */
+      boundaryPulseStart: null, boundaryPulseElapsed: 0, boundaryPulseMs: 0,
       ...(choiceQuestion ? { ocWords: { open:false, closed:false }, storyControls:false } : {}),
       voiceError: '', nudge: null, muted: false, voiceElapsedMs: null,
       motionRun: (st.motionRun || 0) + 1,
@@ -1537,7 +1587,7 @@ class Component extends DCLogic {
          neighbours here, so all four figures read apart at a glance. */
       cfu3: [['c3a', C.green], ['c3b', C.pink], ['c3c', C.purple], ['c3d', C.orange]],
       cfu4: [['c4a', C.green], ['c4b', C.purple], ['c4d', C.pink], ['c4f', C.blue]],
-      cfu5: [['c5a', C.purple], ['c5b', C.green], ['c5c', C.orange], ['c5d', C.blue]]
+      cfu5: [['c5a', C.purple], ['c5b', C.green], ['c5c', C.orange, 'none'], ['c5d', C.purple, 'none']]
     };
   }
   steps() {
@@ -1579,7 +1629,10 @@ class Component extends DCLogic {
       { sc: 'S13', label: '13 · How many sides', narr: 'How many sides does this polygon have?', fig: 'pentagon', q: 'count', ans: 5, fb: { one: 'Count each side carefully and try again.' } },
       { sc: 'S13', ph: 'five', label: '13 · Five sides', narr: 'Correct! This polygon has 5 sides.', fig: 'pentagon', auto: true },
       { sc: 'S14', ph: 'intro', label: '14 · Change it', narr: "Now let's change how it looks.", fig: 'pentagon', auto: true },
-      { sc: 'S14', ph: 'drag', label: '14 · Drag a vertex', narr: 'Drag any vertex. Stretch it, squash it, or resize it.', fig: 'pentagon', q: 'deform' },
+      /* The board reads the instruction itself; Swiftee still speaks the
+         whole recorded line over it. */
+      { sc: 'S14', ph: 'drag', label: '14 · Drag a vertex', narr: 'Drag any vertex. Stretch it, squash it, or resize it.',
+        show: 'Drag any vertex', fig: 'pentagon', q: 'deform' },
       { sc: 'S14', ph: 'wow', label: '14 · Changed', narr: 'Whoa! It looks quite different now.', fig: 'pentagon', auto: true },
       { sc: 'S15', ph: 'a', label: '15 · Before and after', narr: 'Its appearance has completely changed.', ba: true, auto: true },
       { sc: 'S15', ph: 'b', label: '15 · Not everything', narr: 'But not everything has changed.', ba: true, auto: true },
@@ -1589,7 +1642,13 @@ class Component extends DCLogic {
       { sc: 'S17', ph: 'tri', label: '17 · Triangle', narr: 'A polygon with 3 sides is called a triangle.', fig: 'triangle', count: 3, reveal: 'Triangle', auto: true },
       { sc: 'S17', ph: 'quad', label: '17 · Quadrilateral', narr: 'A polygon with 4 sides is called a quadrilateral.', fig: 'quad', count: 4, reveal: 'Quadrilateral', morphFrom: 'triangle', auto: true },
       { sc: 'S18', label: '18 · Quadrilaterals', narr: 'Select all the quadrilaterals.', set: 'q36', q: 'multi', correct: [0, 2, 3],
-        fb: { ok: 'That’s right! Quadrilaterals are polygons with 4 sides.', one: 'Quadrilaterals are polygons with 4 sides.', two: 'Is this shape a polygon?' } },
+        /* First slip states the rule, so the learner is told what a
+           quadrilateral is before being asked to judge one. Every slip after
+           that asks the question instead -- the rule has been given, and
+           repeating it a third time teaches nothing. */
+        fb: { ok: 'That’s right! Quadrilaterals are polygons with 4 sides.',
+              one: 'Quadrilaterals are polygons with 4 sides.',
+              two: 'Is this shape a quadrilateral?' } },
       { sc: 'S19', label: '19 · Pentagon', narr: 'A polygon with 5 sides is called a pentagon.', fig: 'pentagon', count: 5, reveal: 'Pentagon', morphFrom: 'quad', auto: true },
       { sc: 'S20', label: '20 · Hexagon', narr: 'A polygon with 6 sides is called a hexagon.', fig: 'hexagon', count: 6, reveal: 'Hexagon', morphFrom: 'pentagon', auto: true },
       { sc: 'S21', label: '21 · Heptagon', narr: 'A polygon with 7 sides is called a heptagon.', fig: 'heptagon', count: 7, reveal: 'Heptagon', morphFrom: 'hexagon', auto: true },
@@ -1608,7 +1667,7 @@ class Component extends DCLogic {
            board, so naming them again in the sentence only repeated what the
            learner can see. */
         sc: 'C2', label: 'CFU 2', narr: 'Classify the figures as a polygon or not a polygon.',
-        show: 'Classify the figure', set: 'cfu2', q: 'sort',
+        show: 'Classify the figures.', set: 'cfu2', q: 'sort',
         zones: ['Polygon', 'Not a polygon'],
         answer: [0, 1, 0, 1], maxPlacements: 4,
         fb: { ok: 'Great job! You sorted the figures correctly.', one: 'Wrong group. Check for gaps or curved sides.', two: 'Polygons are closed, with only straight sides. Try again.' }
@@ -1660,6 +1719,7 @@ class Component extends DCLogic {
     if (this._labelDragCleanup) this._labelDragCleanup();
     if (this._sortDragCleanup) this._sortDragCleanup();
     this.stopDrawingSound();
+    this.stopSfx();
     const s = this.steps()[k];
     this._voiceStarted = false; this._voiceLocked = true; this._voiceReading = false;
     this._storyCountStart = null; this._openingTraceStart = null; this._lastExplore = 0;
@@ -1674,7 +1734,7 @@ class Component extends DCLogic {
       sceneLeaving: false,
       magicReveal: s.q === 'oc' && s.sc !== 'S1' && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches),
       narrPage: '', draggingLabel:null, labelHover:null, draggingFigure:null, sortHover:null,
-      sel: [], ddOpen: -1, wrong: null, ok: null, ocReveal: null, ocRetire: false, ocWords: { open:false, closed:false }, attempts: 0, nudge: null,
+      sel: [], rejectedOptions: [], ddOpen: -1, wrong: null, ok: null, ocReveal: null, ocRetire: false, ocWords: { open:false, closed:false }, attempts: 0, nudge: null,
       reveal: false, nums: 0, numsB: 0, sideWalkDone: false, hlKind: null, boundaryFocus: null, tracing: false, drawing: false, penAt: null,
       zoomed: s.ph === 'trace' || (s.sc === 'S1' && s.ph === 'ask'), showHand: false, checked: false, phase: s.ph || '',
       chip: null, labelPrompt: false, badPlace: null, pickedFig: null, justPlaced: null, tick: null, united: false, say: '', morph: null
@@ -1687,7 +1747,7 @@ class Component extends DCLogic {
     if (s.q === 'deform') reset.dragged = false;
     /* Before is already known and stated on screen; After starts empty so the
        learner counts it up themselves. */
-    if (s.q === 'count2') reset.cnt = [5, 0];
+    if (s.q === 'count2') { reset.cnt = [5, 0]; reset.count2Complete = false; reset.count2Pulsing = false; }
     /* recallSeen starts holding the triangle: it is already on screen when
        the step opens, so it counts as one of the shapes the learner has met. */
     if (s.q === 'recall') { reset.n = 3; reset.recallNameN = 3; reset.recallLimit = null; reset.recallLimitTick = 0; reset.recallSeen = [3]; reset.recallComplete = false; }
@@ -2306,6 +2366,7 @@ class Component extends DCLogic {
       if (this.locked()) return;
       this.clearNudge();
       const s = this.step();
+      if (s.sc === 'S10' && (this.state.rejectedOptions || []).includes(i)) return;
       if (s.q === 'straight') {
         if (this.state.checked || this.state.sel.includes(i)) return;
         if (s.correct.includes(i)) {
@@ -2384,7 +2445,15 @@ class Component extends DCLogic {
             const correction = attempts > 1 && s.fb && s.fb.two
               ? s.fb.two : (s.fb && s.fb.one) || 'A polygon is closed, with only straight sides.';
             this.feedback(correction, () => {
-              this.setState({ wrong: null, ...(['S18','C1'].includes(s.sc) ? { sel: [] } : {}) }, () => this.restoreQuestion());
+              this.setState({ wrong: null, hoverK: null, pressK: null,
+                ...(s.sc === 'S10' ? { rejectedOptions: [...new Set([...(this.state.rejectedOptions || []), i])] } : {}),
+                /* Clearing the whole selection punishes the shapes the
+                   learner already got right: on 'select all' questions a wrong
+                   tap took away their correct quadrilaterals too and made them
+                   start over. Only the wrong tap is cleared -- and it was
+                   never added to sel in the first place, so dropping the
+                   'wrong' flag above is the whole reset. */
+                ...(s.sc === 'C1' ? { sel: [] } : {}) }, () => this.restoreQuestion());
             });
           }
         }
@@ -2460,11 +2529,27 @@ class Component extends DCLogic {
          counting sides one at a time — starting at 1 asks them to accept a
          side they have not counted yet. */
       const step = this.step();
-      const v = Math.max(0, Math.min(step.q === 'count' ? step.ans : 10, c[i] + d));
+      if (step.q === 'count2' && this.state.count2Complete) return;
+      const v = Math.max(0, Math.min(step.q === 'count' ? step.ans : step.q === 'count2' ? 5 : 10, c[i] + d));
       if (v === c[i]) return;
-      c[i] = v; this.sfx('tick'); this.guide.onInteractionStart();
+      c[i] = v;
+      const completes = step.q === 'count' && v === step.ans || step.q === 'count2' && i === 1 && v === 5;
+      if (!completes) this.sfx('tick');
+      this.guide.onInteractionStart();
       this.setState({ cnt: c, wrong: null }, () => {
         if (step.q === 'count' && v === step.ans) this.checkCount();
+        if (step.q === 'count2' && i === 1 && v === 5) {
+          const generation = this.gen;
+          this.setState({count2Complete:true,count2Pulsing:true});
+          this.answerFeedback(true,true);
+          // Finish the last edge (340ms), pulse the whole outline once (700ms),
+          // then leave three quiet seconds to appreciate the completed shape.
+          this.later(() => {
+            if (generation !== this.gen) return;
+            this.setState({count2Pulsing:false});
+            this.later(() => { if (generation === this.gen) this.advance(); },3000);
+          },this.reducedMotion() ? 0 : 1040);
+        }
       });
     };
   }
@@ -2473,10 +2558,7 @@ class Component extends DCLogic {
   recallPoints(n) { return this.P.reg(n, 500, 500, 300, 180 / n); }
   bumpN(d) {
     return () => {
-      /* The stepper stays live after the set is complete. Next is what leaves
-         the screen, so freezing the shapes behind it would only strand a
-         learner who wanted one more look at the hexagon before moving on. */
-      if (this.locked()) return;
+      if (this.locked() || this.state.recallComplete) return;
       this.clearNudge();
       const cur = this.state.n, v = Math.max(3, Math.min(8, cur + d));
       if (v === cur) {
@@ -2488,21 +2570,19 @@ class Component extends DCLogic {
         this.armNudge();
         return;
       }
-      this.sfx('tick');
+      if (v !== 8) this.sfx('tick');
       this.guide.onInteractionStart();
       const from = this.recallPoints(cur), to = this.recallPoints(v);
       const seen = this.state.recallSeen || [];
       const nextSeen = seen.includes(v) ? seen : seen.concat(v);
+      if (v === 8) {
+        const generation = this.gen;
+        this.setState({recallComplete:true});
+        this.answerFeedback(true,true);
+        this.later(() => { if (generation === this.gen) this.advance(); },3000);
+      }
       this.morphTo(from, to, 520, () => {
-        if (!this.state.recallComplete && [3,4,5,6,7,8].every(n => this.state.recallSeen.includes(n))) {
-          this.clearNudge();
-          /* Completing the set reveals Next; it does not leave the screen.
-             The learner clicks to go on, so interaction stays open -- both so
-             the button can be pressed at all, and so they can step back
-             through the shapes they have just met if they want another look. */
-          this.setState({ recallComplete:true });
-          this.sfx('done');
-        } else if (!this.state.recallComplete) this.armNudge();
+        if (!this.state.recallComplete) this.armNudge();
       }, { n:v, recallNameN:v, recallLimit:null, recallSeen:nextSeen });
     };
   }
@@ -2813,6 +2893,7 @@ class Component extends DCLogic {
     this.clearNudge();
     const token = this._sortRejectToken = (this._sortRejectToken || 0) + 1;
     this.setState({pickedFig:null,sortHover:null,wrong:index});
+    this.answerFeedback(false);
     this.later(() => { if (this._sortRejectToken === token) this.setState({wrong:null}); }, 450);
   }
   sortZoneFull(zone) {
@@ -2821,7 +2902,10 @@ class Component extends DCLogic {
   }
   sortLayout() {
     return ['C2','C5'].includes(this.step().sc) ? Object.assign({}, SORT, {
-      trayW:230, trayGap:30, trayY:0, zoneTop:284, zoneH:340
+      trayW:230, trayGap:30, trayY:0,
+      zoneTop:this.state.united && Object.keys(this.state.sortAt).length === this.step().answer.length
+        ? BOUNDARY.boardY + BOUNDARY.boardH / 2 - BOUNDARY.safeY - 170 : 284,
+      zoneH:340
     }) : SORT;
   }
   sortZoneW() { return (SAFE.w - SORT.zoneGap) / 2 - (this.state.united ? SORT.unite : 0); }
@@ -3282,6 +3366,7 @@ class Component extends DCLogic {
     V.counterClass = V.storyCounting ? '' : 'story-controls';
     for (const item of V.cards) {
       meta(item, item.click, 'game-action');
+      if (item.disabled) item.actionRole = 'button';
       if (item.sortLimitBlocked) { item.actionClass += ' sort-limit-card'; item.actionTab = 0; }
     }
     for (const item of V.targets) {
@@ -3289,6 +3374,8 @@ class Component extends DCLogic {
       if (item.labelKey) meta(item, item.click, 'game-action label-socket', 'action', 'label-socket');
       else meta(item, item.click, item.text ? 'game-action game-primary ice-button' : 'game-action', 'action', item.text ? 'ice-button' : '');
       if (/^(open|close|closed|straight|curved)$/i.test(item.text || '')) item.actionClass += ' concept-choice';
+      if (item.completedMuted) item.actionClass += ' completed-answer';
+      if (item.previewChoice) item.actionClass += ' preview-choice';
     }
     for (const item of V.chips) meta(item, item.click, 'game-action game-quiet label-tile', 'action', 'label-tile');
     for (const drop of V.drops) {
@@ -3481,7 +3568,6 @@ class Component extends DCLogic {
       if (pair.every(key => present.includes(key))) return pair;
     }
     const step = this.P && this.state.ready ? this.step() : {};
-    if (step.sc === 'S18' && step.fb && text === step.fb.one) return ['polygon'];
     const focus = {sides:'side',vertex:'vertex',angle:'angle'}[step.ph];
     if (focus && present.includes(focus)) return [focus];
     const names = present.filter(key => /^(triangle|quadrilateral|pentagon|hexagon|heptagon|octagon)$/.test(key));
@@ -3496,7 +3582,10 @@ class Component extends DCLogic {
     return present.filter(key => ['point','boundary','gap','segment'].includes(key)).slice(0,2);
   }
   narratorParts() {
-    const text = this.state.narrPage === undefined ? this.state.narrShow || this.state.narr || '' : this.state.narrPage;
+    /* A step's own caption wins over paging: where the author has said what
+       the board must read, it reads exactly that for the whole line rather
+       than a fragment of the sentence being spoken over it. */
+    const text = this.state.narrShow || (this.state.narrPage === undefined ? this.state.narr || '' : this.state.narrPage);
     const tokens = text.split(/(\s+)/).filter(Boolean);
     const concepts = this.learningKeywords(text);
     let word = 0;
@@ -3766,7 +3855,7 @@ class Component extends DCLogic {
     return Object.assign({}, lane, {x, w:width, tailX:Math.max(20, Math.min(width - 80, guideX - x - 3))});
   }
   signStyle() {
-    const text = this.state.narrPage === undefined ? this.state.narrShow || this.state.narr : this.state.narrPage;
+    const text = this.state.narrShow || (this.state.narrPage === undefined ? this.state.narr : this.state.narrPage);
     const box = this.fittedDialogue(text);
     const boundary = this.topLessonScene() || this.polygonIntroScene();
     /* Point the tail at wherever Swiftee actually stands, rather than at a
@@ -3828,7 +3917,7 @@ class Component extends DCLogic {
     });
     if (st.boundaryTravel && !this.reducedMotion()) return Object.assign(box,{animation:'boundaryTravel 950ms ease-in-out both'});
     if (this.boundaryScene() && !st.guideHidden) return Object.assign(box,{
-      opacity:1,transform: st.boundaryFocus && !this.reducedMotion() ? 'rotate(-4deg)' : 'none',
+      opacity:1,transform: st.phase !== 'done' && st.boundaryFocus && !this.reducedMotion() ? 'rotate(-4deg)' : 'none',
       transformOrigin:'50% 88%',transition:'transform 320ms ease-out',animation:'none'
     });
     if (st.guideHidden) return Object.assign(box, { opacity: 0, transition: 'none' });
@@ -4106,9 +4195,11 @@ class Component extends DCLogic {
       if (!this.boundaryScene() && (st.hlKind === 'segsOf' + i || st.hlKind === 'curveOf' + i)) {
         hl = F.pts ? this.segHl(name, F.pts.map((p, j) => j), null, ICE, 22) : [{ d: F.traceD || [d, F.extra || ''].join(' '), color: ICE, w: 22, style: {} }];
       }
-      /* Voice cues pulse the card rim; the geometry stays completely unchanged. */
+      /* Voice cues identify the matching figures inside their stationary cards. */
       const boundary = this.boundaryScene();
-      const focused = boundary && (ph !== 'classify' || i === (st.ddActive || 0)) && (st.boundaryFocus === 'all' ||
+      // Classification uses its own active-card state after the question ends.
+      // Narration keywords must not pulse an option before choices are available.
+      const focused = boundary && ph !== 'classify' && (st.boundaryFocus === 'all' ||
         st.boundaryFocus === 'figure'+i ||
         st.boundaryFocus === 'open' && openIdx.includes(i) ||
         st.boundaryFocus === 'closed' && closedIdx.includes(i) ||
@@ -4123,8 +4214,13 @@ class Component extends DCLogic {
          driven frame by frame from the media clock, so the swell tracks the
          word actually being said. Moving this cue from the card to the figure
          is what dropped that sync; a timer alone drifts away from the voice. */
-      const figureCue = ['open', 'closed', 'bound', 'sc'].includes(ph) && focused && !this.reducedMotion()
-        ? 'figureCue ' + (st.boundaryPulseMs || 600) + 'ms ease-in-out '
+      /* Screens 10 and 11 are the exception: their pulse is not one swell on a
+         word but a steady beat held for the whole sentence, so it loops freely
+         and is stopped by the next line clearing the focus. */
+      const heldCue = (ph === 'open' || ph === 'closed') && focused && !this.reducedMotion();
+      const figureCue = heldCue ? 'figureCue 1100ms ease-in-out infinite'
+        : ['open', 'closed', 'bound', 'sc', 'done'].includes(ph) && focused && !this.reducedMotion()
+        ? (ph === 'done' ? 'recapFigureCue ' : 'figureCue ') + (st.boundaryPulseMs || 600) + 'ms ease-in-out '
           + (st.boundaryPulseStart == null ? 'both' : '-' + (st.boundaryPulseElapsed || 0) + 'ms both paused')
         : null;
       /* One figure is answered at a time. The others wait in blue: still fully
@@ -4133,8 +4229,9 @@ class Component extends DCLogic {
       const mine = straightIdx.includes(i) ? 'Straight' : 'Curved';
       const settled = ph === 'classify' && st.dd && st.dd[i] === mine;
       const waitingTurn = ph === 'classify' && !!st.storyControls && !settled && i !== (st.ddActive || 0);
-      const figStroke = waitingTurn ? WAIT_BLUE : it[1];
-      const figFill = waitingTurn ? this.figFill(name, WAIT_BLUE) : this.figFill(name, it[1], it[2]);
+      const neutral = waitingTurn || settled;
+      const figStroke = neutral ? WAIT_BLUE : it[1];
+      const figFill = neutral ? this.figFill(name, WAIT_BLUE) : this.figFill(name, it[1], it[2]);
       const litBounds = !boundary && ph === 'bound';
       const trace = st.tracing && ph === 'sc';
       let state = null;
@@ -4166,7 +4263,7 @@ class Component extends DCLogic {
         stroke: figStroke, sw: 18, fill: figFill, state: state, hl: hl,
         traceD: F.traceD || d,
         traceStyle: boundary ? { opacity: 0 } : (litBounds ? this.boundaryLitStyle() : (trace ? this.traceStyleFor(true, 1400) : { opacity: 0 })),
-        figAnim: figureCue, figGlow: figureCue ? this.tint(figStroke, .8) : null,
+        figAnim: figureCue, figGlow: figureCue && ph !== 'done' ? this.tint(figStroke, .8) : null,
         anim: figureCue ? 'none' : (focused && !this.reducedMotion() ? 'boundaryCardPulse '+(st.boundaryPulseMs || 600)+'ms ease-in-out '+(st.boundaryPulseStart == null ? 'both' : '-'+(st.boundaryPulseElapsed || 0)+'ms both paused') : (st.wrong === i ? 'wig 420ms ease-in-out both' : (pulse && !boundary ? 'pop 900ms ease-in-out infinite' : 'none'))),
         chip: chip, chipBg: chipBg, chipBorder: chipBorder, chipColor: chipColor,
         click: tappable ? this.tapCard(i) : null,
@@ -4174,6 +4271,9 @@ class Component extends DCLogic {
         opacity: tappable && s.q !== 'straight' && st.ok !== null && st.ok !== i ? 0 : 1
       });
       if (stackedChip) Object.assign(card.chipStyle,{whiteSpace:'nowrap',lineHeight:'1.2',padding:'7px 18px'});
+      if (ph === 'classify') card.pathStyle = Object.assign({},card.pathStyle,{
+        transition:this.reducedMotion() ? 'none' : 'stroke 360ms ease, fill 360ms ease'
+      });
       return card;
     });
   }
@@ -4182,16 +4282,12 @@ class Component extends DCLogic {
     V.cards = this.cmpCards(V, s, false);
     if (ph !== 'classify' && ph !== 'done') return;
     const truth = ['Straight', 'Straight', 'Curved', 'Curved'];
-    /* While the question is still being read there is nothing to answer yet:
-       all four figures stand together, undimmed and unlabelled. */
+    /* Show the first answer pair with the question, but keep input locked until
+       narration ends. The figures remain neutral during this introduction. */
     const introBeat = ph === 'classify' && !st.storyControls;
-    const cheer = (st.ddCheer || ph === 'done') && !this.reducedMotion();
     V.cards.forEach((card, i) => {
       const left = parseFloat(card.wrap.left), width = parseFloat(card.wrap.width);
       const done = ph === 'done' || st.dd[i] === truth[i];
-      // Clear the entire completed slot after its brief success confirmation.
-      // The recap phase restores all four examples with their answer labels.
-      if (ph === 'classify' && done && st.ddConfirmed !== i) return;
       /* The question is asked of all four first: while it is still being read
          out they sit together, untouched, so the learner sees the whole set
          before being asked about any one of it. The focus arrives with the end
@@ -4209,28 +4305,33 @@ class Component extends DCLogic {
         transform:'none',
         transition:this.reducedMotion() ? 'none' : 'opacity 360ms ease, transform 380ms cubic-bezier(.22,.9,.24,1), box-shadow 360ms ease, border-color 360ms ease'
       });
-      /* Every figure acknowledges together once the last one is sorted. */
-      if (cheer) card.gStyle = { animation:'figureCheer 900ms ease-in-out both', transformOrigin:'center', transformBox:'fill-box' };
-      /* Only the current figure offers choices. Its accepted answer remains
-         briefly for confirmation, then leaves with the figure. */
-      if (introBeat) return;
-      const options = done ? [truth[i]] : (active ? ['Straight', 'Curved'] : []);
+      // Recap figures retain their individual narration cues from cmpCards.
+      if (ph === 'done') {
+        card.wrap.animation = 'none';
+        Object.assign(card.svgStyle,{overflow:'hidden',transform:'none',transition:'none'});
+      }
+      // Completed figures and answers stay in place with their resting styles.
+      if (ph === 'classify' && done) card.wrap.animation = 'none';
+      const previewChoice = introBeat && !done && i === (st.ddActive || 0);
+      const options = done ? [truth[i]] : (active || previewChoice ? ['Straight', 'Curved'] : []);
       /* One width for the pair, so the two options stay even, and never
          narrower than the longer of the two words: half a card does not hold
          "Straight" at the lesson's button size, and a button that cannot hold
          its own label either spills over the rim or shrinks its type below
          every other button in the lesson. The floor keeps both from happening.
-         A pair that ends up wider than its card is then slid back inside the
-         board rather than being allowed to hang off the edge. */
+         The board has space around this logical content area, so the pair
+         can extend equally past both sides of its card. */
       const slot = Math.max((width - 12) / 2, buttonMinWidth('Straight'), buttonMinWidth('Curved'));
       const row = done ? slot : slot * 2 + 12;
-      const rowLeft = Math.max(0, Math.min(SAFE.w - row, left + (width - row) / 2));
+      // Cards slightly overhang SAFE; clamping only the buttons to SAFE shifts
+      // the first pair right and the last pair left. Share the card's center.
+      const rowLeft = left + (width - row) / 2;
       const rowTop = parseFloat(card.wrap.top) + parseFloat(card.wrap.height) + 36;
       options.forEach((option, j) => {
         const selected = (ph === 'done' ? truth[i] : st.dd[i]) === option;
         const correct = confirming && selected;
         const incorrect = bad && selected;
-        const disabled = done || pending || this.locked();
+        const disabled = introBeat || done || pending || this.locked();
         const blue = option === 'Straight';
         const face = blue ? 'linear-gradient(#e0f6ff,#abe4ff)' : 'linear-gradient(#fff1db,#ffdfb5)';
         const edge = blue ? '#69c7eb' : '#f2b979';
@@ -4240,6 +4341,7 @@ class Component extends DCLogic {
           text:option, label:'Figure ' + (i+1) + ': ' + option,
           nudge: active && !disabled && option === truth[i] ? '1' : '',
           selected:selected && (!done || confirming), disabled:disabled, sequenceState:done ? 'complete' : pending ? 'pending' : 'active',
+          completedMuted:ph === 'classify' && done && !confirming, previewChoice,
           feedback:correct ? 'correct' : (incorrect ? 'incorrect' : ''), click:this.ddPick(i, option),
           style:{
             /* Clear of the figures above: the cards end at 492, so the answer
@@ -4258,15 +4360,13 @@ class Component extends DCLogic {
             /* Straight arrives, then Curved, so the choice reads as two
                options offered in turn rather than a wall of buttons. */
             animation:this.reducedMotion() || done ? 'none' : 'optionRise 300ms cubic-bezier(.22,.8,.25,1) ' + (j * 170) + 'ms both',
+            transition:this.reducedMotion() ? 'none' : 'left 360ms ease, box-shadow 360ms ease, border-color 360ms ease',
             opacity:1, visibility:'visible',
             pointerEvents:disabled ? 'none' : 'auto', cursor:disabled ? 'default' : 'pointer'
           }
         });
       });
     });
-    if (ph === 'classify') {
-      V.cards = V.cards.filter((card, i) => st.dd[i] !== truth[i] || st.ddConfirmed === i);
-    }
   }
   viewTapOne(V, s, isCmp) {
     const st = this.state;
@@ -4432,7 +4532,8 @@ class Component extends DCLogic {
     const pts = F.pts, segs = this.segs('pentagon');
     const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     // Seek paused CSS animations from the media clock; buffering cannot outrun narration.
-    const motion = (name, delay, duration) => reduced ? {} : {
+    const motion = (name, delay, duration) => reduced ? {} : ph === 'angle' && (st.voiceElapsedMs || 0) >= delay + duration
+      ? {opacity:1, ...(name === 'dr' ? {strokeDashoffset:0} : {})} : {
       animationName: name, animationDuration: duration + 'ms', animationTimingFunction: 'ease-in-out',
       animationDelay: (delay - (st.voiceElapsedMs || 0)) + 'ms', animationFillMode: 'both', animationPlayState: 'paused'
     };
@@ -4480,7 +4581,10 @@ class Component extends DCLogic {
       segment.style = draw(edgeStart, Math.max(100, meetTime - edgeStart));
     });
     const dots = [];
-    if (ph === 'vertex' || ph === 'angle') dots.push({ x: pts[2][0], y: pts[2][1], r: 20 * K, fill: '#fff', stroke: this.P.C.purple, sw: 9 * K, style: motion('cueFade', ph === 'vertex' ? cueDelay : meetTime, 300) });
+    // The angle explanation builds on the vertex already introduced. Keep its
+    // marker visible throughout, independent of narration paging or seeking.
+    if (ph === 'vertex' || ph === 'angle') dots.push({ x: pts[2][0], y: pts[2][1], r: 20 * K, fill: '#fff', stroke: this.P.C.purple, sw: 9 * K,
+      style: ph === 'angle' ? {opacity:1,animation:'none'} : motion('cueFade', cueDelay, 300) });
     const vertex = pts[2], radius = 190 * K;
     const u = this.unit(vertex, pts[1]), v = this.unit(vertex, pts[3]);
     const arcStart = [vertex[0] + u[0] * radius, vertex[1] + u[1] * radius];
@@ -4493,7 +4597,7 @@ class Component extends DCLogic {
       { d: 'M' + arcStart.join(' ') + curve, color: palette.angle.color, w: 13 * K, style: draw(cue('form', 2720), Math.max(100, cueDelay - cue('form', 2720) - 100)) }
     ] : [];
     V.cards = [this.buildCard({
-      key: 'pent-' + ph + '-' + st.motionRun, x: x, y: y, w: size, h: size, plain: true, vb: F.vb, snap: reference,
+      key: 'pent-' + ph + '-' + st.motionRun, x: x, y: y, w: size, h: size, plain: true, vb: F.vb, snap: reference, stillCard: ph === 'angle',
       d: this.figD('pentagon'), stroke: figureColor, sw: 18,
       fill: this.figFill('pentagon', figureColor),
       hl: hl, dots: dots, arcs: arcs
@@ -4546,15 +4650,16 @@ class Component extends DCLogic {
     }[name.toLowerCase()];
   }
   labelTileStyle(name) {
-    // Unplaced labels share one neutral palette, including the drag preview.
-    const theme = { gradient:'linear-gradient(#ffffff,#e6edf2)', color:'#a6b8c6', ink:'#354f60' };
+    // One shared yellow treatment avoids revealing the answers by label colour.
+    // The drag preview uses this same face and typography.
+    const theme = { gradient:'linear-gradient(180deg,#fff16a 0%,#ffe52b 38%,#ffda13 68%,#ffbd0a 100%)', color:'#fffef5', ink:'#5c3310' };
     return {
       width:'200px', height:'78px', flex:'0 0 200px', padding:'0 18px', boxSizing:'border-box',
       display:'flex', alignItems:'center', justifyContent:'center', borderRadius:'22px',
       background:theme.gradient, border:'3px solid '+theme.color, color:theme.ink,
       /* Semibold Baloo, matching every other button label in the lesson. */
       font:buttonLabelFont(name,200), lineHeight:'1.1', whiteSpace:'nowrap',
-      boxShadow:'inset 0 3px 0 #ffffffaa,0 6px 0 '+theme.color+',0 10px 16px #174f7326',
+      boxShadow:'inset 0 2px 1px #ffffff99,inset 0 -4px 0 #f69b0b,0 5px 0 #c2cbd3,0 8px 12px #23496a20',
       touchAction:'none', userSelect:'none', cursor:'grab'
     };
   }
@@ -4588,7 +4693,13 @@ class Component extends DCLogic {
       vertex: this.mapPt(box, F.vb, pts[5]),
       angle: this.mapPt(box, F.vb, [angleVertex[0] + (u[0]+v[0])*radius/Math.SQRT2, angleVertex[1] + (u[1]+v[1])*radius/Math.SQRT2])
     };
-    const offs = { side: [-190, 0], vertex: [250, 60], angle: [270, -80] };
+    // The angle cue points horizontally into the angle, as in the reference.
+    // Keep the socket's existing horizontal position and align its centre to the cue.
+    const angleTip = this.mapPt(box, F.vb, [
+      angleVertex[0] + u[0]*radius*.24 + v[0]*radius*.5,
+      angleVertex[1] + u[1]*radius*.24 + v[1]*radius*.5
+    ]);
+    const offs = { side: [-190, 0], vertex: [250, 60], angle: [270, angleTip[1]-anchors.angle[1]] };
     const spots = ['side', 'vertex', 'angle'].map((key) => ({
       key: key, label: key.charAt(0).toUpperCase() + key.slice(1),
       p: [anchors[key][0] + offs[key][0], anchors[key][1] + offs[key][1]]
@@ -4625,20 +4736,20 @@ class Component extends DCLogic {
         }
       };
     });
-    // Short arrows point inward from each socket and stop outside the outline.
-    // The angle arrow approaches the outer corner, keeping its arc unobstructed.
+    // Compact, solid arrowheads point from each socket to its feature.
+    // Side and angle shafts are horizontal; the vertex shaft follows its diagonal.
     V.leaders = spots.map(sp => {
-      const feature = sp.key === 'angle' ? this.mapPt(box, F.vb, angleVertex)
+      const feature = sp.key === 'angle' ? angleTip
         : sp.key === 'vertex' ? [anchors.vertex[0], anchors.vertex[1] + 10] : anchors.side;
       const dx = sp.p[0] - feature[0], dy = sp.p[1] - feature[1];
       const distance = Math.hypot(dx, dy), ux = dx / distance, uy = dy / distance;
-      const gap = sp.key === 'vertex' ? 24 : 14;
+      const gap = sp.key === 'angle' ? 0 : sp.key === 'vertex' ? 24 : 14;
       const socketEdge = Math.min(106 / Math.abs(ux), 38 / Math.abs(uy));
       const tip = [feature[0] + ux * gap, feature[1] + uy * gap];
       const line = this.leader(tip, sp.p, this.labelTheme(sp.key).color, true);
       line.labelKey = sp.key;
       Object.assign(line.style, {width:Math.max(0, distance-gap-socketEdge-12)+'px',height:'5px',marginTop:'-2.5px',pointerEvents:'none'});
-      Object.assign(line.arrowStyle, {width:'16px',height:'18px',top:'-6.5px',borderRadius:'3px'});
+      Object.assign(line.arrowStyle, {left:'0px',width:'14px',height:'16px',top:'-5.5px',borderRadius:'0px'});
       return line;
     });
     V.showChips = true;
@@ -4652,7 +4763,7 @@ class Component extends DCLogic {
         nudge: !st.chip && ci === firstFree ? '1' : '', text: t, click: used ? null : this.pickChip(t), down: used ? null : this.dragLabel(t),
         selected: active, disabled: used,
         style: Object.assign(this.labelTileStyle(t), {
-          borderColor: active ? '#354f60' : '#a6b8c6',
+          borderColor: active ? '#5c3310' : '#fffef5',
           touchAction:'none', cursor: used ? 'default' : 'grab', opacity: st.draggingLabel === t ? 0.35 : (used ? 0.7 : 1),
           boxShadow: used ? 'inset 0 2px 0 #ffffff88' : this.labelTileStyle(t).boxShadow, transform: active ? 'translateY(-4px)' : 'none',
           animation: st.labelPrompt && ci === firstFree && !this.reducedMotion() ? 'labelInvite 650ms ease-in-out both' : 'none',
@@ -4823,9 +4934,9 @@ class Component extends DCLogic {
          colour. The newest one draws itself on rather than appearing, so a tap
          on + reads as "and this one too" instead of a silent jump. */
       const counted = which && counting && n > 0
-        ? this.segHl('pentagon', Array.from({ length: n }, (unused, i) => i), pts, '#f4972d', 26)
+        ? this.segHl('pentagon', Array.from({ length: n }, (unused, i) => i), pts, ICE, 26)
             .map((seg, i) => Object.assign(seg, { style: Object.assign(
-              { filter: 'drop-shadow(0 0 10px rgba(244,151,45,.7))' },
+              { filter: 'drop-shadow(0 0 10px rgba(34,184,230,.7))' },
               i === n - 1 && !this.reducedMotion()
                 ? { strokeDasharray: 100, strokeDashoffset: 100, animation: 'dr 340ms ease-out both' }
                 : {}) }))
@@ -4833,8 +4944,8 @@ class Component extends DCLogic {
       /* While she is comparing them, both outlines breathe — left first, then
          right — so "both" is something the learner sees, not only hears. */
       const glow = st.phase === 'b'
-        ? [{ d: this.dPath(pts, true), color: 'rgba(34,184,230,0.55)', w: 34 * K, style: { animation: reference ? 'glowPulse 1.4s ease-in-out 2' : 'glowPulse 1.4s ease-in-out infinite' } }]
-        : compare
+        ? [{ d: this.dPath(pts, true), color: which ? this.tint(this.P.C.orange, .55) : 'rgba(34,184,230,0.55)', w: 34 * K, style: { animation: reference ? 'glowPulse 1.4s ease-in-out 2' : 'glowPulse 1.4s ease-in-out infinite' } }]
+        : compare && !(which && counting)
           ? [{ d: this.dPath(pts, true), color: which ? 'rgba(244,151,45,.5)' : 'rgba(34,184,230,.5)', w: 30 * K,
               style: this.reducedMotion() ? { opacity: 0.3 }
                 : { animation: 'glowPulse 1.6s ease-in-out ' + (which ? 820 : 0) + 'ms 3' } }]
@@ -4842,7 +4953,10 @@ class Component extends DCLogic {
       const card = this.buildCard({
         key: which ? 'after' : 'before', x: which ? rightX : leftX, y: y, w: size, h: size,
         vb: F.vb, pad: pad, numberInset: 5, d: this.dPath(pts, true), stroke: which ? this.P.C.orange : this.P.C.blue, sw: 18,
-        fill: this.tint(which ? this.P.C.orange : this.P.C.blue), hl: counted.concat(glow), nums: nums,
+        fill: this.tint(which ? this.P.C.orange : this.P.C.blue),
+        hl: counted.concat(glow, which && counting && st.count2Pulsing && !this.reducedMotion()
+          ? [{d:this.dPath(pts,true),color:ICE,w:34*K,
+              style:{animation:'polygonRevealGlow 700ms ease-in-out 340ms 1 both'}}] : []), nums: nums,
         numColor: which ? '#8a4a08' : '#1546a0',
         /* No Before/After captions. The two figures are already told apart by
            colour and by position, and only one of them has a stepper under it,
@@ -4857,9 +4971,13 @@ class Component extends DCLogic {
     };
     V.cards = [mk(false), mk(true)];
     if (s.q === 'count2') {
+      V.showCheck = false;
+      V.checkStyle = {display:'none'};
+      V.check = null;
       V.showCounter = true;
       V.counterRowStyle = {position:'absolute',inset:0,pointerEvents:'none'};
       const counter = this.counter(1, '');
+      Object.assign(counter,{min:0,max:5,fixed:!!st.count2Complete});
       counter.nudge = '1';
       counter.accessibleLabel = 'Number of sides after';
       Object.assign(counter.wrap, {position:'absolute',left:(rightX+size/2)+'px',top:(y+size+64)+'px',translate:'-50% 0',pointerEvents:'auto'});
@@ -4963,44 +5081,23 @@ class Component extends DCLogic {
     V.showCounter = true;
     const counter = this.counter(0, '');
     Object.assign(counter, { accessibleLabel:'Number of sides', value:String(st.n), min:3, max:8,
-      minus:this.bumpN(-1), plus:this.bumpN(1), limitFeedback:true });
+      minus:this.bumpN(-1), plus:this.bumpN(1), limitFeedback:true, fixed:!!st.recallComplete });
     V.counters = [counter];
     if (reference) V.counterRowStyle = {position:'absolute',left:(box.x + box.w/2)+'px',top:'880px',
       width:'max-content',translate:'-50% 0',display:'flex',alignItems:'center'};
-    /* The stepper is an exploration, not a question, so there is nothing to
-       check -- but once every polygon from 3 sides to 8 has been met, the
-       learner is told they are done and given the way on. The screen hands
-       them a Next button and waits: leaving is their decision, not a timer's,
-       so a child still looking at the octagon is not carried off it. */
-    if (st.recallComplete) {
-      // The counter template already renders this action. Do not also render
-      // the standalone action row, which would create a second Next button.
-      V.showCheck = false;
-      V.check = this.advance;
-      V.checkLabel = 'Next';
-      V.checkDisabled = false;
-      V.nudgeCheck = '1';
-      V.checkStyle = Object.assign(this.bigBtn(220, 'Next'), {
-        /* Arrives with the spring the correct answers use, so finishing the
-           set reads as a reward rather than a control that was always there. */
-        animation: this.reducedMotion() ? 'none' : 'answerSuccess 520ms cubic-bezier(.3,1.35,.4,1) both'
-      });
-      V.counterCheckPosition = {position:'absolute',left:'calc(100% + 32px)',
-        top:'calc(50% - 38px)',pointerEvents:'auto'};
-    } else {
-      V.showCheck = false;
-      V.checkStyle = { display: 'none' };
-      V.checkLabel = '';
-    }
+    V.showCheck = false;
+    V.check = null;
+    V.checkStyle = {display:'none'};
+    V.checkLabel = '';
     V.targets = [];
   }
 
-  /* A quiet recap: one definition and six unframed examples. */
+  /* A quiet recap: six examples on softly translucent white panels. */
   viewSummary(V) {
     V.signStyle = { display:'none' };
     const label = (text, x, y, w, size, color = '#174b52') => ({ text, style:{
       position:'absolute',left:x+'px',top:y+'px',width:w+'px',textAlign:'center',
-      font:'800 '+size+'px Nunito,sans-serif',lineHeight:'1.3',color
+      font:'800 '+size+'px Nunito,sans-serif',lineHeight:'1.3',color,zIndex:1
     } });
     V.callouts = [
       label('Polygons',340,140,1300,58,'#7b249c'),
@@ -5009,6 +5106,11 @@ class Component extends DCLogic {
     const names = ['Triangle','Quadrilateral','Pentagon','Hexagon','Heptagon','Octagon'];
     V.cards = names.map((name, i) => {
       const x = 420 + (i % 3) * 440, y = 325 + Math.floor(i / 3) * 285;
+      V.callouts.push({text:'',style:{
+        position:'absolute',left:(x+40)+'px',top:(y-4)+'px',width:'360px',height:'270px',
+        background:'rgba(255,255,255,.72)',borderRadius:'26px',
+        border:'none',boxShadow:'none',pointerEvents:'none',zIndex:0
+      }});
       const color = this.sideColor(i + 3);
       const card = this.buildCard({ key:'summary-'+i,x:x+130,y,w:180,h:160,plain:true,
         vb:'170 170 660 660',d:this.dPath(this.recallPoints(i+3),true),stroke:color,
@@ -5023,7 +5125,9 @@ class Component extends DCLogic {
     V.check = this.advance;
     V.checkDisabled = this.locked();
     V.checkStyle = this.bigBtn(220,'Next');
-    V.checkRowStyle = {position:'absolute',left:'880px',top:'905px',width:'220px',display:'flex',justifyContent:'center'};
+    const heptagon = V.cards[4].wrap;
+    const heptagonCenter = parseFloat(heptagon.left) + parseFloat(heptagon.width) / 2;
+    V.checkRowStyle = {position:'absolute',left:(heptagonCenter-110)+'px',top:'905px',width:'220px',display:'flex',justifyContent:'center'};
   }
 
   /* ----- multi select ----- */
@@ -5046,15 +5150,15 @@ class Component extends DCLogic {
     V.cards = S.map((it, i) => {
       const F = this.fig(it[0]);
       const sel = st.sel.indexOf(i) >= 0;
+      const rejected = s.sc === 'S10' && (st.rejectedOptions || []).includes(i);
+      const figureColor = rejected ? '#7fb2d9' : it[1];
       let state = null;
       if (st.wrong === i || (st.wrong === 'set' && sel && !s.correct.includes(i))) state = 'bad';
       else if (sel && !s.check) state = 'ok';
       else if (sel && s.check) state = st.checked || (pentagonChoice && s.correct.includes(i)) ? 'ok' : 'sel';
       // Screen 45 is a selection activity: preserve the artwork and reserve
       // the green underglow for correct choices; never add a yellow trace.
-      const selectionTint = s.sc === 'C1' && state === 'bad'
-        ? Object.assign({}, this.cardStyleFor(null), {borderColor:'#d69c83',background:'#fff8f2'})
-        : pentagonChoice && state === 'sel'
+      const selectionTint = pentagonChoice && state === 'sel'
           ? Object.assign({}, this.cardStyleFor(null), {borderColor:ICE}) : undefined;
       const coach = !pentagonChoice && st.hlKind === 'coach' && sel && s.correct.indexOf(i) < 0;
       const tileSize = discovery ? grid.tile : w;
@@ -5065,19 +5169,25 @@ class Component extends DCLogic {
       const tileY = discovery ? grid.y + Math.floor(i / 2) * (grid.tile + grid.gap) : y;
       const card = this.buildCard({
         key: it[0], x: tileX, y: tileY, w: tileSize, h: tileSize, vb: F.vb, d: this.figD(it[0]),
-        extra: F.extra || '', stroke: it[1], sw: 20, fill: this.figFill(it[0], it[1], it[2]), state: state, tint: selectionTint,
-        badge: discovery ? '' : String.fromCharCode(65 + i), click: this.tapCard(i), tick: discovery && sel && (!s.check || st.checked),
+        extra: F.extra || '', stroke: figureColor, sw: 20, fill: this.figFill(it[0], figureColor, rejected ? undefined : it[2]), state: state, tint: selectionTint,
+        badge: discovery ? '' : String.fromCharCode(65 + i), click: rejected ? null : this.tapCard(i), tick: discovery && sel && (!s.check || st.checked),
         nudge: !st.checked && i === s.correct.find(index => !st.sel.includes(index)),
         traceD: F.traceD || this.figD(it[0]), traceStyle: coach ? this.traceStyleFor(true, 1500) : { opacity: 0 },
         anim: state === 'bad' ? ((s.set === 'cfu1' || s.sc === 'S18' ? (this._wrongTapToken % 2 ? 'wrongTapA' : 'wrongTapB') : 'wig') + ' 420ms ease-in-out both') : (coach ? 'pop 900ms ease-in-out infinite' : 'none')
       });
+      if (rejected) {
+        card.disabled = true;
+        Object.assign(card.wrap, {cursor:'default',pointerEvents:'none',transform:'none',animation:'none'});
+      }
+      if (s.sc === 'S10') card.pathStyle = Object.assign({},card.pathStyle,{
+        transition:this.reducedMotion() ? 'none' : 'stroke 360ms ease, fill 360ms ease'
+      });
       if (s.sc === 'S18' && (state === 'ok' || state === 'bad')) {
-        const correct = state === 'ok', rim = correct ? '#16834c' : '#d43d3d';
+        const correct = state === 'ok', rim = correct ? CORRECT_RIM : INCORRECT_RIM;
         // A solid inner rim and tinted face remain clear even on a small screen.
         // Keep the artwork, dimensions and keyboard focus treatment intact.
         Object.assign(card.wrap, {
-          borderColor: rim, background: correct ? '#d8f8e5' : '#ffe0dd',
-          boxShadow: 'inset 0 0 0 5px ' + rim + ', inset 0 0 0 9px #ffffffbb, ' + (correct ? CORRECT_GLOW : INCORRECT_GLOW),
+          ...this.cardStyleFor(state),
           zIndex: 3
         });
       }
@@ -5123,7 +5233,7 @@ class Component extends DCLogic {
       position: 'absolute', left: this.sortBandX() + 'px', top: SORT.zoneTop + 'px',
       width: (2 * zoneW + this.sortGap()) + 'px',
       display: 'flex', gap: this.sortGap() + 'px',
-      transition: 'left ' + SORT.uniteMs + 'ms cubic-bezier(.22,.9,.24,1), width ' + SORT.uniteMs + 'ms cubic-bezier(.22,.9,.24,1), gap ' + SORT.uniteMs + 'ms cubic-bezier(.22,.9,.24,1)'
+      transition: this.reducedMotion() ? 'none' : ['left','top','width','gap'].map(property => property+' '+SORT.uniteMs+'ms cubic-bezier(.22,.8,.25,1)').join(', ')
     };
     V.zoneAName = s.zones[0]; V.zoneBName = s.zones[1];
     /* The column headings are button labels like any other, so they take the
@@ -5186,15 +5296,15 @@ class Component extends DCLogic {
       if (s.sc === 'C2') {
         const correct = at !== undefined, incorrect = st.wrong === i;
         if (correct || incorrect || picked) {
-          const rim = correct ? '#16834c' : incorrect ? '#cf6b58' : ICE;
+          const rim = correct ? CORRECT_RIM : incorrect ? INCORRECT_RIM : ICE;
           Object.assign(card.wrap, {
             borderColor:rim,
-            background:correct ? '#e1f7eb' : incorrect ? '#fff0e9' : '#eaf8ff',
-            boxShadow:'inset 0 0 0 4px '+rim+', inset 0 0 0 8px #ffffffaa, 0 6px 0 rgba(108,176,206,.34)'
-              + (correct ? ', 0 0 18px rgba(46,204,113,.35)' : '')
+            background:correct ? CORRECT_FACE : incorrect ? INCORRECT_FACE : '#eaf8ff',
+            boxShadow:this.cardStyleFor(correct ? 'ok' : incorrect ? 'bad' : null).boxShadow
           });
         }
       }
+      if (st.united && at !== undefined) card.wrap.transition = this.reducedMotion() ? 'none' : ['left','top','width','height'].map(property => property+' '+SORT.uniteMs+'ms cubic-bezier(.22,.8,.25,1)').join(', ');
       if (limited && at === undefined) { card.sortLimitBlocked = true; card.wrap.cursor = 'default'; card.wrap.scale = '1'; }
       return card;
     });

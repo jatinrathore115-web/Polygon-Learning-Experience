@@ -15,7 +15,11 @@ for(const line of layout.leaders){
  assert.equal(line.style.pointerEvents,'none','Arrows cannot intercept label drops');
  assert(parseFloat(line.style.width)>0&&parseFloat(line.style.width)<150,'Arrows remain short');
  const angle=parseFloat(line.style.transform.slice(7));
- assert(line.labelKey==='side'?Math.abs(angle)===180:line.labelKey==='vertex'?angle>0&&angle<30:angle<0&&angle>-30,'Arrow points from socket towards its feature');
+ assert(line.labelKey==='side'?Math.abs(angle)===180:line.labelKey==='vertex'?angle>0&&angle<30:angle===0,'Arrow points from socket towards its feature');
+ if(line.labelKey!=='vertex') {
+  const target=layout.targets.find(t=>t.labelKey===line.labelKey).style;
+  assert(Math.abs(parseFloat(line.style.top)-(parseFloat(target.top)+parseFloat(target.height)/2))<.01,'Horizontal cue aligns with socket centre');
+ }
 }
 assert.equal(layout.targets.length,3,'Three sockets remain');
 for(const target of layout.targets){const t=target.style;

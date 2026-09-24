@@ -5,10 +5,21 @@ function game(k){const g=new ctx.Game();g.P=ctx.window.POLY;g.svgRefs={};g.state
 function drain(g){let cap=100;while(g._voiceReading&&--cap){spoken.at(-1).onstart();spoken.at(-1).onend();}assert(cap>0);}
 let g=game(4);g.narrate(g.step().narr,{});assert(g.locked());assert.equal(g.safeStyle().pointerEvents,'none');g.choose('closed');assert.equal(g.state.ok,null);const first=spoken.at(-1);first.onstart();for(const timer of timers)timer();assert(g.locked());first.onend();assert.equal(spoken.at(-1),first);assert(!g.locked());assert.equal(g.safeStyle().pointerEvents,'auto');
 // An error, or an obsolete utterance completing after replay, must never unlock.
-g.narrate('Retry test',{});const failed=spoken.at(-1);failed.onerror();failed.onend();assert(g.locked());assert(g._voiceRetry&&g.state.voiceError,'A blocked line offers recovery instead of skipping');for(const timer of timers.splice(0))timer();assert(g.locked(),'Timers cannot complete unheard narration');g.unlockAudio({isTrusted:true,type:'pointerup'});const retry=spoken.at(-1);assert.notEqual(retry,failed,'A game tap retries blocked narration');g.retryVoice();assert.equal(spoken.at(-1),retry,'The same gesture cannot restart narration twice');failed.onend();assert(g.locked());retry.onstart();retry.onend();assert(!g.locked());
+g.narrate('Retry test',{});const failed=spoken.at(-1);failed.onerror();failed.onend();assert(g.locked());assert(g._voiceRetry&&g.state.voiceError,'A blocked line offers recovery instead of skipping');g.unlockAudio({isTrusted:true,type:'pointerup'});const retry=spoken.at(-1);assert.notEqual(retry,failed,'A game tap retries blocked narration');g.retryVoice();assert.equal(spoken.at(-1),retry,'The same gesture cannot restart narration twice');failed.onend();assert(g.locked());retry.onstart();retry.onend();assert(!g.locked());
 g.narrate('Old',{});const old=spoken.at(-1);g.narrate('New',{});old.onend();assert(g.locked());drain(g);
 // Missing audio keeps the instruction readable and pending until an explicit retry.
-const synth=ctx.window.speechSynthesis;ctx.window.speechSynthesis=null;g.narrate('Unavailable',{});assert(g.locked()&&g._voiceRetry&&g.state.voiceError);for(const timer of timers.splice(0))timer();assert(g.locked());ctx.window.speechSynthesis=synth;
+/* A line that cannot be heard still offers its retry, and still holds the
+   board while the learner has a chance to act on it -- but it must not hold it
+   forever. Browsers refuse audio until the page has been touched once, so on a
+   cold load this is the ordinary path: with nothing scheduled the lesson sat on
+   its opening line waiting for a tap it never asked for. After a reading pause
+   the queue continues by itself, exactly as a finished clip would continue it. */
+const synth=ctx.window.speechSynthesis;ctx.window.speechSynthesis=null;g.narrate('Unavailable',{});
+assert(g.locked()&&g._voiceRetry&&g.state.voiceError,'A silent line offers recovery and holds the board');
+assert(timers.length,'and schedules its own way out rather than dead-ending');
+for(const timer of timers.splice(0))timer();
+assert(!g.locked(),'After a readable pause the lesson carries on without a tap');
+ctx.window.speechSynthesis=synth;
 // Labels, buttons and changing counters never enqueue speech.
 spoken=[];g=game(41);g.narrate(g.step().narr,{});drain(g);assert.equal(spoken.length,g.instructionPages(g.step().narr).length);assert.equal(spoken.map(u=>u.text).join(' '),g.step().narr);
 g=game(23);g.state.cnt=[0,0];g.narrate(g.step().narr,{});drain(g);let count=spoken.length;g.bump(0,1)();assert(!g.locked());assert.equal(g.state.cnt[0],1);assert.equal(spoken.length,count);

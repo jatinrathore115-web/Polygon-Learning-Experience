@@ -1,0 +1,694 @@
+[
+  {
+    "n": 1,
+    "screen": 1,
+    "type": "Instruction",
+    "text": "Look! A point.",
+    "file": "01_Look_A_point.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 2,
+    "screen": 2,
+    "type": "Instruction",
+    "text": "Woah! It drew a shape.",
+    "file": "02_Woah_It_drew_a_shape.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 3,
+    "screen": 3,
+    "type": "Instruction",
+    "text": "Let's look at this shape closely.",
+    "file": "03_Lets_look_at_this_shape_closely.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 4,
+    "screen": 4,
+    "type": "Instruction",
+    "text": "There are no gaps in its boundary.",
+    "file": "04_There_are_no_gaps_in_its_boundary.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 5,
+    "screen": 5,
+    "type": "Instruction",
+    "text": "Is it open or closed?",
+    "file": "05_Is_it_open_or_closed.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 6,
+    "screen": 6,
+    "type": "Instruction",
+    "text": "Is this shape open or closed?",
+    "file": "06_Is_this_shape_open_or_closed.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 7,
+    "screen": 7,
+    "type": "Instruction",
+    "text": "What about this one?",
+    "file": "07_What_about_this_one.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 8,
+    "screen": 8,
+    "type": "Instruction",
+    "text": "And this?",
+    "file": "08_And_this.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 9,
+    "screen": 9,
+    "type": "Instruction",
+    "text": "How about this one?",
+    "file": "09_How_about_this_one.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 10,
+    "screen": 10,
+    "type": "Instruction",
+    "text": "These two shapes are open...",
+    "file": "10_These_two_shapes_are_open.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 11,
+    "screen": 11,
+    "type": "Instruction",
+    "text": "...and these two shapes are closed.",
+    "file": "11_and_these_two_shapes_are_closed.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 12,
+    "screen": 12,
+    "type": "Instruction",
+    "text": "Look! The boundaries of the shapes are different too.",
+    "file": "12_Look_The_boundaries_of_the_shapes_are_different_too.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 13,
+    "screen": 13,
+    "type": "Instruction",
+    "text": "Some are straight and some are curved.",
+    "file": "13_Some_are_straight_and_some_are_curved.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 14,
+    "screen": 14,
+    "type": "Instruction",
+    "text": "Which boundaries are straight and which are curved?",
+    "file": "14_Which_boundaries_are_straight_and_which_are_curved.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 15,
+    "screen": 15,
+    "type": "Instruction",
+    "text": "You got it! These boundaries are straight, while these are curved.",
+    "file": "15_You_got_it_These_boundaries_are_straight_while_these_are_curve.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 16,
+    "screen": 16,
+    "type": "Instruction",
+    "text": "Tap the closed figure made with straight lines.",
+    "file": "80_Tap_the_closed_figure_made_with_straight_lines.wav",
+    "also": [],
+    "have": true,
+    "synth": true
+  },
+  {
+    "n": 17,
+    "screen": 16,
+    "type": "Correct",
+    "text": "Yes! It is closed and made of straight lines.",
+    "file": "70_Yes_It_is_closed_and_made_of_straight_lines.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 18,
+    "screen": 16,
+    "type": "Retry 1",
+    "text": "Not quite. Look for a figure with no gaps and no curves.",
+    "file": "50_Not_quite_Look_for_a_figure_with_no_gaps_and_no_curves.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 19,
+    "screen": 17,
+    "type": "Instruction",
+    "text": "We call this a polygon.",
+    "file": "17_We_call_this_a_polygon.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 20,
+    "screen": 18,
+    "type": "Instruction",
+    "text": "A closed figure made of only straight line segments is called a polygon.",
+    "file": "18_A_closed_figure_made_of_only_straight_line_segments_is_called.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 21,
+    "screen": 19,
+    "type": "Instruction",
+    "text": "Which of these figures are polygons?",
+    "file": "19_Which_of_these_figures_are_polygons.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 22,
+    "screen": 19,
+    "type": "Correct",
+    "text": "Great job! You identified all the polygons.",
+    "file": "81_Great_job_You_identified_all_the_polygons.wav",
+    "also": [],
+    "have": true,
+    "synth": true
+  },
+  {
+    "n": 23,
+    "screen": 20,
+    "type": "Instruction",
+    "text": "These line segments are the sides of the polygon.",
+    "file": "20_These_line_segments_are_the_sides_of_the_polygon.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 24,
+    "screen": 21,
+    "type": "Instruction",
+    "text": "The point where two sides meet is called a vertex.",
+    "file": "21_The_point_where_two_sides_meet_is_called_a_vertex.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 25,
+    "screen": 22,
+    "type": "Instruction",
+    "text": "When two sides meet, they also form an angle.",
+    "file": "22_When_two_sides_meet_they_also_form_an_angle.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 26,
+    "screen": 23,
+    "type": "Instruction",
+    "text": "Label the parts of the polygon.",
+    "file": "23_Label_the_parts_of_the_polygon.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 27,
+    "screen": 24,
+    "type": "Instruction",
+    "text": "How many sides does this polygon have?",
+    "file": "24_How_many_sides_does_this_polygon_have.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 28,
+    "screen": 24,
+    "type": "Retry 1",
+    "text": "Count each side carefully and try again.",
+    "file": "51_Count_each_side_carefully_and_try_again.mp3",
+    "also": [
+      "screen 31"
+    ],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 29,
+    "screen": 25,
+    "type": "Instruction",
+    "text": "Correct! This polygon has 5 sides.",
+    "file": "82_Correct_This_polygon_has_five_sides.wav",
+    "also": [],
+    "have": true,
+    "synth": true
+  },
+  {
+    "n": 30,
+    "screen": 26,
+    "type": "Instruction",
+    "text": "Now let's change how it looks.",
+    "file": "26_Now_lets_change_how_it_looks.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 31,
+    "screen": 27,
+    "type": "Instruction",
+    "text": "Drag any vertex. Stretch it, squash it, or resize it.",
+    "file": "27_Drag_any_vertex_Stretch_it_squash_it_or_resize_it.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 32,
+    "screen": 28,
+    "type": "Instruction",
+    "text": "Whoa! It looks quite different now.",
+    "file": "28_Whoa_It_looks_quite_different_now.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 33,
+    "screen": 29,
+    "type": "Instruction",
+    "text": "Its appearance has completely changed.",
+    "file": "29_Its_appearance_has_completely_changed.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 34,
+    "screen": 30,
+    "type": "Instruction",
+    "text": "But not everything has changed.",
+    "file": "30_But_not_everything_has_changed.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 35,
+    "screen": 31,
+    "type": "Instruction",
+    "text": "Let's count the sides again.",
+    "file": "31_Lets_count_the_sides_again.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 36,
+    "screen": 32,
+    "type": "Instruction",
+    "text": "Both polygons still have 5 sides.",
+    "file": "32_Both_polygons_still_have_five_sides.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 37,
+    "screen": 33,
+    "type": "Instruction",
+    "text": "So the number of sides gives us a good way to name polygons.",
+    "file": "33_So_the_number_of_sides_gives_us_a_good_way_to_name_polygons.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 38,
+    "screen": 34,
+    "type": "Instruction",
+    "text": "A polygon with 3 sides is called a triangle.",
+    "file": "34_A_polygon_with_three_sides_is_called_a_triangle.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 39,
+    "screen": 35,
+    "type": "Instruction",
+    "text": "A polygon with 4 sides is called a quadrilateral.",
+    "file": "35_A_polygon_with_four_sides_is_called_a_quadrilateral.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 40,
+    "screen": 36,
+    "type": "Instruction",
+    "text": "Select all the quadrilaterals.",
+    "file": "36_Select_all_the_quadrilaterals.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 41,
+    "screen": 36,
+    "type": "Correct",
+    "text": "That’s right! Quadrilaterals are polygons with 4 sides.",
+    "file": "83_Thats_right_Quadrilaterals_are_polygons.wav",
+    "also": [],
+    "have": true,
+    "synth": true
+  },
+  {
+    "n": 42,
+    "screen": 36,
+    "type": "Retry 1",
+    "text": "Quadrilaterals are polygons with 4 sides.",
+    "file": "84_Quadrilaterals_are_polygons_with_four_sides.wav",
+    "also": [],
+    "have": true,
+    "synth": true
+  },
+  {
+    "n": 43,
+    "screen": 36,
+    "type": "Retry 2",
+    "text": "Is this shape a quadrilateral?",
+    "file": "85_Is_this_shape_a_quadrilateral.wav",
+    "also": [],
+    "have": true,
+    "synth": true
+  },
+  {
+    "n": 44,
+    "screen": 37,
+    "type": "Instruction",
+    "text": "A polygon with 5 sides is called a pentagon.",
+    "file": "37_A_polygon_with_five_sides_is_called_a_pentagon.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 45,
+    "screen": 38,
+    "type": "Instruction",
+    "text": "A polygon with 6 sides is called a hexagon.",
+    "file": "38_A_polygon_with_six_sides_is_called_a_hexagon.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 46,
+    "screen": 39,
+    "type": "Instruction",
+    "text": "A polygon with 7 sides is called a heptagon.",
+    "file": "39_A_polygon_with_seven_sides_is_called_a_heptagon.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 47,
+    "screen": 40,
+    "type": "Instruction",
+    "text": "A polygon with 8 sides is called an octagon.",
+    "file": "40_A_polygon_with_eight_sides_is_called_an_octagon.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 48,
+    "screen": 41,
+    "type": "Instruction",
+    "text": "Let's recall the different types of polygons we learnt about.",
+    "file": "41_Lets_recall_the_different_types_of_polygons_we_learnt_about.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 49,
+    "screen": 42,
+    "type": "Instruction",
+    "text": "A polygon is a closed figure made only of straight sides.",
+    "file": "86_A_polygon_is_a_closed_figure.wav",
+    "also": [],
+    "have": true,
+    "synth": true
+  },
+  {
+    "n": 50,
+    "screen": 43,
+    "type": "Instruction",
+    "text": "Which of these are polygons?",
+    "file": "77_Select_polygons.wav",
+    "also": [],
+    "have": true,
+    "synth": true
+  },
+  {
+    "n": 51,
+    "screen": 43,
+    "type": "Correct",
+    "text": "Yes! Closed, with only straight sides.",
+    "file": "52_Yes_Closed_with_only_straight_sides.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 52,
+    "screen": 43,
+    "type": "Retry 1",
+    "text": "Not quite! A polygon is closed with only straight sides.",
+    "file": "87_Not_quite_A_polygon_is_closed.wav",
+    "also": [],
+    "have": true,
+    "synth": true
+  },
+  {
+    "n": 53,
+    "screen": 44,
+    "type": "Instruction",
+    "text": "Classify the figures as a polygon or not a polygon.",
+    "file": "43_Classify_the_figures_as_a_polygon_or_not_a_polygon.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 54,
+    "screen": 44,
+    "type": "Correct",
+    "text": "Great job! You sorted the figures correctly.",
+    "file": "55_Great_job_You_sorted_the_figures_correctly.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 55,
+    "screen": 44,
+    "type": "Retry 1",
+    "text": "Wrong group. Check for gaps or curved sides.",
+    "file": "56_Wrong_group_Check_for_gaps_or_curved_sides.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 56,
+    "screen": 44,
+    "type": "Retry 2",
+    "text": "Polygons are closed, with only straight sides. Try again.",
+    "file": "57_Polygons_are_closed_with_only_straight_sides_Try_again.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 57,
+    "screen": 45,
+    "type": "Instruction",
+    "text": "Which figure is NOT a polygon?",
+    "file": "78_Not_a_polygon.wav",
+    "also": [],
+    "have": true,
+    "synth": true
+  },
+  {
+    "n": 58,
+    "screen": 45,
+    "type": "Correct",
+    "text": "You found it! That is not a polygon.",
+    "file": "58_You_found_it_That_is_not_a_polygon.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 59,
+    "screen": 45,
+    "type": "Retry 1",
+    "text": "Which figure breaks the rule for a polygon?",
+    "file": "59_Which_figure_breaks_the_rule_for_a_polygon.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 60,
+    "screen": 45,
+    "type": "Retry 2",
+    "text": "Is it closed? Does it have only straight sides?",
+    "file": "53_Is_it_closed_Does_it_have_only_straight_sides.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 61,
+    "screen": 46,
+    "type": "Instruction",
+    "text": "Which of these are pentagons?",
+    "file": "79_Select_pentagons.wav",
+    "also": [],
+    "have": true,
+    "synth": true
+  },
+  {
+    "n": 62,
+    "screen": 46,
+    "type": "Correct",
+    "text": "Exactly! A pentagon always has 5 sides.",
+    "file": "60_Exactly_A_pentagon_always_has_five_sides.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 63,
+    "screen": 46,
+    "type": "Retry 1",
+    "text": "Count the sides of each figure carefully.",
+    "file": "61_Count_the_sides_of_each_figure_carefully.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 64,
+    "screen": 46,
+    "type": "Retry 2",
+    "text": "Look for every figure with exactly 5 sides.",
+    "file": "62_Look_for_every_figure_with_exactly_five_sides.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 65,
+    "screen": 47,
+    "type": "Instruction",
+    "text": "Classify each figure as a hexagon or a heptagon.",
+    "file": "46_Classify_each_figure_as_a_hexagon_or_a_heptagon.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 66,
+    "screen": 47,
+    "type": "Correct",
+    "text": "Well done! Hexagons have 6 sides and heptagons have 7 sides.",
+    "file": "63_Well_done_Hexagons_have_six_sides_and_heptagons_have_seven_sid.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 67,
+    "screen": 47,
+    "type": "Retry 1",
+    "text": "Count the sides of the ones you placed wrong.",
+    "file": "64_Count_the_sides_of_the_ones_you_placed_wrong.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 68,
+    "screen": 47,
+    "type": "Retry 2",
+    "text": "6 sides make a hexagon, 7 make a heptagon.",
+    "file": "65_Six_sides_make_a_hexagon_seven_make_a_heptagon.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  },
+  {
+    "n": 69,
+    "screen": 48,
+    "type": "Instruction",
+    "text": "You did it! Now you know what makes a figure a polygon.",
+    "file": "47_You_did_it_Now_you_know_what_makes_a_figure_a_polygon.mp3",
+    "also": [],
+    "have": true,
+    "synth": false
+  }
+]

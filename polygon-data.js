@@ -46,10 +46,13 @@
         [835, 590], [695, 390], [830, 160], [570, 185]],
       gap: { x: 460, y: 187, w: 250, h: 110 }
     },
+    /* Shared closed figure from the revised reference: a single horizontal
+       top edge, two inward side corners and a downward point. Keep the same
+       viewBox so every lesson instance retains its size and placement. */
     starClosed: {
       closed: true, vb: '60 140 800 700',
-      pts: [[350, 190], [95, 165], [255, 385], [85, 585], [300, 568], [455, 800], [520, 568],
-        [835, 590], [695, 390], [830, 160], [570, 185]]
+      pts: [[95, 160], [830, 160], [687, 386], [835, 587], [530, 565],
+        [449, 792], [304, 565], [85, 585], [257, 386]]
     },
 
     /* p8 — irregular angular open figure */
@@ -103,7 +106,8 @@
     c1b: { straightOpen: true, closed: false, vb: '-20 -20 1040 1040',
       pts: [[120, 940], [120, 80], [880, 940], [880, 100]] },
     /* Eight straight sides, with a deep inward notch: closed and concave. */
-    c1c: poly([[50, 50], [350, 50], [350, 500], [650, 500], [650, 50], [950, 50], [950, 950], [50, 950]], 30),
+    /* Concave four-sided silhouette traced from the supplied reference. */
+    c1c: poly([[141,15],[960,558],[159,582],[306,294]], 24),
     c1d: { curved: true, closed: true, vb: '-20 -20 1040 1040',
       d: 'M240 80 L520 80 C820 80 960 300 960 510 C960 720 820 940 520 940 L240 940 Z' },
     c1e: poly([[120, 90], [880, 90], [120, 930], [880, 930]], 30),
@@ -135,8 +139,10 @@
     /* CFU 5 — hexagons and heptagons */
     c5a: poly(reg(6, 500, 500, 430, 30), 30),
     c5b: poly(reg(7, 500, 500, 430, 0), 30),
-    c5c: poly([[200, 250], [700, 180], [950, 460], [780, 780], [280, 830], [90, 520]], 30),
-    c5d: poly([[500, 70], [850, 260], [930, 640], [640, 930], [300, 900], [80, 620], [140, 250]], 30)
+    /* Reference silhouettes: preserve the uneven widths, sloping edges and
+       inward corners rather than regularising either polygon. */
+    c5c: poly([[265,350],[1025,390],[825,770],[1170,1170],[285,1150],[530,720]], 30),
+    c5d: poly([[615,35],[930,225],[770,460],[940,695],[225,785],[435,445],[265,275]], 30)
   };
 
   var C = {

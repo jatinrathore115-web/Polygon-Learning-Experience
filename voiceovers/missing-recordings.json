@@ -1,0 +1,310 @@
+[
+    {
+        "duration":  3.3195,
+        "words":  [
+                      {
+                          "word":  "Tap",
+                          "start":  0.1492
+                      },
+                      {
+                          "word":  "the",
+                          "start":  0.6068
+                      },
+                      {
+                          "word":  "closed",
+                          "start":  0.7567
+                      },
+                      {
+                          "word":  "figure",
+                          "start":  1.4168
+                      },
+                      {
+                          "word":  "made",
+                          "start":  1.9642
+                      },
+                      {
+                          "word":  "with",
+                          "start":  2.3242
+                      },
+                      {
+                          "word":  "straight",
+                          "start":  2.5418
+                      },
+                      {
+                          "word":  "lines",
+                          "start":  3.1042
+                      }
+                  ],
+        "source":  "Microsoft Zira Desktop; generated locally with System.Speech",
+        "text":  "Tap the closed figure made with straight lines.",
+        "src":  "voiceovers/voice%20overs/80_Tap_the_closed_figure_made_with_straight_lines.wav"
+    },
+    {
+        "duration":  4.3495,
+        "words":  [
+                      {
+                          "word":  "Great",
+                          "start":  0.1492
+                      },
+                      {
+                          "word":  "job",
+                          "start":  0.5692
+                      },
+                      {
+                          "word":  "You",
+                          "start":  2.4067
+                      },
+                      {
+                          "word":  "identified",
+                          "start":  2.6392
+                      },
+                      {
+                          "word":  "all",
+                          "start":  3.7042
+                      },
+                      {
+                          "word":  "the",
+                          "start":  4.0042
+                      },
+                      {
+                          "word":  "polygons",
+                          "start":  4.1468
+                      }
+                  ],
+        "source":  "Microsoft Zira Desktop; generated locally with System.Speech",
+        "text":  "Great job! You identified all the polygons.",
+        "src":  "voiceovers/voice%20overs/81_Great_job_You_identified_all_the_polygons.wav"
+    },
+    {
+        "duration":  4.1345,
+        "words":  [
+                      {
+                          "word":  "Correct",
+                          "start":  0.1492
+                      },
+                      {
+                          "word":  "This",
+                          "start":  2.2492
+                      },
+                      {
+                          "word":  "polygon",
+                          "start":  2.5492
+                      },
+                      {
+                          "word":  "has",
+                          "start":  3.3892
+                      },
+                      {
+                          "word":  "five",
+                          "start":  3.7568
+                      },
+                      {
+                          "word":  "sides",
+                          "start":  4.2292
+                      }
+                  ],
+        "source":  "Microsoft Zira Desktop; generated locally with System.Speech",
+        "text":  "Correct! This polygon has five sides.",
+        "src":  "voiceovers/voice%20overs/82_Correct_This_polygon_has_five_sides.wav"
+    },
+    {
+        "duration":  4.9745,
+        "words":  [
+                      {
+                          "word":  "That\u0027s",
+                          "start":  0.1492
+                      },
+                      {
+                          "word":  "right",
+                          "start":  0.5768
+                      },
+                      {
+                          "word":  "Quadrilaterals",
+                          "start":  2.4218
+                      },
+                      {
+                          "word":  "are",
+                          "start":  3.7342
+                      },
+                      {
+                          "word":  "polygons",
+                          "start":  3.8918
+                      },
+                      {
+                          "word":  "with",
+                          "start":  4.8968
+                      },
+                      {
+                          "word":  "four",
+                          "start":  5.1068
+                      },
+                      {
+                          "word":  "sides",
+                          "start":  5.4818
+                      }
+                  ],
+        "source":  "Microsoft Zira Desktop; generated locally with System.Speech",
+        "text":  "That\u0027s right! Quadrilaterals are polygons with four sides.",
+        "src":  "voiceovers/voice%20overs/83_Thats_right_Quadrilaterals_are_polygons.wav"
+    },
+    {
+        "duration":  3.4595,
+        "words":  [
+                      {
+                          "word":  "Quadrilaterals",
+                          "start":  0.1492
+                      },
+                      {
+                          "word":  "are",
+                          "start":  1.4617
+                      },
+                      {
+                          "word":  "polygons",
+                          "start":  1.6192
+                      },
+                      {
+                          "word":  "with",
+                          "start":  2.6242
+                      },
+                      {
+                          "word":  "four",
+                          "start":  2.8342
+                      },
+                      {
+                          "word":  "sides",
+                          "start":  3.2092
+                      }
+                  ],
+        "source":  "Microsoft Zira Desktop; generated locally with System.Speech",
+        "text":  "Quadrilaterals are polygons with four sides.",
+        "src":  "voiceovers/voice%20overs/84_Quadrilaterals_are_polygons_with_four_sides.wav"
+    },
+    {
+        "duration":  2.5345,
+        "words":  [
+                      {
+                          "word":  "Is",
+                          "start":  0.1492
+                      },
+                      {
+                          "word":  "this",
+                          "start":  0.3892
+                      },
+                      {
+                          "word":  "shape",
+                          "start":  0.6742
+                      },
+                      {
+                          "word":  "a",
+                          "start":  1.1617
+                      },
+                      {
+                          "word":  "quadrilateral",
+                          "start":  1.2442
+                      }
+                  ],
+        "source":  "Microsoft Zira Desktop; generated locally with System.Speech",
+        "text":  "Is this shape a quadrilateral?",
+        "src":  "voiceovers/voice%20overs/85_Is_this_shape_a_quadrilateral.wav"
+    },
+    {
+        "duration":  4.1495,
+        "words":  [
+                      {
+                          "word":  "A",
+                          "start":  0.1492
+                      },
+                      {
+                          "word":  "polygon",
+                          "start":  0.3368
+                      },
+                      {
+                          "word":  "is",
+                          "start":  1.2217
+                      },
+                      {
+                          "word":  "a",
+                          "start":  1.4468
+                      },
+                      {
+                          "word":  "closed",
+                          "start":  1.5292
+                      },
+                      {
+                          "word":  "figure",
+                          "start":  2.1892
+                      },
+                      {
+                          "word":  "made",
+                          "start":  2.7518
+                      },
+                      {
+                          "word":  "only",
+                          "start":  3.1268
+                      },
+                      {
+                          "word":  "of",
+                          "start":  3.6068
+                      },
+                      {
+                          "word":  "straight",
+                          "start":  3.7568
+                      },
+                      {
+                          "word":  "sides",
+                          "start":  4.2967
+                      }
+                  ],
+        "source":  "Microsoft Zira Desktop; generated locally with System.Speech",
+        "text":  "A polygon is a closed figure made only of straight sides.",
+        "src":  "voiceovers/voice%20overs/86_A_polygon_is_a_closed_figure.wav"
+    },
+    {
+        "duration":  4.9695,
+        "words":  [
+                      {
+                          "word":  "Not",
+                          "start":  0.1492
+                      },
+                      {
+                          "word":  "quite",
+                          "start":  0.5167
+                      },
+                      {
+                          "word":  "A",
+                          "start":  2.4592
+                      },
+                      {
+                          "word":  "polygon",
+                          "start":  2.6468
+                      },
+                      {
+                          "word":  "is",
+                          "start":  3.5318
+                      },
+                      {
+                          "word":  "closed",
+                          "start":  3.7642
+                      },
+                      {
+                          "word":  "with",
+                          "start":  4.3792
+                      },
+                      {
+                          "word":  "only",
+                          "start":  4.5892
+                      },
+                      {
+                          "word":  "straight",
+                          "start":  4.9942
+                      },
+                      {
+                          "word":  "sides",
+                          "start":  5.5268
+                      }
+                  ],
+        "source":  "Microsoft Zira Desktop; generated locally with System.Speech",
+        "text":  "Not quite! A polygon is closed with only straight sides.",
+        "src":  "voiceovers/voice%20overs/87_Not_quite_A_polygon_is_closed.wav"
+    }
+]
