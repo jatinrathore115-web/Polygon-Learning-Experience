@@ -51,10 +51,17 @@ const server=http.createServer((req,res)=>{
     let labels=await boxes();assert.deepEqual(labels.board,baseline.board);assert.deepEqual(labels.guide,baseline.guide);validate(labels);
     const side=page.locator('[data-label-target="side"]');
     assert.equal(await page.getByText('Drag a label, or tap a label then a ?.',{exact:true}).count(),0,'No instruction text above the figure');
+    const tileFaces=[];
     for(const [name,color] of [['Side','rgb(233, 151, 18)'],['Vertex','rgb(128, 81, 201)'],['Angle','rgb(21, 156, 168)']]){
-      assert.equal(await page.getByRole('button',{name,exact:true}).evaluate(e=>getComputedStyle(e).borderTopColor),color,'Choice uses its teaching colour');
-      assert.equal(await page.locator('[data-label-target="'+name.toLowerCase()+'"]').evaluate(e=>getComputedStyle(e).borderTopColor),color,'Socket matches its tile');
+      /* All three tiles wear ONE colour. Dressing each in its own teaching
+         colour handed the answer over: a learner could match amber tile to
+         amber socket without reading a word. The word on the tile is the thing
+         being taught, so it has to be the only clue. Each EMPTY socket keeps
+         its own quiet tint, which is what makes it read as a hole to fill. */
+      tileFaces.push(await page.getByRole('button',{name,exact:true}).evaluate(e=>getComputedStyle(e).borderTopColor));
+      assert.equal(await page.locator('[data-label-target="'+name.toLowerCase()+'"]').evaluate(e=>getComputedStyle(e).borderTopColor),color,'Empty socket keeps its part colour');
     }
+    assert.equal(new Set(tileFaces).size,1,'Every label tile shares one colour, so the tray gives nothing away: '+tileFaces.join(', '));
     /* An empty socket still has to read as somewhere to drop rather than a
        button to press, but not by being drawn with a broken line -- three
        dashed rims around the figure made the shape look like a diagram. The
@@ -83,15 +90,29 @@ const server=http.createServer((req,res)=>{
     await page.keyboard.press('Escape');
     await page.waitForFunction(()=>!__poly.state.chip&&document.activeElement?.getAttribute('data-label-chip')==='Side');
     assert(await page.locator('.story-surface svg').first().evaluate(e=>!getComputedStyle(e.parentElement).transitionProperty.match(/left|top|width|height/)),'Figure geometry and annotation anchors must change together');
+    /* The word the learner carried across keeps its own face once it lands.
+       Recolouring a placed tile -- to amber, or to a green "correct" state --
+       broke the thread between the thing picked up and the thing now sitting
+       in the socket; the drop should read as that tile arriving, not as a
+       different object appearing in its place. */
+    const tileFace=await page.getByRole('button',{name:'Side',exact:true})
+      .evaluate(e=>getComputedStyle(e).backgroundImage);
     await page.getByRole('button',{name:'Side',exact:true}).dragTo(page.locator('[data-label-target="side"]'));
     await page.waitForFunction(()=>__poly.state.placed.side==='Side');
-    await page.waitForFunction(()=>getComputedStyle(document.querySelector('[data-label-target="side"]')).backgroundColor==='rgb(255, 225, 138)');
-    assert.equal(await side.evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(255, 225, 138)','Completed Side matches the amber teaching annotation');
+    await page.waitForFunction(face=>getComputedStyle(document.querySelector('[data-label-target="side"]')).backgroundImage===face,tileFace);
+    assert.equal(await side.evaluate(e=>getComputedStyle(e).backgroundImage),tileFace,'A placed label keeps the tile face it was dragged from');
+    assert(!await side.getAttribute('data-feedback'),'and is not restyled into a correct/incorrect state on landing');
     assert.equal(await side.getAttribute('tabindex'),'-1','Completed annotations leave the tab order');
+    /* Swiftee acknowledges the placement; the board is closed until she has
+       finished, so wait for it rather than pressing into a locked screen. */
+    await page.waitForFunction(()=>!__poly.locked()&&!__poly.state.speaking);
     await page.getByRole('button',{name:'Angle',exact:true}).press('Enter');
     const vertex=page.locator('[data-label-target="vertex"]');
     await vertex.press('Enter');
-    assert.equal(await vertex.getAttribute('data-feedback'),'incorrect');
+    /* Wait for the state to land rather than assuming the keypress and the
+       render happen in the same tick. */
+    await page.waitForFunction(()=>document.querySelector('[data-label-target="vertex"]').getAttribute('data-feedback')==='incorrect');
+    assert.equal(await vertex.getAttribute('data-feedback'),'incorrect','A wrong drop is still answered in red');
     assert.equal(await vertex.evaluate(e=>getComputedStyle(e).borderTopStyle),'solid','Wrong feedback is visible on the socket');
     await page.waitForFunction(()=>!__poly.locked()&&!__poly.state.speaking&&!__poly.state.badPlace);
     assert(await page.evaluate(()=>__poly.state.k===22&&__poly.state.placed.side==='Side'&&!__poly.state.placed.vertex),'A wrong placement preserves progress and allows another try');

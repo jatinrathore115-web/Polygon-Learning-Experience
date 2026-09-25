@@ -3232,5 +3232,41 @@ window.POLYGON_RECORDINGS = [
     ],
     "source": "Microsoft Zira Desktop; generated locally with System.Speech",
     "timingNote": "word starts scaled by 0.8666 to fit the clip: System.Speech reports AudioPosition on its own timeline, which runs past the rendered wave on lines with a sentence break"
+  },
+  {
+    "text": "Let's count the sides of the polygon.",
+    "src": "voiceovers/voice%20overs/88_Lets_count_the_sides_of_the_polygon.wav",
+    "duration": 3.6074,
+    "words": [
+      {
+        "word": "Let's",
+        "start": 0.13
+      },
+      {
+        "word": "count",
+        "start": 0.45
+      },
+      {
+        "word": "the",
+        "start": 0.6
+      },
+      {
+        "word": "sides",
+        "start": 1.28
+      },
+      {
+        "word": "of",
+        "start": 1.74
+      },
+      {
+        "word": "the",
+        "start": 1.98
+      },
+      {
+        "word": "polygon.",
+        "start": 2.2
+      }
+    ],
+    "source": "Windows OneCore Microsoft Heera (en-IN); word starts measured from the rendered audio"
   }
 ];

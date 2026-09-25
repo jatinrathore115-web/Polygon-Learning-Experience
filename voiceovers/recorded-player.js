@@ -34,6 +34,16 @@
       const total = counts.reduce((a, b) => a + b, 0);
       const wordStarts = this.wordStarts(entry, text);
       const words = text.match(/\S+/g) || [];
+      /* A step may speak only the opening of its recording. Screen 27 shows
+         "Drag any vertex" and should say exactly that, but the studio take
+         carries on into "Stretch it, squash it..." -- lines that belong to the
+         interaction, not to the instruction on the board. Rather than re-cut
+         the MP3 and lose the real voice, playback stops in the silence after
+         the last spoken word, so the take is used exactly as recorded and
+         simply ends where the sentence does. */
+      const speakWords = game.step().speakWords;
+      const cutAt = Number.isFinite(speakWords) && wordStarts && wordStarts.length > speakWords
+        ? Math.max(0, wordStarts[speakWords] - 0.3) : null;
       let spoken = 0;
       let frame, pageIndex = -1, revealed = -1, stopped = false;
       const stop = () => {
@@ -43,9 +53,21 @@
         if (game._stopRecordedVoice === stop) game._stopRecordedVoice = null;
       };
       game._stopRecordedVoice = stop;
+      /* The teaching animations on S11 are CSS animations anchored to the
+         voice. Publishing the media clock on every frame meant a React render
+         per frame, each one re-resolving a held animation's delay -- which is
+         what made those screens stutter. The clock is published only when the
+         timeline actually jumps: it starts, pauses, stalls, seeks or ends.
+         Between those the browser runs the animation itself, so it is smooth,
+         and it is still anchored to the real audio position rather than a
+         generic delay. */
+      const clock = running => {
+        if (stopped || !current() || game.step().sc !== 'S11') return;
+        game.setState({ voiceElapsedMs: audio.currentTime * 1000, voiceClockRunning: !!running });
+      };
       function update() {
         if (stopped || !current()) return;
-        if (game.step().sc === 'S11') game.setState({ voiceElapsedMs: audio.currentTime * 1000 });
+        if (cutAt !== null && audio.currentTime >= cutAt) { finish(); return; }
         const duration = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : entry.duration;
         // Alignment timestamps are seconds relative to this MP3, including leading silence.
         // Keep the duration fallback only for recordings without validated alignment.
@@ -79,26 +101,33 @@
           revealed = count; game.setState({ wordReveal:'recorded', revealedWords: count });
         }
       }
+      /* One ending for both the real end of the clip and an early cut. */
+      function finish() {
+        if (stopped || !current()) return;
+        stop();
+        if (game.revealChoiceWords) game.revealChoiceWords(text);
+        game.setState({ wordReveal: 'complete' }, done);
+      }
       function tick() { update(); if (!stopped && current() && !audio.paused) frame = requestAnimationFrame(tick); }
       audio.onplaying = () => {
         if (stopped || !current()) return;
         if (game.storyVoiceStart) game.storyVoiceStart();
-        game.setState({ voiceError: '' }); cancelAnimationFrame(frame); tick();
+        game.setState({ voiceError: '' }); clock(true); cancelAnimationFrame(frame); tick();
       };
       const waiting = () => {
         if (stopped || !current()) return;
-        cancelAnimationFrame(frame);
+        cancelAnimationFrame(frame); clock(false);
         if (game.guide && game.guide.onInstructionPause) game.guide.onInstructionPause();
       };
       audio.onpause = audio.onwaiting = audio.onstalled = waiting;
       audio.ontimeupdate = () => { if (!audio.paused) update(); };
+      /* A seek moves the timeline discontinuously, so the anchor has to move with it. */
+      audio.onseeked = () => clock(!audio.paused);
       audio.onerror = () => { if (!stopped && current()) { stop(); fail(); } };
       audio.onended = () => {
         if (stopped || !current()) return;
         update(); // Catch the last page/word if the browser throttled frame updates.
-        stop();
-        if (game.revealChoiceWords) game.revealChoiceWords(text);
-        game.setState({ wordReveal: 'complete' }, done);
+        finish();
       };
       // Reserve the first phrase before playback; nothing flashes while loading.
       game.prepareNarratorReveal(pages[0]);

@@ -7,7 +7,6 @@
 <meta name="description" content="Explore shapes, sides, vertices, and angles with Swiftee in a playful polygon adventure.">
 <link rel="preload" href="assets/fonts/baloo-2-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/instructiion%20board.png" as="image">
-<link rel="preload" href="assets/backgound%20%2002.png" as="image">
 <link rel="stylesheet" href="styles/fonts.css">
 <link rel="preload" href="assets/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles/buttons.css">
@@ -88,6 +87,18 @@
          mark at all --- there is nothing to point at, and the answer is
          confirmed by the button glow, the chime and Swiftee instead. --- */
   @keyframes gapDotReveal { from { opacity:0; transform:scale(.4); } to { opacity:1; transform:scale(1); } }
+  /* Why the shape is open, shown as one movement: the boundary trace runs from
+     the loose end on one side all the way round to the loose end on the other,
+     and the dots carry the same pen on across the missing piece. The solid
+     half is the screen's existing trace -- nothing is drawn over the figure a
+     second time -- so there is one stroke, one colour, one journey. */
+  /* The end the last dot arrives at gives a small nod as it lands. A nod, not
+     a flourish: this is a wrong answer being explained. */
+  @keyframes gapEndPulse {
+    0%,100% { transform:scale(1); }
+    50%     { transform:scale(1.08); }
+  }
+  @media (prefers-reduced-motion:reduce) { circle[data-dot="gap-end"] { animation:none!important; } }
   @media (prefers-reduced-motion:reduce) { circle[data-dot="gap"] { animation:none!important; opacity:1!important; transform:none!important; } }
   /* Getting it right should feel like the button jumps for you. A 3.5% nudge
      was too polite to register, so this overshoots, dips, and settles -- with
@@ -398,6 +409,10 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1320,&quot;height&quot;:720}}">
 const IK = '#f58420', ICE = '#22b8e6', GRN = '#2f9e5e', RED = '#e8553f', GOLD = '#e9a733';
+/* How long the boundary trace takes on the open/closed screens. The dotted
+   continuation is timed from this, so the two halves of the gesture can never
+   drift apart: change it here and both move together. */
+const OC_TRACE_MS = 1000;
 const SHAPE_VIOLET = '#6354c7'; // Blue-violet outline against the mint learning card.
 /* The shape Swiftee draws on the opening run, screens 2 to 5. A golden yellow
    rather than a lemon one: the board behind it is a pale sky blue, and a light
@@ -903,7 +918,9 @@ class Component extends DCLogic {
   state = {
     ready: false, k: 0, narr: '', speaking: false, voiceError: '', muted: false, scale: 1,
     ddCheer: false,
-    boundaryBackgroundReady: false,
+    /* The scenery is one picture that ships with the page; nothing has to load
+       before it can be shown. */
+    boundaryBackgroundReady: true,
     sel: [], dd: [null, null, null, null], ddOpen: -1, ddWrong: [false, false, false, false],
     cnt: [4, 4], attempts: 0, wrong: null, ok: null, ocReveal: null, ocRetire: false, ocWords: { open:false, closed:false }, nudge: null,
     guideHidden: true, interactive: false,
@@ -921,7 +938,7 @@ class Component extends DCLogic {
 
   /* ---------- lifecycle ---------- */
   componentDidMount() {
-    this.loadBoundaryBackground();
+
     this.loadDrawingSound();
     this.stageRef = React.createRef();
     this.zoneARef = React.createRef(); this.zoneBRef = React.createRef();
@@ -1154,13 +1171,60 @@ class Component extends DCLogic {
     }
     if (this._sfxVoices) this._sfxVoices.clear();
   }
+  /* Silence a playing answer clip. Deliberately NOT part of stopSfx(): the
+     open/closed screens start the boundary trace right after validating the
+     answer, and its little trace tone came through here 40ms later and killed
+     the correct/incorrect sound almost the moment it began -- the clip was
+     heard as a click, or not at all. Only another answer cancels an answer, so
+     one attempt is still one sound, while the lesson's other effects play over
+     the top of it as they always did. */
+  stopAnswerSound() {
+    for (const clip of Object.values(this._answerClips || {})) {
+      try { if (!clip.paused) { clip.pause(); clip.currentTime = 0; } } catch (error) {}
+    }
+  }
+  /* The two answer clips, kept and reused rather than created per attempt: a
+     fresh Audio each time would leave the previous one playing and stack the
+     sound when a learner answers quickly. Rewinding the same element means one
+     attempt can only ever be one sound. */
+  answerClip(kind) {
+    const files = { ok: 'correct  sound.mp3', no: 'incorrect (3).mp3' };
+    if (!files[kind] || typeof Audio === 'undefined') return null;
+    this._answerClips = this._answerClips || {};
+    if (!this._answerClips[kind]) {
+      const clip = new Audio('assets/sfx/' + encodeURIComponent(files[kind]));
+      clip.preload = 'auto';
+      this._answerClips[kind] = clip;
+    }
+    return this._answerClips[kind];
+  }
+  answerSound(kind) {
+    const clip = this.answerClip(kind);
+    const tones = () => kind === 'ok'
+      ? (this.tone(660, 0.12, 'sine', 0.06), this.tone(880, 0.16, 'sine', 0.05, 0.1), this.tone(1180, 0.2, 'sine', 0.04, 0.2))
+      : (this.tone(440, 0.10, 'sine', 0.04), this.tone(350, 0.16, 'sine', 0.035, 0.09));
+    if (!clip) { tones(); return; }
+    try {
+      this.stopAnswerSound();
+      clip.currentTime = 0;
+      const played = clip.play();
+      if (played && played.catch) played.catch(() => tones());
+    } catch (error) { tones(); }
+  }
   sfx(kind) {
     // One effect owns the channel; stale resume callbacks cannot replay an old answer.
     this.stopSfx();
     this.unlockAudio();
+    /* Right and wrong are the two sounds a learner listens for, so they are the
+       supplied recordings rather than synthesised tones. They are played from
+       here and nowhere else: answerFeedback() is the one place the lesson
+       decides an attempt was right or wrong, and it fires at the same moment
+       as the green or red glow, so every tap, drag, drop and selection gets
+       the same sound at the same instant without any screen having its own
+       audio logic. The tones remain as the fallback for a browser that will
+       not play the file. */
     if (kind === 'tap') this.tone(520, 0.08, 'triangle', 0.05);
-    else if (kind === 'ok') { this.tone(660, 0.12, 'sine', 0.06); this.tone(880, 0.16, 'sine', 0.05, 0.1); this.tone(1180, 0.2, 'sine', 0.04, 0.2); }
-    else if (kind === 'no') { this.tone(440, 0.10, 'sine', 0.04); this.tone(350, 0.16, 'sine', 0.035, 0.09); }
+    else if (kind === 'ok' || kind === 'no') this.answerSound(kind);
     else if (kind === 'trace') this.tone(1320, 0.5, 'sine', 0.022);
     else if (kind === 'done') { this.tone(784, 0.1, 'sine', 0.05); this.tone(1046, 0.22, 'sine', 0.045, 0.09); }
     else if (kind === 'tick') this.tone(880, 0.05, 'square', 0.03);
@@ -1626,13 +1690,15 @@ class Component extends DCLogic {
       { sc: 'S11', ph: 'vertex', label: '11 · Vertex', narr: 'The point where two sides meet is called a vertex.', fig: 'pentagon', auto: true },
       { sc: 'S11', ph: 'angle', label: '11 · Angle', narr: 'When two sides meet, they also form an angle.', fig: 'pentagon', auto: true },
       { sc: 'S12', label: '12 · Label the parts', narr: 'Label the parts of the polygon.', fig: 'cross', q: 'labels' },
-      { sc: 'S13', label: '13 · How many sides', narr: 'How many sides does this polygon have?', fig: 'pentagon', q: 'count', ans: 5, fb: { one: 'Count each side carefully and try again.' } },
+      { sc: 'S13', label: '13 · How many sides', narr: "Let's count the sides of the polygon.", fig: 'pentagon', q: 'count', ans: 5, fb: { one: 'Count each side carefully and try again.' } },
       { sc: 'S13', ph: 'five', label: '13 · Five sides', narr: 'Correct! This polygon has 5 sides.', fig: 'pentagon', auto: true },
       { sc: 'S14', ph: 'intro', label: '14 · Change it', narr: "Now let's change how it looks.", fig: 'pentagon', auto: true },
       /* The board reads the instruction itself; Swiftee still speaks the
          whole recorded line over it. */
       { sc: 'S14', ph: 'drag', label: '14 · Drag a vertex', narr: 'Drag any vertex. Stretch it, squash it, or resize it.',
-        show: 'Drag any vertex', fig: 'pentagon', q: 'deform' },
+        /* Speak only the instruction that is on the board; the rest of the
+           take describes the interaction and belongs to the screen after it. */
+        show: 'Drag any vertex', speakWords: 3, fig: 'pentagon', q: 'deform' },
       { sc: 'S14', ph: 'wow', label: '14 · Changed', narr: 'Whoa! It looks quite different now.', fig: 'pentagon', auto: true },
       { sc: 'S15', ph: 'a', label: '15 · Before and after', narr: 'Its appearance has completely changed.', ba: true, auto: true },
       { sc: 'S15', ph: 'b', label: '15 · Not everything', narr: 'But not everything has changed.', ba: true, auto: true },
@@ -1768,7 +1834,17 @@ class Component extends DCLogic {
     reset.hoverK = null; reset.pressK = null;
     /* Nothing is tappable until the instruction has actually started. */
     reset.interactive = false; reset.speaking = false; reset.voiceError = '';
-    if (fresh) reset.narr = '';
+    /* The sign is emptied on EVERY screen change, not only on a fresh start.
+       A screen takes a second or more to arrive -- Swiftee flies in, the board
+       settles -- and narrate() does not run until the end of it. Until this
+       reset, the bubble kept the previous screen's sentence for that whole
+       window: screen 17 opened still reading "Look! A point." at the old box
+       size and then jumped to its own line, which is the stale text flashing
+       before the intended one. Cleared here, the bubble is simply absent until
+       its line begins (signStyle hides an empty sign), so every screen starts
+       from nothing and reveals its own words in step with its own voice. */
+    reset.narr = ''; reset.narrPage = ''; reset.narrShow = '';
+    reset.revealedWords = 0; reset.wordReveal = 'waiting'; reset.wordPaused = false;
 
     this.setState(reset, () => {
       const popMs = this.enterScreen(fresh);
@@ -2267,7 +2343,7 @@ class Component extends DCLogic {
   showBoundaryFeedback(text) {
     const started = Date.now();
     const generation = this.gen;
-    this.runTrace(1800);
+    this.runTrace(OC_TRACE_MS);
     this.feedback(text, () => {
       if (generation !== this.gen) return;
       // Keep both choices in place through the whole explanation. Only once
@@ -3196,19 +3272,60 @@ class Component extends DCLogic {
     if (resolved === 'open') {
       const ends = this.gapEnds(name);
       if (!ends) return out;
-      /* Individual dots reveal the missing span in order, then stay still.
-         Leave both endpoints bare so the original opening stays easy to read. */
-      const dx = ends[1][0] - ends[0][0], dy = ends[1][1] - ends[0][1];
-      const count = Math.max(5, Math.min(12, Math.round(Math.hypot(dx, dy) / (32 * kk))));
+      /* One continuous movement, in three overlapping parts.
+
+         1. The boundary is traced from one loose end round to the other. The
+            figure's own path already runs that way -- it is drawn from the end
+            on one side of the gap, down and around, back up to the end on the
+            other -- so the trace simply follows it, and pathLength="100" lets
+            a dash animation walk it without measuring anything.
+         2. The dots begin at about four fifths of the way through the trace,
+            while the line is still arriving. That overlap is the whole point:
+            the dots are the same gesture running out of boundary to follow,
+            not a second thing that happens afterwards.
+         3. They run from the end the trace finishes at back toward the one it
+            started from, and stop short of both, so the shape is never even
+            momentarily closed -- the gap stays the thing being taught. */
+      /* One pen, one journey.
+
+         The solid half is the boundary trace the screen already runs -- see
+         showBoundaryFeedback, which starts it in the same beat this renders --
+         so there is no second stroke drawn over the figure. It begins at the
+         loose end the path starts from, follows the real boundary all the way
+         round, and stops at the other loose end, because that is where the
+         boundary genuinely stops.
+
+         The dots are that same pen carrying on. They are the SAME BLUE, about
+         the same weight as the stroke, and the first one lands 40ms after the
+         trace arrives -- close enough to read as continuation rather than as a
+         second effect starting. They run from where the line ran out back to
+         where it began, so the missing piece is drawn in the direction the
+         learner was already following, and they stop short of both ends so the
+         shape is never momentarily closed. */
+      const TRACE_MS = OC_TRACE_MS, DOT_LEAD = TRACE_MS + 40, DOT_SPAN = 500, PULSE_MS = 140;
+      /* From where the line stops, on toward where it began. */
+      const from = ends[1], to = ends[0];
+      const dx = to[0] - from[0], dy = to[1] - from[1];
+      const count = Math.max(5, Math.min(12, Math.round(Math.hypot(dx, dy) / (34 * kk))));
+      const step = DOT_SPAN / Math.max(1, count);
       for (let i = 0; i < count; i++) {
         const t = (i + 1) / (count + 1);
-        out.dots.push({ dot: 'gap', x: ends[0][0] + dx * t, y: ends[0][1] + dy * t,
-          r: 6.5 * kk, fill: SHAPE_VIOLET, stroke: 'none', sw: 0,
+        out.dots.push({ dot: 'gap', x: from[0] + dx * t, y: from[1] + dy * t,
+          r: +(8 * kk).toFixed(2), fill: ICE, stroke: 'none', sw: 0,
           style: { opacity: 1, transformBox: 'fill-box', transformOrigin: 'center',
-            filter: 'drop-shadow(0 0 3px rgba(255,255,255,.9))',
-            animation: reduced ? 'none' : 'gapDotReveal 160ms ease-out ' + (i * 90) + 'ms both' }
+            filter: 'drop-shadow(0 0 6px rgba(34,184,230,.55))',
+            animation: reduced ? 'none' : 'gapDotReveal 120ms linear ' + Math.round(DOT_LEAD + i * step) + 'ms both' }
         });
       }
+      /* The ends themselves, in the same blue so nothing competes with the
+         line. The one the last dot arrives at gives a small nod as it lands. */
+      const landing = Math.round(DOT_LEAD + DOT_SPAN);
+      [from, to].forEach((p, i) => out.dots.push({
+        dot: 'gap-end', x: p[0], y: p[1], r: +(10 * kk).toFixed(2),
+        fill: 'none', stroke: ICE, sw: +(3 * kk).toFixed(2),
+        style: { opacity: .9, transformBox: 'fill-box', transformOrigin: 'center',
+          animation: reduced || i === 0 ? 'none' : 'gapEndPulse ' + PULSE_MS + 'ms ease-out ' + landing + 'ms both' }
+      }));
       return out;
     }
 
@@ -3273,7 +3390,11 @@ class Component extends DCLogic {
       zoneRowStyle: {}, liveMsg: this.state.say || '', checkFeedback: '',
       narrStyle: this.narrStyle(), narrRef: this.narrRef,
       bgStyle: this.bgStyle(), boardStyle: this.boardStyle(), signStyle: this.signStyle(),
-      backgroundSrc: st.ready && (st.k === 13 || ['C2','C5'].includes(this.step().sc)) && st.boundaryBackgroundReady ? 'assets/backgound%20%2002.png' : 'assets/image.png',
+      /* One painting behind the whole lesson. Three screens used to swap to a
+         second one, which read as the scene jumping rather than as the lesson
+         moving on -- and the blurred backdrop behind the frame is drawn from
+         the first painting, so the two no longer matched while it was up. */
+      backgroundSrc: 'assets/image.png',
       lessonScene: this.learningReferenceScene() ? 'parts-reference' : this.polygonIntroScene() ? 'polygon-intro' : this.topLessonScene() ? 'boundary' : 'standard',
       safeStyle: this.safeStyle(),
       showGuide: GUIDE_VISIBLE, guideViewport: this.guideViewportStyle(), guideStyle: this.guideStyle(),
@@ -3644,16 +3765,9 @@ class Component extends DCLogic {
     };
   }
   /* ---------- scene layers, all derived from the same stage box ---------- */
-  loadBoundaryBackground() {
-    const image = new Image();
-    image.onload = async () => {
-      try {
-        if (image.decode) await image.decode();
-        if (!this._gone && image.naturalWidth) this.setState({boundaryBackgroundReady:true});
-      } catch (_) { /* Keep the original scenery if the replacement cannot decode. */ }
-    };
-    image.src = 'assets/backgound%20%2002.png';
-  }
+  /* The second painting is gone: one picture sits behind every screen, so there
+     is nothing to swap to and nothing to fetch. This used to preload a megabyte
+     on every load and hold the swap back until it had decoded. */
   boundaryScene() {
     // Keep the same teaching composition from the open/closed introduction onward.
     return !!(this.P && this.state.ready && ['S6','S7'].includes(this.step().sc));
@@ -3751,7 +3865,9 @@ class Component extends DCLogic {
   bgStyle() {
     return Object.assign({position:'absolute',zIndex:0,left:0,top:0,width:'100%',height:'100%'},
       { display: 'block', objectFit: 'cover', userSelect: 'none', pointerEvents: 'none',
-        filter: this.topLessonScene() ? 'saturate(1.06) brightness(1.04)' : 'none', transition: this.reducedMotion() ? 'none' : 'filter 1000ms ease-in-out' });
+        /* No per-scene grade either: lifting saturation on some screens made
+           the same picture look like a different one a second after arriving. */
+        filter: 'none' });
   }
   boardStyle() {
     const boundaryWidth = BOUNDARY.boardW;
@@ -3857,6 +3973,8 @@ class Component extends DCLogic {
   signStyle() {
     const text = this.state.narrShow || (this.state.narrPage === undefined ? this.state.narr : this.state.narrPage);
     const box = this.fittedDialogue(text);
+    /* Empty, or waiting with nothing revealed yet: both count as nothing to show. */
+    const ready = !!text && !(this.state.wordReveal === 'waiting' && !this.state.revealedWords);
     const boundary = this.topLessonScene() || this.polygonIntroScene();
     /* Point the tail at wherever Swiftee actually stands, rather than at a
        percentage that has to be re-guessed every time the lane moves. */
@@ -3874,9 +3992,15 @@ class Component extends DCLogic {
       '--dialogue-side-padding': (NARR_TYPE.inset - 4) + 'px',
       width: box.w+'px', minWidth: '0', maxWidth: box.w + 'px', height: 'auto',
       display: 'block', userSelect: 'none', pointerEvents: 'none',
-      opacity: this.state.storyDialogue && !!text && !this.state.sceneLeaving ? 1 : 0,
-      visibility: text ? 'visible' : 'hidden',
-      transform: this.state.storyDialogue && !!text ? 'scale(1)' : 'scale(.94)',
+      /* A recorded line is sized from its full text so the sign never resizes
+         mid-sentence, but every word starts hidden -- so between the sign
+         arriving and the first word being spoken there was an empty bubble
+         sitting on screen. Hold it back until it actually has something to
+         show: while the reveal is still waiting and no word has landed, the
+         sign stays away, then arrives already carrying its first word. */
+      opacity: this.state.storyDialogue && ready && !this.state.sceneLeaving ? 1 : 0,
+      visibility: ready ? 'visible' : 'hidden',
+      transform: this.state.storyDialogue && ready ? 'scale(1)' : 'scale(.94)',
       transformOrigin: this.topLessonScene() ? '100% 60%' : (box.tailX + 30) + 'px 100%',
       transition: this.reducedMotion() ? 'none' : 'opacity 240ms ease-out, transform 240ms cubic-bezier(.22,.8,.25,1)'
     };
@@ -4199,7 +4323,7 @@ class Component extends DCLogic {
       const boundary = this.boundaryScene();
       // Classification uses its own active-card state after the question ends.
       // Narration keywords must not pulse an option before choices are available.
-      const focused = boundary && ph !== 'classify' && (st.boundaryFocus === 'all' ||
+      const focused = boundary && ph !== 'classify' && ph !== 'sc' && (st.boundaryFocus === 'all' ||
         st.boundaryFocus === 'figure'+i ||
         st.boundaryFocus === 'open' && openIdx.includes(i) ||
         st.boundaryFocus === 'closed' && closedIdx.includes(i) ||
@@ -4258,7 +4382,7 @@ class Component extends DCLogic {
       const stackedChip = false;
       const card = this.buildCard({
         key: name + i, x: x0 + i * (w + gap), y: y, w: w, h: h, vb: F.vb, d: d, extra: F.extra || '',
-        stackedChip: stackedChip,
+        stackedChip: stackedChip, stillCard: boundary && ph === 'sc',
         tint: stackedChip && state === 'bad' ? { borderColor: '#dca99f', background: '#fffaf9', boxShadow: '0 6px 0 rgba(146,196,228,.25)' } : undefined,
         stroke: figStroke, sw: 18, fill: figFill, state: state, hl: hl,
         traceD: F.traceD || d,
@@ -4532,10 +4656,23 @@ class Component extends DCLogic {
     const pts = F.pts, segs = this.segs('pentagon');
     const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     // Seek paused CSS animations from the media clock; buffering cannot outrun narration.
+    /* Anchored to the voice, then left to run.
+       Each cue is a CSS animation whose delay is measured from where the
+       recording actually is: a negative delay starts it already part-way
+       through, so it lands on the word no matter when this screen rendered.
+       It then RUNS -- the browser drives it frame to frame. It used to be held
+       paused and re-seeked from a media clock published on every animation
+       frame, which meant a React render per frame and an animation re-resolved
+       sixty times a second; that is what made these screens stutter. The clock
+       is now republished only when the timeline jumps (start, pause, stall,
+       seek), and each jump re-anchors the delay, so a buffering pause still
+       cannot let the animation run ahead of the narration. */
+    const clockRunning = st.voiceClockRunning !== false;
     const motion = (name, delay, duration) => reduced ? {} : ph === 'angle' && (st.voiceElapsedMs || 0) >= delay + duration
       ? {opacity:1, ...(name === 'dr' ? {strokeDashoffset:0} : {})} : {
       animationName: name, animationDuration: duration + 'ms', animationTimingFunction: 'ease-in-out',
-      animationDelay: (delay - (st.voiceElapsedMs || 0)) + 'ms', animationFillMode: 'both', animationPlayState: 'paused'
+      animationDelay: (delay - (st.voiceElapsedMs || 0)) + 'ms', animationFillMode: 'both',
+      animationPlayState: clockRunning ? 'running' : 'paused'
     };
     const draw = (delay, duration = 600) => reduced ? {} : Object.assign({ strokeDasharray: 100, strokeDashoffset: 100 }, motion('dr', delay, duration));
     const recording = window.PolygonRecordedVoice && window.PolygonRecordedVoice.find(s.narr || this.step().narr);
@@ -4711,7 +4848,13 @@ class Component extends DCLogic {
       return {
         nudge: !done && st.chip && st.chip.toLowerCase() === sp.key ? '1' : '',
         labelKey: sp.key, text: done ? sp.label : '?', click: done ? null : this.hitTarget(sp.key),
-        disabled: done, feedback: bad ? 'incorrect' : (done ? 'correct' : ''),
+        /* No 'correct' state on a placed word. Dropping the right tile in is
+           the answer landing, not a verdict being delivered: turning it green
+           recoloured the very word the learner had just carried across, which
+           broke the thread between the yellow tile they picked up and the
+           thing now sitting in the socket. A wrong drop still answers in red,
+           because that one does need saying. */
+        disabled: done, feedback: bad ? 'incorrect' : '',
         label: done ? sp.label + ', correctly placed' : ({side:'Left question-mark target',vertex:'Lower-right question-mark target',angle:'Upper-right question-mark target'}[sp.key]),
         style: {
           position: 'absolute', left: (sp.p[0] - 106) + 'px', top: (sp.p[1] - 38) + 'px',
@@ -4719,16 +4862,22 @@ class Component extends DCLogic {
           /* A quiet solid rim rather than a dashed one -- the target still
              reads as somewhere to drop, without ringing the figure in
              broken lines. */
-          border: '5px solid ' + theme.color,
-          background: 'linear-gradient(155deg,#ffffff,' + theme.light + 'bb)',
-          color: theme.ink, font: buttonLabelFont(done ? sp.label : '?', 212),
+          /* A filled socket wears the tile's own yellow, so the word looks like
+             the same object the learner dragged rather than a copy of it in
+             another colour. An empty socket keeps the part's quiet tint, which
+             is what makes it read as a hole waiting to be filled. */
+          border: '5px solid ' + (done ? '#fffef5' : theme.color),
+          background: done
+            ? 'linear-gradient(180deg,#fff16a 0%,#ffe52b 38%,#ffda13 68%,#ffbd0a 100%)'
+            : 'linear-gradient(155deg,#ffffff,' + theme.light + 'bb)',
+          color: done ? '#5c3310' : theme.ink, font: buttonLabelFont(done ? sp.label : '?', 212),
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           cursor: done ? 'default' : 'pointer', transform:'none', transition:'background 200ms,border-color 200ms,box-shadow 150ms',
           /* An empty socket is sunk into the board and a label tile stands off
              it, so the two still read as hole and thing-that-fills-it now that
              neither is drawn with a broken line. Once filled, the socket lifts
              to match the tile it is holding. */
-          boxShadow: done ? 'inset 0 2px 0 #fff,0 5px 0 '+theme.color+'44'
+          boxShadow: done ? 'inset 0 2px 1px #ffffff99,inset 0 -4px 0 #f69b0b,0 5px 0 #c2cbd3,0 8px 12px #23496a20'
             : hovered ? 'inset 0 3px 8px '+theme.color+'55,0 0 0 5px '+theme.color+'55'
             : ready ? 'inset 0 3px 8px '+theme.color+'55,0 0 0 3px '+theme.color+'44'
             : 'inset 0 3px 8px '+theme.color+'55',

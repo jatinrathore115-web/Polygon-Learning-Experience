@@ -52,7 +52,13 @@ const server = http.createServer((req,res) => {
     const before=await page.locator('.story-board').boundingBox();
     await show(13);
     await page.waitForTimeout(900);
-    assert.equal(await source(),'assets/backgound%20%2002.png');
+    /* One painting behind the whole lesson. Screen 14 and the two sort screens
+       used to swap to a second one; the scene read as jumping rather than as
+       the lesson moving on, and the blurred backdrop behind the frame is drawn
+       from the first painting, so the two did not even match while it was up.
+       The board still travels between its layouts -- that is the part that is
+       meant to move -- but the picture behind it does not change. */
+    assert.equal(await source(),'assets/image.png','The background is the same picture on every screen');
     assert.deepEqual(await page.locator('.story-board').boundingBox(),before,'Board stays steady');
     /* Only the figure being asked about offers answers, so the row is two
        buttons rather than eight competing for the same tap. */
@@ -62,10 +68,10 @@ const server = http.createServer((req,res) => {
     await page.getByRole('button',{name:'Figure 1: Straight',exact:true}).click();
     await page.waitForFunction(()=>__poly.state.dd[0]==='Straight');
     await show(14);
-    await show(13);await page.waitForTimeout(1300);assert.equal(await source(),'assets/backgound%20%2002.png','Rapid reentry settles');
+    await show(13);await page.waitForTimeout(1300);assert.equal(await source(),'assets/image.png','Rapid reentry settles on the same picture');
     await show(14);await page.waitForTimeout(1300);assert.equal(await source(),'assets/image.png');
     await page.emulateMedia({reducedMotion:'reduce'});
-    await show(13);await page.waitForTimeout(50);assert.equal(await source(),'assets/backgound%20%2002.png');
+    await show(13);await page.waitForTimeout(50);assert.equal(await source(),'assets/image.png');
     assert.equal(await page.locator('.lesson-background').evaluate(e=>getComputedStyle(e).transitionDuration),'0s');
     for (const viewport of [{width:1024,height:768},{width:390,height:844}]) {
       await page.setViewportSize(viewport);

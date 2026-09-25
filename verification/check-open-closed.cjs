@@ -78,15 +78,38 @@ questions.filter(o => o.s.ans === 'open').forEach(o => {
     o.s.fig + ': and every dot lies on the run between the two places the boundary stops');
   /* Strictly between the ends: the loose ends stay bare so the opening itself
      is still the clearest thing on the shape. */
-  const atEnd = dots.filter(d => ends.some(e => near(d.x, e[0], 6) && near(d.y, e[1], 6)));
-  check(atEnd.length === 0, o.s.fig + ': with both loose ends left bare');
+  const gapDots = dots.filter(d => d.dot === 'gap');
+  const atEnd = gapDots.filter(d => ends.some(e => near(d.x, e[0], 6) && near(d.y, e[1], 6)));
+  check(atEnd.length === 0, o.s.fig + ': with the dotted run stopping short of both loose ends');
+  /* The ends themselves are ringed once the dots have run out, so the eye
+     finishes on the break rather than on the last dot. Unfilled, so the
+     boundary underneath still shows through. */
+  const rings = dots.filter(d => d.dot === 'gap-end');
+  check(rings.length === 2 && rings.every(r => r.fill === 'none'
+        && ends.some(e => near(r.x, e[0], 2) && near(r.y, e[1], 2))),
+    o.s.fig + ': and both loose ends marked where the boundary stops');
   /* They arrive one after another, so the gap is drawn rather than appearing. */
   /* The delay is the second time in the shorthand, after the easing; matching
      the first one just re-reads the duration for every dot. */
-  const delays = dots.map(d => parseFloat((/ease-out\s+(\d+)ms/.exec(d.style.animation || '') || [0, 0])[1]));
-  check(/gapDotReveal/.test(dots[0].style.animation || '')
+  /* Read the delay out of the shorthand without pinning the easing: the dots
+     run linear now, because the pen they continue is moving at a steady pace. */
+  const delays = gapDots.map(d => parseFloat((/gapDotReveal\s+\d+ms\s+\S+\s+(\d+)ms/.exec(d.style.animation || '') || [0, 0])[1]));
+  check(/gapDotReveal/.test(gapDots[0].style.animation || '')
         && delays.every((v, i) => i === 0 || v > delays[i - 1]),
     o.s.fig + ': revealed in order along the gap, not all at once');
+  /* They pick up where the boundary trace stops, close enough behind it to
+     read as the same pen carrying on rather than a second effect starting.
+     The solid half is the screen's own trace, so nothing is stroked over the
+     figure a second time -- one line, one journey. */
+  const traceMs = g.constants ? g.constants.OC_TRACE_MS : 1000;
+  check(delays[0] >= traceMs && delays[0] <= traceMs + 80,
+    o.s.fig + ': with the dots picking up as the trace lands (' + delays[0] + 'ms after a ' + traceMs + 'ms trace)');
+  check(revealed.card.hl.length === 0,
+    o.s.fig + ': and no second stroke drawn over the boundary');
+  /* One colour for the whole gesture: the dots are the trace continued, so a
+     different ink would make them read as an unrelated diagram. */
+  check(gapDots.every(d => d.fill === rings[0].stroke),
+    o.s.fig + ': the dotted continuation is the same blue as the trace');
   /* Right answer: the same marks, so being right still shows why. */
   const correct = answered(o.k, { ok: 'open' });
   check(correct.card.dots.length === dots.length,
